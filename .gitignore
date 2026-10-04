@@ -1,0 +1,64 @@
+# Secrets and machine-local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets/
+.codex/
+.calm/
+
+# Python environments and build/test caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+build/
+dist/
+*.egg-info/
+
+# Frontend dependencies and generated build output
+node_modules/
+web/dist/
+web/coverage/
+
+# Dataset/model binaries and runtime artifacts (track manifests instead)
+/datasets/raw/
+/datasets/processed/
+/artifacts/models/
+/artifacts/evaluation/
+/storage/
+/logs/
+/runs/
+/checkpoints/
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+*.bin
+*.pkl
+*.pickle
+*.joblib
+
+# Editor/OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+*.tmp

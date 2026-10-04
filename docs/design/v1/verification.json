@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-04",
+  "scope": "Design artifacts, not application implementation",
+  "markdown_documents": 10,
+  "uml_sources": 10,
+  "svg_diagrams": 10,
+  "json_schemas": 4,
+  "contract_checks": [
+    {
+      "name": "receipt valid",
+      "passed": true
+    },
+    {
+      "name": "invoice valid",
+      "passed": true
+    },
+    {
+      "name": "result valid",
+      "passed": true
+    },
+    {
+      "name": "export valid",
+      "passed": true
+    },
+    {
+      "name": "job valid",
+      "passed": true
+    },
+    {
+      "name": "float money rejected",
+      "passed": true
+    },
+    {
+      "name": "missing key rejected",
+      "passed": true
+    },
+    {
+      "name": "unknown key rejected",
+      "passed": true
+    },
+    {
+      "name": "row limit rejected",
+      "passed": true
+    },
+    {
+      "name": "type payload mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "bbox out of range rejected",
+      "passed": true
+    },
+    {
+      "name": "confidence out of range rejected",
+      "passed": true
+    },
+    {
+      "name": "wrong language rejected",
+      "passed": true
+    },
+    {
+      "name": "broker rejects text",
+      "passed": true
+    },
+    {
+      "name": "export schema mismatch rejected",
+      "passed": true
+    }
+  ],
+  "local_links_checked": 19,
+  "plantuml_compiler": "Unavailable; sources not compiled",
+  "schema_validation": "Local keyword-subset checks + JSON parsing/ref resolution; conforming compiler not run",
+  "application_tests": "Not applicable: no application built",
+  "browser_visual_qa": "Not run; interaction behavior unverified",
+  "svg_xml_validation": "10 SVG parsed successfully",
+  "diagram_visual_qa": "Raster previews of all 10 views inspected; activity/state label layout repaired",
+  "html_inline_javascript": "Syntax check passed; browser interaction not tested",
+  "renderer_warning": "Font cache not writable; rendering succeeded and Vietnamese glyphs visually inspected"
+}

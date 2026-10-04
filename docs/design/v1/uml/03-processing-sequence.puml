@@ -1,0 +1,48 @@
+@startuml
+title Sequence — job đến prediction
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+hide footbox
+participant "Review UI" as ui
+participant "API" as api
+participant "Job service" as svc
+participant "PostgreSQL" as db
+participant "Dispatcher" as dispatch
+participant "Redis" as broker
+participant "Worker" as worker
+participant "Pipeline" as pipe
+ui -> api : POST jobs + Idempotency-Key
+api -> svc : authorize; create_job(manifest pinned)
+svc -> db : TX: job QUEUED + outbox + audit
+db --> svc : COMMIT
+svc --> api : job_id
+api --> ui : 202 Accepted
+dispatch -> db : claim outbox row; read job
+dispatch ->> broker : publish(job_id)
+dispatch -> db : mark delivered after confirmation
+broker ->> worker : deliver job_id
+worker -> svc : claim with lease/fencing token
+svc -> db : CAS state + attempt/token
+alt Claim accepted / fresh token
+worker -> pipe : canonical → OCR → extraction → checks
+worker -> svc : heartbeat(token) during computation
+pipe --> worker : payload + evidence + issues
+worker -> svc : complete(job_id, token, result)
+svc -> db : TX: validate token; UNIQUE run/job; SUCCEEDED
+svc -> db : create head draft only if head is null
+worker ->> broker : ACK after committed completion
+else Terminal / duplicate active delivery / stale token
+svc --> worker : no-op or reject stale completion
+worker ->> broker : ACK duplicate; no new committed run
+end
+note over dispatch,db
+Crash recovery: expired lease or lost delivery → bounded requeue; previous token cannot commit.
+end note
+ui -> api : GET job / run
+api --> ui : status; draft or candidate result
+legend bottom
+DB commit/publish gap, duplicate delivery và stale attempt được xử lý bằng outbox, lease và fencing.
+endlegend
+@enduml

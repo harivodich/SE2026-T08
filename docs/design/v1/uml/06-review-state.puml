@@ -1,0 +1,21 @@
+@startuml
+title State machine — head revision
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+state "NONE\nchưa có head" as none #E8F0FC
+state "DRAFT\nhead chưa approve" as draft #E8F0FC
+state "APPROVED\nhead có approval" as approved #DDF3E8
+[*] --> none : upload
+none --> draft : first successful run / create initial revision
+draft --> draft : save or adopt / append + CAS
+draft --> approved : approve current head / guards + CAS
+approved --> draft : save or adopt / new revision
+approved --> approved : export selected approved snapshot
+draft --> draft : rerun completes / candidate only
+approved --> approved : rerun completes / candidate only
+legend bottom
+State của head, độc lập job. Historic revisions và approvals không bị ghi đè khi head đổi.
+endlegend
+@enduml

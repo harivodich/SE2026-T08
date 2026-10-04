@@ -1,0 +1,38 @@
+@startuml
+title Deployment — demo Compose và offline ML
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+node "Browser / Operator" as browser #E8F0FC
+package "Linux / WSL2 demo host" {
+node "web container\nstatic UI + reverse proxy" as web #E8F0FC
+node "api container\nFastAPI CPU" as api #E8F0FC
+node "dispatcher container\noutbox + recovery" as dispatch #E8F0FC
+node "worker container\nOCR + extractor\nconcurrency = 1" as worker #E8F0FC
+database "postgres container\nprivate network" as pg #E8F0FC
+database "redis container\nprivate network" as redis #E8F0FC
+artifact "Private storage volume" as storage #E8F0FC
+artifact "Model release volume\nread-only" as models #E8F0FC
+}
+package "ML environment" {
+node "Offline training/evaluation\nseparate process/time" as train #E8F0FC
+artifact "Frozen dataset manifests\nand samples" as data #E8F0FC
+}
+browser --> web : HTTPS deployment / localhost dev
+web --> api : same-origin /api/v1
+api --> pg : SQL
+dispatch --> pg : outbox/leases
+dispatch --> redis : publish
+redis --> worker : delivery
+worker --> pg : application services
+api --> storage : authorized read/write
+worker --> storage : input/attempt artifacts
+worker --> models : pin manifest + weights
+train --> data : immutable split
+train --> models : verified release handoff
+legend bottom
+GPU serving một job; API không giữ weights. Training tách thời gian/máy, model release read-only.
+endlegend
+@enduml

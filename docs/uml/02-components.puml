@@ -1,0 +1,56 @@
+@startuml
+title Components — API, job và computation
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+component "React Review UI" as web #E8F0FC
+component "FastAPI / Auth / Routes" as api #E8F0FC
+component "Dispatcher / Recovery" as dispatch #E8F0FC
+component "Celery worker entrypoint" as worker #E8F0FC
+package "Application services" {
+component "Documents service" as docs #E8F0FC
+component "Job lifecycle / completion" as jobs #E8F0FC
+component "Revision / Approval" as review #E8F0FC
+component "Snapshot exporter" as exports #E8F0FC
+}
+package "Infrastructure" {
+component "UnitOfWork / Repositories" as uow #E8F0FC
+database "PostgreSQL\nstate + outbox + audit" as db #E8F0FC
+database "Redis broker" as redis #E8F0FC
+database "Private storage / model artifacts" as files #E8F0FC
+}
+package "Compute" {
+component "Pipeline orchestration" as pipeline #E8F0FC
+component "OCR / Geometry" as ocr #E8F0FC
+component "Extraction adapter" as extractor #E8F0FC
+component "Normalize / Evidence / Validate" as checks #E8F0FC
+}
+web --> api : REST + polling
+api --> docs : upload/get
+api --> jobs : create/status
+api --> review : edit/approve
+api --> exports : export revision
+docs --> uow : transaction
+jobs --> uow : job/outbox/fence
+review --> uow : CAS/revision/audit
+exports --> uow : approval lookup
+uow --> db : SQLAlchemy
+docs --> files : original asset
+exports --> files : approved artifact
+dispatch --> jobs : dispatch/recover
+dispatch --> redis : publish job_id
+redis --> worker : at-least-once delivery
+worker --> jobs : claim/heartbeat/commit
+worker --> pipeline : compute
+pipeline --> ocr : canonical page
+ocr --> extractor : text + boxes
+extractor --> checks : raw prediction
+checks --> pipeline : validated result
+pipeline --> files : attempt assets
+pipeline --> extractor : pin manifest
+legend bottom
+Một repository, nhiều process. Redis chỉ delivery; PostgreSQL giữ state; model không viết DB.
+endlegend
+@enduml

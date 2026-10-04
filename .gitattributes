@@ -1,0 +1,8 @@
+* text=auto eol=lf
+# Preserve original snapshot bytes for future hash comparison.
+docs/design/v1/** -text
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.pdf -text
+*.zip -text

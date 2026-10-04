@@ -1,0 +1,103 @@
+@startuml
+title Class model — records và value objects
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+class "User" as User #E8F0FC {
+  +id: UUID
+  +role: operator | admin
+  +active: bool
+}
+class "Document" as Document #E8F0FC {
+  +id, owner_id: UUID
+  +type: receipt | invoice
+  +head_revision_id: UUID?
+  +version: int
+  +file_key, sha256: str
+  +compare_and_swap_head(expected)
+}
+class "ProcessingJob" as Job #E8F0FC {
+  +id, document_id: UUID
+  +state, stage: enum
+  +manifest_id: str
+  +lease_token, lease_until
+  +attempt_count, deadline_at
+  +claim()
+  +heartbeat(token)
+  +complete(token, result)
+}
+class "ExtractionRun" as Run #E8F0FC {
+  +id, job_id: UUID
+  +prediction: BusinessPayload
+  +evidence, issues
+  +provenance: ModelManifest
+  +immutable content
+}
+class "ReviewRevision" as Revision #E8F0FC {
+  +id, document_id, parent_id
+  +extraction_run_id: UUID
+  +payload: BusinessPayload
+  +row_id_map, metadata
+  +creator_id, reason
+  +immutable content
+}
+class "Approval" as Approval #E8F0FC {
+  +id, revision_id, actor_id
+  +acknowledged_issue_ids
+  +reason, created_at
+}
+class "ExportArtifact" as Export #E8F0FC {
+  +revision_id, format
+  +exporter_version
+  +storage_key, sha256
+}
+class "LineItem <<value>>" as Item #E8F0FC {
+  +description, unit: str?
+  +quantity: DecimalString?
+  +unit_price, line_total: DecimalString?
+}
+class "FieldMetadata <<value>>" as Meta #E8F0FC {
+  +path, raw_value, origin
+  +confidence, method
+  +review_flags
+}
+class "SourceRegion <<value>>" as Region #E8F0FC {
+  +page: 0
+  +quad: 4 canonical points
+  +ocr_block_ids
+}
+class "OutboxMessage" as Outbox #E8F0FC {
+  +id, job_id, event_type
+  +delivered_at, retry_at
+}
+class "ModelRelease" as Model #E8F0FC {
+  +id, manifest_hash/key
+  +schema_version, lifecycle
+}
+class "AuditEvent" as Audit #E8F0FC {
+  +actor_id/system_actor
+  +document_id, action
+  +base/new revision_id
+  +created_at
+}
+User "1" --> "0..*" Document : owns
+Document "1" --> "0..*" Job : processing history
+Job "1" --> "0..1" Run : committed result
+Document "1" --> "0..*" Revision : revision history
+Document "0..1" --> "0..1" Revision : head
+Revision "0..*" --> "0..1" Revision : parent
+Run "1" --> "0..*" Revision : derived drafts
+Revision "1" --> "0..1" Approval : approval
+Revision "1" --> "0..*" Export : exports
+Revision "1" *-- "0..*" Item : payload rows
+Run "1" *-- "0..*" Meta : field metadata
+Meta "1" *-- "0..*" Region : evidence
+Job "1" --> "1..*" Outbox : delivery/recovery
+Job "0..*" --> "1" Model : pins release
+Document "1" --> "0..*" Audit : history
+User "1" --> "0..*" Approval : approves
+legend bottom
+Payload revision immutable; approval độc lập. Các value objects không phải mỗi cái một ORM table.
+endlegend
+@enduml

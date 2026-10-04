@@ -1,0 +1,11 @@
+{
+  "invoice_number": "DEMO-2026-001",
+  "issue_date": "2026-10-04",
+  "seller_name": "ĐƠN VỊ GIẢ LẬP A",
+  "buyer_name": "ĐƠN VỊ GIẢ LẬP B",
+  "subtotal": "1000000",
+  "tax_amount": "100000",
+  "discount_amount": "0",
+  "total_amount": "1100000",
+  "items": [{"description": "Dịch vụ minh họa", "quantity": "1", "unit": "Gói", "unit_price": "1000000", "line_total": "1000000"}]
+}

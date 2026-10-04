@@ -1,0 +1,39 @@
+@startuml
+title Activity — xử lý và kiểm duyệt
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+|Operator|
+start
+:Chọn loại / upload;
+|API / Services|
+if (File/profile hợp lệ?) then (yes)
+:Commit job + outbox;
+|Worker|
+:Claim / render / OCR / extraction;
+if (Result schema hợp lệ?) then (yes)
+|API / Services|
+:Commit run / draft hoặc candidate;
+|Operator|
+repeat
+:Đối chiếu source / sửa / save;
+|API / Services|
+:Kiểm approval guards;
+repeat while (Còn issue hoặc conflict?) is (yes) not (no)
+:Record approval snapshot;
+|Operator|
+:Export JSON revision đã approve;
+stop
+else (no)
+:Fail hoặc bounded retry theo job state;
+stop
+endif
+else (no)
+:Reject + actionable error;
+stop
+endif
+legend bottom
+Swimlane phân trách nhiệm; input không hợp profile bị reject, model result không tự được approve.
+endlegend
+@enduml

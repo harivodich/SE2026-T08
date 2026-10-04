@@ -1,0 +1,2149 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VietDoc — Plan, Architecture và UML</title><style>:root{--bg:#F2F5FA;--card:#FFF;--text:#1A2B42;--muted:#60738D;--line:#D8E1EE;--accent:#1759A8;--code:#EFF3F9}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Arial,sans-serif}body.dark{--bg:#101826;--card:#182538;--text:#E5EDF8;--muted:#A6B7D0;--line:#30435C;--accent:#91C2FF;--code:#101D2E}header{padding:40px 5vw 30px;border-bottom:1px solid var(--line);background:var(--card)}header .eyebrow{font-size:12px;letter-spacing:2px;color:var(--accent);font-weight:bold}h1{font-size:32px;line-height:1.3;margin:10px 0}header p{max-width:950px;color:var(--muted)}button{background:var(--code);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 15px;cursor:pointer}.layout{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1600px;margin:auto}nav{padding:24px 18px;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}nav a{display:block;padding:8px 12px;margin:3px 0;border-radius:7px;font-size:13px;color:var(--muted);text-decoration:none}nav a.active{background:var(--card);color:var(--accent);font-weight:bold}main{padding:28px;min-width:0}.document{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px;margin-bottom:24px;overflow-x:auto}.js .document,.js #gallery{display:none}.js .visible{display:block!important}h2{font-size:24px;margin-top:32px;border-bottom:1px solid var(--line);padding-bottom:8px}h3{font-size:19px}a{color:var(--accent)}table{border-collapse:collapse;width:100%;font-size:14px;margin:20px 0}th,td{border:1px solid var(--line);padding:10px 12px;vertical-align:top}th{background:var(--code);text-align:left}pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:18px;overflow:auto;font:13px/1.65 Consolas,monospace}code{font-family:Consolas,monospace;font-size:.9em}p code,li code,td code{background:var(--code);padding:2px 5px;border-radius:4px}blockquote{border-left:3px solid var(--accent);margin-left:0;padding-left:18px;color:var(--muted)}.diagram{background:var(--card);padding:25px;margin-bottom:28px;border:1px solid var(--line);border-radius:14px}.diagram-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.diagram-heading h2{margin:0;border:0;font-size:22px}.diagram-heading a{font-size:13px;white-space:nowrap}.diagram-image{background:white;border:1px solid var(--line);border-radius:8px;overflow:auto;margin:20px 0;text-align:center;padding:16px}.diagram-image img{display:block;width:100%;min-width:650px;max-height:680px;object-fit:contain;margin:auto}details summary{cursor:pointer;font-size:14px;color:var(--muted)}.badges{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.badges span{background:var(--code);border:1px solid var(--line);padding:5px 10px;border-radius:20px;font-size:12px}.notice{border-left:4px solid #CC9A39;background:var(--code);padding:12px 18px;font-size:14px}footer{padding:25px 5vw;color:var(--muted);font-size:12px}@media(max-width:850px){.layout{display:block}nav{position:static;max-height:none;display:flex;flex-wrap:wrap;padding:15px}nav a{font-size:11px;padding:5px}main{padding:12px}.document{padding:20px}header{padding:28px 20px}h1{font-size:25px}.diagram-heading{display:block}.diagram-image img{min-width:500px}}</style></head><body><header><div class="eyebrow">VIETDOC / DESIGN DOSSIER / 04.10.2026</div><h1>Chứng từ tiếng Việt, từ ảnh đến dữ liệu được kiểm duyệt</h1><p>Kế hoạch 12–16 tuần · 4 engineers + Lead · Hai loại tài liệu · Hồ sơ đề xuất trước implementation</p><div class="badges"><span>Receipt + Invoice</span><span>Modular monolith</span><span>Revision-aware review</span><span>10 UML views</span><span>Vietnamese only</span></div><button id="theme" type="button">Đổi sáng / tối</button></header><div class="layout"><nav><a href="#doc-01-scope-workflows">01-scope-workflows</a><a href="#doc-02-architecture">02-architecture</a><a href="#doc-03-contracts">03-contracts</a><a href="#doc-04-source-structure">04-source-structure</a><a href="#doc-05-delivery-plan">05-delivery-plan</a><a href="#doc-06-data-ml-evaluation">06-data-ml-evaluation</a><a href="#doc-07-decisions">07-decisions</a><a href="#doc-08-uml-guide">08-uml-guide</a><a href="#doc-09-sources">09-sources</a><a href="#doc-README">Tổng quan</a><a href="#gallery">Sơ đồ kiến trúc và UML</a><a href="verification.md">Báo cáo kiểm tra</a></nav><main><section class="document" id="doc-01-scope-workflows"><h1>01 — Scope, yêu cầu và workflow</h1>
+<h2>1. Bài toán và phạm vi</h2>
+<p>Tên: <strong>Hệ thống trích xuất và kiểm duyệt dữ liệu chứng từ tiếng Việt từ ảnh/PDF</strong>.</p>
+<p>Người dùng mục tiêu là nhân viên nhập liệu chi phí/chứng từ. Hệ thống chuyển hình ảnh thành record có cấu trúc, giúp đối chiếu và sửa trước khi bàn giao JSON. Không xử lý thanh toán, không tự xác nhận tính hợp lệ pháp lý của hóa đơn.</p>
+<table>
+<thead>
+<tr>
+<th>Mục</th>
+<th>Scope bắt buộc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ngôn ngữ</td>
+<td>Tiếng Việt; model pretrained đa ngôn ngữ vẫn được dùng, nhưng dataset và nghiệm thu chỉ tiếng Việt</td>
+</tr>
+<tr>
+<td>Loại</td>
+<td><code>receipt</code> và <code>invoice</code>, người dùng chọn lúc upload</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>JPEG, PNG, PDF không mã hóa; một trang; văn bản in</td>
+</tr>
+<tr>
+<td>Nội dung</td>
+<td>Field đơn + bảng một trang, tối đa 30 dòng trong profile MVP</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>Review record + business JSON đã được approve</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Synthetic/sample đã audit; không dùng thông tin khách hàng/bệnh nhân thật trong demo</td>
+</tr>
+<tr>
+<td>Ngoài scope</td>
+<td>Chữ viết tay, tài liệu bất kỳ, chatbot, phân loại tự động, phiếu giao hàng, OCR nhiều trang, integration ERP thật</td>
+</tr>
+</tbody></table>
+<p>MVP profile: file tối đa 20 MiB, ảnh canonical tối đa 20 megapixel; PDF render dự kiến 200 DPI và giới hạn pixels. Worker deadline toàn job dự kiến 180 giây. Giá trị cấu hình phải benchmark trên hardware tuần 2, điều chỉnh trước tuần 3 và lưu ADR-0005. Không nhận tài liệu ngoài profile rồi cắt bớt nội dung âm thầm.</p>
+<h2>2. Yêu cầu và acceptance traceability</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Yêu cầu</th>
+<th>Bằng chứng nghiệm thu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-01</td>
+<td>Upload đúng loại/file/profile</td>
+<td>MIME + decoder kiểm thật, test corrupt/oversize/PDF nhiều trang</td>
+</tr>
+<tr>
+<td>FR-02</td>
+<td>Xử lý nền có trạng thái</td>
+<td>HTTP 202, status riêng, API vẫn phản hồi trong khi inference</td>
+</tr>
+<tr>
+<td>FR-03</td>
+<td>OCR tiếng Việt giữ text và vị trí</td>
+<td>Fixture dấu tiếng Việt, ảnh xoay, tọa độ đúng trên viewer</td>
+</tr>
+<tr>
+<td>FR-04</td>
+<td>Extraction theo schema receipt/invoice</td>
+<td>Result pass schema và báo metric field trên holdout</td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td>Bảng chi tiết giữ quan hệ dòng</td>
+<td>Test mô tả xuống dòng, cột trống, tối đa 30 dòng</td>
+</tr>
+<tr>
+<td>FR-06</td>
+<td>Thiếu/mơ hồ không bịa giá trị</td>
+<td><code>null</code>, issue và review flag trên missing/ambiguous fixtures</td>
+</tr>
+<tr>
+<td>FR-07</td>
+<td>Review sửa field và dòng bảng</td>
+<td>UI source bên trái, editor bên phải; save tạo revision</td>
+</tr>
+<tr>
+<td>FR-08</td>
+<td>Không ghi đè sửa đồng thời</td>
+<td>Hai tab sửa cùng version: một thành công, một HTTP 409</td>
+</tr>
+<tr>
+<td>FR-09</td>
+<td>Approval chỉ đúng snapshot</td>
+<td>Approve revision cụ thể; kiểm blocking issues và warning ack</td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td>Export chỉ approved revision</td>
+<td>Chưa approve: 409; payload/checksum đúng snapshot</td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td>Rerun giữ prediction và sửa cũ</td>
+<td>New job/run; không thay head đang review/approved</td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td>Audit truy vết thay đổi</td>
+<td>Actor, time, action, base/new revision, reason</td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td>Retry không nhân bản kết quả</td>
+<td>Duplicate delivery chỉ một committed run/job</td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td>Có baseline và fine-tune tái lập</td>
+<td>Manifest, seed, weights hash, evaluator, per-type metrics</td>
+</tr>
+<tr>
+<td>NFR-01</td>
+<td>Bảo vệ truy cập</td>
+<td>Operator chỉ tài liệu của mình; admin phạm vi đồ án</td>
+</tr>
+<tr>
+<td>NFR-02</td>
+<td>Không lộ nội dung vào log</td>
+<td>Log IDs/stage/error code; test redaction</td>
+</tr>
+<tr>
+<td>NFR-03</td>
+<td>Giới hạn tài nguyên</td>
+<td>Size/page/pixel/token/timeout; không retry OOM vô hạn</td>
+</tr>
+<tr>
+<td>NFR-04</td>
+<td>Model rollback</td>
+<td>Job pin pipeline manifest; đổi active release chỉ ảnh hưởng job mới</td>
+</tr>
+</tbody></table>
+<h2>3. Actors và quyền</h2>
+<ul>
+<li><code>operator</code>: upload; xem/run/review/approve/export tài liệu của chính mình. Một người được sửa và approve trong demo; không tuyên bố có kiểm soát bốn mắt.</li>
+<li><code>admin</code>: quyền operator trong phạm vi toàn demo, xem lỗi, cập nhật active model release sau gate.</li>
+<li>Worker/dispatcher là system processes, không dùng credential người dùng.</li>
+<li>Data/AI engineers chạy training/evaluation offline; không có quyền tự đưa review corrections vào training.</li>
+</ul>
+<p>Không thêm đăng ký public, password reset, MFA hay identity server. Account seed qua CLI, secret qua environment; không có mật khẩu mặc định trong repo. Login dùng bearer access token ngắn hạn, giữ trong memory frontend; refresh trang đăng nhập lại trong MVP, không triển khai refresh token flow.</p>
+<h2>4. Workflow A — Upload</h2>
+<ol>
+<li>Operator chọn <code>receipt</code>/<code>invoice</code>, upload file, gửi <code>Idempotency-Key</code>.</li>
+<li>API xác thực và giới hạn streaming bytes trước decode; kiểm định dạng thực, malware-like malformed payload và profile. Không chỉ tin extension hoặc header MIME.</li>
+<li>Tạo UUID và staging key. Tính SHA-256 khi stream; kiểm EXIF/PDF page count trong sandboxed resource limits. PDF mật khẩu/nhiều trang trả lỗi rõ.</li>
+<li>Đưa file vào local private volume qua storage adapter. Object key do server sinh, không dùng tên upload làm path.</li>
+<li>Transaction tạo <code>Document(UPLOADED)</code> + audit + idempotency receipt, rồi trả 201. File store và DB không có chung transaction: DB thất bại thì ghi orphan candidate cho cleanup theo manifest/staging TTL; không xóa bằng glob ngoài namespace.</li>
+<li>Trùng key cùng request trả resource cũ; key khác nội dung trả 409. Trùng checksum cùng owner là cảnh báo/đường dẫn record cũ, không xóa tài liệu khác hoặc lộ tài liệu của user khác.</li>
+</ol>
+<p>Upload chưa tự chạy model. UI có nút Xử lý; tạo được fixture từng bước, kiểm loại tài liệu trước inference.</p>
+<h2>5. Workflow B — Processing</h2>
+<ol>
+<li>POST job pin <code>document_type</code>, <code>schema_version</code>, <code>pipeline_manifest_id</code> và input checksum; transaction ghi job <code>QUEUED</code> + outbox + audit.</li>
+<li>Dispatcher publish <code>job_id</code> sau commit, đánh dấu outbox delivered sau broker confirmation. Crash giữa publish/mark có thể phát lại; worker xử lý idempotent.</li>
+<li>Worker claim job với lease + fencing token; nếu đã terminal thì ACK/no-op, nếu lease còn hiệu lực thì no-op và ACK delivery dư.</li>
+<li>Đọc file; render canonical page, sửa EXIF orientation. Canonical viewer image có kích thước cố định và hash riêng.</li>
+<li>Preprocess nhẹ: deskew/contrast khi bật config. Lưu transform invertible hoặc đánh dấu geometry unavailable. Không coi bbox trên ảnh preprocess là bbox viewer.</li>
+<li>OCR → text/quad/score trên ảnh đã preprocess → map ngược tọa độ canonical → <code>OcrPage</code>.</li>
+<li>Extraction adapter nhận canonical image, OCR context, document type và schema. Baseline rule adapter và model adapter dùng cùng contract.</li>
+<li>Parse output bounded; schema validate; normalize; map evidence. Không dùng <code>eval</code>, không sửa giá trị bằng LLM vòng lặp không giới hạn.</li>
+<li>Model output JSON không parse được: mặc định job FAILED <code>MODEL_OUTPUT_INVALID</code>; lưu raw output hạn chế truy cập để diagnose. Không bịa result placeholder. Chỉ thêm một repair attempt nếu spike chứng minh lợi ích và được đưa vào manifest/deadline.</li>
+<li>Validation phân biệt structural errors và semantic warnings. Mơ hồ/không thấy field hợp lệ → <code>null</code> + issue, vẫn có thể tạo review draft.</li>
+<li>Short transaction kiểm fencing token còn current, ghi <code>ExtractionRun</code> bất biến + job SUCCEEDED. Nếu document chưa có head, tạo draft revision đầu; nếu đã có head, result là candidate và không tự thay head.</li>
+<li>ACK sau commit. UI polling theo job, hiển thị result hoặc lỗi actionable. Job SUCCEEDED nghĩa pipeline hoàn thành, <strong>không nghĩa dữ liệu đúng/được approve</strong>.</li>
+</ol>
+<p>Mỗi attempt phải heartbeat giữa stages; inference dài dùng heartbeat timer riêng. Lease hết hạn không đủ để job cũ được commit: fencing token đã thay thì transaction bị từ chối.</p>
+<h2>6. Workflow C — Review/save/adopt</h2>
+<ol>
+<li>UI tải current revision, document version, source page và validation issues.</li>
+<li>Highlight evidence khi có; không có vị trí thì hiển thị Không xác định được vùng nguồn.</li>
+<li>Operator sửa value, thêm/sửa/xóa dòng bảng. Mỗi dòng có UUID runtime ổn định; reorder không làm mất identity.</li>
+<li>PATCH gửi toàn corrected payload, <code>base_revision_id</code>, <code>expected_document_version</code>, reason. Full replacement payload đơn giản hơn JSON Patch cho MVP; server vẫn tính diff/audit.</li>
+<li>Service kiểm owner, base=head, version; validate kiểu và normalize. Structural errors trả 422, không tạo revision.</li>
+<li>Transaction append revision mới, update head bằng CAS, tăng document version, insert audit. Revision mới chưa approved; approval cũ vẫn gắn snapshot cũ.</li>
+<li>Version stale trả 409 kèm current ID/version; UI giữ bản chỉnh local, tải server và cho người dùng reconcile. Không last-write-wins.</li>
+<li>Adopt candidate từ rerun là một action riêng, cần cùng CAS; tạo revision mới từ candidate, không sửa revision cũ.</li>
+</ol>
+<h2>7. Workflow D — Approve/export</h2>
+<ol>
+<li>Approve yêu cầu head revision cụ thể + expected document version, review confirmation và issue IDs được acknowledge.</li>
+<li>Tổng tiền là field required-for-approval trong cả hai schema. Số tiền mơ hồ/thiếu phải được sửa hoặc ghi nhận rejection; không có silent admin bypass.</li>
+<li>Blocking structural/profile/rule errors không approve được. Warning về subtotal/tax arithmetic có thể acknowledge với reason; không ép công thức không đúng loại chứng từ.</li>
+<li>Transaction append <code>Approval</code>, tăng document version, ghi audit. Payload revision bất biến; một revision chỉ một approval.</li>
+<li>Export dùng <code>revision_id</code>, chỉ revision thuộc document/owner và có approval. Trả JSON envelope chứa schema version, document ID, revision ID và business payload; không trộn review metadata vào ERP payload.</li>
+<li>Export repeat cùng revision/format/exporter-version cho cùng bytes/checksum. Sửa revision sau approval không làm artifact cũ thay đổi.</li>
+<li>Nếu người dùng yêu cầu latest export trong khi có draft mới thì 409; có thể chọn rõ revision approved cũ. Không giả vờ draft mới đã approved.</li>
+</ol>
+<h2>8. Workflow E — Failure/retry/cancel</h2>
+<table>
+<thead>
+<tr>
+<th>Lỗi</th>
+<th>Chính sách</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>File corrupt, PDF password/nhiều trang</td>
+<td>Reject trước job hoặc FAILED terminal; user thay file</td>
+</tr>
+<tr>
+<td>Storage/DB tạm unavailable</td>
+<td>Retry tối đa 2 lần sau attempt đầu; backoff jitter; deadline bounded</td>
+</tr>
+<tr>
+<td>OCR không đọc được</td>
+<td>Null/issue nếu còn result hợp lệ; FAIL nếu engine/runtime không thực thi</td>
+</tr>
+<tr>
+<td>OOM, model không load</td>
+<td>FAIL terminal; admin giảm profile/check manifest, không autoretry cùng config</td>
+</tr>
+<tr>
+<td>JSON model sai schema</td>
+<td>FAIL; diagnose/fix model, không vòng LLM vô hạn</td>
+</tr>
+<tr>
+<td>Worker crash</td>
+<td>Lease expiry + dispatcher recovery; fencing ngăn late commit</td>
+</tr>
+<tr>
+<td>Cancel</td>
+<td>QUEUED → CANCELLED; RUNNING đặt cancel flag, worker kiểm trước commit; kill unsafe GPU không bắt buộc</td>
+</tr>
+</tbody></table>
+<p>Automatic retry là attempt cùng job, cùng input và model version. Sau terminal failure, nút chạy lại tạo job mới; sửa file cần document mới. Một document tối đa một job nonterminal, enforced trong DB.</p>
+<h2>9. Review UI tối giản</h2>
+<p>Ba màn hình: danh sách chứng từ/job; upload; detail review. Detail gồm ảnh zoom/pan, field list, bảng items, issue panel, version/history, Save/Approve/Export. UI không tự quyết định approval policy hoặc tính toán confidence thay backend.</p>
+<p>Operator xác nhận đã xem nội dung, kể cả field score cao. Confidence ưu tiên review, không thay con người approve. Dùng polling 2–5 giây có backoff khi tab hidden; không cần WebSocket trong scope này.</p>
+</section><section class="document" id="doc-02-architecture"><h1>02 — Kiến trúc hệ thống</h1>
+<h2>1. Kiến trúc đề xuất</h2>
+<p>Modular monolith, một repository, một schema nghiệp vụ PostgreSQL. API, dispatcher và inference worker có entrypoint riêng nhưng dùng chung source/contracts. Các module sở hữu dữ liệu của mình và trao đổi qua public service/contract. Không cần HTTP giữa các module nội bộ.</p>
+<table>
+<thead>
+<tr>
+<th>Thành phần</th>
+<th>Quyết định</th>
+<th>Lý do và chi phí</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API</td>
+<td>FastAPI + Pydantic, Python 3.11</td>
+<td>Typed boundary; không import/load weights trong API</td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>PostgreSQL + SQLAlchemy 2 + Alembic</td>
+<td>Transaction, FK, JSONB và compare-and-swap; một ORM</td>
+</tr>
+<tr>
+<td>Queue</td>
+<td>Celery + Redis</td>
+<td>Worker ngoài API; cần xử lý redelivery và cấu hình visibility timeout</td>
+</tr>
+<tr>
+<td>Dispatcher</td>
+<td>Process nhẹ, poll outbox và recovery</td>
+<td>Đóng khoảng hở DB commit/publish; thêm một process để vận hành</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td><code>StoragePort</code>, local private volume trước</td>
+<td>Ít hạ tầng; sau này thay bằng S3-compatible adapter</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>React + TypeScript + Vite</td>
+<td>Viewer/editor ba màn hình; Backend sở hữu UI scope nhỏ</td>
+</tr>
+<tr>
+<td>OCR</td>
+<td>PaddleOCR adapter, bật tiếng Việt</td>
+<td>Khóa package/model revision sau spike; không dựa default model động</td>
+</tr>
+<tr>
+<td>Extraction</td>
+<td>Rule baseline + VLM adapter fine-tuned</td>
+<td>Cùng output/schema để so sánh; model cụ thể là quyết định tuần 2</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Structured logs + job metrics</td>
+<td>Có trace IDs; không triển khai ELK/Kubernetes trong MVP</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Docker Compose trên Linux/WSL2</td>
+<td>Môi trường tái lập; GPU worker dùng profile riêng khi có GPU</td>
+</tr>
+</tbody></table>
+<p>FastAPI khuyến nghị công cụ như Celery cho computation nặng ở process khác: <a href="https://fastapi.tiangolo.com/tutorial/background-tasks/">Background tasks</a>. PaddleOCR có <code>vi</code>, nhưng mức hỗ trợ phụ thuộc OCR version: <a href="https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html">tài liệu chính thức</a>. Version/package trong thiết kế chưa phải lockfile đã kiểm chứng.</p>
+<h2>2. Ranh giới và ownership</h2>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Sở hữu</th>
+<th>Public operations</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>identity</code></td>
+<td>User và quyền</td>
+<td>authenticate, authorize_document</td>
+</tr>
+<tr>
+<td><code>documents</code></td>
+<td>Document, file metadata, head pointer, version</td>
+<td>upload, get, compare_and_swap_head</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td>ProcessingJob, lease/attempt, OutboxMessage</td>
+<td>create, claim, heartbeat, complete, fail, cancel</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>ReviewRevision, Approval</td>
+<td>create_initial, edit, adopt, approve, get_snapshot</td>
+</tr>
+<tr>
+<td><code>exports</code></td>
+<td>ExportArtifact</td>
+<td>export_approved_revision</td>
+</tr>
+<tr>
+<td><code>pipeline</code></td>
+<td>CPU/GPU computation, không sở hữu DB entity</td>
+<td>process_document → PipelineResult</td>
+</tr>
+<tr>
+<td><code>ml</code></td>
+<td>Training/inference adapter và model manifest</td>
+<td>load_release, predict; train/evaluate offline</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>Generator, adapters, dataset manifest</td>
+<td>generate, normalize, validate, split</td>
+</tr>
+<tr>
+<td><code>evaluation</code></td>
+<td>Metric, holdout, reports</td>
+<td>evaluate_artifacts; không viết state nghiệp vụ</td>
+</tr>
+<tr>
+<td><code>infrastructure</code></td>
+<td>DB session/UoW, broker, storage, logging</td>
+<td>Adapter cho ports; không chứa approval rule</td>
+</tr>
+</tbody></table>
+<p><code>contracts</code> là dữ liệu trao đổi chung, không là nơi gom business logic. Một UnitOfWork có thể commit nhiều module trong transaction; quyền ghi entity vẫn đi qua service của module sở hữu. ORM models chỉ ở persistence adapter; route không query DB trực tiếp; pipeline/model không tự ghi result state.</p>
+<p>Audit được append qua một <code>AuditPort</code> trong cùng transaction với thay đổi business. Module khác không sửa audit cũ. Đây là audit application-level, không phải bằng chứng chống admin DB thay đổi dữ liệu.</p>
+<h2>3. Luồng thành phần</h2>
+<p>Browser → API → application services → UoW/PostgreSQL và storage.</p>
+<p>Job service commit job + outbox → dispatcher → Redis → worker → pipeline → OCR/extraction/validation → completion service → PostgreSQL.</p>
+<p>Worker gọi cùng application services với API; không gọi HTTP ngược API. Dispatcher không chạy model. Training process tách khỏi serving, đọc dataset snapshot và xuất model release manifest.</p>
+<h2>4. Queue semantics và fencing</h2>
+<p>Không hứa exactly-once execution. Có thể execute lại, nhưng <strong>một committed ExtractionRun cho mỗi job</strong> nhờ UNIQUE(job_id) và transaction/fencing.</p>
+<p>Job creation dùng partial UNIQUE(document_id) cho các trạng thái nonterminal <code>QUEUED</code>, <code>RUNNING</code>, <code>RETRY_WAIT</code>. Lần tạo trùng trả active job hoặc 409 theo request key, không song song inference cùng document.</p>
+<p>Claim là CAS row với <code>lease_token</code>, <code>lease_until</code>, <code>attempt_count</code>, <code>stage</code>. Heartbeat cập nhật chỉ khi token còn current. Default dự kiến lease 60s, heartbeat 15s; deadline 180s, tối đa 3 attempts. Timeout thực khóa sau spike.</p>
+<p>Dispatcher lấy outbox bằng short transaction <code>FOR UPDATE SKIP LOCKED</code>; publish message chỉ <code>job_id</code>, không chứa file/text. Publish OK mới mark delivered. Recovery định kỳ tìm job QUEUED/RETRY_WAIT chưa được claim quá dispatch grace hoặc RUNNING lease expired, tăng fence/requeue trong transaction và tạo outbox mới. Recovery cũng bounded theo attempts/deadline.</p>
+<p>Celery: idempotent task, <code>acks_late</code>, prefetch 1. <code>task_reject_on_worker_lost</code> cần thử kill test, không bật cùng retry OOM vô hạn. Redis visibility timeout dự kiến 900s, lớn hơn runtime tối đa; DB recovery không phụ thuộc việc chờ redelivery Redis. <a href="https://docs.celeryq.dev/en/stable/userguide/tasks.html">Celery task semantics</a>, <a href="https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html">Redis caveats</a>.</p>
+<p>Attempt artifacts ghi dưới <code>documents/{id}/jobs/{job_id}/attempts/{lease_token}/...</code>. Late worker không overwrite artifact attempt mới. Chỉ DB committed pointer được viewer sử dụng; orphan cleanup theo manifest, không quét/xóa broad path.</p>
+<h2>5. Data model và constraints</h2>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Fields chính</th>
+<th>Invariants</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>users</code></td>
+<td>id, username, password_hash, role, active</td>
+<td>username unique; không lưu plain password</td>
+</tr>
+<tr>
+<td><code>documents</code></td>
+<td>id, owner_id, type, file_key, sha256, head_revision_id, version, created_at</td>
+<td>Head phải thuộc document; version increment trên head/approval change</td>
+</tr>
+<tr>
+<td><code>processing_jobs</code></td>
+<td>id, document_id, manifest_id, state, stage, attempt_count, lease_token/until, cancel_requested, error_code, deadline_at</td>
+<td>Một job active/document; terminal không reclaim</td>
+</tr>
+<tr>
+<td><code>extraction_runs</code></td>
+<td>id, job_id, schema_version, prediction_json, ocr_key, page_key, model_provenance, metrics</td>
+<td>job_id unique; prediction bất biến</td>
+</tr>
+<tr>
+<td><code>review_revisions</code></td>
+<td>id, document_id, extraction_run_id, parent_id, payload_json, metadata_json, creator_id, reason, created_at</td>
+<td>Append-only content; parent cùng document; stable row IDs</td>
+</tr>
+<tr>
+<td><code>approvals</code></td>
+<td>id, revision_id, actor_id, warning_ack_json, reason, created_at</td>
+<td>revision_id unique; approve current head</td>
+</tr>
+<tr>
+<td><code>export_artifacts</code></td>
+<td>id, revision_id, format, exporter_version, storage_key, sha256</td>
+<td>unique(revision_id,format,exporter_version); snapshot approved</td>
+</tr>
+<tr>
+<td><code>outbox_messages</code></td>
+<td>id, job_id, event_type, delivered_at, next_delivery_at</td>
+<td>At-least-once publish; row lock dispatch</td>
+</tr>
+<tr>
+<td><code>audit_events</code></td>
+<td>id, actor_id/system_actor, document_id, action, base/new revision, details, created_at</td>
+<td>Append only; details không lộ secret</td>
+</tr>
+<tr>
+<td><code>idempotency_requests</code></td>
+<td>owner_id, route, key, request_hash, resource_id, expires_at</td>
+<td>unique(owner_id,route,key); khác hash →409</td>
+</tr>
+<tr>
+<td><code>model_releases</code></td>
+<td>id, manifest_key/hash, schema_version, lifecycle, active_since</td>
+<td>Manifest immutable; một active release/profile</td>
+</tr>
+</tbody></table>
+<p>JSONB lưu payload type-specific để tránh entity-attribute-value hàng nghìn row. Validation giữ bên application; DB FK/unique/CAS giữ invariants quan hệ. Tables không phải ER schema pháp lý của chứng từ.</p>
+<p>Document head có thể null lúc upload. Tạo revision rồi gán head trong transaction; dùng composite FK hoặc explicit guard để ngăn reference revision của document khác. <code>parent_id</code> và <code>extraction_run_id</code> cũng có guard document ownership.</p>
+<h2>6. Review concurrency</h2>
+<p>API GET trả <code>document_version</code>. Save/adopt/approve yêu cầu expected version và head ID. CAS UPDATE documents WHERE id AND version=:expected; 0 rows →409. Transaction rollback toàn revision/audit nếu CAS fail.</p>
+<p>Payload revision không sửa in-place. Approval là row riêng, không thay payload. Save sau approve tạo draft head mới; export revision cũ vẫn hợp lệ nếu người dùng chọn rõ. Approval phải kiểm rules với đúng payload snapshot và increment document version để serialize với save/adopt.</p>
+<p>SQLAlchemy có <code>version_id_col</code>, nhưng chỉ bảo vệ một số đường ORM flush; explicit CAS vẫn cần cho updates ngoài đường đó. <a href="https://docs.sqlalchemy.org/en/20/orm/versioning.html">Version counter</a>. Không dựa chỉ frontend disable button.</p>
+<h2>7. Storage và model provenance</h2>
+<p>Private local volume <code>storage/</code> được mount API/worker; browser chỉ lấy qua authorized API route, không static public directory. S3 adapter sau này cần sửa deployment ADR, không sửa pipeline business contract.</p>
+<p>Object classes: original input, canonical page, preprocess image/transform, OCR JSON, raw/model output, prediction JSON, approved export. DB chỉ lưu keys/hash/size. Model release là folder read-only: weights/adapter/tokenizer/processor + immutable manifest.</p>
+<p>Job pin release ID lúc tạo. Worker loader cache tối đa một release nếu chỉ một GPU; load release khác là cold start được đo. Không dùng <code>latest</code> remote revision runtime. API activation không sửa weights; new release → new manifest ID. Existing job giữ version cũ hoặc fail actionable nếu artifact không còn.</p>
+<p>Original input bất biến. Canonical page sau EXIF/PDF render là hệ tọa độ viewer. Preprocess giữ inverse transform từ processed → canonical. Missing transform/evidence → source bbox null, không vẽ vùng sai.</p>
+<h2>8. Resource và deployment profile</h2>
+<p>Target demo: 5 operator đồng thời, 1 inference job/GPU, queue cap 20 active jobs toàn instance, file ≤20 MiB, 1 page, ≤20 MP, ≤30 rows. API metadata p95 mục tiêu ≤500ms ở 5 clients, không tính upload/inference. Pipeline p95 mục tiêu ≤120s, deadline ≤180s sau hardware spike. Đây là target, chưa có số đo.</p>
+<p>CPU profile chạy rule baseline và OCR, có thể dùng extraction checkpoint nhỏ nếu thực nghiệm đủ nhanh. GPU profile chạy model đã chọn; không tuyên bố GPU X GB đủ trước phép đo. Serving/training không tranh cùng GPU khi demo; worker model warm-up trước buổi nghiệm thu.</p>
+<p>Celery CUDA process được thử với pool <code>solo</code>/concurrency 1 trong spike; chặn load model trước unsafe fork. CPU OCR ban đầu tránh chiếm VRAM extraction. Không scale nhiều worker GPU khi chưa có capacity/memory evidence.</p>
+<p>Docker Compose services: <code>web</code> (static/reverse proxy), <code>api</code>, <code>dispatcher</code>, <code>worker</code>, <code>postgres</code>, <code>redis</code>. PostgreSQL/Redis không expose ra internet. Browser cùng origin <code>/api/v1</code>, giảm CORS complexity. Health API, DB readiness và worker heartbeat/model readiness tách nhau.</p>
+<h2>9. Security và vận hành cần có</h2>
+<p>File signature/decode, size/pixel/page cap, PDF subprocess timeout, object-key path safety; prompt coi text tài liệu là dữ liệu, model không có tools/network. Không URL-fetch tùy ý. Local samples fictional; public samples chỉ dùng sau audit nguồn/PII/terms.</p>
+<p>Access token giữ trong memory, expiration ngắn; API authorize từng document/run/revision/page/export. Admin actions audit. Secrets environment, <code>.env</code> không commit. Logs có request_id/job_id/document_id/stage/duration/error_code, không raw OCR hoặc nội dung mẫu nhạy cảm.</p>
+<p>Metrics: queue age, jobs by state/stage, attempts, OCR/extraction latency, JSON parse failure, OOM, missing field rate, validation issues, manual correction rate. Không biến số corrections thành model accuracy nếu thiếu ground truth.</p>
+<p>Backup PostgreSQL + storage manifest cùng epoch demo. Restore rehearsal xác minh FK và file hashes. Rollback app container/tag và active model release; migration expand-compatible trước, không rollback DB bằng thao tác phá dữ liệu.</p>
+<p>Retention MVP không có auto-delete dữ liệu user. Cleanup chỉ staging/attempt orphan được registry xác định; TTL đề xuất 24h staging và 7 ngày orphan attempts, admin dry-run/review trước delete. Dữ liệu approved cần chính sách riêng khi productionize.</p>
+<h2>10. Failure matrix cần test</h2>
+<table>
+<thead>
+<tr>
+<th>Failure injection</th>
+<th>Expected outcome</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API chết sau DB commit job, trước publish</td>
+<td>Outbox dispatcher vẫn publish</td>
+</tr>
+<tr>
+<td>Dispatcher chết sau publish, trước mark</td>
+<td>Duplicate message; một committed run</td>
+</tr>
+<tr>
+<td>Redis mất message/restart</td>
+<td>DB reconciliation requeue job chưa claim</td>
+</tr>
+<tr>
+<td>Worker chết giữa inference</td>
+<td>Lease expires, attempt mới; stale token không commit</td>
+</tr>
+<tr>
+<td>DB outage khi completion</td>
+<td>Không ACK success; retry/recovery giữ idempotency</td>
+</tr>
+<tr>
+<td>Approve và save cạnh tranh</td>
+<td>Một transaction thành công; còn lại 409</td>
+</tr>
+<tr>
+<td>Rerun thành công sau user đã sửa</td>
+<td>Candidate riêng; head user không bị thay</td>
+</tr>
+<tr>
+<td>Storage mất object</td>
+<td>Job fail rõ; không trả result fake</td>
+</tr>
+<tr>
+<td>Model output chứa lệnh/injection</td>
+<td>Bị coi là text; không gọi tool hoặc thực thi</td>
+</tr>
+</tbody></table>
+<h2>11. Fitness rules và remediation</h2>
+<p>CI AST/import check: contracts không import FastAPI/ORM/model frameworks; pipeline không import business persistence; routes chỉ gọi public services; modules không import private internals nhau. Cycle detection phải dựa imports thực, không graph hard-code.</p>
+<p>Behavior checks: one committed run/job, approval revision unchanged, export checksum stable, version conflict, bbox inverse transform. Vi phạm boundary: chuyển logic về owning service/adapter rồi update contract; không tạo wrapper không cần thiết. CI failure phải nêu file/import hoặc invariant cụ thể để reviewer sửa được.</p>
+</section><section class="document" id="doc-03-contracts"><h1>03 — Schemas, API và module contracts</h1>
+<h2>1. Quy ước chung</h2>
+<p>IDs runtime UUID; <code>document_type</code> = <code>receipt|invoice</code>; schema = <code>receipt.v1|invoice.v1</code>; <code>language=vi</code>. Backend timestamps UTC ISO 8601; transaction time trên chứng từ giữ local time, không tự gán timezone nếu ảnh không có.</p>
+<p>Business values là string/null; tiền và quantity dùng decimal string sau normalize (<code>1250000</code>, <code>1.5</code>), không binary float. Date = YYYY-MM-DD, time = HH:MM hoặc HH:MM:SS; type-specific semantic validators kiểm ngày/giờ thực, vì regex không đủ.</p>
+<p>Mọi field key luôn có mặt trong prediction để client ổn định; value null biểu diễn không xác định. <code>items=[]</code> nghĩa không phát hiện dòng đủ tin cậy, không bảo đảm tài liệu không có bảng. Evidence/issue phải cho biết coverage. Missing training label có <code>label_status=unlabeled</code>, khác nhãn gold <code>absent</code>.</p>
+<h2>2. Receipt v1</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+<th>Approval policy</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>merchant_name</td>
+<td>Tên cửa hàng/người bán</td>
+<td>Nullable; warning khi thiếu</td>
+</tr>
+<tr>
+<td>merchant_address</td>
+<td>Địa chỉ bên bán trên chứng từ</td>
+<td>Nullable</td>
+</tr>
+<tr>
+<td>transaction_date</td>
+<td>Ngày giao dịch</td>
+<td>Nullable; warning khi thiếu/ambiguous</td>
+</tr>
+<tr>
+<td>transaction_time</td>
+<td>Giờ giao dịch</td>
+<td>Nullable; không suy đoán</td>
+</tr>
+<tr>
+<td>total_amount</td>
+<td>Tổng phải thanh toán/giao dịch</td>
+<td>Required non-null để approve</td>
+</tr>
+<tr>
+<td>items</td>
+<td>Dòng hàng đọc được</td>
+<td>Không ép có hàng nếu ảnh không có bảng; user xác nhận completeness</td>
+</tr>
+</tbody></table>
+<p>Receipt number/payment method chưa bắt buộc trong v1. Thêm sau phải update schema và evaluation coverage, không trả key tùy hứng.</p>
+<h2>3. Invoice v1</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+<th>Approval policy</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>invoice_number</td>
+<td>Số chứng từ ghi trên ảnh</td>
+<td>Nullable; warning thiếu</td>
+</tr>
+<tr>
+<td>issue_date</td>
+<td>Ngày lập</td>
+<td>Nullable; không dùng ngày đến hạn thay thế</td>
+</tr>
+<tr>
+<td>seller_name</td>
+<td>Bên bán/cung cấp dịch vụ</td>
+<td>Nullable; warning thiếu</td>
+</tr>
+<tr>
+<td>buyer_name</td>
+<td>Bên mua</td>
+<td>Nullable; không lấy người ký thay</td>
+</tr>
+<tr>
+<td>subtotal</td>
+<td>Giá trị trước các khoản điều chỉnh khi được ghi</td>
+<td>Nullable</td>
+</tr>
+<tr>
+<td>tax_amount</td>
+<td>Tiền thuế ghi rõ</td>
+<td>Nullable; không suy ra từ tax rate</td>
+</tr>
+<tr>
+<td>discount_amount</td>
+<td>Số tiền giảm giá ghi rõ</td>
+<td>Nullable</td>
+</tr>
+<tr>
+<td>total_amount</td>
+<td>Tổng ghi trên chứng từ</td>
+<td>Required non-null để approve</td>
+</tr>
+<tr>
+<td>items</td>
+<td>Dòng sản phẩm/dịch vụ</td>
+<td>Cùng LineItem schema</td>
+</tr>
+</tbody></table>
+<p>Không kiểm nhận diện hóa đơn hợp lệ pháp lý, MST, QR xác thực hoặc ký số trong v1. <code>currency</code> không đưa vào business v1 vì scope target VND; nếu tài liệu không phải VND/không rõ monetary convention thì warning hoặc unsupported profile, không suy ra dựa language alone.</p>
+<h2>4. Line item và provenance</h2>
+<p>Business line item gồm <code>description</code>, <code>quantity</code>, <code>unit</code>, <code>unit_price</code>, <code>line_total</code> (string/null). Runtime editor gán <code>row_id</code> UUID ngoài business payload, map 1:1 với items và giữ qua reorder. Output model dùng index tạm; backend tạo identity, không yêu cầu model sinh UUID.</p>
+<p>Field metadata dùng JSON Pointer (<code>/total_amount</code>, <code>/items/0/line_total</code>) và map stable row ID trong revision metadata. <code>raw_value</code>, <code>value_origin=prediction|human|absent</code>, <code>source_regions[]</code>, <code>ocr_score</code>, <code>confidence</code>, <code>confidence_method</code>, <code>review_flags[]</code>.</p>
+<p>Source region = canonical page index 0, normalized quad 4 điểm [x,y] trong [0,1], OCR block IDs. Viewer width/height thuộc PageAsset, không lấy dimension ảnh preprocess. Evidence do matching/alignment thực, model bbox chưa verify không coi là ground truth.</p>
+<p>Confidence null nếu chưa calibrated. OCR score độc lập; không copy thành field probability. Human correction giữ original evidence provenance và đánh dấu manual value, không gán confidence=1.0.</p>
+<h2>5. Contracts tính toán</h2>
+<p>Các chữ ký dưới là thiết kế, không phải API thư viện được xác minh.</p>
+<pre><code class="language-python">class OcrPort(Protocol):
+    def recognize(self, page: PreparedPage, limits: PipelineLimits) -&gt; OcrPage: ...
+
+class ExtractorPort(Protocol):
+    def extract(self, request: ExtractionInput) -&gt; RawPrediction: ...
+
+class StoragePort(Protocol):
+    def open_read(self, key: str) -&gt; BinaryIO: ...
+    def put(self, key: str, stream: BinaryIO, content_type: str) -&gt; StoredAsset: ...
+
+class UnitOfWork(Protocol):
+    def commit(self) -&gt; None: ...
+    def rollback(self) -&gt; None: ...
+</code></pre>
+<p><code>ExtractionInput</code>: document type/schema, image asset, ordered OCR blocks, limits, model manifest; OCR text encoded như untrusted data, không nối vào system instructions. <code>RawPrediction</code> có raw output, finish reason, timing; <code>PipelineResult</code> mới là validated payload/evidence/issues/provenance.</p>
+<p><code>PreparedPage</code>: canonical image key/dimensions, processed image key, inverse transform, geometry status. <code>OcrPage</code>: ordered blocks với immutable block_id/text/quad/score, OCR version. Không return ndarray qua broker; computation dùng object nội bộ, broker chỉ ID.</p>
+<h2>6. REST API v1</h2>
+<table>
+<thead>
+<tr>
+<th>Method/path</th>
+<th>Request chính</th>
+<th>Success</th>
+<th>Constraints</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST /api/v1/auth/token</td>
+<td>Credentials theo auth library</td>
+<td>200 token</td>
+<td>Seed account; rate limit; không log password</td>
+</tr>
+<tr>
+<td>POST /api/v1/documents</td>
+<td>multipart file + document_type; Idempotency-Key</td>
+<td>201 document</td>
+<td>Size/type/profile; owner</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents</td>
+<td>cursor, status/type filter</td>
+<td>200 page</td>
+<td>Owner scope, default 20 max 100</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents/{id}</td>
+<td>—</td>
+<td>200 metadata/version/head</td>
+<td>Authorization</td>
+</tr>
+<tr>
+<td>POST /api/v1/documents/{id}/jobs</td>
+<td>profile/release option allowed; Idempotency-Key</td>
+<td>202 job</td>
+<td>One active job; pin manifest</td>
+</tr>
+<tr>
+<td>GET /api/v1/jobs/{id}</td>
+<td>—</td>
+<td>200 state/stage/error</td>
+<td>Authorization qua document</td>
+</tr>
+<tr>
+<td>POST /api/v1/jobs/{id}/cancel</td>
+<td>expected state</td>
+<td>202 request hoặc 200 cancelled</td>
+<td>Terminal không mutate</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents/{id}/runs</td>
+<td>cursor</td>
+<td>200 history</td>
+<td>Prediction immutable</td>
+</tr>
+<tr>
+<td>GET /api/v1/runs/{id}</td>
+<td>—</td>
+<td>200 result</td>
+<td>Không expose raw model output mặc định</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents/{id}/pages/0</td>
+<td>—</td>
+<td>200 image</td>
+<td>Canonical page qua authorized stream</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents/{id}/revisions</td>
+<td>cursor</td>
+<td>200 revisions</td>
+<td>Owner scope</td>
+</tr>
+<tr>
+<td>GET /api/v1/revisions/{id}</td>
+<td>—</td>
+<td>200 snapshot/issues</td>
+<td>Relation guard</td>
+</tr>
+<tr>
+<td>PATCH /api/v1/documents/{id}/review</td>
+<td>base_revision_id, expected_document_version, payload, reason</td>
+<td>201 new revision</td>
+<td>CAS + validation</td>
+</tr>
+<tr>
+<td>POST /api/v1/documents/{id}/adopt-run</td>
+<td>run_id, base_revision_id, expected_document_version, reason</td>
+<td>201 revision</td>
+<td>Explicit candidate adoption</td>
+</tr>
+<tr>
+<td>POST /api/v1/documents/{id}/approve</td>
+<td>revision_id, expected_document_version, confirmed_review, acknowledged_issue_ids, reason</td>
+<td>201 approval</td>
+<td>Current head; blocking issue check</td>
+</tr>
+<tr>
+<td>POST /api/v1/documents/{id}/exports</td>
+<td>revision_id, format=json</td>
+<td>201 artifact hoặc 200 existing</td>
+<td>Approved snapshot</td>
+</tr>
+<tr>
+<td>GET /api/v1/exports/{id}/download</td>
+<td>—</td>
+<td>200 attachment</td>
+<td>Owner; schema/revision IDs</td>
+</tr>
+<tr>
+<td>GET /api/v1/documents/{id}/audit</td>
+<td>cursor</td>
+<td>200 events</td>
+<td>Minimal details</td>
+</tr>
+<tr>
+<td>POST /api/v1/admin/model-releases/{id}/activate</td>
+<td>release manifest đã có trên disk</td>
+<td>200 active release</td>
+<td>Admin; release gate evidence</td>
+</tr>
+<tr>
+<td>GET /health/live, /health/ready</td>
+<td>—</td>
+<td>200/503</td>
+<td>Không disclose secrets</td>
+</tr>
+</tbody></table>
+<p>Không nhận arbitrary model path, object key, URL hoặc prompt trong public API. ID mapping resolver do server sở hữu. Run mới từ terminal failure dùng POST jobs; retry nội bộ không là endpoint riêng.</p>
+<h2>7. Ví dụ save review</h2>
+<pre><code class="language-json">{
+  &quot;base_revision_id&quot;: &quot;22222222-2222-4222-8222-222222222222&quot;,
+  &quot;expected_document_version&quot;: 3,
+  &quot;reason&quot;: &quot;Sửa tổng tiền sau khi đối chiếu ảnh mẫu&quot;,
+  &quot;payload&quot;: {
+    &quot;merchant_name&quot;: &quot;CỬA HÀNG MẪU&quot;,
+    &quot;merchant_address&quot;: null,
+    &quot;transaction_date&quot;: &quot;2026-10-04&quot;,
+    &quot;transaction_time&quot;: null,
+    &quot;total_amount&quot;: &quot;125000&quot;,
+    &quot;items&quot;: []
+  }
+}
+</code></pre>
+<p>Response 201 trả new revision ID, parent ID, document version=4, issues và review state DRAFT. Ví dụ là dữ liệu giả lập, không phải prediction hoặc metric thật.</p>
+<h2>8. Error envelope</h2>
+<pre><code class="language-json">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;REVISION_CONFLICT&quot;,
+    &quot;message&quot;: &quot;Tài liệu đã có phiên bản mới. Hãy đối chiếu lại trước khi lưu.&quot;,
+    &quot;request_id&quot;: &quot;demo-request-id&quot;,
+    &quot;details&quot;: {&quot;current_document_version&quot;: 4}
+  }
+}
+</code></pre>
+<p>400 malformed request; 401 invalid/expired token; 403 role action không allowed; 404 document inaccessible hoặc không tồn tại; 409 version/active job/idempotency/export precondition conflict; 413 byte limit; 415 unsupported media; 422 payload/schema/profile invalid; 429 admission/rate limit; 503 dependency unavailable. Không expose exception traceback/path/token/raw payload.</p>
+<p>Job failure dùng enum <code>INPUT_CORRUPT</code>, <code>PROFILE_UNSUPPORTED</code>, <code>OCR_RUNTIME_ERROR</code>, <code>MODEL_LOAD_FAILED</code>, <code>MODEL_OUTPUT_INVALID</code>, <code>RESOURCE_EXHAUSTED</code>, <code>DEADLINE_EXCEEDED</code>, <code>STORAGE_UNAVAILABLE</code>, <code>INTERNAL_ERROR</code>. User thấy reason/action; traceback chỉ restricted diagnostic.</p>
+<h2>9. Validation policy</h2>
+<p>Structural: key/type/array limit, finite bbox, pointer tồn tại, enum/type/schema compatibility. Date/time semantic: ngày thực, không tự biến invalid thành date gần đúng. Money: decimal parse theo source convention, giữ raw string, không xóa mọi dấu phẩy/chấm tùy tiện.</p>
+<p>Arithmetic chỉ áp dụng khi known rule và đủ operands: qty×unit_price≈line_total, subtotal+tax−discount≈total. Tolerance theo rounding policy được manifest hóa; service charge/thuế gộp/inclusive prices không dùng cùng công thức. Chênh lệch là warning; không override source total.</p>
+<p>Receipt required-for-approval: total. Invoice: total. Candidate field thiếu tên/date/number là warning. Nếu tài liệu không hợp profile hoặc user không xác nhận completeness thì không approve. Validation chạy lại trên corrected payload, không reuse issues từ prediction.</p>
+<h2>10. Versioning và schema files</h2>
+<p>Schema breaking change → <code>.v2</code>, model/dataset/evaluator updated cùng PR kế hoạch migration; additive fields vẫn cần client compatibility review. Manifest pin schema, normalizer, evidence mapper, OCR, model, tokenizer, processor và code commit.</p>
+<p><code>schemas/business.schema.json</code>: receipt/invoice payload. <code>schemas/extraction-result.schema.json</code>: result envelope + evidence/issues. <code>schemas/job-message.schema.json</code>: broker message. <code>schemas/export.schema.json</code>: approved business export. JSON Schema không tự kiểm FK, semantic date, quad geometry hoặc money arithmetic; cần validators tương ứng.</p>
+<p>Source of truth lúc implementation: Pydantic contracts sinh JSON Schema/OpenAPI; files trong hồ sơ này là reference design. Không duy trì hai bộ model thủ công khác nhau mãi. Frontend types sinh từ OpenAPI, không tự viết lại API types.</p>
+</section><section class="document" id="doc-04-source-structure"><h1>04 — Cấu trúc source dự kiến và ownership</h1>
+<h2>1. Repository layout</h2>
+<p>Cây dưới là thiết kế target, không phải các file production đã được tạo. Backend tạo skeleton tối thiểu theo vertical slice, không mở sẵn hàng chục file rỗng.</p>
+<pre><code class="language-text">vietdoc/
+├── AGENTS.md                         # quy ước ổn định, không chứa tiến độ task
+├── pyproject.toml                    # core + api + worker + ml optional groups
+├── uv.lock                          # dependency lock sau spike
+├── specs/
+│   ├── scope.md
+│   ├── approval-policy.md
+│   ├── errors.md
+│   └── contracts/                    # schema/OpenAPI sinh từ Pydantic
+├── docs/
+│   ├── adr/
+│   ├── uml/
+│   ├── data-cards/
+│   ├── model-cards/
+│   └── runbooks/
+├── tasks/                           # backlog, acceptance, weekly decisions
+├── src/vietdoc/
+│   ├── contracts/
+│   │   ├── business.py               # ReceiptPayload, InvoicePayload, LineItem
+│   │   ├── ocr.py                    # PreparedPage, OcrBlock, OcrPage
+│   │   ├── extraction.py             # ExtractionInput, RawPrediction, PipelineResult
+│   │   ├── review.py                 # Review DTO, SourceRegion, FieldMetadata
+│   │   ├── jobs.py                   # JobState, JobMessage, PipelineManifest
+│   │   └── errors.py                 # typed error codes
+│   ├── identity/
+│   │   ├── public.py
+│   │   ├── service.py
+│   │   └── policies.py               # ownership/RBAC
+│   ├── documents/
+│   │   ├── public.py
+│   │   ├── entities.py
+│   │   ├── service.py                # upload + head CAS
+│   │   └── ports.py                  # DocumentRepository, file store
+│   ├── jobs/
+│   │   ├── public.py
+│   │   ├── entities.py
+│   │   ├── service.py                # create/claim/complete/recovery
+│   │   ├── lifecycle.py
+│   │   └── ports.py
+│   ├── review/
+│   │   ├── public.py
+│   │   ├── entities.py
+│   │   ├── service.py                # initial/edit/adopt/approve
+│   │   ├── validation.py             # approval rules, money/date consistency
+│   │   └── ports.py
+│   ├── exports/
+│   │   ├── public.py
+│   │   ├── service.py
+│   │   ├── json_exporter.py
+│   │   └── ports.py
+│   ├── pipeline/
+│   │   ├── service.py                # pure orchestration of compute stages
+│   │   ├── preprocess.py
+│   │   ├── geometry.py               # inverse transforms canonical coordinates
+│   │   ├── ocr/
+│   │   │   ├── port.py
+│   │   │   └── paddle_adapter.py
+│   │   ├── extraction/
+│   │   │   ├── port.py
+│   │   │   ├── rule_baseline.py
+│   │   │   ├── model_adapter.py
+│   │   │   └── prompts/              # versioned, local templates
+│   │   ├── normalization.py
+│   │   ├── evidence.py
+│   │   └── confidence.py             # fitted calibrator or null+flags
+│   ├── data/
+│   │   ├── manifest.py
+│   │   ├── generator/
+│   │   │   ├── render.py
+│   │   │   ├── values.py
+│   │   │   └── templates/{receipt,invoice}/
+│   │   ├── adapters/receiptvqa.py
+│   │   ├── validation.py
+│   │   └── splits.py
+│   ├── ml/
+│   │   ├── train_extractor.py
+│   │   ├── model_loading.py
+│   │   ├── training_dataset.py
+│   │   ├── release_manifest.py
+│   │   └── configs/
+│   ├── evaluation/
+│   │   ├── run.py
+│   │   ├── fields.py
+│   │   ├── line_items.py
+│   │   ├── geometry.py
+│   │   └── reports.py
+│   ├── infrastructure/
+│   │   ├── persistence/{models,repositories,uow}.py
+│   │   ├── storage/{local,s3}.py      # chỉ local được implement trong MVP
+│   │   ├── queue/celery_adapter.py
+│   │   ├── model_registry.py
+│   │   └── observability.py
+│   └── entrypoints/
+│       ├── api/{app,dependencies,exception_handlers}.py
+│       │   └── routes/{auth,documents,jobs,review,exports,admin}.py
+│       ├── worker/{app,tasks}.py
+│       ├── dispatcher/main.py
+│       └── cli/{seed_users,generate_data,evaluate,publish_release}.py
+├── web/
+│   ├── package.json
+│   ├── src/
+│   │   ├── api/generated/            # từ OpenAPI
+│   │   ├── features/{auth,documents,review}/
+│   │   ├── components/{DocumentViewer,FieldEditor,ItemsGrid,IssuePanel}/
+│   │   └── app/
+│   └── tests/
+├── migrations/                      # một Alembic lineage; Backend điều phối
+├── tests/
+│   ├── unit/{documents,jobs,review,pipeline}/
+│   ├── integration/{api,queue,persistence,storage}/
+│   ├── contract/
+│   ├── architecture/
+│   ├── e2e/
+│   └── fixtures/                    # fictional tiny fixtures, không full dataset
+├── datasets/{raw,processed,manifests}/ # raw/processed ignored, manifest tracked
+├── artifacts/{models,evaluation}/     # model binaries ignored
+├── storage/                          # runtime ignored
+├── infra/{compose.yaml,Dockerfile.api,Dockerfile.worker,web.conf}
+├── .github/{workflows,CODEOWNERS,PULL_REQUEST_TEMPLATE.md}
+└── .env.example                     # chỉ tên biến và giá trị không nhạy cảm
+</code></pre>
+<p><code>s3.py</code> ở cây là vị trí tương lai, không tạo implementation rỗng. Hạn chế thêm repository/interface nếu chỉ một helper pure; các ports trên được dùng ở I/O hoặc model boundary thật.</p>
+<h2>2. Dependency rules</h2>
+<ol>
+<li><code>contracts</code> không import entrypoints, database, Celery, Paddle, Transformers.</li>
+<li>Business entities/services không import FastAPI decorators, ORM hoặc GPU libraries; chỉ contracts và ports cần thiết.</li>
+<li><code>pipeline</code> dùng contracts + compute adapters; không import modules persistence hoặc gọi services review/export.</li>
+<li><code>data/ml/evaluation</code> không gọi production API để training; dùng dataset snapshot/artifacts.</li>
+<li>Routes gọi public services, không model inference/SQL trong handler.</li>
+<li>Worker task chỉ claim → compute → completion service. Không lặp business rules riêng của API.</li>
+<li>Cross-module calls qua <code>public.py</code>; UoW injection từ entrypoint composition root.</li>
+<li><code>infrastructure/persistence</code> implement owning-module ports; dùng chung SQLAlchemy session, không thêm ORM khác.</li>
+</ol>
+<p>DAG mong muốn: contracts ở đáy; services/ports phụ thuộc contracts; adapters phụ thuộc ports/contracts; entrypoints compose services/adapters. <code>review</code> được dùng <code>documents.public</code>; <code>exports</code> được dùng <code>review.public</code>; <code>jobs</code> điều phối <code>documents.public</code> và <code>review.public</code> nhưng review không gọi jobs. Status UI lấy API composition, không tạo cycle modules.</p>
+<h2>3. CODEOWNERS và integration ownership</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Implementer chính</th>
+<th>Reviewer bắt buộc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>contracts, specs, ADR</td>
+<td>Backend implement contract; Lead thiết kế</td>
+<td>Lead + consumer bị ảnh hưởng</td>
+</tr>
+<tr>
+<td>data/generator/adapters/splits</td>
+<td>Data Engineer</td>
+<td>AI-1/AI-2 + Lead khi schema/split đổi</td>
+</tr>
+<tr>
+<td>preprocess/geometry/ocr/evidence</td>
+<td>AI-1</td>
+<td>AI-2 khi input đổi; Backend khi UI bbox đổi</td>
+</tr>
+<tr>
+<td>extraction/model adapter/ml/confidence</td>
+<td>AI-2</td>
+<td>AI-1 + Lead</td>
+</tr>
+<tr>
+<td>evaluation</td>
+<td>Data Engineer</td>
+<td>Cả hai AI; Lead metric/release gate</td>
+</tr>
+<tr>
+<td>identity/documents/jobs/review/exports/persistence/API/web</td>
+<td>Backend</td>
+<td>Lead; AI reviewer cho integration contract</td>
+</tr>
+<tr>
+<td>infra/CI/migrations</td>
+<td>Backend</td>
+<td>Lead; model worker config cần AI-2</td>
+</tr>
+</tbody></table>
+<p>Lead <strong>không có backlog coding thường xuyên</strong>. Lead quyết scope/contract, review, merge và điều phối conflict; Backend chịu phần code bootstrap/CI. Nếu Backend quá tải UI, giảm polish hoặc xin bổ sung người, không âm thầm dồn code cho Lead.</p>
+<h2>4. Các unit interfaces cần khóa tuần 1</h2>
+<ul>
+<li>OCR → extraction: text, ordering, canonical geometry, limits.</li>
+<li>Model → pipeline: raw output, finish reason, timing; JSON schema không phụ thuộc vendor model.</li>
+<li>Pipeline → jobs: payload/evidence/issues/provenance; terminal errors typed.</li>
+<li>Review → frontend: revision/head/version, stable row IDs, issues severity.</li>
+<li>Export → consumer: approved snapshot, schema version, decimal strings.</li>
+<li>Dataset → training: source IDs, template families, split, label status và evidence.</li>
+</ul>
+<h2>5. Trình tự xây source</h2>
+<ol>
+<li>Backend tạo contracts + upload/job metadata + rule baseline pipeline, AI-1 đưa một OCR fixture đúng contract. Data tạo 10–20 fictional documents có labels.</li>
+<li>Chạy vertical slice trên một receipt: upload → xử lý thật → review → approve → JSON; không chờ model fine-tune mới tích hợp.</li>
+<li>AI-1 thay OCR fixture bằng engine thật; AI-2 thêm model adapter đã chạy smoke; tests fixture không được dùng để báo AI accuracy.</li>
+<li>Mở invoice và line items bằng cùng orchestration, không fork backend thứ hai.</li>
+<li>Hoàn thiện outbox/recovery/CAS, model release manifest và evaluation gates trước release.</li>
+</ol>
+<p>CLI names là đề xuất; command cụ thể chỉ ghi README khi code đã thực thi thành công. Không copy chạy snippets training ngoài repo mà không audit dependencies/model licensing.</p>
+</section><section class="document" id="doc-05-delivery-plan"><h1>05 — Plan 12–16 tuần và workflow team</h1>
+<h2>1. Khung thời gian</h2>
+<p>Tuần là relative từ kickoff, không giả định ngày bắt đầu. Giả định ban đầu mỗi IC có khoảng 12–16 giờ/tuần và Lead 4–8 giờ/tuần cho thiết kế/review. Đây là giả định capacity, cần đối chiếu lịch thực trước khi cam kết. Nếu mỗi IC dưới 8 giờ/tuần thì giảm UI/hạ tầng polish hoặc kéo dài; không bỏ line items/approval khỏi scope âm thầm.</p>
+<p>Mốc W4 phải có vertical slice thật. W8 feature complete; W10 model/release candidate; W12 nghiệm thu scope chính; W13–16 dùng để cải thiện và buffer. Không bắt đầu tính năng loại tài liệu thứ ba chỉ vì dư lịch trên giấy.</p>
+<h2>2. Kế hoạch theo tuần</h2>
+<table>
+<thead>
+<tr>
+<th>Tuần</th>
+<th>Data Engineer</th>
+<th>AI-1</th>
+<th>AI-2</th>
+<th>Backend</th>
+<th>Lead và exit gate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>W1</td>
+<td>Manifest, 10–20 mẫu fake, 2 template mỗi loại</td>
+<td>OCR contract, baseline smoke</td>
+<td>Fine-tune feasibility plan, model license audit</td>
+<td>Repo, contracts, DB, upload, CI skeleton</td>
+<td>Khóa FR/schema/ownership; review API/OCR fixtures</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>Generator + split family, audit ReceiptVQA tùy chọn</td>
+<td>Engine vi, geometry, CER sample</td>
+<td>Load/infer/train-step trên hardware thật</td>
+<td>Job/worker, input limits, first UI</td>
+<td>G0: model/resource/profile quyết định bằng số đo</td>
+</tr>
+<tr>
+<td>W3</td>
+<td>Mở template diversity, JSON label QA</td>
+<td>OCR thật, evidence matching</td>
+<td>Rule/model adapters cùng contract</td>
+<td>Review revisions, viewer/editor</td>
+<td>API↔AI integration test; không chờ full training</td>
+</tr>
+<tr>
+<td>W4</td>
+<td>Dataset v0.1 và tiny regression set</td>
+<td>OCR lỗi ảnh nghiêng/text nhỏ</td>
+<td>Baseline eval + fine-tune pilot</td>
+<td>Approve/export, CAS test</td>
+<td>G1: một receipt xuyên suốt thật, invoice smoke</td>
+</tr>
+<tr>
+<td>W5</td>
+<td>Dataset v1, đủ train/dev family</td>
+<td>Geometry adversarial fixtures</td>
+<td>Full run #1, errors theo type/field</td>
+<td>Invoice editor + items grid</td>
+<td>Khóa final-test manifest và evaluator protocol</td>
+</tr>
+<tr>
+<td>W6</td>
+<td>Verify table labels và template imbalance</td>
+<td>Optimize lỗi OCR có evidence</td>
+<td>Run #2 theo lỗi #1; normalization</td>
+<td>Outbox, duplicate-delivery, audit</td>
+<td>G2: hai loại + bảng có review; basic failure tests</td>
+</tr>
+<tr>
+<td>W7</td>
+<td>Evidence/label coverage report</td>
+<td>Source highlight và score features</td>
+<td>Calibrator validation, missing/ambiguity cases</td>
+<td>Rerun/adopt, warning ack, ownership guards</td>
+<td>Review confidence scope; check annotations↔payload</td>
+</tr>
+<tr>
+<td>W8</td>
+<td>Frozen evaluator + dev report</td>
+<td>OCR version freeze</td>
+<td>Candidate model manifest</td>
+<td>Cancel/recovery, export history</td>
+<td>G3: feature complete; stop scope expansion</td>
+</tr>
+<tr>
+<td>W9</td>
+<td>Independent mock/test forms QA</td>
+<td>Stress suite, CPU/GPU timing</td>
+<td>Targeted improvement cycle cuối</td>
+<td>Load/failure tests, logging/metrics</td>
+<td>Reassess nếu ba vòng không giảm lỗi; chọn baseline thực</td>
+</tr>
+<tr>
+<td>W10</td>
+<td>Run frozen holdout, per-slice report</td>
+<td>Final OCR/error analysis</td>
+<td>Final model card, artifact hashes</td>
+<td>Release candidate, backup/restore drill</td>
+<td>G4: quality + correctness gates; không tune final test</td>
+</tr>
+<tr>
+<td>W11</td>
+<td>Data lineage packaging</td>
+<td>Reproducible inference commands</td>
+<td>Training reproduction subset</td>
+<td>Demo UX, docs/runbooks, rollback rehearsal</td>
+<td>Requirements review, code review, simplify unused paths</td>
+</tr>
+<tr>
+<td>W12</td>
+<td>Report/sample predictions</td>
+<td>Support demo</td>
+<td>Support demo</td>
+<td>Smoke end-to-end clean env</td>
+<td>G5: nghiệm thu, handoff, limitations rõ</td>
+</tr>
+<tr>
+<td>W13–14</td>
+<td>Thêm independent samples nếu cần</td>
+<td>Fix hard OCR failures có repro</td>
+<td>Re-evaluate trên dev mới có version</td>
+<td>Reliability/performance polish</td>
+<td>Buffer; không dùng final test như dev</td>
+</tr>
+<tr>
+<td>W15–16</td>
+<td>Reproducibility audit</td>
+<td>Freeze</td>
+<td>Freeze</td>
+<td>Release packaging, presentation support</td>
+<td>Final verification; chưa deploy/publish nếu chưa yêu cầu</td>
+</tr>
+</tbody></table>
+<h2>3. Backlog theo vertical slice</h2>
+<table>
+<thead>
+<tr>
+<th>Epic/task</th>
+<th>Owner</th>
+<th>Depends</th>
+<th>Acceptance cụ thể</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>E0 Contracts + CI</td>
+<td>Backend, Lead review</td>
+<td>Scope</td>
+<td>Schema examples pass; routes/types consumer thống nhất</td>
+</tr>
+<tr>
+<td>E1 Generator + manifest</td>
+<td>Data</td>
+<td>E0</td>
+<td>Labels khớp rendered text, Unicode, seed; split không overlap family</td>
+</tr>
+<tr>
+<td>E2 OCR adapter</td>
+<td>AI-1</td>
+<td>E0,E1 sample</td>
+<td>Text/boxes canonical; không crash file profile hợp lệ</td>
+</tr>
+<tr>
+<td>E3 Rule baseline</td>
+<td>AI-2</td>
+<td>E0,E2 fixture</td>
+<td>Hai payload schemas; missing null; stable output</td>
+</tr>
+<tr>
+<td>E4 Upload/job processing</td>
+<td>Backend</td>
+<td>E0,E3</td>
+<td>201/202; API không blocked; job terminal và artifacts</td>
+</tr>
+<tr>
+<td>E5 Review/approve/export</td>
+<td>Backend</td>
+<td>E4</td>
+<td>Revision append, stale save 409, approved export checksum</td>
+</tr>
+<tr>
+<td>E6 Extraction fine-tune</td>
+<td>AI-2</td>
+<td>E1,E2</td>
+<td>Weights/config/seed/hash; dev report so baseline</td>
+</tr>
+<tr>
+<td>E7 Line items/evidence</td>
+<td>AI-1+AI-2, khác files</td>
+<td>E2,E6</td>
+<td>Không trộn dòng khi wrap; mapping highlight verified</td>
+</tr>
+<tr>
+<td>E8 Evaluation</td>
+<td>Data</td>
+<td>E1,E3,E6</td>
+<td>Per-type metrics, coverage, bootstrap uncertainty khi đủ mẫu</td>
+</tr>
+<tr>
+<td>E9 Reliability</td>
+<td>Backend</td>
+<td>E4,E5</td>
+<td>Outbox publish gap/duplicate/stale fence kill tests</td>
+</tr>
+<tr>
+<td>E10 Release</td>
+<td>Backend+AI, Lead gate</td>
+<td>E8,E9</td>
+<td>Fresh env smoke, manifest pin, rollback rehearsal</td>
+</tr>
+</tbody></table>
+<p>Dependencies là interfaces, không là lý do để chờ cả epic. Consumer dùng fixture theo contract; fixture chỉ để integration, không ghi thành kết quả model thật.</p>
+<h2>4. Gate và completion criteria</h2>
+<ul>
+<li><strong>G0/W2</strong>: OCR vi và một extraction candidate chạy trên hardware; 20 sample smoke, JSON validity/latency/VRAM có số đo. Nếu không đủ GPU cho VLM, chọn một extractor nhỏ hoặc OCR-text model bằng evidence, giữ scope/output và ghi ADR thay đổi. Không hứa fine-tune VLM trước khi có spike.</li>
+<li><strong>G1/W4</strong>: Receipt E2E, source review, save, approve, export; hai user/tab conflict có test. Chưa cần đạt model quality cuối.</li>
+<li><strong>G2/W6</strong>: Invoice + receipt + items; generated ground truth coverage; one job/run invariant. Acceptance các field nullable không đồng nghĩa model được phép trả toàn null.</li>
+<li><strong>G3/W8</strong>: Rerun/adopt/recovery/auth; stable schemas; staging compose reproducible. UI bắt buộc đủ ba màn hình; không đòi frontend design system.</li>
+<li><strong>G4/W10</strong>: Model report và holdout criteria tại tài liệu 06; lỗi blocking vẫn là release blocker. Nếu không đạt, báo failed criteria, không rename milestone thành success.</li>
+<li><strong>G5/W12</strong>: Demo + runbook + checks + limitations + clean diff. Output source chạy được; docs/UML không thay implementation khi chuyển sang coding phase.</li>
+</ul>
+<h2>5. PR và merge workflow</h2>
+<ol>
+<li>Lead viết issue có problem, input/output, non-goals, acceptance, owner và contract version. Một task có một accountable owner.</li>
+<li>Implementer tạo branch ngắn <code>feat/&lt;issue&gt;-&lt;module&gt;</code>; một PR một increment. Aim review được trong 20–40 phút, không phải giới hạn line count cứng.</li>
+<li>Contract PR đi trước consumer PR. Backend implement Pydantic/OpenAPI, Lead review và AI consumers xác nhận fixture.</li>
+<li>Tác giả chạy focused tests, thêm evidence vào PR: screenshots UI, sample input/output fake, test command và kết quả, ML config + dev comparison nếu có.</li>
+<li>CI CPU: formatter/lint/type checks, contract/import checks, unit/integration có DB; frontend typecheck/build. GPU eval chạy riêng khi model/preprocessing/prompt đổi, không yêu cầu mọi UI PR chạy training.</li>
+<li>Reviewer của module kiểm code; Lead kiểm requirements, boundaries, data leakage, rollback và compatibility. Required checks + approval mới merge.</li>
+<li>Lead squash merge theo thứ tự dependency. Sau contract/migration merge, authors rebase/update downstream branches và rerun checks.</li>
+<li>Main phải có smoke path; release tag/deploy/push chỉ khi được yêu cầu, không tự chạy external mutations từ kế hoạch này.</li>
+</ol>
+<p>Pipeline checks được thiết kế; chưa có workflow GitHub Actions production trong hồ sơ này. Khi viết <code>.github/workflows</code>, audit permissions và pin action revisions theo workflow-testing skill.</p>
+<h2>6. Check conflict: Git và semantic</h2>
+<table>
+<thead>
+<tr>
+<th>Vùng dễ conflict</th>
+<th>Policy</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>contracts/OpenAPI</td>
+<td>Một người merge sequence; consumer reviewer; regenerate types, không sửa generated file bằng tay</td>
+</tr>
+<tr>
+<td>pyproject/lockfile</td>
+<td>Tác giả ghi lý do dependency; Backend regenerate lock sau merge; không ghép text lockfile</td>
+</tr>
+<tr>
+<td>Alembic migrations</td>
+<td>Backend cấp migration lineage; PR song song kiểm heads; không sửa migration đã applied</td>
+</tr>
+<tr>
+<td>model config/prompts</td>
+<td>AI-2 owns; phiên bản/hash; không thay preprocessing nếu manifest chưa đổi</td>
+</tr>
+<tr>
+<td>dataset splits</td>
+<td>Data owns; immutable final holdout; hash/template-family gate</td>
+</tr>
+<tr>
+<td>evidence geometry</td>
+<td>AI-1 owns; Backend verify UI mapping, inverse transform test</td>
+</tr>
+<tr>
+<td>review state/export</td>
+<td>Backend owns; Lead yêu cầu race tests, không chỉ nhìn diff</td>
+</tr>
+</tbody></table>
+<p>Khi Git conflict: owner file resolve bằng cách hiểu cả hai thay đổi, không chọn ours/theirs toàn file. Lead hỗ trợ quyết định contract; tác giả chịu kiểm thử nội dung. Khi semantic conflict: mở issue ngắn ghi incompatible inputs/outputs và acceptance, cập nhật contract/ADR trước merge.</p>
+<h2>7. Cadence cho Lead</h2>
+<p>Đầu tuần 30 phút: scope/blockers/dependency order. Giữa tuần integration demo 20 phút bằng tiny fixtures. Hai cửa sổ review cố định/tuần, không để PR chờ đến sprint cuối. Cuối tuần 30 phút: metric, failed cases, risk register và next slice.</p>
+<p>Lead theo dõi: oldest PR age, contract changes, active blockers, latest E2E result, dataset/model version và acceptance chưa đạt. Không đánh giá thành viên bằng commit count hoặc số file.</p>
+<h2>8. Risk register và cắt scope có thứ tự</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Trigger</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Backend quá tải UI</td>
+<td>W3 chưa có viewer/save</td>
+<td>Giữ 3 screen, reuse components; giảm dashboard/polish</td>
+</tr>
+<tr>
+<td>GPU/training infeasible</td>
+<td>G0 không chạy train step</td>
+<td>Chọn smaller extractor; benchmark lại; giữ output và fine-tune objective</td>
+</tr>
+<tr>
+<td>Synthetic overfit</td>
+<td>Unseen-template dev drop lớn</td>
+<td>Thêm template family/dev và independent mock; không thêm noise vô hạn</td>
+</tr>
+<tr>
+<td>Public data không hợp terms/PII</td>
+<td>Audit fail</td>
+<td>Không dùng; generator vẫn là nguồn chính</td>
+</tr>
+<tr>
+<td>Bảng trộn dòng</td>
+<td>Row error trên dev</td>
+<td>Giới hạn dạng bảng trước; sửa grouping; không xóa test khó</td>
+</tr>
+<tr>
+<td>Confidence sai</td>
+<td>High-score wrong có nhiều</td>
+<td>Null score + review flags; sửa calibrator; không autoapprove</td>
+</tr>
+<tr>
+<td>Không giảm lỗi sau 3 cycles</td>
+<td>Dev gần như không đổi</td>
+<td>Reassess error source, freeze tốt nhất, báo criterion còn thiếu</td>
+</tr>
+</tbody></table>
+<p>Cắt trước: CSV, dashboard biểu đồ, auto classification, WebSocket, nhiều trang, loại thứ ba, external ERP, OCR fine-tune. Không cắt review/approval/export, data split, field/table evaluation hoặc model provenance vốn là core.</p>
+</section><section class="document" id="doc-06-data-ml-evaluation"><h1>06 — Dữ liệu, model, fine-tune và evaluation</h1>
+<h2>1. Data boundary</h2>
+<p>Chỉ tiếng Việt, chữ in, receipt/invoice một trang, profile VND. Dữ liệu main là synthetic có giá trị giả lập. Không dùng thông tin khách hàng/bệnh nhân thật trong generator/demo. Public không đồng nghĩa phù hợp privacy/terms; Data Engineer audit trước dùng sample.</p>
+<h3>Data sources và quyết định</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Evidence đã kiểm</th>
+<th>Quyết định</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Synthetic của nhóm</td>
+<td>Sẽ tạo ảnh+JSON+box+template/source IDs</td>
+<td>Nguồn main; phải kiểm labels bằng rendered page</td>
+</tr>
+<tr>
+<td>ReceiptVQA/LiGT</td>
+<td>Tác giả công bố 9.500 images, 64.812 QA, research-only CC BY-NC-SA; link Drive</td>
+<td>Optional phụ trợ/read-eval; chưa download/audit; QA không là full JSON</td>
+</tr>
+<tr>
+<td>Vietnamese Bill Extraction</td>
+<td>HF viewer 982 rows, <code>master_data</code> có row fields; nhiều mẫu là y tế/dược</td>
+<td>Không đưa core do provenance/PII/label audit chưa xong</td>
+</tr>
+<tr>
+<td>MC-OCR</td>
+<td>4 fields và yêu cầu đăng ký nghiên cứu</td>
+<td>Optional; không để timeline phụ thuộc access</td>
+</tr>
+<tr>
+<td>FATURA/SROIE/CORD</td>
+<td>Dataset khác ngôn ngữ</td>
+<td>Không dùng training/evaluation chính trong scope chỉ Việt</td>
+</tr>
+</tbody></table>
+<p>Nguồn: <a href="https://github.com/phong-lt/LiGT_VQA">ReceiptVQA</a>, <a href="https://arxiv.org/html/2502.19202v1">paper</a>, <a href="https://huggingface.co/datasets/minhduc168/dataset-origin-vlm-extract-bill">Bill Extraction</a>, <a href="https://www.rivf2021-mc-ocr.vietnlp.com/dataset">MC-OCR</a>.</p>
+<p>ReceiptVQA đã dùng một phần ảnh MC-OCR. Nếu dùng cả hai, source lineage/hash phải group cùng split; không dùng MC train và ReceiptVQA test như độc lập. Partial annotation không chuyển các field chưa hỏi thành absent/null gold.</p>
+<h2>2. Generator và schema supervision</h2>
+<p>Target lập kế hoạch sau G0: khoảng 3.000–6.000 clean documents tổng hai loại, thêm bounded augmentation. Đếm <strong>base documents và template families</strong>, không quảng cáo ảnh biến thể như dữ liệu độc lập. Nếu train capacity thấp, dùng subset stratified, giữ final holdout.</p>
+<p>Template target mỗi loại 10 families: 6 train, 2 dev, 2 final-test; thêm 2–3 independent mock families mỗi loại được người khác thiết kế. Đây là target, Data Engineer có thể điều chỉnh trước freeze tuần 5 dựa complexity. Một font/color change không tự là family mới; family phải khác spatial structure/label vocabulary/table arrangement.</p>
+<p>Generated fields: fake merchant/seller/buyer, dates, document numbers, prices/quantity/unit; Việt Unicode NFC. Tên business fake rõ, không số định danh có thể vô tình trùng người thật; không chữ ký/con dấu thật. Sinh missing fields, zero/discount/service charges và multi-line descriptions có chủ đích.</p>
+<p>Mỗi sample chứa image/PDF, canonical ground truth business JSON, regions, optional table row/cell IDs; metadata: sample_id, base_id, template_id, family_id, seed, generator_version, schema_version, language, source_kind, license, split, labels_status, sha256. Render truth từ cùng data object; không chạy OCR rồi lấy prediction làm gold.</p>
+<p>Nếu augmentation crop/rotate làm mất field, cần update visible-label/evidence hoặc đánh dấu obscured, không giữ gold unseen như ảnh sạch mà không ghi slice. Noise/blur có severity cap; nội dung vẫn readable trong main evaluation, unreadable là failure slice riêng.</p>
+<h2>3. Split và leakage controls</h2>
+<ol>
+<li>Assign family split trước sinh values. Tất cả variants cùng base/family ở cùng split.</li>
+<li>Không cross templates clone bằng thay màu/fonts giữa train/test.</li>
+<li>Dedupe SHA-256 và perceptual/content signatures; report ambiguous near-duplicate groups.</li>
+<li>Dev dùng chọn checkpoint/hyperparams; tách dev-tuning và dev-calibration khi đủ mẫu.</li>
+<li>Final-test manifest frozen/hash từ W5; engineer tune model không xem final predictions cho đến W10. Xem để sửa có nghĩa cần test mới, không tiếp tục gọi tập đó là untouched.</li>
+<li>Independent mock được author khác generator tạo, không copy coordinates từ templates train.</li>
+<li>Human corrections không tự vào train. Phải consent/data audit/label QA/source group/version trước dùng.</li>
+</ol>
+<h2>4. Ground-truth QA checklist</h2>
+<ul>
+<li>Đọc rendered image: nhãn/date/amount và Unicode đúng, text không overflow hoặc bị clip bất ngờ.</li>
+<li>Decimal semantics có locale rõ; totals sinh nhất quán theo rule, nhưng không mọi sample có cùng arithmetic pattern.</li>
+<li>Required-for-approval field có visible gold; optional field absent được đánh dấu rõ.</li>
+<li>Bảng có row identity, wrap và empty cells; không align bằng thứ tự OCR mặc định.</li>
+<li>Bbox/quad theo canonical viewer geometry; page 0; [0,1] finite.</li>
+<li>Gold field có <code>present/absent/obscured/unlabeled</code>; metrics chỉ tính labels được phép.</li>
+<li>Dataset report có counts theo type/family/field, missing rate, max rows, average tokens và exclusion reasons.</li>
+</ul>
+<p>Data Engineer sample-check mỗi family, boundary cases và ngẫu nhiên theo seed. AI engineers review các lỗi ảnh nhãn phát hiện được; giữ correction history.</p>
+<h2>5. Pipeline baseline và model spike</h2>
+<p><strong>B0</strong>: OCR có sẵn + label-aware rules + table grouping đơn giản + cùng normalization/validation. Rules không hard-code tọa độ duy nhất; vẫn là baseline để đo value fine-tune.</p>
+<p><strong>M0</strong>: Một pretrained extractor candidate dùng OCR/image context và output JSON trước fine-tune. Candidate có thể là VLM nhỏ. Qwen2.5-VL-3B-Instruct là <strong>ứng viên spike</strong>, chưa được chứng minh phù hợp tiếng Việt/hardware của nhóm; audit model card/license, tokenizer, processor và memory trước chọn. Model không có tools. <a href="https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct">Model card</a>.</p>
+<p><strong>M1</strong>: Fine-tuned extractor, output business schema như B0/M0. Adapter giữ vendor-specific types ngoài contracts. G0 có 20 sample, inference + một train-step, output-validity/latency/peak memory có số đo. Nếu không chạy được, chọn OCR-text model nhỏ hơn; không thêm paid API mặc định. Không pin model name là chất lượng cam kết.</p>
+<p>OCR spike dùng PaddleOCR <code>vi</code>, pin engine/package/OCR models sau smoke. Không assume <code>lang=vi</code> trên mọi version chọn đúng model; docs có mapping theo OCR release. <a href="https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html">PaddleOCR</a>.</p>
+<h2>6. Training workflow</h2>
+<ol>
+<li>Load immutable dataset manifest, kiểm hash/labels/schema/split.</li>
+<li>Build training input gồm type/schema instruction, image và OCR context nếu architecture cần. Context giữ order/coordinates và token budget; overflow không truncate field giữa chừng âm thầm.</li>
+<li>Target output là canonical JSON, optional field absent là null; unlabeled samples không dùng như full supervision. ReceiptVQA chỉ QA được label → auxiliary experiment riêng hoặc manual mapping + audit, không mặc định toàn bộ dataset thành JSON.</li>
+<li>Fine-tune bằng PEFT/LoRA nếu selected model hỗ trợ và spike phù hợp. Base weights frozen, adapter trained; batch/sequence/image resolution/quantization/gradient checkpointing chọn từ hardware, không hứa VRAM trước đo.</li>
+<li>Checkpoint chọn trên dev, lưu seeds/config/code commit/library versions/model/tokenizer/processor revisions. Không chọn bằng train loss duy nhất.</li>
+<li>Run bounded cycles: baseline, run #1, run #2 targeted. Cycle #3 chỉ khi hypothesis mới có evidence; không quét hyperparameter vô hạn.</li>
+<li>Export weights/adapter + manifest; inference script chạy sample, hash output và verify schema.</li>
+<li>Model registry lifecycle <code>CANDIDATE → VERIFIED → ACTIVE → RETIRED</code>. Activation sau regression/eval gate, rollback release pointer khi có regression. Không tự deploy trong training script.</li>
+</ol>
+<p>Các metric trong design là mục tiêu/chọn phương pháp, không phải kết quả. Model card report measured model size/config, latency/VRAM/hardware và limitations khi implementation hoàn thành.</p>
+<h2>7. Evidence và confidence</h2>
+<p>Evidence mapping match raw extracted text với OCR blocks, resolve bằng label/context/geometry. Không chỉ chọn occurrence đầu tiên khi số tiền lặp. Nhiều candidate khó phân biệt → issue; không tự sửa giá trị nguồn bằng arithmetic.</p>
+<p>Field confidence là khả năng value đúng theo definition đã chọn. Features có thể gồm OCR score vùng, evidence ambiguity, schema/semantic validity, model score nếu adapter có meaningful score. Fit calibrator trên dev-calibration bằng correctness labels, report Brier/ECE/coverage-error khi đủ sample.</p>
+<p>Không dùng model tự viết <code>confidence:0.99</code> làm probability. Với field/type quá ít support, confidence null và explicit flags. Phần confidence của MVP phải có workflow review và báo cáo calibration; null fallback là limitation chứ không khẳng định đã có xác suất đáng tin.</p>
+<h2>8. Metric definitions</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Định nghĩa/ý nghĩa</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JSON validity</td>
+<td>Raw output parse và schema pass trước human correction; không che bằng repair</td>
+</tr>
+<tr>
+<td>Field exact match</td>
+<td>Gold/pred sau cùng normalization; giữ dấu; denominator annotated fields</td>
+</tr>
+<tr>
+<td>Field precision/recall/F1</td>
+<td>Present gold/pred value matching; sai value tính FP và FN; báo absent handling riêng</td>
+</tr>
+<tr>
+<td>Critical total/date EM</td>
+<td>Per-type critical fields; không để nullable/absent chiếm metric</td>
+</tr>
+<tr>
+<td>Missing/false-fill rate</td>
+<td>Present field bị null / absent field bị model điền sai</td>
+</tr>
+<tr>
+<td>Table row matching</td>
+<td>Match rows bằng gold descriptions/values theo policy, báo exact-row accuracy và unmatched/duplicate rows</td>
+</tr>
+<tr>
+<td>Cell accuracy</td>
+<td>So field từng matched row; qty/unit price/total riêng; row reorder không penalty nếu semantic order không required</td>
+</tr>
+<tr>
+<td>Evidence accuracy</td>
+<td>Bbox overlap/text association khi gold regions có; coverage và ambiguous cases</td>
+</tr>
+<tr>
+<td>OCR CER/WER</td>
+<td>Trên visible transcription có gold; không dùng QA đáp án như toàn bộ transcription</td>
+</tr>
+<tr>
+<td>Document pass rate</td>
+<td>Tất cả annotated business fields và items đúng; rất nghiêm, báo support</td>
+</tr>
+<tr>
+<td>Review correction rate</td>
+<td>Số field/row user sửa; usability metric, không model truth nếu chưa có gold</td>
+</tr>
+</tbody></table>
+<p>Không strip dấu tiếng Việt để tăng metric chính. Có thể report relaxed case/whitespace score song song, ghi rule rõ. Date/money ambiguity không silently convert khác convention. Failure jobs tính trong end-to-end denominator, không drop outlier để accuracy đẹp.</p>
+<h2>9. Experiment matrix</h2>
+<p>E0 B0 baseline; E1 M0 pretrained extraction; E2 M1 fine-tuned; E3 M1 with/without OCR context nếu model hỗ trợ; E4 same model gold OCR vs predicted OCR trên subset có transcription; E5 familiar-layout vs unseen-layout + independent mock; E6 confidence/review prioritization.</p>
+<p>Không yêu cầu tất cả combinations hoặc train lại mọi variant. Một variable chính mỗi so sánh, cùng schema/normalizer/test profile. Public QA benchmark được report riêng, không gộp vào invoice JSON metric.</p>
+<h2>10. Gate chất lượng đề xuất</h2>
+<p>Khóa tiêu chí sau baseline W4, trước mở final test; target sau đây để lập kế hoạch, không đảm bảo đạt:</p>
+<ul>
+<li>Raw JSON validity ≥98% trên profile hợp lệ.</li>
+<li>Present scalar normalized EM mục tiêu ≥85% mỗi type; total amount EM mục tiêu ≥95%.</li>
+<li>Matched row cell accuracy mục tiêu ≥85%; exact row accuracy ≥75%; báo unmatched rows và duplicate rows.</li>
+<li>Fine-tuned score không thấp hơn baseline cho critical totals trên dev; nếu không tốt hơn phải giải thích error/cost và tiêu chí fine-tune còn chưa đạt.</li>
+<li>Bố cục mới và independent mock report riêng, không đạt aggregate nhờ các template dễ.</li>
+<li>Confidence threshold chỉ được dùng khi holdout validation cho thấy error/coverage; không autoapprove.</li>
+<li>UI/retry/concurrency/export invariants bắt buộc pass bất kể model quality.</li>
+</ul>
+<p>Final holdout target 200–400 base documents tổng hai types, cân bằng layout/quality/missing/table slices; có support từng slice. Small samples report counts/intervals, không tuyên bố độ chính xác doanh nghiệp production.</p>
+<h2>11. Handoff artifacts</h2>
+<p>Dataset manifest/data card, generator seed/version, split IDs/hash, model manifest/model card, evaluator version, sample errors, per-type tables, hardware/time/memory, code commit, locked env và commands đã thực thi. Raw dataset/model binaries không commit Git; git lưu manifests/tiny fictional fixtures.</p>
+</section><section class="document" id="doc-07-decisions"><h1>07 — ADR đề xuất</h1>
+<p>Tất cả ADR trong hồ sơ là <strong>Proposed</strong>, ngày 04/10/2026. Lead/team có thể chấp nhận và đưa từng ADR vào <code>docs/adr/</code> khi bắt đầu implementation. Không có architecture hiện hữu để migrate trong workspace đã kiểm.</p>
+<h2>ADR-0001 — Modular monolith với API/worker riêng</h2>
+<p>Context: bốn IC, hai loại chứng từ, computation nặng và review transactional. Chọn một repo và public module boundaries; API/worker/dispatcher dùng chung services/contracts.</p>
+<p>Alternatives: synchronous monolith đơn giản nhưng inference block/timeout; microservices tăng deployment/API/versioning/debug overhead khi chưa có independent teams. Chấp nhận thêm process để isolation, không thêm network boundary giữa business modules.</p>
+<p>Validation: CPU API không import/load GPU model; import-cycle checks; one receipt E2E. Reversibility: sau này tách compute serving adapter nếu có scale evidence; giữ public contracts.</p>
+<h2>ADR-0002 — PostgreSQL source of truth + outbox + Celery/Redis</h2>
+<p>Context: không mất job khi API chết giữa commit/publish, retry có duplicates. Chọn job/outbox transaction, dispatcher/recovery và fencing; Redis chỉ delivery.</p>
+<p>Alternatives: FastAPI BackgroundTasks thiếu process isolation/durable reconciliation; DB-only queue giảm broker nhưng phải tự làm execution plumbing; RabbitMQ thêm operational stack. Chấp nhận outbox và recovery để giữ invariant, không claim exactly-once execution.</p>
+<p>Validation: publish gap, duplicate delivery, stale worker, Redis restart tests; một run/job. Reversibility: broker adapter đổi, DB job semantics giữ nguyên.</p>
+<h2>ADR-0003 — Immutable prediction/revision và approval snapshot</h2>
+<p>Context: rerun và edits có thể cạnh tranh; export phải đúng dữ liệu human approved. Chọn ExtractionRun bất biến, append ReviewRevision, Approval riêng, optimistic CAS head/version, export explicit revision.</p>
+<p>Alternatives: một JSON record sửa in-place dễ mất provenance và audit; full event sourcing quá nặng. Chấp nhận thêm records/storage để traceability.</p>
+<p>Validation: stale edits 409; rerun không overwrite; export hash stable; approval/save race. Reversibility: có thể compact nonapproved drafts sau retention policy, không sửa lịch sử approved.</p>
+<h2>ADR-0004 — Synthetic Việt main, public data phụ trợ có audit</h2>
+<p>Context: đề chỉ Việt và synthetic/sample; public KIE Việt không luôn có full JSON/PII-safe. Chọn generator có labels tự động, layout-disjoint splits và independent mock; ReceiptVQA optional QA support.</p>
+<p>Alternatives: public-only dễ phụ thuộc access/schema; tự gán nhãn nhiều dữ liệu thật không hợp time/privacy; tiếng Anh không hợp scope. Chấp nhận domain gap synthetic, report rõ, không claim production-generalization.</p>
+<p>Validation: rendered-label QA, parent/template leakage tests, provenance/terms, final holdout coverage. Reversibility: thêm dataset thật đã được phép với version/split mới khi scope cho phép.</p>
+<h2>ADR-0005 — OCR baseline + fine-tuned extraction, chọn model bằng spike</h2>
+<p>Context: chưa biết GPU/VRAM; extraction phải có schema và line items. Chọn OCR Vietnamese có sẵn, rule baseline và một extraction candidate fine-tune; engine-specific adapters, immutable manifest.</p>
+<p>Alternatives: train OCR từ đầu không đủ dữ liệu/time; VLM lớn chưa biết cost; paid APIs cần authority/cost và không là default. Chấp nhận model name/version là quyết định mở đến G0; schema/process không chờ tên model.</p>
+<p>Validation: 20-sample smoke + train step W2, dev metrics B0/M0/M1, peak memory/latency/license. Reversibility: thay adapter/checkpoint qua manifest; record outcomes.</p>
+<h2>ADR-0006 — Canonical geometry và nullable calibrated confidence</h2>
+<p>Context: OCR preprocess ảnh khác ảnh viewer; score OCR không là field correctness. Chọn canonical page, inverse transform và evidence mapper, confidence null khi thiếu calibration.</p>
+<p>Alternatives: trực tiếp dùng processed bbox sai highlight; VLM tự sinh confidence không đáng tin. Chấp nhận ambiguity/manual review thay source coordinates/probability bịa.</p>
+<p>Validation: rotation/crop/deskew tests, bbox range/order, evidence coverage, validation calibration support. Reversibility: cải thiện mapper/calibrator giữ contract, tăng manifest version.</p>
+<h2>ADR-0007 — Local private storage và UI polling trong MVP</h2>
+<p>Context: demo one instance, Backend phải làm cả UI. Chọn local volume adapter, authorized file stream và polling status. Một ORM/API style, không thêm vector DB hoặc WebSocket chưa cần.</p>
+<p>Alternatives: S3 tăng setup nhưng phù hợp multiple hosts; SSE/WebSocket tăng cancellation/reconnect complexity. Chấp nhận capacity một instance và polling delay.</p>
+<p>Validation: ownership file access, lost-object handling, API response target, filesystem path safety. Reversibility: S3 adapter hoặc push notifications khi có requirement mới.</p>
+<h2>ADR-0008 — Business schema là contract, JSON là output approved</h2>
+<p>Context: dataset/vendor fields khác nhau; nullable data không đồng nghĩa complete label. Chọn receipt.v1/invoice.v1 và shared items, Pydantic source-of-truth khi code; schema refs trong hồ sơ là reference. UI metadata/evidence không trộn vào business payload.</p>
+<p>Alternatives: arbitrary extraction schemas cần broader data/evaluation; dataset-specific JSON làm UI/backend phân mảnh. Chấp nhận fixed schema profile và explicit migration khi đổi.</p>
+<p>Validation: schema examples/negative cases, dataset coverage labels, frontend generated types, exporter approved snapshot test. Reversibility: v2 qua migration + model/dataset/evaluator version đồng bộ.</p>
+</section><section class="document" id="doc-08-uml-guide"><h1>08 — UML và kiến trúc trực quan</h1>
+<p>Các sơ đồ mô tả <strong>hệ thống đề xuất</strong>, không phải code đang chạy. Nguồn <code>.puml</code> theo cú pháp PlantUML; SVG trình bày được tạo cục bộ từ cùng mô hình sơ đồ (Graphviz cho graph views, SVG renderer cho sequence và swimlane activity). Máy hiện không có Java/PlantUML compiler trong PATH: không tuyên bố các <code>.puml</code> đã compile bằng PlantUML. Xem verification report để biết check thực tế.</p>
+<table>
+<thead>
+<tr>
+<th>Sơ đồ</th>
+<th>Câu hỏi được trả lời</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="uml/01-use-cases.puml">01 — Use cases</a></td>
+<td>Operator/admin được làm gì?</td>
+</tr>
+<tr>
+<td><a href="uml/02-components.puml">02 — Components</a></td>
+<td>API, dispatcher, worker và storage liên hệ thế nào?</td>
+</tr>
+<tr>
+<td><a href="uml/03-processing-sequence.puml">03 — Processing sequence</a></td>
+<td>Từ tạo job đến prediction/revision diễn ra ra sao?</td>
+</tr>
+<tr>
+<td><a href="uml/04-review-sequence.puml">04 — Review sequence</a></td>
+<td>Save/approve/export có transaction và conflict gì?</td>
+</tr>
+<tr>
+<td><a href="uml/05-job-state.puml">05 — Job state machine</a></td>
+<td>Retry/cancel/recovery/terminal states</td>
+</tr>
+<tr>
+<td><a href="uml/06-review-state.puml">06 — Review state machine</a></td>
+<td>Head draft/approved, edit/rerun/adopt và historical export</td>
+</tr>
+<tr>
+<td><a href="uml/07-domain-classes.puml">07 — Class model</a></td>
+<td>Entities, multiplicities, prediction/revision/approval ownership</td>
+</tr>
+<tr>
+<td><a href="uml/08-activity-workflow.puml">08 — Swimlane workflow</a></td>
+<td>Trách nhiệm User/API/Worker/Reviewer trong xử lý</td>
+</tr>
+<tr>
+<td><a href="uml/09-deployment.puml">09 — Deployment</a></td>
+<td>Containers, GPU worker, volumes, boundaries và offline training</td>
+</tr>
+<tr>
+<td><a href="uml/10-training-activity.puml">10 — Training workflow</a></td>
+<td>Audit dữ liệu, chia tập theo template, fine-tune, freeze và release gate</td>
+</tr>
+</tbody></table>
+<p>Quan hệ component/deployment dùng dependency; class dùng association/composition đúng đối tượng. Review state là trạng thái <strong>head revision</strong>; job state độc lập, rerun không làm mất approval của head hiện tại. Activity workflow giản lược retries; chi tiết recovery ở processing sequence và tài liệu 02.</p>
+<p>Khi có Java/PlantUML ở môi trường team, render lại sources bằng compiler chính thức và review layout. Không cần gửi sources lên renderer public. Giữ source + diagrams cùng PR khi contract/state đổi; CI kiểm state enum/edges/contracts để tránh sơ đồ lạc code.</p>
+</section><section class="document" id="doc-09-sources"><h1>09 — Nguồn nghiên cứu và giới hạn xác minh</h1>
+<p>Ngày đối chiếu: 04/10/2026. Ưu tiên tài liệu chính thức; kỹ thuật được đề xuất cho project, không lấy benchmark công bố làm kết quả của nhóm.</p>
+<table>
+<thead>
+<tr>
+<th>Nguồn</th>
+<th>Điều đã dùng trong thiết kế</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://fastapi.tiangolo.com/tutorial/background-tasks/">FastAPI Background Tasks</a></td>
+<td>Computation nặng ở process khác phù hợp task queue; tách inference khỏi API</td>
+</tr>
+<tr>
+<td><a href="https://docs.celeryq.dev/en/stable/userguide/tasks.html">Celery Tasks</a></td>
+<td>Idempotency, late ack, retry và caveat worker loss</td>
+</tr>
+<tr>
+<td><a href="https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html">Celery Redis</a></td>
+<td>Visibility timeout/redelivery caveats</td>
+</tr>
+<tr>
+<td><a href="https://docs.sqlalchemy.org/en/20/orm/versioning.html">SQLAlchemy versioning</a></td>
+<td>Version checks và giới hạn đường ORM; explicit CAS policy</td>
+</tr>
+<tr>
+<td><a href="https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html">PaddleOCR usage</a></td>
+<td>Vietnamese <code>vi</code>, language support theo version; pin model/package</td>
+</tr>
+<tr>
+<td><a href="https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct">Qwen2.5-VL-3B model card</a></td>
+<td>Candidate model để spike; không là guarantee tiếng Việt/VRAM</td>
+</tr>
+<tr>
+<td><a href="https://json-schema.org/draft/2020-12">JSON Schema 2020-12</a></td>
+<td>Draft cho schemas tham chiếu</td>
+</tr>
+<tr>
+<td><a href="https://github.com/phong-lt/LiGT_VQA">ReceiptVQA/LiGT repo</a></td>
+<td>Dataset access link, research use/license và implementation tham khảo</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/html/2502.19202v1">ReceiptVQA paper</a></td>
+<td>QA labels, 9.500/64.812, image grouping và nguồn MC-OCR</td>
+</tr>
+<tr>
+<td><a href="https://huggingface.co/datasets/minhduc168/dataset-origin-vlm-extract-bill">Vietnamese Bill Extraction</a></td>
+<td>Viewer 982 samples, row schema; audit/provenance chưa đủ để làm core</td>
+</tr>
+<tr>
+<td><a href="https://www.rivf2021-mc-ocr.vietnlp.com/dataset">MC-OCR dataset</a></td>
+<td>Điều kiện access và nhãn receipt</td>
+</tr>
+</tbody></table>
+<p>Không có benchmark GPU, training run, download/audit toàn dataset hoặc production code trong task thiết kế này. Không cài stack backend/model vào máy người dùng; không tạo PR/push/deploy. Giá trị deadline, dataset size, throughput và metric là mục tiêu hoặc giả định có gate xác minh.</p>
+<p>Các ADR/API/schema/diagram là quyết định thiết kế của nhóm, không là trích nguyên văn từ nguồn. Phiên bản dependencies thực tế phải lock sau smoke tuần 2; không gắn mọi source code với latest documentation mà không test.</p>
+</section><section class="document" id="doc-README"><h1>VietDoc — Hồ sơ thiết kế v1</h1>
+<p>Ngày thiết kế: 04/10/2026. Trạng thái: <strong>đề xuất để team triển khai</strong>, chưa phải phần mềm đã xây dựng hoặc benchmark đã đo.</p>
+<h2>Quyết định chính</h2>
+<p>Xây hệ thống OCR và trích xuất chứng từ <strong>tiếng Việt</strong>, gồm <code>receipt</code> và <code>invoice</code>, với field đơn và bảng chi tiết. Người dùng đối chiếu nguồn, sửa, xác nhận rồi xuất JSON. Dữ liệu synthetic/sample; không nhận tài liệu riêng tư thật trong bản đồ án.</p>
+<ul>
+<li>Kiến trúc: modular monolith, cùng repository; API, dispatcher và worker là process khác nhau.</li>
+<li>Stack đề xuất: Python 3.11, FastAPI/Pydantic, SQLAlchemy 2/Alembic, PostgreSQL, Celery/Redis, React/TypeScript/Vite; file qua storage adapter, local volume trong bản đầu.</li>
+<li>PostgreSQL là nguồn trạng thái chính. Redis chuyển thông điệp; inference chạy trong worker. Model không ghi database.</li>
+<li>Prediction bất biến; sửa tạo revision mới. Approval và export luôn chỉ rõ revision.</li>
+<li>Training tập trung extraction; OCR dùng model có sẵn trước. Model cụ thể và resource budget khóa sau spike tuần 2.</li>
+<li>Lộ trình: 12 tuần scope bắt buộc + 4 tuần chất lượng/hoàn thiện; không phụ thuộc việc lấy được dataset ngoài.</li>
+</ul>
+<h2>Cách đọc</h2>
+<table>
+<thead>
+<tr>
+<th>Tài liệu</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="#doc-01-scope-workflows">01 — Scope và workflow</a></td>
+<td>Yêu cầu, use case, luồng thành công/lỗi, chính sách review</td>
+</tr>
+<tr>
+<td><a href="#doc-02-architecture">02 — Kiến trúc</a></td>
+<td>Thành phần, dữ liệu, queue, concurrency, vận hành và failure modes</td>
+</tr>
+<tr>
+<td><a href="#doc-03-contracts">03 — Contracts</a></td>
+<td>Schema, API, errors, OCR/extraction interfaces và versioning</td>
+</tr>
+<tr>
+<td><a href="#doc-04-source-structure">04 — Source structure</a></td>
+<td>Cây source dự kiến, ownership, dependency rules, trình tự triển khai</td>
+</tr>
+<tr>
+<td><a href="#doc-05-delivery-plan">05 — Plan và teamwork</a></td>
+<td>16 tuần, backlog, acceptance, PR/merge/conflict workflow</td>
+</tr>
+<tr>
+<td><a href="#doc-06-data-ml-evaluation">06 — Data, training, evaluation</a></td>
+<td>Synthetic, dữ liệu bổ trợ, fine-tune, split, metric và release gate</td>
+</tr>
+<tr>
+<td><a href="#doc-07-decisions">07 — ADR</a></td>
+<td>Quyết định, trade-off, phương án thay thế và khả năng đảo ngược</td>
+</tr>
+<tr>
+<td><a href="#doc-08-uml-guide">08 — UML</a></td>
+<td>Mười góc nhìn UML và cách đọc</td>
+</tr>
+<tr>
+<td><a href="#doc-09-sources">09 — Nguồn</a></td>
+<td>Tài liệu chính thức và giới hạn xác minh</td>
+</tr>
+</tbody></table>
+<p><code>schemas/</code> chứa JSON Schema tham chiếu; <code>examples/</code> chỉ chứa giá trị giả lập. <code>uml/</code> chứa nguồn PlantUML và SVG trình bày. Đây là hồ sơ thiết kế, không tạo các module app rỗng hoặc giả lập implementation để coi như sản phẩm đã chạy.</p>
+<h2>Giả định cần kiểm tra</h2>
+<ol>
+<li>Lead + 1 Data Engineer + 2 AI Engineer + 1 Backend Engineer; Backend làm UI tối giản, không có frontend engineer riêng.</li>
+<li>Chưa có repo sản phẩm trong workspace đang xét; cấu trúc là thiết kế greenfield.</li>
+<li>Chưa biết GPU, VRAM, thời gian làm mỗi tuần và server triển khai. Các số latency/metric/dataset là mục tiêu lập kế hoạch, không phải kết quả thực nghiệm.</li>
+<li>ReceiptVQA có nhãn QA, không có sẵn toàn bộ JSON nghiệp vụ. Truy cập và chất lượng gói phải audit; pipeline không chờ nguồn này.</li>
+<li>Một trang, chữ in, hai loại tài liệu. Nhận PDF có text vẫn render cùng pipeline cho bản đầu để giữ một đường xử lý.</li>
+</ol>
+<h2>Điều kiện hoàn thành</h2>
+<p>Hai loại tài liệu chạy xuyên suốt; có model extraction fine-tuned, so sánh baseline/fine-tune, đánh giá bố cục mới, revision/approval/export nhất quán, kiểm thử retry/concurrency và handoff tái lập được. Nếu spike hoặc fine-tune không đạt, phải báo cáo bằng chứng và phần chưa hoàn thành; không được đổi định nghĩa hoàn thành âm thầm.</p>
+</section><section id="gallery"><div class="notice">SVG được render cục bộ từ mô hình diagram; nguồn PlantUML đi kèm. Chưa compile .puml bằng PlantUML vì máy không có compiler. Mở SVG để zoom các sơ đồ lớn.</div><article class="diagram"><div class="diagram-heading"><h2>Use cases — quyền và thao tác</h2><a href="uml/01-use-cases.svg" target="_blank">Mở SVG / zoom</a></div><p>Operator làm việc với tài liệu của mình; Admin bổ sung quản trị release và diagnostics. Approval vẫn là human action.</p><div class="diagram-image"><img loading="lazy" src="uml/01-use-cases.svg" alt="Use cases — quyền và thao tác"></div><details><summary>Nguồn PlantUML · <a href="uml/01-use-cases.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Use cases — quyền và thao tác
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+actor &quot;Operator&quot; as operator #E8F0FC
+actor &quot;Admin&quot; as admin #E8F0FC
+rectangle &quot;VietDoc&quot; {
+usecase &quot;Upload và chọn loại&quot; as upload #E8F0FC
+usecase &quot;Tạo job / xem trạng thái&quot; as process #E8F0FC
+usecase &quot;Đối chiếu nguồn / sửa&quot; as review #E8F0FC
+usecase &quot;Validate payload&quot; as validate #E8F0FC
+usecase &quot;Approve revision&quot; as approve #E8F0FC
+usecase &quot;Export approved JSON&quot; as export #E8F0FC
+usecase &quot;Rerun / adopt candidate&quot; as rerun #E8F0FC
+usecase &quot;Xem history / audit&quot; as history #E8F0FC
+usecase &quot;Activate verified release&quot; as activate #E8F0FC
+usecase &quot;Xem job lỗi / diagnostics&quot; as diagnose #E8F0FC
+}
+admin --|&gt; operator
+operator --&gt; upload
+operator --&gt; process
+operator --&gt; review
+operator --&gt; approve
+operator --&gt; export
+operator --&gt; rerun
+operator --&gt; history
+review ..&gt; validate : &lt;&lt;include&gt;&gt;
+approve ..&gt; validate : &lt;&lt;include&gt;&gt;
+admin --&gt; activate
+admin --&gt; diagnose
+legend bottom
+Operator làm việc với tài liệu của mình; Admin bổ sung quản trị release và diagnostics. Approval vẫn là human action.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Components — API, job và computation</h2><a href="uml/02-components.svg" target="_blank">Mở SVG / zoom</a></div><p>Một repository, nhiều process. Redis chỉ delivery; PostgreSQL giữ state; model không viết DB.</p><div class="diagram-image"><img loading="lazy" src="uml/02-components.svg" alt="Components — API, job và computation"></div><details><summary>Nguồn PlantUML · <a href="uml/02-components.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Components — API, job và computation
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+component &quot;React Review UI&quot; as web #E8F0FC
+component &quot;FastAPI / Auth / Routes&quot; as api #E8F0FC
+component &quot;Dispatcher / Recovery&quot; as dispatch #E8F0FC
+component &quot;Celery worker entrypoint&quot; as worker #E8F0FC
+package &quot;Application services&quot; {
+component &quot;Documents service&quot; as docs #E8F0FC
+component &quot;Job lifecycle / completion&quot; as jobs #E8F0FC
+component &quot;Revision / Approval&quot; as review #E8F0FC
+component &quot;Snapshot exporter&quot; as exports #E8F0FC
+}
+package &quot;Infrastructure&quot; {
+component &quot;UnitOfWork / Repositories&quot; as uow #E8F0FC
+database &quot;PostgreSQL\nstate + outbox + audit&quot; as db #E8F0FC
+database &quot;Redis broker&quot; as redis #E8F0FC
+database &quot;Private storage / model artifacts&quot; as files #E8F0FC
+}
+package &quot;Compute&quot; {
+component &quot;Pipeline orchestration&quot; as pipeline #E8F0FC
+component &quot;OCR / Geometry&quot; as ocr #E8F0FC
+component &quot;Extraction adapter&quot; as extractor #E8F0FC
+component &quot;Normalize / Evidence / Validate&quot; as checks #E8F0FC
+}
+web --&gt; api : REST + polling
+api --&gt; docs : upload/get
+api --&gt; jobs : create/status
+api --&gt; review : edit/approve
+api --&gt; exports : export revision
+docs --&gt; uow : transaction
+jobs --&gt; uow : job/outbox/fence
+review --&gt; uow : CAS/revision/audit
+exports --&gt; uow : approval lookup
+uow --&gt; db : SQLAlchemy
+docs --&gt; files : original asset
+exports --&gt; files : approved artifact
+dispatch --&gt; jobs : dispatch/recover
+dispatch --&gt; redis : publish job_id
+redis --&gt; worker : at-least-once delivery
+worker --&gt; jobs : claim/heartbeat/commit
+worker --&gt; pipeline : compute
+pipeline --&gt; ocr : canonical page
+ocr --&gt; extractor : text + boxes
+extractor --&gt; checks : raw prediction
+checks --&gt; pipeline : validated result
+pipeline --&gt; files : attempt assets
+pipeline --&gt; extractor : pin manifest
+legend bottom
+Một repository, nhiều process. Redis chỉ delivery; PostgreSQL giữ state; model không viết DB.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Sequence — job đến prediction</h2><a href="uml/03-processing-sequence.svg" target="_blank">Mở SVG / zoom</a></div><p>DB commit/publish gap, duplicate delivery và stale attempt được xử lý bằng outbox, lease và fencing.</p><div class="diagram-image"><img loading="lazy" src="uml/03-processing-sequence.svg" alt="Sequence — job đến prediction"></div><details><summary>Nguồn PlantUML · <a href="uml/03-processing-sequence.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Sequence — job đến prediction
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+hide footbox
+participant &quot;Review UI&quot; as ui
+participant &quot;API&quot; as api
+participant &quot;Job service&quot; as svc
+participant &quot;PostgreSQL&quot; as db
+participant &quot;Dispatcher&quot; as dispatch
+participant &quot;Redis&quot; as broker
+participant &quot;Worker&quot; as worker
+participant &quot;Pipeline&quot; as pipe
+ui -&gt; api : POST jobs + Idempotency-Key
+api -&gt; svc : authorize; create_job(manifest pinned)
+svc -&gt; db : TX: job QUEUED + outbox + audit
+db --&gt; svc : COMMIT
+svc --&gt; api : job_id
+api --&gt; ui : 202 Accepted
+dispatch -&gt; db : claim outbox row; read job
+dispatch -&gt;&gt; broker : publish(job_id)
+dispatch -&gt; db : mark delivered after confirmation
+broker -&gt;&gt; worker : deliver job_id
+worker -&gt; svc : claim with lease/fencing token
+svc -&gt; db : CAS state + attempt/token
+alt Claim accepted / fresh token
+worker -&gt; pipe : canonical → OCR → extraction → checks
+worker -&gt; svc : heartbeat(token) during computation
+pipe --&gt; worker : payload + evidence + issues
+worker -&gt; svc : complete(job_id, token, result)
+svc -&gt; db : TX: validate token; UNIQUE run/job; SUCCEEDED
+svc -&gt; db : create head draft only if head is null
+worker -&gt;&gt; broker : ACK after committed completion
+else Terminal / duplicate active delivery / stale token
+svc --&gt; worker : no-op or reject stale completion
+worker -&gt;&gt; broker : ACK duplicate; no new committed run
+end
+note over dispatch,db
+Crash recovery: expired lease or lost delivery → bounded requeue; previous token cannot commit.
+end note
+ui -&gt; api : GET job / run
+api --&gt; ui : status; draft or candidate result
+legend bottom
+DB commit/publish gap, duplicate delivery và stale attempt được xử lý bằng outbox, lease và fencing.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Sequence — sửa, approve, export</h2><a href="uml/04-review-sequence.svg" target="_blank">Mở SVG / zoom</a></div><p>Một payload revision bất biến; save/approve cạnh tranh dùng CAS; exporter không đọc latest prediction.</p><div class="diagram-image"><img loading="lazy" src="uml/04-review-sequence.svg" alt="Sequence — sửa, approve, export"></div><details><summary>Nguồn PlantUML · <a href="uml/04-review-sequence.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Sequence — sửa, approve, export
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+hide footbox
+participant &quot;Operator&quot; as user
+participant &quot;Review UI&quot; as ui
+participant &quot;API&quot; as api
+participant &quot;Review service&quot; as review
+participant &quot;Validation&quot; as rules
+participant &quot;PostgreSQL&quot; as db
+participant &quot;Exporter&quot; as export
+user -&gt; ui : Edit fields/items; confirm source
+ui -&gt; api : PATCH review(base_revision, expected_version)
+api -&gt; review : authorized edit(payload, reason)
+review -&gt; rules : schema + normalization + semantic checks
+alt Payload valid and head/version current
+review -&gt; db : TX: append revision + CAS head + audit
+api --&gt; ui : 201 new revision / version / issues
+else Stale version or invalid payload
+api --&gt; ui : 409 conflict or 422 validation; preserve local edits
+end
+user -&gt; ui : Review all fields; acknowledge warnings
+ui -&gt; api : POST approve(revision_id, expected_version)
+api -&gt; review : approve snapshot
+review -&gt; rules : revalidate current payload; approval policy
+alt No blockers; current head; warnings acknowledged
+review -&gt; db : TX: approval + version CAS + audit
+api --&gt; ui : 201 approval
+else Changed head / blocking issue / missing confirmation
+api --&gt; ui : 409 precondition / 422 invalid request
+end
+ui -&gt; api : POST export(explicit revision_id)
+api -&gt; export : export_approved_revision
+export -&gt; db : load immutable payload + approval
+export -&gt; export : serialize deterministic JSON; hash
+export -&gt; db : record artifact keyed by revision/format/version
+api --&gt; ui : artifact/download; repeated export same bytes
+note over review,db
+Rerun is a separate candidate. Save/adopt after approval creates a new draft; old approved export remains tied to old revision.
+end note
+legend bottom
+Một payload revision bất biến; save/approve cạnh tranh dùng CAS; exporter không đọc latest prediction.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>State machine — ProcessingJob</h2><a href="uml/05-job-state.svg" target="_blank">Mở SVG / zoom</a></div><p>Job status không phải accuracy hay approval. Automatic retries cùng job; manual rerun là job mới.</p><div class="diagram-image"><img loading="lazy" src="uml/05-job-state.svg" alt="State machine — ProcessingJob"></div><details><summary>Nguồn PlantUML · <a href="uml/05-job-state.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title State machine — ProcessingJob
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+state &quot;QUEUED&quot; as queued #E8F0FC
+state &quot;RUNNING\nlease + stage + token&quot; as running #E8F0FC
+state &quot;RETRY_WAIT\nnext_retry_at&quot; as retry #E8F0FC
+state &quot;SUCCEEDED\nresult committed&quot; as success #DDF3E8
+state &quot;FAILED\nterminal error&quot; as failed #FCE7E5
+state &quot;CANCELLED&quot; as cancel #FCE7E5
+[*] --&gt; queued : create + commit
+queued --&gt; running : claim / fresh token
+queued --&gt; cancel : cancel request
+running --&gt; success : result valid + current fence + COMMIT
+running --&gt; retry : transient error; within budget
+running --&gt; failed : terminal error / exhausted / deadline
+running --&gt; cancel : cancel flag checked before commit
+retry --&gt; queued : backoff elapsed / dispatch
+retry --&gt; cancel : cancel request
+running --&gt; queued : expired lease / bounded recovery; new fence
+success --&gt; [*]
+failed --&gt; [*]
+cancel --&gt; [*]
+legend bottom
+Job status không phải accuracy hay approval. Automatic retries cùng job; manual rerun là job mới.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>State machine — head revision</h2><a href="uml/06-review-state.svg" target="_blank">Mở SVG / zoom</a></div><p>State của head, độc lập job. Historic revisions và approvals không bị ghi đè khi head đổi.</p><div class="diagram-image"><img loading="lazy" src="uml/06-review-state.svg" alt="State machine — head revision"></div><details><summary>Nguồn PlantUML · <a href="uml/06-review-state.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title State machine — head revision
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+state &quot;NONE\nchưa có head&quot; as none #E8F0FC
+state &quot;DRAFT\nhead chưa approve&quot; as draft #E8F0FC
+state &quot;APPROVED\nhead có approval&quot; as approved #DDF3E8
+[*] --&gt; none : upload
+none --&gt; draft : first successful run / create initial revision
+draft --&gt; draft : save or adopt / append + CAS
+draft --&gt; approved : approve current head / guards + CAS
+approved --&gt; draft : save or adopt / new revision
+approved --&gt; approved : export selected approved snapshot
+draft --&gt; draft : rerun completes / candidate only
+approved --&gt; approved : rerun completes / candidate only
+legend bottom
+State của head, độc lập job. Historic revisions và approvals không bị ghi đè khi head đổi.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Class model — records và value objects</h2><a href="uml/07-domain-classes.svg" target="_blank">Mở SVG / zoom</a></div><p>Payload revision immutable; approval độc lập. Các value objects không phải mỗi cái một ORM table.</p><div class="diagram-image"><img loading="lazy" src="uml/07-domain-classes.svg" alt="Class model — records và value objects"></div><details><summary>Nguồn PlantUML · <a href="uml/07-domain-classes.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Class model — records và value objects
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+class &quot;User&quot; as User #E8F0FC {
+  +id: UUID
+  +role: operator | admin
+  +active: bool
+}
+class &quot;Document&quot; as Document #E8F0FC {
+  +id, owner_id: UUID
+  +type: receipt | invoice
+  +head_revision_id: UUID?
+  +version: int
+  +file_key, sha256: str
+  +compare_and_swap_head(expected)
+}
+class &quot;ProcessingJob&quot; as Job #E8F0FC {
+  +id, document_id: UUID
+  +state, stage: enum
+  +manifest_id: str
+  +lease_token, lease_until
+  +attempt_count, deadline_at
+  +claim()
+  +heartbeat(token)
+  +complete(token, result)
+}
+class &quot;ExtractionRun&quot; as Run #E8F0FC {
+  +id, job_id: UUID
+  +prediction: BusinessPayload
+  +evidence, issues
+  +provenance: ModelManifest
+  +immutable content
+}
+class &quot;ReviewRevision&quot; as Revision #E8F0FC {
+  +id, document_id, parent_id
+  +extraction_run_id: UUID
+  +payload: BusinessPayload
+  +row_id_map, metadata
+  +creator_id, reason
+  +immutable content
+}
+class &quot;Approval&quot; as Approval #E8F0FC {
+  +id, revision_id, actor_id
+  +acknowledged_issue_ids
+  +reason, created_at
+}
+class &quot;ExportArtifact&quot; as Export #E8F0FC {
+  +revision_id, format
+  +exporter_version
+  +storage_key, sha256
+}
+class &quot;LineItem &lt;&lt;value&gt;&gt;&quot; as Item #E8F0FC {
+  +description, unit: str?
+  +quantity: DecimalString?
+  +unit_price, line_total: DecimalString?
+}
+class &quot;FieldMetadata &lt;&lt;value&gt;&gt;&quot; as Meta #E8F0FC {
+  +path, raw_value, origin
+  +confidence, method
+  +review_flags
+}
+class &quot;SourceRegion &lt;&lt;value&gt;&gt;&quot; as Region #E8F0FC {
+  +page: 0
+  +quad: 4 canonical points
+  +ocr_block_ids
+}
+class &quot;OutboxMessage&quot; as Outbox #E8F0FC {
+  +id, job_id, event_type
+  +delivered_at, retry_at
+}
+class &quot;ModelRelease&quot; as Model #E8F0FC {
+  +id, manifest_hash/key
+  +schema_version, lifecycle
+}
+class &quot;AuditEvent&quot; as Audit #E8F0FC {
+  +actor_id/system_actor
+  +document_id, action
+  +base/new revision_id
+  +created_at
+}
+User &quot;1&quot; --&gt; &quot;0..*&quot; Document : owns
+Document &quot;1&quot; --&gt; &quot;0..*&quot; Job : processing history
+Job &quot;1&quot; --&gt; &quot;0..1&quot; Run : committed result
+Document &quot;1&quot; --&gt; &quot;0..*&quot; Revision : revision history
+Document &quot;0..1&quot; --&gt; &quot;0..1&quot; Revision : head
+Revision &quot;0..*&quot; --&gt; &quot;0..1&quot; Revision : parent
+Run &quot;1&quot; --&gt; &quot;0..*&quot; Revision : derived drafts
+Revision &quot;1&quot; --&gt; &quot;0..1&quot; Approval : approval
+Revision &quot;1&quot; --&gt; &quot;0..*&quot; Export : exports
+Revision &quot;1&quot; *-- &quot;0..*&quot; Item : payload rows
+Run &quot;1&quot; *-- &quot;0..*&quot; Meta : field metadata
+Meta &quot;1&quot; *-- &quot;0..*&quot; Region : evidence
+Job &quot;1&quot; --&gt; &quot;1..*&quot; Outbox : delivery/recovery
+Job &quot;0..*&quot; --&gt; &quot;1&quot; Model : pins release
+Document &quot;1&quot; --&gt; &quot;0..*&quot; Audit : history
+User &quot;1&quot; --&gt; &quot;0..*&quot; Approval : approves
+legend bottom
+Payload revision immutable; approval độc lập. Các value objects không phải mỗi cái một ORM table.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Activity — xử lý và kiểm duyệt</h2><a href="uml/08-activity-workflow.svg" target="_blank">Mở SVG / zoom</a></div><p>Swimlane phân trách nhiệm; input không hợp profile bị reject, model result không tự được approve.</p><div class="diagram-image"><img loading="lazy" src="uml/08-activity-workflow.svg" alt="Activity — xử lý và kiểm duyệt"></div><details><summary>Nguồn PlantUML · <a href="uml/08-activity-workflow.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Activity — xử lý và kiểm duyệt
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+|Operator|
+start
+:Chọn loại / upload;
+|API / Services|
+if (File/profile hợp lệ?) then (yes)
+:Commit job + outbox;
+|Worker|
+:Claim / render / OCR / extraction;
+if (Result schema hợp lệ?) then (yes)
+|API / Services|
+:Commit run / draft hoặc candidate;
+|Operator|
+repeat
+:Đối chiếu source / sửa / save;
+|API / Services|
+:Kiểm approval guards;
+repeat while (Còn issue hoặc conflict?) is (yes) not (no)
+:Record approval snapshot;
+|Operator|
+:Export JSON revision đã approve;
+stop
+else (no)
+:Fail hoặc bounded retry theo job state;
+stop
+endif
+else (no)
+:Reject + actionable error;
+stop
+endif
+legend bottom
+Swimlane phân trách nhiệm; input không hợp profile bị reject, model result không tự được approve.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Deployment — demo Compose và offline ML</h2><a href="uml/09-deployment.svg" target="_blank">Mở SVG / zoom</a></div><p>GPU serving một job; API không giữ weights. Training tách thời gian/máy, model release read-only.</p><div class="diagram-image"><img loading="lazy" src="uml/09-deployment.svg" alt="Deployment — demo Compose và offline ML"></div><details><summary>Nguồn PlantUML · <a href="uml/09-deployment.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Deployment — demo Compose và offline ML
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+node &quot;Browser / Operator&quot; as browser #E8F0FC
+package &quot;Linux / WSL2 demo host&quot; {
+node &quot;web container\nstatic UI + reverse proxy&quot; as web #E8F0FC
+node &quot;api container\nFastAPI CPU&quot; as api #E8F0FC
+node &quot;dispatcher container\noutbox + recovery&quot; as dispatch #E8F0FC
+node &quot;worker container\nOCR + extractor\nconcurrency = 1&quot; as worker #E8F0FC
+database &quot;postgres container\nprivate network&quot; as pg #E8F0FC
+database &quot;redis container\nprivate network&quot; as redis #E8F0FC
+artifact &quot;Private storage volume&quot; as storage #E8F0FC
+artifact &quot;Model release volume\nread-only&quot; as models #E8F0FC
+}
+package &quot;ML environment&quot; {
+node &quot;Offline training/evaluation\nseparate process/time&quot; as train #E8F0FC
+artifact &quot;Frozen dataset manifests\nand samples&quot; as data #E8F0FC
+}
+browser --&gt; web : HTTPS deployment / localhost dev
+web --&gt; api : same-origin /api/v1
+api --&gt; pg : SQL
+dispatch --&gt; pg : outbox/leases
+dispatch --&gt; redis : publish
+redis --&gt; worker : delivery
+worker --&gt; pg : application services
+api --&gt; storage : authorized read/write
+worker --&gt; storage : input/attempt artifacts
+worker --&gt; models : pin manifest + weights
+train --&gt; data : immutable split
+train --&gt; models : verified release handoff
+legend bottom
+GPU serving một job; API không giữ weights. Training tách thời gian/máy, model release read-only.
+endlegend
+@enduml
+</code></pre></details></article><article class="diagram"><div class="diagram-heading"><h2>Activity — data đến model release</h2><a href="uml/10-training-activity.svg" target="_blank">Mở SVG / zoom</a></div><p>Không training từ corrections tự động; final holdout không dùng tune; gate bằng metric và deployment smoke.</p><div class="diagram-image"><img loading="lazy" src="uml/10-training-activity.svg" alt="Activity — data đến model release"></div><details><summary>Nguồn PlantUML · <a href="uml/10-training-activity.puml" download>Tải .puml</a></summary><pre><code>@startuml
+title Activity — data đến model release
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+|Data Engineer|
+start
+:Audit source/terms/PII;
+:Generate ảnh + JSON + box;
+:Family split / dedupe / manifest;
+|AI-1|
+:OCR vi / canonical geometry;
+|AI-2|
+repeat
+:Hardware + model smoke / train step;
+|Lead|
+if (Feasible?) then (yes)
+:Khóa candidate và resource profile;
+else (no)
+:Chọn smaller candidate / ADR;
+endif
+repeat while (Cần thử candidate khác?) is (yes) not (no)
+|AI-2|
+:Baseline / fine-tune bounded cycles;
+|Data Engineer|
+:Dev eval / calibrate / error report;
+|Lead|
+:Freeze checkpoint + evaluator;
+|Data Engineer|
+:Final holdout + independent mock;
+|Lead|
+if (Quality/correctness pass?) then (yes)
+|AI-2|
+:Manifest / model card / smoke / activate;
+else (no)
+|Lead|
+:Report failed criteria; new dev/test if iterate;
+endif
+stop
+legend bottom
+Không training từ corrections tự động; final holdout không dùng tune; gate bằng metric và deployment smoke.
+endlegend
+@enduml
+</code></pre></details></article></section></main></div><footer>Không tải thư viện hoặc gửi nội dung ra ngoài khi mở hồ sơ. Targets là mục tiêu chưa đo; xem phần assumptions và validation gates.</footer><script>document.body.classList.add("js");function show(id){if(!document.getElementById(id))id="doc-README";document.querySelectorAll(".document,#gallery").forEach(x=>x.classList.toggle("visible",x.id===id));document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("active",a.hash==="#"+id));window.scrollTo(0,0)}window.addEventListener("hashchange",()=>show(location.hash.slice(1)));show(location.hash.slice(1));document.getElementById("theme").onclick=()=>document.body.classList.toggle("dark");</script></body></html>

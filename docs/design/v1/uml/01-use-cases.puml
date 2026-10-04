@@ -1,0 +1,37 @@
+@startuml
+title Use cases — quyền và thao tác
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+left to right direction
+actor "Operator" as operator #E8F0FC
+actor "Admin" as admin #E8F0FC
+rectangle "VietDoc" {
+usecase "Upload và chọn loại" as upload #E8F0FC
+usecase "Tạo job / xem trạng thái" as process #E8F0FC
+usecase "Đối chiếu nguồn / sửa" as review #E8F0FC
+usecase "Validate payload" as validate #E8F0FC
+usecase "Approve revision" as approve #E8F0FC
+usecase "Export approved JSON" as export #E8F0FC
+usecase "Rerun / adopt candidate" as rerun #E8F0FC
+usecase "Xem history / audit" as history #E8F0FC
+usecase "Activate verified release" as activate #E8F0FC
+usecase "Xem job lỗi / diagnostics" as diagnose #E8F0FC
+}
+admin --|> operator
+operator --> upload
+operator --> process
+operator --> review
+operator --> approve
+operator --> export
+operator --> rerun
+operator --> history
+review ..> validate : <<include>>
+approve ..> validate : <<include>>
+admin --> activate
+admin --> diagnose
+legend bottom
+Operator làm việc với tài liệu của mình; Admin bổ sung quản trị release và diagnostics. Approval vẫn là human action.
+endlegend
+@enduml

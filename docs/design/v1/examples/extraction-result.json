@@ -1,0 +1,76 @@
+{
+  "run_id": "11111111-1111-4111-8111-111111111111",
+  "job_id": "11111111-1111-4111-8111-111111111111",
+  "document_type": "receipt",
+  "schema_version": "receipt.v1",
+  "language": "vi",
+  "payload": {
+    "merchant_name": "CỬA HÀNG GIẢ LẬP A",
+    "merchant_address": "Địa chỉ minh họa không có thật",
+    "transaction_date": "2026-10-04",
+    "transaction_time": "15:30",
+    "total_amount": "125000",
+    "items": [
+      {
+        "description": "Sản phẩm mẫu A",
+        "quantity": "2",
+        "unit": "Hộp",
+        "unit_price": "50000",
+        "line_total": "100000"
+      },
+      {
+        "description": "Sản phẩm mẫu B",
+        "quantity": "1",
+        "unit": "Chai",
+        "unit_price": "25000",
+        "line_total": "25000"
+      }
+    ]
+  },
+  "field_metadata": [
+    {
+      "path": "/total_amount",
+      "raw_value": "125.000",
+      "value_origin": "prediction",
+      "source_regions": [
+        {
+          "page": 0,
+          "quad": [
+            [
+              0.1,
+              0.7
+            ],
+            [
+              0.5,
+              0.7
+            ],
+            [
+              0.5,
+              0.8
+            ],
+            [
+              0.1,
+              0.8
+            ]
+          ],
+          "ocr_block_ids": [
+            "demo-block"
+          ]
+        }
+      ],
+      "ocr_score": null,
+      "confidence": null,
+      "confidence_method": null,
+      "review_flags": [
+        "CONFIDENCE_UNCALIBRATED"
+      ]
+    }
+  ],
+  "issues": [],
+  "provenance": {
+    "pipeline_manifest_id": "demo-design-manifest",
+    "ocr_version": "demo-ocr",
+    "extractor_release_id": "demo-release",
+    "normalizer_version": "v1"
+  }
+}

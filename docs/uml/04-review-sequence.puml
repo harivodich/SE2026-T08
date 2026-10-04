@@ -1,0 +1,47 @@
+@startuml
+title Sequence — sửa, approve, export
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+hide footbox
+participant "Operator" as user
+participant "Review UI" as ui
+participant "API" as api
+participant "Review service" as review
+participant "Validation" as rules
+participant "PostgreSQL" as db
+participant "Exporter" as export
+user -> ui : Edit fields/items; confirm source
+ui -> api : PATCH review(base_revision, expected_version)
+api -> review : authorized edit(payload, reason)
+review -> rules : schema + normalization + semantic checks
+alt Payload valid and head/version current
+review -> db : TX: append revision + CAS head + audit
+api --> ui : 201 new revision / version / issues
+else Stale version or invalid payload
+api --> ui : 409 conflict or 422 validation; preserve local edits
+end
+user -> ui : Review all fields; acknowledge warnings
+ui -> api : POST approve(revision_id, expected_version)
+api -> review : approve snapshot
+review -> rules : revalidate current payload; approval policy
+alt No blockers; current head; warnings acknowledged
+review -> db : TX: approval + version CAS + audit
+api --> ui : 201 approval
+else Changed head / blocking issue / missing confirmation
+api --> ui : 409 precondition / 422 invalid request
+end
+ui -> api : POST export(explicit revision_id)
+api -> export : export_approved_revision
+export -> db : load immutable payload + approval
+export -> export : serialize deterministic JSON; hash
+export -> db : record artifact keyed by revision/format/version
+api --> ui : artifact/download; repeated export same bytes
+note over review,db
+Rerun is a separate candidate. Save/adopt after approval creates a new draft; old approved export remains tied to old revision.
+end note
+legend bottom
+Một payload revision bất biến; save/approve cạnh tranh dùng CAS; exporter không đọc latest prediction.
+endlegend
+@enduml

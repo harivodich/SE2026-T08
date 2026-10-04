@@ -1,0 +1,44 @@
+@startuml
+title Activity — data đến model release
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+|Data Engineer|
+start
+:Audit source/terms/PII;
+:Generate ảnh + JSON + box;
+:Family split / dedupe / manifest;
+|AI-1|
+:OCR vi / canonical geometry;
+|AI-2|
+repeat
+:Hardware + model smoke / train step;
+|Lead|
+if (Feasible?) then (yes)
+:Khóa candidate và resource profile;
+else (no)
+:Chọn smaller candidate / ADR;
+endif
+repeat while (Cần thử candidate khác?) is (yes) not (no)
+|AI-2|
+:Baseline / fine-tune bounded cycles;
+|Data Engineer|
+:Dev eval / calibrate / error report;
+|Lead|
+:Freeze checkpoint + evaluator;
+|Data Engineer|
+:Final holdout + independent mock;
+|Lead|
+if (Quality/correctness pass?) then (yes)
+|AI-2|
+:Manifest / model card / smoke / activate;
+else (no)
+|Lead|
+:Report failed criteria; new dev/test if iterate;
+endif
+stop
+legend bottom
+Không training từ corrections tự động; final holdout không dùng tune; gate bằng metric và deployment smoke.
+endlegend
+@enduml

@@ -1,0 +1,11 @@
+{
+  "merchant_name": "CỬA HÀNG GIẢ LẬP A",
+  "merchant_address": "Địa chỉ minh họa không có thật",
+  "transaction_date": "2026-10-04",
+  "transaction_time": "15:30",
+  "total_amount": "125000",
+  "items": [
+    {"description": "Sản phẩm mẫu A", "quantity": "2", "unit": "Hộp", "unit_price": "50000", "line_total": "100000"},
+    {"description": "Sản phẩm mẫu B", "quantity": "1", "unit": "Chai", "unit_price": "25000", "line_total": "25000"}
+  ]
+}

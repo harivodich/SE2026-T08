@@ -1,0 +1,29 @@
+@startuml
+title State machine — ProcessingJob
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #405670
+state "QUEUED" as queued #E8F0FC
+state "RUNNING\nlease + stage + token" as running #E8F0FC
+state "RETRY_WAIT\nnext_retry_at" as retry #E8F0FC
+state "SUCCEEDED\nresult committed" as success #DDF3E8
+state "FAILED\nterminal error" as failed #FCE7E5
+state "CANCELLED" as cancel #FCE7E5
+[*] --> queued : create + commit
+queued --> running : claim / fresh token
+queued --> cancel : cancel request
+running --> success : result valid + current fence + COMMIT
+running --> retry : transient error; within budget
+running --> failed : terminal error / exhausted / deadline
+running --> cancel : cancel flag checked before commit
+retry --> queued : backoff elapsed / dispatch
+retry --> cancel : cancel request
+running --> queued : expired lease / bounded recovery; new fence
+success --> [*]
+failed --> [*]
+cancel --> [*]
+legend bottom
+Job status không phải accuracy hay approval. Automatic retries cùng job; manual rerun là job mới.
+endlegend
+@enduml
