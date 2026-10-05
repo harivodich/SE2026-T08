@@ -2,7 +2,7 @@
 
 ## 1. Repository layout
 
-Cây dưới là thiết kế target, không phải các file production đã được tạo. Backend tạo skeleton tối thiểu theo vertical slice, không mở sẵn hàng chục file rỗng.
+Cây dưới là thiết kế target đầy đủ. Theo yêu cầu ngày 05/10/2026, các folder/package chính đã được tạo để team bắt đầu làm việc; xem [source hiện tại](../src/vietdoc/README.md). Các file service/adapter trong cây sẽ được thêm khi triển khai từng việc, chưa có implementation runtime.
 
 ```text
 vietdoc/

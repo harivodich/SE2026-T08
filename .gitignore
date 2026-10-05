@@ -7,9 +7,15 @@
 *.p12
 *.pfx
 credentials.json
+*credentials*.json
+*service-account*.json
+id_rsa
+id_ed25519
+.ssh/
 secrets/
 .codex/
 .calm/
+.gitnexus/
 
 # Python environments and build/test caches
 .venv/
@@ -19,6 +25,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.ipynb_checkpoints/
 .coverage
 .coverage.*
 htmlcov/
@@ -32,16 +39,30 @@ dist/
 node_modules/
 web/dist/
 web/coverage/
+.next/
+.vite/
+coverage/
+playwright-report/
+test-results/
 
 # Dataset/model binaries and runtime artifacts (track manifests instead)
-/datasets/raw/
-/datasets/processed/
-/artifacts/models/
-/artifacts/evaluation/
-/storage/
+/datasets/raw/*
+!/datasets/raw/.gitkeep
+/datasets/processed/*
+!/datasets/processed/.gitkeep
+/artifacts/models/*
+!/artifacts/models/.gitkeep
+/artifacts/evaluation/*
+!/artifacts/evaluation/.gitkeep
+/storage/*
+!/storage/.gitkeep
 /logs/
 /runs/
 /checkpoints/
+/outputs/
+/work/
+/tmp/
+/backups/
 *.safetensors
 *.gguf
 *.pt
@@ -53,6 +74,9 @@ web/coverage/
 *.pkl
 *.pickle
 *.joblib
+*.sqlite
+*.sqlite3
+*.db
 
 # Editor/OS files
 .idea/

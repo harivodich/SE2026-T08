@@ -4,7 +4,7 @@ Hệ thống trích xuất và kiểm duyệt dữ liệu chứng từ tiếng V
 
 ## Trạng thái
 
-Repository đang ở giai đoạn **bootstrap tài liệu và Git**, chưa có ứng dụng, API, model hoặc môi trường runtime. Không có lệnh chạy server/training đã được kiểm chứng. Repo GitHub được liên kết bằng `origin`; thiết lập remote không đồng nghĩa đã push hoặc có quyền ghi.
+Repository có tài liệu thiết kế và khung thư mục để team bắt đầu viết code. Các package Python hiện là scaffold; API, OCR/model và giao diện sẽ được triển khai từng phần theo việc được giao.
 
 ## Phạm vi
 
@@ -23,10 +23,12 @@ Repository đang ở giai đoạn **bootstrap tài liệu và Git**, chưa có �
 | [Approval policy](specs/approval-policy.md) | Save, conflict, approve và export |
 | [Contracts](specs/contracts/README.md) | Bốn JSON Schema tham chiếu |
 | [Architecture](docs/architecture.md) | Modules, queue, persistence và failure modes |
-| [Source structure](docs/source-structure.md) | Cây source target; chưa phải code đã tạo |
+| [Source structure](docs/source-structure.md) | Cấu trúc đích và ranh giới module |
+| [Source hiện tại](src/vietdoc/README.md) | Viết code vào đâu, phần nào thuộc ai |
 | [ADR index](docs/adr/README.md) | Tám quyết định đang Proposed |
 | [UML](docs/uml/README.md) | Mười nguồn PlantUML và SVG |
-| [Tuần 1](tasks/week-01.md) | Owner, dependencies và acceptance |
+| [Git Flow](docs/git-flow.md) | Branch, PR, review và merge |
+| [Việc đang làm](tasks/README.md) | Theo dõi từng việc bằng mô tả ngắn |
 | [Bộ thiết kế gốc](docs/design/v1/README.md) | Snapshot nguyên trạng để đối chiếu |
 | [HTML tổng hợp](docs/design/v1/index.html) | Mở bằng trình duyệt để đọc và xem diagram |
 
@@ -36,19 +38,35 @@ Modular monolith, cùng source/contracts; API, dispatcher và inference worker c
 
 ## Bắt đầu trên Windows
 
-1. Mở `D:\SE` làm thư mục project local trong Codex. Đọc `AGENTS.md` và task có owner trước khi sửa.
-2. Kiểm tra `git status --short --branch` và `git remote -v`.
-3. Sau bootstrap commit, tạo branch ngắn theo task: `git switch -c feat/w1-<module>`.
-4. Làm một increment nhỏ, chạy focused checks và đưa evidence vào PR. Lead review/merge theo dependency; commit/push/PR cần yêu cầu riêng.
+1. Clone repo: `git clone https://github.com/harivodich/SE2026.AI-02.1.git` rồi mở thư mục đó trong Codex.
+2. `main` giữ bản chung ổn định; `develop` dùng tích hợp. Khi nhận một việc, tách branch từ `develop` theo [Git Flow](docs/git-flow.md).
+3. Đọc `src/vietdoc/README.md` để chọn đúng module. Mỗi PR chỉ giải quyết một việc; Lead review và merge.
+4. Việc mới được nói rõ khi bắt đầu: làm gì, ai làm, xong khi nào. Không cần đọc trước toàn bộ backlog nhiều tuần.
 
 Nếu chạy bằng một tài khoản sandbox khác chủ sở hữu thư mục và gặp `dubious ownership`, dùng exception chỉ cho lệnh với đúng repo đã xác minh: `git -c safe.directory=D:/SE status`. Không dùng wildcard hoặc sửa Git config global. Repo dùng TLS backend OpenSSL ở config local; kiểm chứng chứng chỉ vẫn bật.
 
 ## Source và cấu hình
 
-Không có skeleton module rỗng, dependency lock hoặc `.env.example` trong bootstrap này. Backend tạo source/config khi làm vertical slice đầu tiên; chỉ ghi command vào README sau khi chạy thành công. Cấu trúc chi tiết nằm ở tài liệu source structure.
+`pyproject.toml` khai báo package `vietdoc`, Python ≥3.11, chưa thêm dependencies runtime. Các folder đã tạo theo thiết kế; chỉ thêm file có logic khi triển khai việc tương ứng. Chưa có lệnh chạy server hoặc training.
+
+```text
+src/vietdoc/   Python: contracts, nghiệp vụ, OCR/extraction, data, training, API/worker
+web/           React/TypeScript khi bắt đầu làm giao diện
+tests/         Unit, integration, contract và end-to-end
+migrations/    Alembic migrations do Backend quản lý
+infra/         Docker Compose và cấu hình triển khai
+datasets/      Raw/processed ở local; manifest nhỏ có thể commit
+artifacts/     Model và kết quả chạy ở local
+storage/       File người dùng/runtime ở local
+specs/         Scope, schema và approval policy
+docs/          Thiết kế, UML, Git Flow và lịch sử
+tasks/         Chỉ giữ việc hiện tại
+```
+
+`.gitignore` loại secrets, môi trường ảo, caches, datasets raw/processed, weights, runtime storage và outputs. File `.gitkeep` chỉ giữ thư mục trống; không chứa dữ liệu. Tiny fictional fixtures và manifests cần được review trước khi commit.
 
 Schema/diagram hiện là reference design. Khi có code, Pydantic sinh JSON Schema/OpenAPI; cập nhật contracts và docs bị ảnh hưởng trong cùng PR. Giữ `docs/design/v1` làm snapshot, không sửa nó để khớp code mới.
 
 ## Giới hạn xác minh
 
-Báo cáo trong snapshot là kết quả của **lượt thiết kế trước**, không phải test ứng dụng hiện tại. SVG đã render; `.puml` chưa compile bằng PlantUML. Các con số accuracy/latency/dataset là mục tiêu chưa đo. Xem [handoff bootstrap](tasks/bootstrap.md) để biết kiểm tra của lượt này.
+Báo cáo trong snapshot là kết quả của lượt thiết kế trước. SVG đã render; `.puml` chưa compile bằng PlantUML. Các con số accuracy/latency/dataset là mục tiêu chưa đo. Ghi chép cũ nằm trong [lịch sử bootstrap](docs/history/bootstrap-2026-10-04.md).

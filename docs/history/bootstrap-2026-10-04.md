@@ -1,5 +1,7 @@
 # Bootstrap workspace — 2026-10-04
 
+Ghi chép lịch sử của lần khởi tạo ngày 04/10. Trạng thái repo hiện tại được mô tả ở [README](../../README.md); việc đang làm ở [tasks](../../tasks/README.md).
+
 ## Scope và acceptance
 
 Thiết lập repo local tại `D:\SE`, origin `https://github.com/harivodich/SE2026.AI-02.1.git`, nhập bộ thiết kế, stable project guidance và backlog W1. Không tạo application, tải model/data, training, push, PR hoặc deployment. Người dùng cho phép một commit local cho đúng bootstrap files sau review; không có authorization commit cho task sau.
@@ -38,4 +40,4 @@ Người dùng đã cung cấp identity; `user.name=harivodich`, `user.email=har
 
 ## Task tiếp theo
 
-Đọc [W1 backlog](week-01.md). Lead khóa contracts/ADR; Backend triển khai Pydantic contracts/tests trước consumer wiring; Data chuẩn bị fictional samples/manifest; AI-1 OCR/geometry fixtures; AI-2 baseline/spike protocol. Không bắt đầu toàn bộ ứng dụng trong bootstrap task.
+Đề xuất thời điểm đó nằm ở [W1 backlog gốc](week-01-original.md). Bản này chỉ giữ lịch sử, không áp đặt giao việc hiện tại.

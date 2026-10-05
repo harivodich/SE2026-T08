@@ -1,0 +1,1 @@
+"""VietDoc package scaffold."""

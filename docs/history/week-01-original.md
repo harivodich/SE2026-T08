@@ -1,6 +1,6 @@
 # W1 — khóa contracts và chuẩn bị vertical slice
 
-Trạng thái các task dưới: **chưa triển khai**. Tuần tính từ kickoff; owner là vai trò, chưa gán GitHub username. [Plan 12–16 tuần](../docs/design/v1/05-delivery-plan.md), [module ownership](../AGENTS.md).
+Đây là bản kế hoạch cũ được giữ để đối chiếu, không phải danh sách việc hiện tại. Team giao việc dần theo [tasks/README.md](../../tasks/README.md). [Plan 12–16 tuần](../design/v1/05-delivery-plan.md), [module ownership](../../AGENTS.md).
 
 ## Thứ tự tích hợp
 
