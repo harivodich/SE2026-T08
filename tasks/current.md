@@ -1,5 +1,7 @@
 # Chuẩn bị repo để team làm việc
 
+Trạng thái: đã hoàn tất ngày 05/10/2026. Đã đối chiếu GitHub: main/develop có cùng bản khởi tạo, folders source hiển thị và cả năm invitation đang chờ accept.
+
 - Làm gì: tạo folder theo thiết kế, làm gọn task, kiểm .gitignore, push bản khởi tạo lên GitHub và mời thầy/team.
 - Ai làm: Lead với Codex.
 - Xong khi: main/develop có cùng bản khởi tạo; source folders hiển thị trên GitHub; invitations đã gửi; local tree sạch.
