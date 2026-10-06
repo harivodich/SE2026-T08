@@ -17,10 +17,10 @@ vietdoc/
 ├── docs/
 │   ├── adr/
 │   ├── uml/
+│   ├── team/                        # roadmap/task chi tiết từng người + workflow/Git Flow
 │   ├── data-cards/
 │   ├── model-cards/
 │   └── runbooks/
-├── tasks/                           # backlog, acceptance, weekly decisions
 ├── src/vietdoc/
 │   ├── contracts/
 │   │   ├── business.py               # ReceiptPayload, InvoicePayload, LineItem
@@ -150,6 +150,7 @@ DAG mong muốn: contracts ở đáy; services/ports phụ thuộc contracts; ad
 | data/generator/adapters/splits | Data Engineer | AI-1/AI-2 + Lead khi schema/split đổi |
 | preprocess/geometry/ocr/evidence | AI-1 | AI-2 khi input đổi; Backend khi UI bbox đổi |
 | extraction/model adapter/ml/confidence | AI-2 | AI-1 + Lead |
+| pipeline/service.py (thin stage wiring, phân công đề xuất) | Backend; Lead xác nhận kickoff | AI-1 + AI-2 |
 | evaluation | Data Engineer | Cả hai AI; Lead metric/release gate |
 | identity/documents/jobs/review/exports/persistence/API/web | Backend | Lead; AI reviewer cho integration contract |
 | infra/CI/migrations | Backend | Lead; model worker config cần AI-2 |
@@ -167,10 +168,14 @@ Lead **không có backlog coding thường xuyên**. Lead quyết scope/contract
 
 ## 5. Trình tự xây source
 
-1. Backend tạo contracts + upload/job metadata + rule baseline pipeline, AI-1 đưa một OCR fixture đúng contract. Data tạo 10–20 fictional documents có labels.
+1. Backend tạo contracts + upload/job metadata và lớp nối compute stages; AI-2 viết rule baseline, AI-1 đưa một OCR fixture đúng contract rồi thay bằng engine thật. Data tạo 10–20 fictional documents có labels. Phân công lớp nối cho Backend là đề xuất làm rõ ở [hướng dẫn team](team/README.md), Lead xác nhận kickoff.
 2. Chạy vertical slice trên một receipt: upload → xử lý thật → review → approve → JSON; không chờ model fine-tune mới tích hợp.
 3. AI-1 thay OCR fixture bằng engine thật; AI-2 thêm model adapter đã chạy smoke; tests fixture không được dùng để báo AI accuracy.
 4. Mở invoice và line items bằng cùng orchestration, không fork backend thứ hai.
 5. Hoàn thiện outbox/recovery/CAS, model release manifest và evaluation gates trước release.
 
 CLI names là đề xuất; command cụ thể chỉ ghi README khi code đã thực thi thành công. Không copy chạy snippets training ngoài repo mà không audit dependencies/model licensing.
+
+## 6. Spec folder và kế hoạch hiện hành
+
+[Spec sử dụng folder](../specs/repository-layout.md) giải thích purpose/owner/current status và Git exclusions. Roadmap/task từng người ở [docs team](team/README.md), workflow/Git Flow/gates chung ở [workflow](team/workflow.md). Tiến độ/evidence ở Issue/PR hoặc phiếu Lead giao, không tasks folder. Snapshot docs/design/v1 giữ layout cũ để đối chiếu.

@@ -1,6 +1,6 @@
 # UML v1
 
-Mười `.puml` và `.svg` ở đây là bản copy nguyên trạng từ [snapshot](../design/v1/08-uml-guide.md). SVG là presentation từ canonical diagram model; không phải output PlantUML compiler. `.puml` chưa compile bằng PlantUML.
+Mười `.puml`/`.svg` là copy nguyên trạng từ [snapshot](../design/v1/08-uml-guide.md). SVG track là presentation từ canonical model, không output PlantUML compiler. [Verification 07/10](../reviews/verification-2026-10-07.md) đã compile 20 sources active/snapshot và render 10 active diagrams bằng PlantUML 1.2026.8; outputs local ignored .verification, không ghi đè SVG track.
 
 | View | Source | SVG |
 |---|---|---|

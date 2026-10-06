@@ -1,3 +1,5 @@
+> Lưu trữ ngày 07/10/2026 từ tasks/current.md. Nội dung/trạng thái dưới đây là lịch sử, không là kế hoạch hiện hành. Team dùng [docs cá nhân và workflow](../../team/README.md).
+
 # Chuẩn bị repo để team làm việc
 
 Trạng thái: đã hoàn tất ngày 05/10/2026. Đã đối chiếu GitHub: main/develop có cùng bản khởi tạo, folders source hiển thị và cả năm invitation đang chờ accept.

@@ -17,7 +17,8 @@ Chỉ chứng từ tiếng Việt: receipt/invoice một trang, chữ in, có sc
 
 - `specs/`: domain rules, approval policy và reference contracts.
 - `docs/adr/`: quyết định và trade-offs; status Proposed không tự đổi thành Accepted.
-- `tasks/`: task, tiến độ, acceptance và evidence.
+- `SPEC.md` trong từng folder làm việc: local purpose/ownership/content/boundaries/checks. `specs/repository-layout.md` chỉ index tương thích, không cần đọc bảng folder chung.
+- `docs/team/`: roadmap/task theo người, workflow/Git Flow; tiến độ/evidence ở Issue/PR được giao. Không dùng folder `tasks/`.
 - `docs/design/v1/`: snapshot thiết kế gốc bất biến, không phải runtime authority.
 - Khi code bắt đầu: `src/vietdoc/`, `web/`, `tests/` và `migrations/` theo source-structure design; chỉ tạo file cần cho increment hiện hành.
 

@@ -162,3 +162,12 @@ Khi có conflict:
 ## 8. Vai trò của code review
 
 Review chéo giúp phát hiện lỗi logic, regression và vấn đề maintainability sớm; chia sẻ kiến thức để thành viên khác có thể tiếp quản; và tạo dấu vết rõ ràng về quyết định trước khi code vào branch tích hợp. Reviewer phản hồi vào thay đổi cụ thể, tác giả trả lời và cập nhật code; Tech Lead chịu trách nhiệm duyệt cuối theo quyền được phân công.
+
+## 9. Áp dụng cho VietDoc và doc cá nhân
+
+- Roadmap/task ở [Lead](team/lead.md), [Data](team/data-engineer.md), [AI-1](team/ai-1-ocr.md), [AI-2](team/ai-2-extraction.md), [Backend](team/backend.md). Mỗi doc có Git Flow/reviewer/output checklist; tiến độ ở Issue/PR, không folder tasks.
+- O1.3/M3.2 là mã tra guide, không issue đã tồn tại. Branch dùng issue/Jira ID thật và slug snake_case.
+- [Spec folder](../specs/repository-layout.md) quy định vùng sửa/owner. Shared contracts/migrations/lockfile cần consumer review, Lead điều phối merge order; không chọn cả một phía khi conflict.
+- PR data/model ghi dataset/model/evaluator/processor/preprocess/config versions, manifests/hashes và report thật. Không commit raw data/weights/PII để reviewer chạy thử.
+- [Workflow](team/workflow.md) có commands có điều kiện, handoffs/gates. Kiểm working tree trước switch/pull; không stash/reset/clean tự động để vượt dirty tree.
+- Protection/required checks/access GitHub cần xác minh riêng, lượt audit local không thay settings. CI chưa implement thì giao B1.3, không claim checks đã pass.

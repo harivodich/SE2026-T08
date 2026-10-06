@@ -19,4 +19,4 @@ Chi tiết fields, API/error envelopes và ports: [contracts design](../../docs/
 - Structural schema không kiểm ownership/FK, approved state, ngày thực, JSON Pointer existence, arithmetic hoặc quad semantics: application validators cần làm riêng.
 - `$ref` dùng URN nội bộ, validator phải đăng ký schemas, không tự fetch URL ngoài.
 - Contract PR đi trước consumer PR. Breaking version change phải đồng bộ dataset/model/evaluator/frontend/exporter.
-- Backend tạo Pydantic source-of-truth rồi generate JSON Schema/OpenAPI/types, thêm full validator positive/negative tests. Lượt bootstrap chưa chạy conforming JSON Schema compiler.
+- Backend tạo Pydantic source-of-truth rồi generate JSON Schema/OpenAPI/types, thêm project contract tests. Bootstrap chưa chạy compiler; [verification 07/10](../../docs/reviews/verification-2026-10-07.md) đã dùng Draft 2020-12 kiểm 8 schema và 50 cases. Reference checks không thay runtime/API/approval tests.

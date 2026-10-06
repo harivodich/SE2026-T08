@@ -16,6 +16,7 @@ secrets/
 .codex/
 .calm/
 .gitnexus/
+/.verification/
 
 # Python environments and build/test caches
 .venv/
@@ -48,14 +49,19 @@ test-results/
 # Dataset/model binaries and runtime artifacts (track manifests instead)
 /datasets/raw/*
 !/datasets/raw/.gitkeep
+!/datasets/raw/SPEC.md
 /datasets/processed/*
 !/datasets/processed/.gitkeep
+!/datasets/processed/SPEC.md
 /artifacts/models/*
 !/artifacts/models/.gitkeep
+!/artifacts/models/SPEC.md
 /artifacts/evaluation/*
 !/artifacts/evaluation/.gitkeep
+!/artifacts/evaluation/SPEC.md
 /storage/*
 !/storage/.gitkeep
+!/storage/SPEC.md
 /logs/
 /runs/
 /checkpoints/
