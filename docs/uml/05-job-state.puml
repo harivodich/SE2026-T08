@@ -16,10 +16,12 @@ queued --> cancel : cancel request
 running --> success : result valid + current fence + COMMIT
 running --> retry : transient error; within budget
 running --> failed : terminal error / exhausted / deadline
-running --> cancel : cancel flag checked before commit
-retry --> queued : backoff elapsed / dispatch
+running --> cancel : atomic cancel / fence revoke; late response rejected
+retry --> queued : backoff elapsed / DB eligibility
 retry --> cancel : cancel request
-running --> queued : expired lease / bounded recovery; new fence
+running --> retry : expired lease / bounded recovery; revoke old fence
+queued --> failed : deadline / unavailable pinned release
+retry --> failed : exhausted / deadline
 success --> [*]
 failed --> [*]
 cancel --> [*]

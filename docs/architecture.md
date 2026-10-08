@@ -1,141 +1,114 @@
-# 02 — Kiến trúc hệ thống
+# Kiến trúc VietDoc: Java nghiệp vụ, Python AI
 
-## 1. Kiến trúc đề xuất
+## 1. Hiện trạng và thiết kế đích
 
-Modular monolith, một repository, một schema nghiệp vụ PostgreSQL. API, dispatcher và inference worker có entrypoint riêng nhưng dùng chung source/contracts. Các module sở hữu dữ liệu của mình và trao đổi qua public service/contract. Không cần HTTP giữa các module nội bộ.
+Ngày rà soát 07/10/2026: source có 25 file Python `__init__.py` chỉ docstring. Không có Java implementation/pom, server/model, UI app, migrations hay CI workflow. Cấu trúc dưới là thiết kế để triển khai, không mô tả hệ thống đã chạy. UI Thymeleaf đã được người dùng chọn; chi tiết stack/job cần Lead duyệt [ADR-0009](adr/0009-java-python-thymeleaf.md).
 
-| Thành phần | Quyết định | Lý do và chi phí |
+Một monorepo; business modular monolith bằng Java, một Python compute service. Đây là hệ thống hai runtime, không còn single-language monolith dùng chung application services.
+
+| Thành phần | Thiết kế đích | Owner |
 |---|---|---|
-| API | FastAPI + Pydantic, Python 3.11 | Typed boundary; không import/load weights trong API |
-| Persistence | PostgreSQL + SQLAlchemy 2 + Alembic | Transaction, FK, JSONB và compare-and-swap; một ORM |
-| Queue | Celery + Redis | Worker ngoài API; cần xử lý redelivery và cấu hình visibility timeout |
-| Dispatcher | Process nhẹ, poll outbox và recovery | Đóng khoảng hở DB commit/publish; thêm một process để vận hành |
-| Storage | `StoragePort`, local private volume trước | Ít hạ tầng; sau này thay bằng S3-compatible adapter |
-| Web | React + TypeScript + Vite | Viewer/editor ba màn hình; Backend sở hữu UI scope nhỏ |
-| OCR | PaddleOCR adapter, bật tiếng Việt | Khóa package/model revision sau spike; không dựa default model động |
-| Extraction | Rule baseline + VLM adapter fine-tuned | Cùng output/schema để so sánh; model cụ thể là quyết định tuần 2 |
-| Observability | Structured logs + job metrics | Có trace IDs; không triển khai ELK/Kubernetes trong MVP |
-| Deployment | Docker Compose trên Linux/WSL2 | Môi trường tái lập; GPU worker dùng profile riêng khi có GPU |
+| Business API và HTML | Spring Boot/MVC; REST `/api/v1` + Thymeleaf | Backend |
+| Auth | Spring Security, session cookie, CSRF; demo users giả | Backend |
+| Business persistence | PostgreSQL; Spring Data JPA/Hibernate; Flyway | Backend |
+| Job execution | Java job-runner profile riêng, PostgreSQL durable queue | Backend |
+| AI transport | Private HTTP multipart request/JSON response | Java client: Backend; Python server: AI-2 |
+| AI compute | FastAPI composition + preprocess/OCR/extraction/evidence | AI-2 wiring; AI-1 OCR |
+| Dataset/evaluation | Python offline; manifest/splits/evaluator versioned | Data |
+| Training/release | Python offline, không tranh GPU với serving khi demo | AI-2 |
+| Storage | Private local volumes; Java authorize serving assets | Backend; AI chỉ attempt outputs |
+| Demo deployment | Compose: app, job-runner, ai-service, postgres | Backend; AI review runtime |
 
-FastAPI khuyến nghị công cụ như Celery cho computation nặng ở process khác: [Background tasks](https://fastapi.tiangolo.com/tutorial/background-tasks/). PaddleOCR có `vi`, nhưng mức hỗ trợ phụ thuộc OCR version: [tài liệu chính thức](https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html). Version/package trong thiết kế chưa phải lockfile đã kiểm chứng.
+Không dùng Celery/Redis/outbox/React/Alembic ở thiết kế đích. Exact JDK/Spring/dependency versions được kiểm và pin tuần 1–2, không tự cài trong lượt thiết kế. Java 21 là target đề xuất cần đối chiếu version Spring/backend environment.
 
-## 2. Ranh giới và ownership
+## 2. Ownership và dependencies
 
-| Module | Sở hữu | Public operations |
-|---|---|---|
-| `identity` | User và quyền | authenticate, authorize_document |
-| `documents` | Document, file metadata, head pointer, version | upload, get, compare_and_swap_head |
-| `jobs` | ProcessingJob, lease/attempt, OutboxMessage | create, claim, heartbeat, complete, fail, cancel |
-| `review` | ReviewRevision, Approval | create_initial, edit, adopt, approve, get_snapshot |
-| `exports` | ExportArtifact | export_approved_revision |
-| `pipeline` | CPU/GPU computation, không sở hữu DB entity | process_document → PipelineResult |
-| `ml` | Training/inference adapter và model manifest | load_release, predict; train/evaluate offline |
-| `data` | Generator, adapters, dataset manifest | generate, normalize, validate, split |
-| `evaluation` | Metric, holdout, reports | evaluate_artifacts; không viết state nghiệp vụ |
-| `infrastructure` | DB session/UoW, broker, storage, logging | Adapter cho ports; không chứa approval rule |
+Java feature packages: `identity`, `documents`, `jobs`, `review`, `exports`; `aiclient` là adapter I/O, `persistence/storage` là infrastructure. Controllers HTML/REST gọi cùng application services; không duplicate approval rules. Entities/DTO không là model ML.
 
-`contracts` là dữ liệu trao đổi chung, không là nơi gom business logic. Một UnitOfWork có thể commit nhiều module trong transaction; quyền ghi entity vẫn đi qua service của module sở hữu. ORM models chỉ ở persistence adapter; route không query DB trực tiếp; pipeline/model không tự ghi result state.
+Python: `contracts` (compute/OCR types), `pipeline`, `ml`, `data`, `evaluation`, `entrypoints/api` (private compute), `entrypoints/cli` (offline). Python không có DB credentials, không claim business jobs, không approve/export hay callback ghi business DB. Training không tự activate release.
 
-Audit được append qua một `AuditPort` trong cùng transaction với thay đổi business. Module khác không sửa audit cũ. Đây là audit application-level, không phải bằng chứng chống admin DB thay đổi dữ liệu.
+Contract dùng schema trung lập ở [specs/contracts](../specs/contracts/README.md). Mỗi ngôn ngữ validate cùng valid/invalid fixtures. Không dùng Pydantic generated schema để tự đổi schema authoritative của Java.
 
-## 3. Luồng thành phần
+Module Java không query tables module khác ngoài service/port được review. Native SQL claim/CAS đặt trong owning repository adapter dùng cùng transaction manager, không thêm ORM thứ hai. API/UI không gọi AI trực tiếp trong request xử lý người dùng.
 
-Browser → API → application services → UoW/PostgreSQL và storage.
+## 3. Data flow và canonical assets
 
-Job service commit job + outbox → dispatcher → Redis → worker → pipeline → OCR/extraction/validation → completion service → PostgreSQL.
+1. Browser upload PNG/JPEG/PDF + type → Java authorize, admission bounds, private original/hash → metadata 201.
+2. Người dùng tạo job → Java transaction ghi `QUEUED`, pin pipeline/model manifest và request idempotency →202.
+3. Runner poll DB, claim một eligible job với attempt/fence/lease; commit, rồi gửi original bytes + metadata tới Python ngoài transaction.
+4. Python xác minh input/hash/limits, render canonical page, OCR → extraction → normalization → evidence/confidence. Chỉ attempt-scoped artifacts, không business state.
+5. Python trả compute response. Java validate schema/correlation/provenance/safe asset paths/hash, promote verified copy sang private committed assets, rồi kiểm current fence và transaction ghi immutable run + job success + audit.
+6. Chưa có head: tạo draft bằng atomic guard head-null. Đã có head (kể cả user vừa sửa): giữ head, run là candidate. Completion/save cạnh tranh phải serialize trên document row.
+7. Thymeleaf viewer dùng canonical page của run mà revision dẫn tới; edit/adopt append revision, approve current head, export explicit approved snapshot.
 
-Worker gọi cùng application services với API; không gọi HTTP ngược API. Dispatcher không chạy model. Training process tách khỏi serving, đọc dataset snapshot và xuất model release manifest.
+Original bất biến. Python ghi canonical/OCR dưới `attempts/{job_id}/{attempt_id}/` trong volume riêng; Java stream-copy attempt assets sang Java-owned committed storage, kiểm hash/size trên chính bytes đã copy và decode bản copy trước atomic publish. DB chỉ trỏ promoted keys; Python không writable committed assets. Không serve trực tiếp attempt files để tránh biến đổi/TOCTOU sau validation. Canonical page phải theo revision/run, không lấy page từ rerun mới để vẽ evidence revision cũ. Trước run đầu có thể hiển thị original preview nhưng không overlay canonical evidence lên original chưa chuẩn hóa.
 
-## 4. Queue semantics và fencing
+## 4. Job protocol và concurrency
 
-Không hứa exactly-once execution. Có thể execute lại, nhưng **một committed ExtractionRun cho mỗi job** nhờ UNIQUE(job_id) và transaction/fencing.
+PostgreSQL là queue/state authority; không có commit/publish gap vì không có broker. Runner poll khoảng 1s (target), bounded executor concurrency 1, chỉ claim khi còn compute slot. Claim `FOR UPDATE SKIP LOCKED` trong transaction ngắn; HTTP không giữ DB lock/session transaction.
 
-Job creation dùng partial UNIQUE(document_id) cho các trạng thái nonterminal `QUEUED`, `RUNNING`, `RETRY_WAIT`. Lần tạo trùng trả active job hoặc 409 theo request key, không song song inference cùng document.
+Một active job/document (`QUEUED/RUNNING/RETRY_WAIT`) qua partial unique constraint. Job pin immutable manifest; một committed ExtractionRun/job qua UNIQUE(job_id). Atomic queue cap cần serialized admission guard nếu nhiều web/runner instances, không check-count rồi insert mù.
 
-Claim là CAS row với `lease_token`, `lease_until`, `attempt_count`, `stage`. Heartbeat cập nhật chỉ khi token còn current. Default dự kiến lease 60s, heartbeat 15s; deadline 180s, tối đa 3 attempts. Timeout thực khóa sau spike.
+Lease dự kiến 60s, heartbeat 15s từ scheduler độc lập với blocking HTTP. Heartbeat/completion đều CAS current attempt/fence, state RUNNING và lease chưa expired; quá deadline/cancel thì không commit. Recovery dùng DB time tăng fence; transient fail → RETRY_WAIT, backoff có jitter và next_attempt_at. Max 3 attempts nằm trong một total job deadline dự kiến 180s, không reset deadline mỗi retry. Limits khóa sau G0.
 
-Dispatcher lấy outbox bằng short transaction `FOR UPDATE SKIP LOCKED`; publish message chỉ `job_id`, không chứa file/text. Publish OK mới mark delivered. Recovery định kỳ tìm job QUEUED/RETRY_WAIT chưa được claim quá dispatch grace hoặc RUNNING lease expired, tăng fence/requeue trong transaction và tạo outbox mới. Recovery cũng bounded theo attempts/deadline.
+Response loss sau compute có thể chạy lại; không claim exactly-once execution. Late attempt assets có prefix riêng không ghi đè attempt mới. Duplicate completion cùng token/run là idempotent lookup; stale token reject. Terminal jobs không reclaim. DB outage thì không ghi success; recovery khi DB trở lại.
 
-Celery: idempotent task, `acks_late`, prefetch 1. `task_reject_on_worker_lost` cần thử kill test, không bật cùng retry OOM vô hạn. Redis visibility timeout dự kiến 900s, lớn hơn runtime tối đa; DB recovery không phụ thuộc việc chờ redelivery Redis. [Celery task semantics](https://docs.celeryq.dev/en/stable/userguide/tasks.html), [Redis caveats](https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html).
+Cancel queued/retry → CANCELLED. Cancel running atomically chuyển terminal/invalidate fence, không chỉ UI flag; late response không commit. MVP không hứa ngắt GPU ngay: Python giữ slot tới compute dừng/timeout, Java không bypass AI busy gate. Resource timeout hard-stop cần subprocess isolation/restart policy đo G0/M2.3, không giả định async cancel dừng CUDA.
 
-Attempt artifacts ghi dưới `documents/{id}/jobs/{job_id}/attempts/{lease_token}/...`. Late worker không overwrite artifact attempt mới. Chỉ DB committed pointer được viewer sử dụng; orphan cleanup theo manifest, không quét/xóa broad path.
+Python semaphore/admission concurrency 1, không thêm queue vô hạn; busy trả typed 503/Retry-After. Không dùng nhiều Uvicorn workers cùng load model trên một GPU. Web/runner profiles và startup wiring không được load model weights.
 
-## 5. Data model và constraints
+## 5. Business DB target
 
-| Table | Fields chính | Invariants |
-|---|---|---|
-| `users` | id, username, password_hash, role, active | username unique; không lưu plain password |
-| `documents` | id, owner_id, type, file_key, sha256, head_revision_id, version, created_at | Head phải thuộc document; version increment trên head/approval change |
-| `processing_jobs` | id, document_id, manifest_id, state, stage, attempt_count, lease_token/until, cancel_requested, error_code, deadline_at | Một job active/document; terminal không reclaim |
-| `extraction_runs` | id, job_id, schema_version, prediction_json, ocr_key, page_key, model_provenance, metrics | job_id unique; prediction bất biến |
-| `review_revisions` | id, document_id, extraction_run_id, parent_id, payload_json, metadata_json, creator_id, reason, created_at | Append-only content; parent cùng document; stable row IDs |
-| `approvals` | id, revision_id, actor_id, warning_ack_json, reason, created_at | revision_id unique; approve current head |
-| `export_artifacts` | id, revision_id, format, exporter_version, storage_key, sha256 | unique(revision_id,format,exporter_version); snapshot approved |
-| `outbox_messages` | id, job_id, event_type, delivered_at, next_delivery_at | At-least-once publish; row lock dispatch |
-| `audit_events` | id, actor_id/system_actor, document_id, action, base/new revision, details, created_at | Append only; details không lộ secret |
-| `idempotency_requests` | owner_id, route, key, request_hash, resource_id, expires_at | unique(owner_id,route,key); khác hash →409 |
-| `model_releases` | id, manifest_key/hash, schema_version, lifecycle, active_since | Manifest immutable; một active release/profile |
-
-JSONB lưu payload type-specific để tránh entity-attribute-value hàng nghìn row. Validation giữ bên application; DB FK/unique/CAS giữ invariants quan hệ. Tables không phải ER schema pháp lý của chứng từ.
-
-Document head có thể null lúc upload. Tạo revision rồi gán head trong transaction; dùng composite FK hoặc explicit guard để ngăn reference revision của document khác. `parent_id` và `extraction_run_id` cũng có guard document ownership.
-
-## 6. Review concurrency
-
-API GET trả `document_version`. Save/adopt/approve yêu cầu expected version và head ID. CAS UPDATE documents WHERE id AND version=:expected; 0 rows →409. Transaction rollback toàn revision/audit nếu CAS fail.
-
-Payload revision không sửa in-place. Approval là row riêng, không thay payload. Save sau approve tạo draft head mới; export revision cũ vẫn hợp lệ nếu người dùng chọn rõ. Approval phải kiểm rules với đúng payload snapshot và increment document version để serialize với save/adopt.
-
-SQLAlchemy có `version_id_col`, nhưng chỉ bảo vệ một số đường ORM flush; explicit CAS vẫn cần cho updates ngoài đường đó. [Version counter](https://docs.sqlalchemy.org/en/20/orm/versioning.html). Không dựa chỉ frontend disable button.
-
-## 7. Storage và model provenance
-
-Private local volume `storage/` được mount API/worker; browser chỉ lấy qua authorized API route, không static public directory. S3 adapter sau này cần sửa deployment ADR, không sửa pipeline business contract.
-
-Object classes: original input, canonical page, preprocess image/transform, OCR JSON, raw/model output, prediction JSON, approved export. DB chỉ lưu keys/hash/size. Model release là folder read-only: weights/adapter/tokenizer/processor + immutable manifest.
-
-Job pin release ID lúc tạo. Worker loader cache tối đa một release nếu chỉ một GPU; load release khác là cold start được đo. Không dùng `latest` remote revision runtime. API activation không sửa weights; new release → new manifest ID. Existing job giữ version cũ hoặc fail actionable nếu artifact không còn.
-
-Original input bất biến. Canonical page sau EXIF/PDF render là hệ tọa độ viewer. Preprocess giữ inverse transform từ processed → canonical. Missing transform/evidence → source bbox null, không vẽ vùng sai.
-
-## 8. Resource và deployment profile
-
-Target demo: 5 operator đồng thời, 1 inference job/GPU, queue cap 20 active jobs toàn instance, file ≤20 MiB, 1 page, ≤20 MP, ≤30 rows. API metadata p95 mục tiêu ≤500ms ở 5 clients, không tính upload/inference. Pipeline p95 mục tiêu ≤120s, deadline ≤180s sau hardware spike. Đây là target, chưa có số đo.
-
-CPU profile chạy rule baseline và OCR, có thể dùng extraction checkpoint nhỏ nếu thực nghiệm đủ nhanh. GPU profile chạy model đã chọn; không tuyên bố GPU X GB đủ trước phép đo. Serving/training không tranh cùng GPU khi demo; worker model warm-up trước buổi nghiệm thu.
-
-Celery CUDA process được thử với pool `solo`/concurrency 1 trong spike; chặn load model trước unsafe fork. CPU OCR ban đầu tránh chiếm VRAM extraction. Không scale nhiều worker GPU khi chưa có capacity/memory evidence.
-
-Docker Compose services: `web` (static/reverse proxy), `api`, `dispatcher`, `worker`, `postgres`, `redis`. PostgreSQL/Redis không expose ra internet. Browser cùng origin `/api/v1`, giảm CORS complexity. Health API, DB readiness và worker heartbeat/model readiness tách nhau.
-
-## 9. Security và vận hành cần có
-
-File signature/decode, size/pixel/page cap, PDF subprocess timeout, object-key path safety; prompt coi text tài liệu là dữ liệu, model không có tools/network. Không URL-fetch tùy ý. Local samples fictional; public samples chỉ dùng sau audit nguồn/PII/terms.
-
-Access token giữ trong memory, expiration ngắn; API authorize từng document/run/revision/page/export. Admin actions audit. Secrets environment, `.env` không commit. Logs có request_id/job_id/document_id/stage/duration/error_code, không raw OCR hoặc nội dung mẫu nhạy cảm.
-
-Metrics: queue age, jobs by state/stage, attempts, OCR/extraction latency, JSON parse failure, OOM, missing field rate, validation issues, manual correction rate. Không biến số corrections thành model accuracy nếu thiếu ground truth.
-
-Backup PostgreSQL + storage manifest cùng epoch demo. Restore rehearsal xác minh FK và file hashes. Rollback app container/tag và active model release; migration expand-compatible trước, không rollback DB bằng thao tác phá dữ liệu.
-
-Retention MVP không có auto-delete dữ liệu user. Cleanup chỉ staging/attempt orphan được registry xác định; TTL đề xuất 24h staging và 7 ngày orphan attempts, admin dry-run/review trước delete. Dữ liệu approved cần chính sách riêng khi productionize.
-
-## 10. Failure matrix cần test
-
-| Failure injection | Expected outcome |
+| Record | Constraints/rules |
 |---|---|
-| API chết sau DB commit job, trước publish | Outbox dispatcher vẫn publish |
-| Dispatcher chết sau publish, trước mark | Duplicate message; một committed run |
-| Redis mất message/restart | DB reconciliation requeue job chưa claim |
-| Worker chết giữa inference | Lease expires, attempt mới; stale token không commit |
-| DB outage khi completion | Không ACK success; retry/recovery giữ idempotency |
-| Approve và save cạnh tranh | Một transaction thành công; còn lại 409 |
-| Rerun thành công sau user đã sửa | Candidate riêng; head user không bị thay |
-| Storage mất object | Job fail rõ; không trả result fake |
-| Model output chứa lệnh/injection | Bị coi là text; không gọi tool hoặc thực thi |
+| users | unique username, hashed password, active/role |
+| documents | owner/type/original key/hash; head/version; head thuộc đúng document |
+| processing_jobs | pinned manifest/state/stage/attempt/fence/lease/deadline/next_attempt_at; active unique/document |
+| extraction_runs | unique job_id; immutable prediction/evidence/issues/provenance; attempt asset references |
+| review_revisions | append-only content; parent/run cùng document; stable row metadata |
+| approvals | unique revision; exact current head revalidated; warning acknowledgements |
+| export_artifacts | unique revision/format/exporter version; bytes/hash ổn định |
+| audit_events | append action/actor/base/new revision trong cùng transaction |
+| idempotency_requests | owner/route/key + hash; same key khác request →409 |
+| model_releases | immutable manifest/hash; activation chỉ job mới |
 
-## 11. Fitness rules và remediation
+Không còn outbox_messages. Payload type-specific JSONB có schema validation trong Java; relational FK/unique/CAS vẫn cần, JSONB không thay constraints. Head/parent guards kiểm cross-document; partial unique race mapping về stable errors.
 
-CI AST/import check: contracts không import FastAPI/ORM/model frameworks; pipeline không import business persistence; routes chỉ gọi public services; modules không import private internals nhau. Cycle detection phải dựa imports thực, không graph hard-code.
+## 6. Review/approval/export
 
-Behavior checks: one committed run/job, approval revision unchanged, export checksum stable, version conflict, bbox inverse transform. Vi phạm boundary: chuyển logic về owning service/adapter rồi update contract; không tạo wrapper không cần thiết. CI failure phải nêu file/import hoặc invariant cụ thể để reviewer sửa được.
+Save/adopt/approve gửi expected version + head; explicit CAS trong transaction, stale →409 và rollback revision/audit. JPA optimistic locking không tự bảo vệ mọi native/bulk update, cần kiểm đường CAS cụ thể.
+
+Approval revalidate bằng Java domain validator: schema, ngày/giờ semantic, total non-null/nonambiguous, blockers, completeness, warnings. Python issues là evidence hỗ trợ, không approval authority. Save sau approve tạo draft mới; export approved cũ vẫn giữ snapshot. Serialize decimal strings, deterministic key ordering/UTF-8, timestamp lấy persisted snapshot chứ không tạo mới mỗi export.
+
+## 7. Security, limits, provenance
+
+Public session cookie HttpOnly/SameSite/Secure phù hợp deploy; CSRF cả form lẫn JS mutations. Render OCR/model text escaped (`th:text`/DOM textContent), không raw HTML/eval. Object authorization cho page/job/run/revision/export; không serve storage thành static directory.
+
+Private AI network + service credential runtime (không Git/log); fixed base URL, no arbitrary URL/file path from input. Byte/page/pixel/decode/depth/output/token caps cả Java admission và Python decode. File names không là filesystem paths. AI artifacts untrusted: containment, symlink/path traversal, hash/size/content type/canonical dimensions/prefix check trước commit.
+
+Job pin pipeline manifest gồm OCR/preprocess/model/processor/normalizer/calibrator/schema versions/hashes. Missing release →fail rõ; không remote latest runtime. Activation/rollback do Java admin flow hoặc controlled operational command, AI training không tự đổi production.
+
+Profile targets chưa đo: 5operators, queue20, 20MiB,20MP,1page,30rows, compute p95≤120s, deadline180s, API metadata p95≤500ms. Không hứa GPU memory trước spike. Logs chỉ IDs/stage/time/error, không document text/secrets.
+
+## 8. Failure matrix và verification owner
+
+| Inject | Expected | Task |
+|---|---|---|
+| App chết sau commit job | Runner vẫn tìm job DB | B3.1/B6.1 |
+| Hai runner claim đồng thời | Một current lease; không giữ lock qua HTTP | B3.1 |
+| Runner chết giữa HTTP | Lease expiry/retry bounded; stale response không commit | B3.3/B6.1 |
+| Python hoàn tất nhưng mất response | Retry có thể compute lại, một committed run/job | B3.2/M2.3 |
+| Cancel trong inference | Terminal fence chặn completion; UI không claim GPU đã dừng | B3.3/M2.3 |
+| DB outage lúc complete | Không success giả; recovery có bounds | B6.1 |
+| AI busy/OOM/invalid output | Busy transient; OOM/config/output-invalid không retry vô hạn | M2.3/B3.3 |
+| Save/approve/adopt/first completion race | CAS/row guard; head không bị ghi đè | B4.1–B4.3 |
+| Asset prefix/hash/symlink sai | Reject, không publish unsafe artifact | B3.2 |
+| Session/CSRF/XSS/owner khác | Reject/escaped; browser giữ local edits khi409 | B2.1/B5.2/B6.1 |
+
+Fitness checks cần viết theo implementation: Java module rules (ArchUnit hoặc equivalent), Python no business persistence imports/DB creds, schema cross-language, migration lineage, actual-provider E2E. Sửa vi phạm ở owning service/adapter, không thêm wrapper che cycle. Docs/UML validation không thay các checks runtime này.
+
+## 9. Delivery và migration
+
+Giữ scaffold legacy read-only (có SPEC chỉ đường), tạo Java code khi B1.3 bắt đầu; không tạo classes TODO. Target structure ở [source-structure](source-structure.md), task/weekly output ở [doc từng người](team/README.md). Java 12–16h/tuần là rủi ro chính: ưu tiên receipt vertical slice W4, ít UI polish; không dồn code về Lead. W13–16 dùng reliability/ML gap, không thêm scope.
+
+[Spring MVC/Thymeleaf](https://docs.spring.io/spring-boot/reference/web/servlet.html) và [Flyway](https://docs.spring.io/spring-boot/how-to/data-initialization.html) hỗ trợ stack đề xuất; [PostgreSQL SKIP LOCKED](https://www.postgresql.org/docs/current/sql-select.html) dành cho queue-like consumers. Các lựa chọn trong tài liệu là thiết kế của VietDoc, chưa có benchmark triển khai.

@@ -2,7 +2,9 @@
 
 Mở SPEC.md ngay trong folder phụ trách, rồi doc cá nhân trong bảng dưới. Mỗi doc có roadmap tuần, task nhỏ/input/steps/output/acceptance, reviewer, Git Flow và checklist bàn giao. [SPEC của docs/team](SPEC.md) giải thích chính folder này; [workflow chung](workflow.md) giữ handoffs/gates, không plan cá nhân thứ hai.
 
-Repo hiện có scaffold và thiết kế; các file implementation nêu trong hướng dẫn là file cần viết khi nhận việc. Chưa gán bốn username GitHub vào vai trò vì chưa có phân công thực tế.
+Repo hiện có scaffold và thiết kế Java/Spring Boot/Thymeleaf + Python AI; các file implementation nêu trong hướng dẫn là file cần viết khi nhận việc. Chưa gán bốn username GitHub vào vai trò vì chưa có phân công thực tế.
+
+UI Thymeleaf đã được chọn. Python pipeline/serving giao AI-2 (M2.3); AI-1 giữ preprocess/OCR; Backend giữ Java runner/client/DB/UI. [Architecture](../architecture.md), [compute protocol](../../specs/contracts/compute-api.md) là active design; v1 là snapshot.
 
 ## Từ ngữ dùng trong hướng dẫn
 
@@ -24,7 +26,7 @@ Repo hiện có scaffold và thiết kế; các file implementation nêu trong h
 | Lead | [lead.md](lead.md) — 6 task nhỏ | L1.1/L1.2: scope, người nhận việc, interfaces |
 | Data Engineer | [data-engineer.md](data-engineer.md) — 8 task nhỏ | D1.1/D1.2: dictionary, 20 tài liệu giả/gold |
 | AI-1: preprocessing & OCR | [ai-1-ocr.md](ai-1-ocr.md) — 8 task nhỏ | O1.1/O1.2/O1.3: canonical/preprocess/OCR thật |
-| AI-2: extraction & fine-tuning | [ai-2-extraction.md](ai-2-extraction.md) — 11 task nhỏ | M1.1/M1.2/M1.3: hardware/license/infer/train-step |
+| AI-2: extraction & fine-tuning | [ai-2-extraction.md](ai-2-extraction.md) — 12 task nhỏ | M1.1/M1.2/M1.3: hardware/license/infer/train-step |
 | Backend | [backend.md](backend.md) — 15 task nhỏ | B1.1/B1.2/B1.3: contracts/types/checks/app tối thiểu |
 
 ## Bài toán chung
@@ -69,10 +71,10 @@ Business payload đúng cho ví dụ này:
 |---|---|---|
 | Data | Giá trị giả/template → ảnh, gold JSON, transcript, manifest | Hai AI và Backend |
 | AI-1 | Ảnh/PDF → canonical page, OCR text/quad/score/version | AI-2 và viewer Backend |
-| AI-2 | Type + image/OCR context → prediction, issues, provenance | Pipeline/worker Backend |
+| AI-2 | Type + image/OCR context → prediction, issues, provenance | Private compute service → Java client Backend |
 | Backend | Prediction → revision, approval, export | Người dùng và Lead nghiệm thu |
 
-Backend implement types trong `src/vietdoc/contracts/`; AI/Data đề xuất và review phần mình dùng. Thay key/type/geometry/version cần báo consumer và Lead trước merge. Consumer có thể dùng tiny fixtures đúng contract trong lúc provider chưa hoàn tất; fixtures không được report như kết quả AI thật.
+Backend owns shared schema/protocol/Java DTO, AI-1 OCR types, AI-2 private compute types trong Python. Hai phía validate cùng fixtures. Thay key/type/geometry/version cần báo consumer và Lead trước merge. Consumer có thể dùng tiny fixtures đúng contract trong lúc provider chưa hoàn tất; fixtures không được report như kết quả AI thật.
 
 ## Thứ tự làm lần đầu
 
@@ -83,7 +85,7 @@ Backend implement types trong `src/vietdoc/contracts/`; AI/Data đề xuất và
 
 ## Ai viết phần tích hợp?
 
-Phân công cụ thể đề xuất cho lần kickoff này: Backend viết lớp nối mỏng `pipeline/service.py` và worker; AI-1 bàn giao preprocessing/OCR/evidence; AI-2 bàn giao extraction/normalization/confidence/model loading. Hai AI review cách Backend gọi các stage. Lead xác nhận phân công trước khi giao việc; đây là phần làm rõ ownership tích hợp, không phải thay đổi kiến trúc.
+Phân công thiết kế mới: AI-2 viết Python pipeline/service.py và private compute service (M2.3); AI-1 bàn giao preprocessing/OCR/geometry/evidence và review wiring; Backend viết Java runner/client/completion + Thymeleaf. Shared schema writer Backend, consumers validate cùng fixtures. Lead duyệt ADR-0009 và capacity trước implementation.
 
 Backend không viết lại thuật toán AI trong lớp nối. AI không ghi business DB, tạo revision hay quyết định approval. Data tạo gold và evaluator, AI-2 chuyển dataset sang format model; AI-1 không phải nhận luôn cả phần chuẩn bị training input của AI-2.
 
@@ -107,4 +109,4 @@ Khi giao task, ghi làm gì, ai làm, xong khi nào, input/version, reviewer và
 
 Feature/bug từ develop → PR develop → peer review → Lead duyệt/merge → consumer smoke. Không push thẳng main/develop, force-push hoặc stage data/weights/secrets. Lệnh thực hành ở [workflow](workflow.md), policy ở [Git Flow](../git-flow.md), reviewer theo doc cá nhân.
 
-Repo đủ context để kickoff/giao task đầu tiên, chưa app/model chạy. Lead cần gán bốn username vào vai trò, xác nhận hardware/capacity/ownership lớp nối và quyết định ADR khi áp dụng. GitHub access/protection/CI cần kiểm tra riêng; đọc [audit local](../reviews/repository-readiness-2026-10-07.md) trước claim integration/release ready.
+Repo đủ context để kickoff/giao task đầu tiên, chưa app/model chạy. Lead cần gán bốn username vào vai trò, xác nhận hardware/capacity/ADR-0009/transport/capacity và quyết định ADR khi áp dụng. GitHub access/protection/CI cần kiểm tra riêng; đọc [audit local](../reviews/repository-readiness-2026-10-07.md) trước claim integration/release ready.

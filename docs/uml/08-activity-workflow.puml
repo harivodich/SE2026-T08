@@ -1,39 +1,47 @@
 @startuml
-title Activity — xử lý và kiểm duyệt
+title Activity target — Java commits, Python computes, human approves
 skinparam defaultFontName Arial
 skinparam shadowing false
-skinparam backgroundColor #FFFFFF
-skinparam ArrowColor #405670
-|Operator|
+|Operator / Thymeleaf|
 start
-:Chọn loại / upload;
-|API / Services|
-if (File/profile hợp lệ?) then (yes)
-:Commit job + outbox;
-|Worker|
-:Claim / render / OCR / extraction;
-if (Result schema hợp lệ?) then (yes)
-|API / Services|
-:Commit run / draft hoặc candidate;
-|Operator|
+:Choose type / upload;
+|Java services|
+if (Auth/file/profile valid?) then (yes)
+:Commit original metadata;\ncreate durable QUEUED job, pin manifest;
+|Java runner|
+:Claim short DB transaction;\nprivate HTTP outside transaction;
+|Python ai-service|
+:Admission slot / resource bounds;
+:Canonical render / OCR / extraction;\nnormalization / evidence / attempt artifacts;
+|Java runner|
+if (Valid response/assets and current fence?) then (yes)
+:Commit immutable run;\nhead-null guard => draft, otherwise candidate;
+|Operator / Thymeleaf|
+:Select/adopt candidate if intended;
 repeat
-:Đối chiếu source / sửa / save;
-|API / Services|
-:Kiểm approval guards;
-repeat while (Còn issue hoặc conflict?) is (yes) not (no)
-:Record approval snapshot;
-|Operator|
-:Export JSON revision đã approve;
+:Compare source / edit fields/items / save;
+|Java services|
+:Revalidate head/version;\nappend revision + CAS;
+|Operator / Thymeleaf|
+repeat while (Issues/conflict need correction?) is (yes) not (no)
+:Confirm review / acknowledge warnings;
+|Java services|
+if (Current head + approval guards pass?) then (yes)
+:Record approval + version CAS + audit;
+:Export explicit approved revision;\ndeterministic bytes/hash;
+|Operator / Thymeleaf|
+:Download approved JSON;
 stop
 else (no)
-:Fail hoặc bounded retry theo job state;
+:409/422; preserve user edits;\nretry review deliberately;
 stop
 endif
 else (no)
-:Reject + actionable error;
+:Bounded transient retry or typed fail;\nstale/cancelled attempt cannot commit;
 stop
 endif
-legend bottom
-Swimlane phân trách nhiệm; input không hợp profile bị reject, model result không tự được approve.
-endlegend
+else (no)
+:Reject actionable error;
+stop
+endif
 @enduml

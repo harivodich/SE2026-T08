@@ -1,37 +1,12 @@
 # SPEC — VietDoc root
 
-## Purpose và owner
+Điểm vào repo; Lead architecture/review, Backend bootstrap. Java/Spring Boot/Thymeleaf ở [backend](backend/SPEC.md), Python AI/Data ở [src](src/SPEC.md); mở SPEC ngay working folder.
 
-Điểm vào repo và quy ước chung. Owner: Lead/Backend.
+- [requirements/contracts](specs/SPEC.md), [docs/ADR/UML/team](docs/SPEC.md)
+- [tests](tests/SPEC.md), [infra](infra/SPEC.md), [Git/PR](.github/SPEC.md)
+- [datasets](datasets/SPEC.md), [model/eval artifacts](artifacts/SPEC.md), [private runtime](storage/SPEC.md)
+- [web legacy](web/SPEC.md), [migrations legacy](migrations/SPEC.md)
 
-## Đặt gì ở đây?
+[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. 25 Python init hiện docstring-only, Java chưa app; docs không app proof.
 
-README/AGENTS/pyproject/Git config files; source ở src/, UI ở web/, requirements ở specs/, workflow theo người ở docs/team/.
-
-## Ranh giới và dữ liệu
-
-Không đặt datasets/weights/runtime files ở root; không sửa .git thủ công. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
-
-## Workflow và kết quả cần kiểm
-
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](docs/team/lead.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Đọc SPEC.md ngay trong folder định sửa, kiểm scope/owner/diff/ignore; không claim app chạy từ folders tồn tại.
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](docs/git-flow.md), không direct push main/develop.
-
-## Folder liên quan
-
-Root repo. [Scope](specs/scope.md).
-- [.github](.github/SPEC.md)
-- [artifacts](artifacts/SPEC.md)
-- [datasets](datasets/SPEC.md)
-- [docs](docs/SPEC.md)
-- [infra](infra/SPEC.md)
-- [migrations](migrations/SPEC.md)
-- [specs](specs/SPEC.md)
-- [src](src/SPEC.md)
-- [storage](storage/SPEC.md)
-- [tests](tests/SPEC.md)
-- [web](web/SPEC.md)
-
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 bất biến, current task chỉ local redesign, chưa commit/push. [Git Flow](docs/git-flow.md): bootstrap main theo Lead yêu cầu riêng; team feature→develop khi coding bắt đầu.

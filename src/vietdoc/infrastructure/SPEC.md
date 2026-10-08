@@ -2,28 +2,25 @@
 
 ## Purpose và owner
 
-I/O adapters/composition support Owner: Backend.
+Compute adapters Owner: AI-2; AI-1 engine integration.
 
 ## Đặt gì ở đây?
 
-persistence/storage/queue, registry/observability khi code cần
+Attempt storage/logging/release loading; persistence/queue subfolders legacy.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không domain approval logic hoặc ORM thứ hai Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Không business ORM/broker/DB credentials, no originals/exports writable.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. B2/B3/B6: real boundaries, transactions, lifecycle, safe paths/config
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. M2.3 path/hash/attempt isolation và lifecycle; consumer Backend kiểm artifacts. Ghi actual commands/results và limitations, [Git Flow](../../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../../specs/scope.md).
-- [persistence](persistence/SPEC.md)
+[Scope](../../../specs/scope.md), [structure](../../../docs/source-structure.md), [architecture](../../../docs/architecture.md).
 - [queue](queue/SPEC.md)
+- [persistence](persistence/SPEC.md)
 - [storage](storage/SPEC.md)
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

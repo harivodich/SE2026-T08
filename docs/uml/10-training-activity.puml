@@ -32,7 +32,9 @@ repeat while (Cần thử candidate khác?) is (yes) not (no)
 |Lead|
 if (Quality/correctness pass?) then (yes)
 |AI-2|
-:Manifest / model card / smoke / activate;
+:Manifest / model card / serving smoke;
+|Backend / Lead|
+:Controlled activation for NEW jobs\nexisting jobs retain pinned release;
 else (no)
 |Lead|
 :Report failed criteria; new dev/test if iterate;

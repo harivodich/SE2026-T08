@@ -1,5 +1,7 @@
 # VietDoc — xác minh thực tế và SPEC từng folder
 
+> Evidence/kiểm kê của thiết kế Python-only trước redesign. Kiến trúc hiện hành và checks mới ở [redesign report](architecture-redesign-2026-10-07.md); không dùng kết quả cũ làm Java/Thymeleaf runtime proof.
+
 Ngày: 07/10/2026, Asia/Saigon. Báo cáo này thay trạng thái unverified trong [audit trước](repository-readiness-2026-10-07.md). Kết quả là kiểm tra tài liệu/contracts/design assets hiện có, không nghiệm thu ứng dụng chưa implement.
 
 ## 1. Spec ngay trong folder

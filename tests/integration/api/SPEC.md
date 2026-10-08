@@ -2,26 +2,23 @@
 
 ## Purpose và owner
 
-Real API Owner: Backend.
+Private Python compute integration tests Owner: AI-2.
 
 ## Đặt gì ở đây?
 
-Auth/upload/jobs/review/export client cases
+Multipart/private auth/shape/errors/limits/lifecycle/busy tests.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không secrets/real docs hoặc assertions chỉ kiểm file tồn tại thay behavior. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Không public FastAPI business API; Java API tests ở backend.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Owner/invalid input/status/nonblocking/conflict response
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. M2.3 use fixtures wiring + real OCR smoke separately. Ghi actual commands/results và limitations, [Git Flow](../../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../../specs/scope.md).
-Folder này không có subfolder làm việc cần spec riêng.
+[Scope](../../../specs/scope.md), [structure](../../../docs/source-structure.md), [architecture](../../../docs/architecture.md).
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

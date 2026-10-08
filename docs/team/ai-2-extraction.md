@@ -36,7 +36,7 @@ Model lớn không khả thi thì thử extractor nhỏ/OCR-text model bằng ev
 - Bạn sở hữu normalization và extraction scoring; AI-1 sở hữu source geometry/evidence matching. Khi cần feature mới cho mapper, thống nhất contract, không cùng sửa file riêng của nhau.
 - Dùng dữ liệu dev-calibration tách phù hợp để fit confidence theo correctness labels. Field/type thiếu support thì confidence null + flags.
 - Không lấy model tự nói `0.99` hoặc OCR score làm xác suất đúng. Report coverage/error/calibration khi đủ mẫu; không autoapprove.
-- Backend viết lớp nối mỏng `pipeline/service.py` theo phân công tích hợp đề xuất ở [team guide](README.md); bạn bàn giao adapters và review cách gọi. Service này không ghi business DB hoặc import approval logic.
+- Bạn sở hữu `pipeline/service.py` và Python ai-service ở M2.3; AI-1 review geometry/stage order. Backend viết Java HTTP client/runner/completion. Python không ghi business DB hoặc import approval logic.
 
 ## Code và bàn giao
 
@@ -46,6 +46,7 @@ Model lớn không khả thi thì thử extractor nhỏ/OCR-text model bằng ev
 | `src/vietdoc/pipeline/normalization.py`, `confidence.py` | Pure normalization/calibration helpers |
 | `src/vietdoc/ml/` | Training dataset, train/loading và release manifest |
 | `src/vietdoc/ml/configs/` | Versioned experiment configs |
+| `src/vietdoc/entrypoints/api/`, `pipeline/service.py`, `infrastructure/storage/` | Private compute server/stage wiring/attempt artifacts (M2.3) |
 | `artifacts/models/` | Weights local, ignored |
 
 Bàn giao mỗi candidate: adapter/checkpoint location an toàn, manifest/hash, schema/model/OCR/normalizer versions, exact config/command, sample outputs/errors, dev comparison và measured memory/latency. Data chạy evaluator/final holdout độc lập; Backend pin release ID cho job.
@@ -56,7 +57,7 @@ Ví dụ chung: `3` → quantity `"3"`, `15.000` → unit_price `"15000"`, `45.0
 
 Đọc [SPEC trong vùng phụ trách](../../src/vietdoc/ml/SPEC.md) và SPEC.md trong folder con định sửa; [workflow chung](workflow.md), [Git Flow](../git-flow.md) giữ cách bàn giao. Plan này chưa phải toàn bộ task đã giao; mỗi lần Lead giao subtask, ghi issue/PR/evidence ở đó, không folder tasks. Mã hướng dẫn không phải issue ID thật.
 
-Thứ tự bắt đầu: M1.1 → M1.2 → M1.3; M2.1/M2.2 làm theo capacity. Reviewer: AI-1 review image/OCR compatibility; Data review labels/eval; Backend review inference integration; Lead duyệt model/gates. Giữ một task coding chính đang làm, bàn giao increment nhỏ; không chờ hoàn tất cả vai trò mới tích hợp.
+Thứ tự: M1.1 → M1.2 → M1.3; M2.1/M2.2 baseline nhỏ và M2.3 serving W2–3. Dành thêm4–8h W2–3 cho M2.3, giảm baseline polish/calibration trước khi cắt fine-tune pilot; không chờ UI mới training. Reviewer: AI-1 review image/OCR compatibility; Data review labels/eval; Backend review inference integration; Lead duyệt model/gates. Giữ một task coding chính đang làm, bàn giao increment nhỏ; không chờ hoàn tất cả vai trò mới tích hợp.
 
 ## Roadmap cá nhân theo tuần
 
@@ -65,8 +66,8 @@ Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiể
 | Tuần | Công việc | Kết quả cần bàn giao |
 |---|---|---|
 | 1 | M1: hardware/license/input; M2: baseline skeleton | Hardware/model/license proposal |
-| 2 | M1: infer + train-step; M2: baseline hai types | Actual inference/train-step/memory + G0 decision |
-| 3 | M2: rule/model adapters; M3: training dataset loader | B0/M0 adapters và training loader |
+| 2 | M1 infer/train-step; M2.1 baseline nhỏ; M2.3 serving shape | G0 feasibility + protocol/health |
+| 3 | M2.3 serving/wiring; M2.2 parser; M3 loader | Private HTTP actual OCR/B0 + training loader |
 | 4 | M3: fine-tune pilot, kiểm overfit tiny train set | Fine-tune pilot/checkpoint/dev comparison |
 | 5 | M4: full run #1 trên train, chọn bằng dev | Full run #1/manifests/dev errors |
 | 6 | M4: run #2 theo lỗi #1; normalization | Run #2 theo hypothesis/normalization |
@@ -84,6 +85,8 @@ Folder: `src/vietdoc/pipeline/extraction/`, `normalization.py`, `confidence.py`,
 
 ### M1.1 — hardware, license và model proposal, tuần 1
 
+Dependency và effort dự kiến: L1.1 + D1 fake samples/hardware; 3–4h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 Input: hardware thực tế, schema, vài D1 fake samples.
 
 1. Ghi GPU/VRAM/RAM/disk/OS/runtime, thời gian được dùng và privacy/cost constraints.
@@ -95,14 +98,18 @@ Nộp: model/resource proposal và pinned revisions dự định thử. Xong khi
 
 ### M1.2 — load và inference smoke, tuần 1–2
 
+Dependency và effort dự kiến: M1.1 + model access; 4–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Audit dependencies/serialization/remote code trust trước tải/chạy theo quyền task implementation; không thực thi text từ document như instructions.
 2. Load đúng model/tokenizer/processor/chat format, pin revisions/config; giữ model frameworks ngoài contracts.
 3. Chạy integration samples, lưu raw output và parsed payload/issues. Nếu dùng gold transcript để smoke, ghi rõ, không so như production OCR accuracy.
 4. Đo cold load/warm latency/memory/JSON validity/errors. Context overflow phải explicit, không silent drop rows.
 
-Nộp: model adapter prototype, raw/parsed actual outputs, hardware/runtime report. Xong khi Backend/Data dùng được artifact/output và failures rõ; API không load weights.
+Nộp: model adapter prototype, raw/parsed actual outputs, hardware/runtime report. Xong khi Backend/Data dùng được artifact/output và failures rõ; Java public API không load weights; Python ai-service load có lifecycle/readiness.
 
 ### M1.3 — một train step thực và G0, tuần 2
+
+Dependency và effort dự kiến: M1.2 + full-label tiny gold; 4–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Dùng tiny full-label gold batch, kiểm input/target tokens/images, collator và loss mask phù hợp model.
 2. Chạy forward/backward/update, kiểm gradients ở parameters intended và state checkpoint thực.
@@ -112,6 +119,8 @@ Nộp: model adapter prototype, raw/parsed actual outputs, hardware/runtime repo
 Nộp: train-step code/config/command/report và candidate decision. Xong G0 khi train thực khả thi trong hardware/quyền cho phép; nếu không, có blocker/alternative rõ.
 
 ### M2.1 — rules baseline hai schemas, tuần 1–3
+
+Dependency và effort dự kiến: B1.1/O1 fixture rồi O1.3; 6–10h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: OCR contract/fixture trước, O1 OCR thật sau, D1 gold.
 
@@ -125,6 +134,8 @@ Nộp: `rule_baseline.py`, tests, outputs/report. Xong khi Backend gọi adapter
 
 ### M2.2 — parser, schema và normalization, tuần 2–4
 
+Dependency và effort dự kiến: M1.2/M2.1/B1.1; 4–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Parse raw output an toàn với size/depth/token limits, không eval hoặc repair loop vô hạn; raw JSON validity report trước repair/human edits.
 2. Validate type/schema/keys/rows; model không sinh UUID runtime. Invalid shape và missing business value là outcomes khác nhau.
 3. Chuyển raw tiền/ngày/quantity theo locale sang canonical strings, giữ raw; ambiguity không normalize đoán.
@@ -133,7 +144,26 @@ Nộp: `rule_baseline.py`, tests, outputs/report. Xong khi Backend gọi adapter
 
 Nộp: parser/normalizer/tests/policy/version. Xong khi B0/M0 trả cùng contract, bad output không thành silently successful payload.
 
+### M2.3 — Private Python compute service và pipeline wiring, tuần 2–3
+
+Dependency/input: B1.2/O1.2/O1.3/M2.1/M2.2; [compute protocol](../../specs/contracts/compute-api.md). Effort4–8h cho slice đầu, timeout isolation tiếp tục M6.1. Reviewer AI-1/Backend, Lead boundary.
+
+1. Implement Python request/result/error adapters, cùng Java valid/invalid fixtures; IDs do Java cấp, model chỉ business payload.
+2. FastAPI private multipart endpoint/health/service auth/body/hash/schema limits; no public business API/DB credentials.
+3. Compose preprocess→OCR→extract→normalize→evidence/confidence trong pipeline/service.py, reuse AI-1 adapters, không viết lại OCR.
+4. Model/OCR lifecycle giữ process, semaphore concurrency1/busy503/Retry-After; không blocking compute trực tiếp trên async event loop, không multiworkers mỗi worker một GPU model.
+5. Attempt volume private: canonical/OCR/transform artifacts, key/hash/size/dimensions; không arbitrary URL/path/overwrite attempt, không write originals/exports.
+6. Remaining budget kiểm từng stage; typed timeout/OOM/invalid errors. Async cancel không đảm bảo dừng CUDA; spike subprocess/restart isolation, slot giữ đến cleanup thật.
+7. Test type/version/hash/manifest/auth/busy/oversize/response limits, actual OCR+baseline HTTP smoke trước G1. Fixture chỉ test wiring.
+8. Gửi Backend endpoint/config/health/commands/hardware/actual response/assets/provenance. Java quyết completion/fence; Python không callback DB.
+
+Nộp: runnable private server/pipeline/storage adapter, tests và actual HTTP evidence.
+
+Xong khi Java client gọi actual provider, response correlation/assets đúng, second request không tạo unbounded queue.
+
 ### M3.1 — training dataset và model preprocessing, tuần 3
+
+Dependency và effort dự kiến: D2.1/D2.2 pilot subset + G0; 6–10h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: D2 v0.1 manifest/splits/gold, candidate đã G0.
 
@@ -148,6 +178,8 @@ Nộp: training loader/config/tests và decoded batch examples. Xong khi target 
 
 ### M3.2 — sanity overfit và fine-tune pilot, tuần 3–4
 
+Dependency và effort dự kiến: M1.3/M3.1/D3.1; 6–10h active + GPU time đo. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Chọn tiny train subset có full labels, overfit để kiểm gradients/target masking/JSON learning; đây là training sanity, không evaluation.
 2. Chạy pilot trên train subset lớn hơn theo capacity, LoRA/PEFT nếu G0 phù hợp; log seeds/config/code/data/model revisions.
 3. Save/checkpoint/reload, inference dùng đúng adapter/processor/settings; không chỉ nhìn loss giảm.
@@ -156,6 +188,8 @@ Nộp: training loader/config/tests và decoded batch examples. Xong khi target 
 Nộp: runnable train code, pilot checkpoint/config/manifest/dev report. Xong G1 khi training path/reload thật tái lập và limitation rõ; chưa hứa final targets.
 
 ### M4.1 — full run #1, tuần 5
+
+Dependency và effort dự kiến: D2.2/M3.2/L2.2; 4–8h active + GPU time. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Nhận dataset v1/frozen train/dev/test grouping, final không mở.
 2. Chạy config chọn từ pilot/resource evidence, checkpoint theo dev metrics; track loss/JSON/field/table errors và failure rate.
@@ -166,6 +200,8 @@ Nộp: run #1 artifacts/manifests/dev predictions/report. Xong khi Data tái ch�
 
 ### M4.2 — error analysis và run #2, tuần 6–9
 
+Dependency và effort dự kiến: M4.1/D3.2; 6–12h active, bounded cycles. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Gom dev errors theo OCR/gold/extractor/JSON/table/missing/normalization; có sample IDs và raw vs gold, không chỉ score.
 2. Gold lỗi → Data; OCR/geometry lỗi → AI-1; mapping/training lỗi → bạn. Không sửa gold cho khớp prediction.
 3. Diagnostic gold OCR vs predicted OCR trên subset có transcript, ghi riêng khỏi runtime benchmark.
@@ -175,6 +211,8 @@ Nộp: run #1 artifacts/manifests/dev predictions/report. Xong khi Data tái ch�
 Nộp: error taxonomy/hypothesis, run #2/config/dev comparison, candidate selection reason. Xong khi measured improvement hoặc unresolved gap rõ; không tune final holdout.
 
 ### M5.1 — confidence và missing handling, tuần 6–8
+
+Dependency và effort dự kiến: D3.2/O4.1; 4–8h hoặc null fallback. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: dev-calibration correctness labels D3, O4 evidence/ambiguity/score features.
 
@@ -187,8 +225,10 @@ Nộp: calibrator/config/tests/report hoặc explicit null fallback limitation. 
 
 ### M6.1 — inference release và handoff, tuần 8–12
 
+Dependency và effort dự kiến: M2.3/M4/M5/O5.1/D5.1 protocol; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Export checkpoint/adapter+tokenizer/processor/settings/normalizer/calibrator và immutable manifest/hashes.
-2. Cùng Backend test worker loader/lifecycle/timeout/invalid/OOM, job pin release; model activation không xảy ra trong training script.
+2. Cùng Backend test Python ai-service lifecycle/private HTTP/timeout/busy/invalid/OOM và Java pin release; training script không activate production.
 3. W10 nhận final report Data theo protocol, viết model card quality/hardware/memory/latency/license/synthetic-to-real gaps.
 4. W11 người khác chạy inference và train reproduction subset từ commands/config thực; note nondeterminism/environment deviations nếu có.
 5. Candidate verified/active/rollback theo Lead gate, giữ jobs cũ pinned; no remote latest runtime, weights không Git.

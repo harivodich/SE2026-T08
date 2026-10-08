@@ -92,3 +92,12 @@ Thumbs.db
 Desktop.ini
 *.log
 *.tmp
+
+# Java/Maven/Gradle build outputs (wrapper binaries reviewed separately)
+**/target/
+.gradle/
+*.class
+*.war
+hs_err_pid*
+replay_pid*
+# Deliberately do not ignore every jar: reviewed Maven wrapper may be tracked.

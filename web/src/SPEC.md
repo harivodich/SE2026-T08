@@ -2,29 +2,26 @@
 
 ## Purpose và owner
 
-UI modules Owner: Backend.
+Legacy scaffold: không dùng để triển khai mới. Owner: Backend giữ reference.
 
 ## Đặt gì ở đây?
 
-app/features/components/api, shared types theo OpenAPI.
+Không thêm runtime code/dependencies ở đây. Đích: backend/src/main/resources/templates và static.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không raw documents/weights hoặc business DB logic. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Java/Thymeleaf + Python AI theo ADR-0009 thay stack v1; không chạy hai business/UI/migration implementations song song.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. B5: actual provider integration, typed requests/responses.
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../docs/team/backend.md), nhận một task có input/version/output/acceptance. Cleanup cần PR riêng sau verified Java slice; không xóa source người dùng trong lượt thiết kế. Ghi actual commands/results và limitations, [Git Flow](../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../specs/scope.md).
+[Scope](../../specs/scope.md), [structure](../../docs/source-structure.md), [architecture](../../docs/architecture.md).
 - [api](api/SPEC.md)
-- [app](app/SPEC.md)
 - [components](components/SPEC.md)
+- [app](app/SPEC.md)
 - [features](features/SPEC.md)
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+Legacy placeholders giữ nguyên để đối chiếu; chưa xóa.

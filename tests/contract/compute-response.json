@@ -1,0 +1,58 @@
+{
+  "contract_version": 1,
+  "attempt_id": "33333333-3333-4333-8333-333333333333",
+  "result": {
+    "run_id": "22222222-2222-4222-8222-222222222222",
+    "job_id": "11111111-1111-4111-8111-111111111111",
+    "document_type": "receipt",
+    "schema_version": "receipt.v1",
+    "language": "vi",
+    "payload": {
+      "merchant_name": "CỬA HÀNG GIẢ",
+      "merchant_address": null,
+      "transaction_date": "2026-10-07",
+      "transaction_time": null,
+      "total_amount": "45000",
+      "items": [
+        {
+          "description": "Cà phê",
+          "quantity": "3",
+          "unit": "ly",
+          "unit_price": "15000",
+          "line_total": "45000"
+        }
+      ]
+    },
+    "field_metadata": [],
+    "issues": [],
+    "provenance": {
+      "pipeline_manifest_id": "fixture_pipeline.v1",
+      "ocr_version": "fixture_ocr.v1",
+      "extractor_release_id": "fixture_rules.v1",
+      "normalizer_version": "fixture_normalizer.v1"
+    }
+  },
+  "canonical_page": {
+    "page": 0,
+    "width": 1000,
+    "height": 1200,
+    "asset_key": "attempts/11111111-1111-4111-8111-111111111111/33333333-3333-4333-8333-333333333333/canonical.png",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "artifacts": [
+    {
+      "kind": "canonical_page",
+      "asset_key": "attempts/11111111-1111-4111-8111-111111111111/33333333-3333-4333-8333-333333333333/canonical.png",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 100,
+      "media_type": "image/png"
+    },
+    {
+      "kind": "ocr",
+      "asset_key": "attempts/11111111-1111-4111-8111-111111111111/33333333-3333-4333-8333-333333333333/ocr.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 100,
+      "media_type": "application/json"
+    }
+  ]
+}

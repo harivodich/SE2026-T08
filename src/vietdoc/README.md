@@ -1,26 +1,21 @@
-# Source Python
+# Python AI/Data source
 
-Các package hiện giữ chỗ cho code theo thiết kế. Chưa có server/model chạy từ các folder này.
+Hiện package init chỉ docstring, chưa inference/training/server implementation. Python chỉ computation và offline Data/ML; Java quản lý business state.
 
-| Folder | Viết gì ở đây | Phụ trách |
-|---|---|---|
-| contracts/ | Kiểu dữ liệu/schema chung: receipt, invoice, OCR, result | Backend, Lead review |
-| identity/ | Login và quyền truy cập | Backend |
-| documents/ | Upload, metadata và head revision | Backend |
-| jobs/ | Tạo job, lease, retry, completion | Backend |
-| review/ | Sửa, validate và approve revision | Backend |
-| exports/ | JSON của revision đã approve | Backend |
-| pipeline/preprocess.py, geometry.py, evidence.py | Preprocessing/canonical transforms/evidence; files tạo khi triển khai | AI-1 |
-| pipeline/ocr/ | OCR port/engine adapter | AI-1 |
-| pipeline/extraction/ | Rule/model extraction adapters | AI-2 |
-| pipeline/normalization.py, confidence.py | Normalization/calibration; files tạo khi triển khai | AI-2 |
-| pipeline/service.py | Thin wiring, không viết lại algorithms | Đề xuất Backend, hai AI review, Lead chốt |
-| data/ | Generator, dataset adapters, manifest và splits | Data Engineer |
-| ml/ | Training, model loading/config và release manifest | AI-2 |
-| evaluation/ | Metrics và báo cáo chất lượng | Data, hai AI review |
-| infrastructure/ | DB, storage, broker adapters | Backend |
-| entrypoints/ | Nơi khởi động API, worker, dispatcher, CLI | Backend |
+| Vùng active | Owner và output |
+|---|---|
+| contracts/ | AI-1 OCR/page, AI-2 compute typed adapters; shared JSON schemas ở specs/contracts |
+| pipeline/preprocess.py,geometry.py,evidence.py,ocr/ | AI-1 canonical/preprocess/OCR/source regions |
+| pipeline/extraction/,normalization.py,confidence.py | AI-2 extraction/fine-tune adapter/normalization/calibration |
+| pipeline/service.py | AI-2 wiring, AI-1 review, không business services |
+| entrypoints/api/,api/routes/ | AI-2 private compute/health, không public review API |
+| infrastructure/storage/ | AI-2 attempt artifacts, no originals/exports/business DB |
+| data/,evaluation/ | Data generator/gold/splits/metrics/reports |
+| ml/ | AI-2 train/loading/release configs; no automatic activation |
+| entrypoints/cli/ | Data offline data/eval commands; AI-2 training/model CLI |
 
-Logic nghiệp vụ ở module sở hữu; routes chỉ gọi service. Model không ghi business DB và API không load weights. Training/evaluation đọc dataset snapshot riêng. Trước khi sửa interface chung, thống nhất với consumer và Lead.
+`identity/documents/jobs/review/exports`, `infrastructure/persistence/queue`, `entrypoints/worker/dispatcher` là legacy scaffold: không implementation mới, Java target ở [backend](../../backend/SPEC.md). Chưa xóa placeholders trong lượt thiết kế.
 
-Tạo file khi có việc cụ thể, không thêm TODO services. Mỗi module có SPEC.md; [spec package](SPEC.md) dẫn specs con. [Doc cá nhân](../../docs/team/README.md) giữ roadmap/task/Git Flow. Cây đích ở [source structure](../../docs/source-structure.md); file đích chưa implement không là thiếu scaffold.
+Python server được phép load model theo lifecycle trong process riêng; Java web API không load weights. Python không DB credentials, claim/cancel business jobs hoặc approve/export. Contracts không import API/model frameworks.
+
+Mở SPEC ngay folder định sửa, [doc vai trò](../../docs/team/README.md), [compute protocol](../../specs/contracts/compute-api.md). Big outputs ở ignored datasets/artifacts/runtime, chỉ tiny fictional fixtures có review vào Git.

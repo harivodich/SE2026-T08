@@ -1,5 +1,7 @@
 # VietDoc — audit sẵn sàng giao việc
 
+> Evidence/kiểm kê của thiết kế Python-only trước redesign. Kiến trúc hiện hành và checks mới ở [redesign report](architecture-redesign-2026-10-07.md); không dùng kết quả cũ làm Java/Thymeleaf runtime proof.
+
 > Đây là snapshot audit trước khi thêm SPEC.md từng folder/chạy tool kiểm định. Xem [verification mới](verification-2026-10-07.md) cho kết quả hiện hành; counts và unverified dưới đây là lịch sử, không còn trạng thái mới nhất.
 
 Ngày: 07/10/2026, Asia/Saigon. Audit local tại D:\SE, không đọc lại GitHub invitations/protection/CI settings hoặc publish gì.

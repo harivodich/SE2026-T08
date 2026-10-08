@@ -45,7 +45,7 @@ Mỗi branch giải quyết một task. Tránh tên chung như `feature/update`,
 
 Nếu chưa dùng Jira, lấy số GitHub issue làm mã `SE-<số_issue>`, ví dụ `feature/SE-1_receipt_schema`. Chỉ mở issue khi bắt đầu giao việc, không cần tạo toàn bộ backlog trước.
 
-Lần publish đầu tiên của repo dùng `main` cho khung chung, sau đó tạo `develop` từ cùng commit. Đây là bước khởi tạo; các thay đổi phát triển tiếp theo đi qua feature/bug branch và PR theo quy trình dưới đây. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
+Ngoại lệ bootstrap VietDoc: khi Lead đang hoàn thiện khung và yêu cầu riêng, có thể commit/push main; không tự tạo branch mới trái chỉ dẫn. Lượt redesign hiện chỉ sửa local, chưa được yêu cầu commit/push. Trước team coding, Lead đồng bộ develop từ main đã kiểm bằng fast-forward/PR phù hợp lịch sử, không force/reset; sau đó feature/bug đi qua PR như dưới đây. Ngoại lệ này không áp dụng cho feature thường xuyên. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
 
 ## 3. Feature và QA bug
 

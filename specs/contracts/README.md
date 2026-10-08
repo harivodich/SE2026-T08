@@ -1,22 +1,26 @@
-# Reference contracts v1
+# Contracts authoritative và adapters Java/Python
 
-Các JSON Schema này sao chép nguyên trạng từ [snapshot thiết kế](../../docs/design/v1/README.md). Chưa có Pydantic models hoặc OpenAPI implementation; không duy trì hai bộ contracts thủ công khi code được tạo.
+Schema Draft 2020-12 ở đây là contract trung lập cho thiết kế đích. Java DTO và Python models phải validate cùng schema/fixtures; Pydantic hay Jackson không được tự sinh bản khác rồi coi schema đổi là mặc định. Chưa có runtime adapters/OpenAPI.
 
-| Schema | Contract |
+| Contract | Dùng ở đâu |
 |---|---|
-| [business](business.schema.json) | Receipt/invoice và line items |
-| [extraction result](extraction-result.schema.json) | Prediction + evidence/issues/provenance |
-| [job message](job-message.schema.json) | Broker chỉ message version/job ID |
-| [export](export.schema.json) | Business envelope cho approved revision |
+| [business](business.schema.json) | Receipt/invoice/line items, dataset gold/model/review/export |
+| [extraction result](extraction-result.schema.json) | Prediction/evidence/issues/provenance; IDs do application cấp |
+| [export](export.schema.json) | Approved revision JSON |
+| [compute request](compute-request.schema.json) | Java runner metadata + original multipart bytes |
+| [compute response](compute-response.schema.json) | Python result + attempt assets/canonical page |
+| [compute error](compute-error.schema.json) | Stable private AI errors |
+| [job message](job-message.schema.json) | Legacy broker schema, giữ compatibility; không dùng MVP mới |
 
-Chi tiết fields, API/error envelopes và ports: [contracts design](../../docs/design/v1/03-contracts.md). Ví dụ chỉ là dữ liệu giả: [receipt](../../docs/design/v1/examples/receipt.json), [invoice](../../docs/design/v1/examples/invoice.json), [result](../../docs/design/v1/examples/extraction-result.json), [export](../../docs/design/v1/examples/export.json).
+[Java public API/Thymeleaf routes](public-api.md) và [shared fictional fixtures](../../tests/contract/README.md) là input implementation. [Compute protocol](compute-api.md) là nguồn cho transport/errors/semantic checks. [Approval policy](../approval-policy.md) là nguồn domain review. API công khai cần OpenAPI do Java implementation tạo B1.3/B2/B4, đồng bộ examples/checks; internal OpenAPI do Python implementation tạo M2.3. Hai API có boundary khác nhau.
 
-## Rules
+## Rules và authority
 
-- `document_type=receipt|invoice`, schema `receipt.v1|invoice.v1`, language `vi`.
-- All business keys hiện diện; string/null; tiền/quantity là decimal strings.
-- Bbox là normalized quad canonical page 0; unavailable evidence/confidence không tự bịa.
-- Structural schema không kiểm ownership/FK, approved state, ngày thực, JSON Pointer existence, arithmetic hoặc quad semantics: application validators cần làm riêng.
-- `$ref` dùng URN nội bộ, validator phải đăng ký schemas, không tự fetch URL ngoài.
-- Contract PR đi trước consumer PR. Breaking version change phải đồng bộ dataset/model/evaluator/frontend/exporter.
-- Backend tạo Pydantic source-of-truth rồi generate JSON Schema/OpenAPI/types, thêm project contract tests. Bootstrap chưa chạy compiler; [verification 07/10](../../docs/reviews/verification-2026-10-07.md) đã dùng Draft 2020-12 kiểm 8 schema và 50 cases. Reference checks không thay runtime/API/approval tests.
+- Type receipt/invoice; schema receipt.v1/invoice.v1; language vi. All business keys present, decimal strings/null,≤30items.
+- Normalized canonical quad page0; confidence/evidence unavailable không tự bịa.
+- Schema không kiểm ownership/state, date arithmetic, JSON Pointer existence, asset containment/hash/provenance correlation: owning validators cần tests riêng.
+- URN refs đăng ký local registry; không auto fetch refs ngoài mạng.
+- Shared schema PR trước consumers; breaking change version + data/model/evaluator/Java/Python/export compatibility.
+- Backend owns schema/protocol/Java DTO; AI-1 OCR geometry types; AI-2 private compute types; Data gold validation. Lead review interface, không coding backlog.
+- [Các ví dụ v1](../../docs/design/v1/examples/receipt.json) là dữ liệu giả, giữ nguyên. Snapshot không authority mới khi có mâu thuẫn stack.
+- [Verification cũ](../../docs/reviews/verification-2026-10-07.md) kiểm schemas v1, không bằng chứng Java/Python API chạy. Kiểm mới được ghi trong báo cáo redesign.

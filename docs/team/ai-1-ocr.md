@@ -6,7 +6,7 @@ Bạn phụ trách preprocessing ảnh đầu vào, geometry, OCR và evidence n
 
 1. Review OCR contract cùng Backend/AI-2: canonical image/dimensions, ordered blocks, block IDs, text, quad, score, OCR version và lỗi.
 2. Chọn một pretrained OCR engine có hỗ trợ tiếng Việt để smoke; PaddleOCR adapter là hướng thiết kế hiện tại. Pin package/model version đã chạy được, không dựa mặc định latest.
-3. Đọc PNG/JPEG đúng channel order/dtype/range và EXIF orientation; PDF một trang được render thành canonical image trong worker với resource limits đã thống nhất.
+3. Đọc PNG/JPEG đúng channel order/dtype/range và EXIF orientation; PDF một trang được render thành canonical image trong Python ai-service với resource limits đã thống nhất.
 4. Trả mỗi vùng chữ: block ID, text, bốn điểm quad trong [0,1] và engine score. Trả page index 0, image dimensions và version rõ ràng.
 5. Chạy trên 20 sample, lưu OCR result gắn sample ID. So với transcript/region gold của Data; ghi sample nào sai dấu, mất số, đảo thứ tự hoặc boxes lệch.
 6. Bàn giao adapter gọi được và vài output thực theo contract; report latency/config/hardware, lỗi runtime và giới hạn đã gặp.
@@ -37,7 +37,7 @@ Bàn giao source regions và block IDs cho field paths, report ambiguity/coverag
 | `src/vietdoc/pipeline/evidence.py` | Match prediction với source blocks |
 | `tests/unit/pipeline/`, `tests/fixtures/` | Geometry/OCR boundary fixtures và checks |
 
-Backend implement shared OCR types theo proposal đã review. Data owns evaluator chung; bạn hỗ trợ OCR/geometry correctness definitions. Output chạy lớn ở `artifacts/evaluation/`, không commit hàng loạt ảnh/OCR text.
+AI-1 implement Python OCR/page types theo shared schema/proposal; Backend implement Java DTO tương ứng. Hai phía validate cùng fixtures, không import types qua ngôn ngữ. Data owns evaluator chung; bạn hỗ trợ OCR/geometry correctness definitions. Output chạy lớn ở `artifacts/evaluation/`, không commit hàng loạt ảnh/OCR text.
 
 ## Kiểm tra trước PR
 
@@ -81,18 +81,22 @@ Folder: `src/vietdoc/pipeline/preprocess.py`, `geometry.py`, `ocr/`, `evidence.p
 
 ### O1.1 — thống nhất ảnh chuẩn và input, tuần 1
 
-Input: D1 samples, B1 page contract proposal, file/resource scope.
+Dependency và effort dự kiến: L1.2/B1.2/D1 samples; 3–4h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
+Input: D1 samples, B1.2 compute/page proposal, file/resource scope; xem [private compute protocol](../../specs/contracts/compute-api.md).
 
 1. Chốt canonical là ảnh viewer sau EXIF orientation/PDF render, page=0 và dimensions rõ.
 2. Ghi channel order/dtype/range engine cần; phân biệt original/canonical/processed image.
 3. Thống nhất quad point order/coordinates/normalization, inverse transform và unavailable outcomes cùng Backend/AI-2.
 4. Chốt admission của Backend và compute decode/render limits cùng policy; không tự đọc arbitrary file path từ request.
 
-Nộp: input/geometry examples và proposal để Backend viết types. Xong khi viewer/extractor cùng hiểu một box và orientation.
+Nộp: input/geometry examples, Python types và proposal để Backend viết Java DTO. Xong khi viewer/extractor cùng hiểu một box và orientation.
 
 ### O1.2 — loader và preprocessing tối thiểu, tuần 1–2
 
-1. Decode JPEG/PNG, xử lý EXIF; PDF không mã hóa một trang render trong worker dưới byte/page/pixel/time limits đã review.
+Dependency và effort dự kiến: O1.1; 6–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
+1. Decode JPEG/PNG, xử lý EXIF; PDF không mã hóa một trang render trong Python ai-service dưới byte/page/pixel/time limits đã review.
 2. Convert color space/dtype/range đúng OCR, canonical dimensions giữ rõ; resize riêng processed nếu cần.
 3. Trả PreparedPage/compute artifacts theo B1, transform processed→canonical; reject corrupt/unsupported/out-of-profile bằng typed errors.
 4. Test blank/corrupt/rotated/oversized/multipage; không crop/deskew nâng cao trước baseline.
@@ -101,14 +105,18 @@ Nộp: loader/preprocess code/tests/config, vài canonical/processed pairs. Xong
 
 ### O1.3 — OCR engine adapter thật, tuần 1–2
 
+Dependency và effort dự kiến: O1.2/D1.2; 6–10h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Chọn pretrained Vietnamese OCR candidate theo thiết kế, pin/audit engine+model revisions đã smoke; không assume latest/default đúng model.
-2. Loader lifecycle giữ engine theo worker process, không API. Gọi OCR trên prepared images, chuyển vendor output sang common types.
+2. Loader lifecycle giữ engine trong Python ai-service process, không Java web API. AI-2 compose lifecycle theo M2.3. Gọi OCR trên prepared images, chuyển vendor output sang common types.
 3. Xuất block IDs/text/quad/score/read order/page/dimensions/versions; không sinh fake text/score khi engine fail.
 4. Chạy D1 thật và gửi OCR JSON cho AI-2 consume. Ghi cold load/warm latency/memory/hardware và các lỗi.
 
 Nộp: OCR port/adapter/config, actual outputs và report. Xong G0 khi AI-2 parse dùng được, engine chạy thật, failed samples report đầy đủ.
 
 ### O2.1 — geometry correctness và overlays, tuần 2–3
+
+Dependency và effort dự kiến: O1.2/O1.3; 6–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Unit tests identity/resize/rotate/crop mapping và round-trip điểm với tolerance đã định nghĩa.
 2. Map quads processed→canonical, normalize về [0,1], finite và bounds; missing transform đánh dấu unavailable.
@@ -119,6 +127,8 @@ Nộp: geometry tests/overlay và order cases. Xong khi test/consumer overlay đ
 
 ### O2.2 — OCR error baseline, tuần 2–3
 
+Dependency và effort dự kiến: O1.3/D3.1; 4–6h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Chạy D3 evaluator trên transcript gold, per-type/clean/skew/small-text slices.
 2. Gom errors dấu/số/missing/order/geometry/runtime theo sample IDs; lưu OCR version/config.
 3. Cùng AI-2 chấm ảnh hưởng total/items; không chỉ báo CER trung bình.
@@ -128,6 +138,8 @@ Nộp: OCR report/errored samples và hypothesis. Xong khi Lead/Data tái tính 
 
 ### O3.1 — cải thiện preprocessing, tuần 4–6
 
+Dependency và effort dự kiến: O2.2 measured dev errors; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Chọn một lỗi có evidence, thử một thay đổi: deskew/contrast/resolution/noise handling.
 2. Giữ cùng engine/evaluator/dev inputs, chạy before/after; measure CER/WER, extraction totals/items, memory/time.
 3. Lưu transforms/version/config, regression tests clean/skew/wrap; không làm mất source rồi giữ gold như đọc được.
@@ -136,6 +148,8 @@ Nộp: OCR report/errored samples và hypothesis. Xong khi Lead/Data tái tính 
 Nộp: preprocessing increment + before/after report. Xong khi có measured improvement hoặc quyết định loại bỏ có lý do, canonical overlay vẫn đúng.
 
 ### O4.1 — source evidence matcher, tuần 3–7
+
+Dependency và effort dự kiến: O2.1/M2.1/M2.2; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: AI-2 raw values/field paths, OCR blocks và canonical geometry.
 
@@ -148,6 +162,8 @@ Input: AI-2 raw values/field paths, OCR blocks và canonical geometry.
 Nộp: evidence mapper/tests/coverage và viewer integration sample. Xong khi match đúng hoặc báo uncertainty, consumer dùng được.
 
 ### O5.1 — freeze/stress/reproduction, tuần 8–12
+
+Dependency và effort dự kiến: O3.1/O4.1/M2.3/M6.1; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Freeze OCR/preprocess/geometry/evidence versions, AI-2 pin training/inference đúng transformations.
 2. Stress corrupt/blank/skew/PDF-outside-profile/resource timeout; typed errors/lifecycle cleanup, không infinite retry.

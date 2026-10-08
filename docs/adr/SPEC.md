@@ -2,26 +2,23 @@
 
 ## Purpose và owner
 
-Architecture decisions Owner: Lead decision, Backend implementation.
+Durable decisions và alternatives Owner: Lead decision; implementers review.
 
 ## Đặt gì ở đây?
 
-8 Proposed ADRs hiện có, reason/alternatives/consequences/status.
+ADR0001–0008 Proposedv1, ADR0009 Proposed redesign.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không tự đổi Accepted vì scaffold tồn tại; significant change cần explicit decision. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+No silent Accepted/Superseded; UI Thymeleaf human-chosen, technical details need explicit Lead acceptance.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../team/lead.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Decision authority/evidence và affected consumers.
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../team/lead.md), nhận một task có input/version/output/acceptance. Check authority/status/consumer compatibility and verification criteria. Ghi actual commands/results và limitations, [Git Flow](../git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../specs/scope.md).
-Folder này không có subfolder làm việc cần spec riêng.
+[Scope](../../specs/scope.md), [structure](../source-structure.md), [architecture](../architecture.md).
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

@@ -2,37 +2,34 @@
 
 ## Purpose và owner
 
-Production Python modules cùng contracts/services. Owner: Theo module; Backend integration.
+Compute và offline Data/ML Python Owner: AI-1/AI-2/Data.
 
 ## Đặt gì ở đây?
 
-contracts, identity, documents, jobs, review, exports, pipeline, data, ml, evaluation, infrastructure, entrypoints; hiện 25 __init__.py docstrings.
+contracts/pipeline/data/ml/evaluation/entrypoints/api/cli + attempt storage; 25 init docstrings hiện tại.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Model không ghi DB; API không load weights; cross-module calls qua public services. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Legacy business/queue/worker/dispatcher chỉ reference; Python no business DB/approve/export.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Contracts trước adapters/consumers, actual receipt E2E trước nghiệm thu runtime.
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. Actual OCR/extraction HTTP phải có evidence; fixtures chỉ wiring. Ghi actual commands/results và limitations, [Git Flow](../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../specs/scope.md).
-- [contracts](contracts/SPEC.md)
+[Scope](../../specs/scope.md), [structure](../../docs/source-structure.md), [architecture](../../docs/architecture.md).
 - [data](data/SPEC.md)
-- [documents](documents/SPEC.md)
-- [entrypoints](entrypoints/SPEC.md)
-- [evaluation](evaluation/SPEC.md)
+- [contracts](contracts/SPEC.md)
 - [exports](exports/SPEC.md)
+- [evaluation](evaluation/SPEC.md)
+- [documents](documents/SPEC.md)
 - [identity](identity/SPEC.md)
+- [entrypoints](entrypoints/SPEC.md)
 - [infrastructure](infrastructure/SPEC.md)
-- [jobs](jobs/SPEC.md)
 - [ml](ml/SPEC.md)
-- [pipeline](pipeline/SPEC.md)
 - [review](review/SPEC.md)
+- [jobs](jobs/SPEC.md)
+- [pipeline](pipeline/SPEC.md)
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

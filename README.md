@@ -1,75 +1,40 @@
 # VietDoc
 
-Hệ thống trích xuất và kiểm duyệt dữ liệu chứng từ tiếng Việt từ ảnh/PDF.
+Trích xuất và kiểm duyệt receipt/invoice tiếng Việt một trang: ảnh/PDF → OCR → extraction → validation → người dùng sửa/duyệt → JSON.
 
-## Trạng thái
+## Trạng thái và stack
 
-Repository có tài liệu thiết kế và khung thư mục để team bắt đầu viết code. Các package Python hiện là scaffold; API, OCR/model và giao diện sẽ được triển khai từng phần theo việc được giao.
+Repository đang ở bước thiết kế/khung. 25 file Python hiện chỉ docstring; chưa có Java app, OCR/model runtime, UI, migrations hay CI implementation. Thiết kế mới: Java/Spring Boot/MVC + Thymeleaf quản lý nghiệp vụ; Python FastAPI private compute cho AI. PostgreSQL durable jobs, JPA/Flyway; không dùng React/Celery/Redis/Alembic cho MVP mới.
 
-## Phạm vi
+UI Thymeleaf được người dùng chọn. Chi tiết job/transport/persistence được đề xuất trong [ADR-0009](docs/adr/0009-java-python-thymeleaf.md), cần Lead duyệt; không đổi Proposed thành Accepted vì đã có docs.
 
-- Hai loại: `receipt` và `invoice`, nhiều bố cục, chữ in, một trang.
-- JPEG/PNG/PDF → OCR → extraction theo schema → validation → review/sửa → approve → JSON.
-- Field đơn và bảng tối đa 30 dòng; field thiếu hoặc mơ hồ là `null` kèm issue.
-- Prediction bất biến, sửa tạo revision mới, rerun không ghi đè head đã chỉnh.
-- Synthetic/sample đã audit; không đưa dữ liệu cá nhân thật vào demo.
+## Mở đúng hướng dẫn
 
-## Đọc trước khi làm việc
-
-| Tài liệu | Mục đích |
+| Cần làm | Đọc |
 |---|---|
-| [AGENTS.md](AGENTS.md) | Quy ước cho người và agent |
-| [Scope](specs/scope.md) | FR/NFR, input/output và non-goals |
-| [Approval policy](specs/approval-policy.md) | Save, conflict, approve và export |
-| [Contracts](specs/contracts/README.md) | Bốn JSON Schema tham chiếu |
-| [Spec ngay trong folder](SPEC.md) | Mở SPEC.md của folder đang làm: purpose/owner/content/checks |
-| [Architecture](docs/architecture.md) | Modules, queue, persistence và failure modes |
-| [Source structure](docs/source-structure.md) | Cấu trúc đích và ranh giới module |
-| [Source hiện tại](src/vietdoc/README.md) | Viết code vào đâu, phần nào thuộc ai |
-| [Hướng dẫn từng vai trò](docs/team/README.md) | Roadmap tuần, task chi tiết, output và Git Flow từng người |
-| [Workflow team](docs/team/workflow.md) | Bàn giao, Git Flow thực hành và gate nghiệm thu |
-| [ADR index](docs/adr/README.md) | Tám quyết định đang Proposed |
-| [UML](docs/uml/README.md) | Mười nguồn PlantUML và SVG |
-| [Git Flow](docs/git-flow.md) | Branch, PR, review và merge |
-| [Audit readiness](docs/reviews/repository-readiness-2026-10-07.md) | Kiểm kê file/folder, checks và phần chưa xác minh |
-| [Xác minh thực tế](docs/reviews/verification-2026-10-07.md) | Validator chuẩn, compiler UML, browser QA và runtime discovery |
-| [Bộ thiết kế gốc](docs/design/v1/README.md) | Snapshot nguyên trạng để đối chiếu |
-| [HTML tổng hợp](docs/design/v1/index.html) | Mở bằng trình duyệt để đọc và xem diagram |
+| Quy ước | [AGENTS](AGENTS.md), [SPEC ngay folder](SPEC.md) |
+| Phạm vi/approval | [Scope](specs/scope.md), [policy](specs/approval-policy.md) |
+| Kiến trúc/cấu trúc | [Architecture](docs/architecture.md), [source target](docs/source-structure.md) |
+| Java ↔ Python | [Schemas](specs/contracts/README.md), [private compute protocol](specs/contracts/compute-api.md) |
+| Giao việc từng người | [Team index](docs/team/README.md), [workflow/gates](docs/team/workflow.md) |
+| Java Backend/UI | [backend SPEC](backend/SPEC.md), [Backend roadmap](docs/team/backend.md) |
+| Python AI/Data | [Python README](src/vietdoc/README.md), SPEC trong module |
+| UML | [10 UML views](docs/uml/README.md) |
+| Quyết định/Git | [ADR index](docs/adr/README.md), [Git Flow](docs/git-flow.md) |
+| Evidence của lượt redesign | [Review/verification](docs/reviews/architecture-redesign-2026-10-07.md) |
+| Đối chiếu bản cũ | [Snapshot v1](docs/design/v1/README.md), không active stack |
 
-## Kiến trúc đề xuất
+## Scope và bất biến
 
-Modular monolith, cùng source/contracts; API, dispatcher và inference worker chạy riêng. PostgreSQL giữ business/job state, Redis chuyển job, private storage giữ artifacts. Stack đề xuất: Python 3.11, FastAPI/Pydantic, SQLAlchemy/Alembic, Celery/Redis và React/TypeScript. Model, dependencies và GPU budget sẽ chốt sau spike tuần 2.
+Receipt/invoice, chữ in, một trang, selected type,≤30rows; money/quantity decimal strings, thiếu/mơ hồ null+issue. Prediction/revisions bất biến; save/adopt append draft, stale409; approve exact current head; export explicit approved revision, stable bytes/hash. Rerun candidate không ghi đè edits. Synthetic/sample đã audit; no real PII/raw dataset/weights in Git.
 
-## Bắt đầu trên Windows
+## Bắt đầu
 
-1. Clone repo: `git clone https://github.com/harivodich/SE2026-T08.git` rồi mở thư mục đó trong Codex.
-2. `main` giữ bản chung ổn định; `develop` dùng tích hợp. Khi nhận một việc, tách branch từ `develop` theo [Git Flow](docs/git-flow.md).
-3. Mở SPEC.md ngay trong folder định sửa và [doc cá nhân](docs/team/README.md) để biết roadmap/task/Git Flow. Mỗi PR một việc; consumer review trước, Lead duyệt cuối.
-4. Lead giao task nhỏ; tiến độ/acceptance/evidence ở GitHub Issue/PR hoặc phiếu giao trực tiếp, không folder tasks và không mở sẵn toàn bộ backlog.
+1. Clone `https://github.com/harivodich/SE2026-T08.git` và mở folder trong Codex.
+2. Mở doc vai trò + SPEC local; Lead giao một task đủ input/acceptance, không toàn bộ backlog và không folder tasks.
+3. Bootstrap khung có thể làm trên main khi Lead yêu cầu riêng. Khi team coding bắt đầu, Lead đồng bộ develop với main đã kiểm; feature/bug→PR develop→peer review→Lead duyệt. Không tự suy ra quyền commit/push.
+4. Tạo implementation khi nhận task; chưa có commands start/train của app đã chạy. `pyproject.toml` hiện Python≥3.11, dependencies rỗng; Java Maven project sẽ do B1.3 tạo và smoke.
 
-Nếu chạy bằng một tài khoản sandbox khác chủ sở hữu thư mục và gặp `dubious ownership`, dùng exception chỉ cho lệnh với đúng repo đã xác minh: `git -c safe.directory=D:/SE status`. Không dùng wildcard hoặc sửa Git config global. Repo dùng TLS backend OpenSSL ở config local; kiểm chứng chứng chỉ vẫn bật.
+Working roots: `backend/` Java; `src/vietdoc/` AI/Data; `tests/` Python/shared/E2E; `infra/` deploy config. `web/`, `migrations/` và Python business scaffold cũ có SPEC legacy; không viết implementation mới tại đó. Giữ chúng để đối chiếu, chưa xóa.
 
-## Source và cấu hình
-
-`pyproject.toml` khai báo package `vietdoc`, Python ≥3.11, chưa thêm dependencies runtime. Các folder đã tạo theo thiết kế; chỉ thêm file có logic khi triển khai việc tương ứng. Chưa có lệnh chạy server hoặc training.
-
-```text
-src/vietdoc/   Python: contracts, nghiệp vụ, OCR/extraction, data, training, API/worker
-web/           React/TypeScript khi bắt đầu làm giao diện
-tests/         Unit, integration, contract và end-to-end
-migrations/    Alembic migrations do Backend quản lý
-infra/         Docker Compose và cấu hình triển khai
-datasets/      Raw/processed ở local; manifest nhỏ có thể commit
-artifacts/     Model và kết quả chạy ở local
-storage/       File người dùng/runtime ở local
-specs/         Scope, schema và approval policy
-docs/          Thiết kế, UML, Git Flow và lịch sử
-```
-
-`.gitignore` loại secrets, môi trường ảo, caches, datasets raw/processed, weights, runtime storage và outputs. File `.gitkeep` chỉ giữ thư mục trống; không chứa dữ liệu. Tiny fictional fixtures và manifests cần được review trước khi commit.
-
-Schema/diagram hiện là reference design. Khi có code, Pydantic sinh JSON Schema/OpenAPI; cập nhật contracts và docs bị ảnh hưởng trong cùng PR. Giữ `docs/design/v1` làm snapshot, không sửa nó để khớp code mới.
-
-## Giới hạn xác minh
-
-Báo cáo trong snapshot là kết quả của lượt thiết kế trước. SVG đã render; `.puml` chưa compile bằng PlantUML. Các con số accuracy/latency/dataset là mục tiêu chưa đo. Ghi chép cũ nằm trong [lịch sử bootstrap](docs/history/bootstrap-2026-10-04.md).
+Dataset/model/runtime/secret/cache/build outputs bị ignore; tiny fictional fixtures/manifests phải review trước commit. Snapshot v1 bất biến. Docs/schema/UML checks không chứng minh app/model đã chạy; xem verification report mới.

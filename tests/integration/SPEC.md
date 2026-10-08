@@ -2,29 +2,26 @@
 
 ## Purpose và owner
 
-Real adapter boundary tests Owner: Backend; AI integration review.
+Python compute và cross-runtime boundaries Owner: AI-2 compute; Backend integration consumer.
 
 ## Đặt gì ở đây?
 
-api/persistence/queue/storage fixtures/setup/teardown khi app có.
+api private AI tests; legacy queue/persistence/storage giữ reference.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không fake DB/broker rồi claim concurrency/recovery thật. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+DB/CAS/Flyway tests đặt Java; HTTP lost response/busy/cancel actual integration quan trọng.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Transactions/ownership/outbox/fence/failure injection.
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. M2.3/B3/B6: no mock locks claims as real PostgreSQL proof. Ghi actual commands/results và limitations, [Git Flow](../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../specs/scope.md).
-- [api](api/SPEC.md)
-- [persistence](persistence/SPEC.md)
+[Scope](../../specs/scope.md), [structure](../../docs/source-structure.md), [architecture](../../docs/architecture.md).
 - [queue](queue/SPEC.md)
 - [storage](storage/SPEC.md)
+- [persistence](persistence/SPEC.md)
+- [api](api/SPEC.md)
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

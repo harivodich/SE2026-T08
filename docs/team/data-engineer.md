@@ -88,6 +88,8 @@ Folder: `src/vietdoc/data/`, `src/vietdoc/evaluation/`; dữ liệu lớn ở ig
 
 ### D1.1 — data dictionary và fake values, tuần 1
 
+Dependency và effort dự kiến: L1.1 + schema; 3–4h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 Input: business schema và L1.1, không chờ API hoàn thiện.
 
 1. Với từng field ghi nghĩa, source label examples, raw format/canonical format, absent/obscured/unlabeled status.
@@ -98,6 +100,8 @@ Input: business schema và L1.1, không chờ API hoàn thiện.
 Nộp: dictionary/config và vài gold JSON valid có receipt/invoice. Xong khi AI/Backend hiểu raw/canonical và null statuses; Lead review scope.
 
 ### D1.2 — render 20 integration samples, tuần 1
+
+Dependency và effort dự kiến: D1.1/O1.1/B1.2; 6–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: D1.1 và page/geometry proposal B1.2/O1.1.
 
@@ -111,6 +115,8 @@ Nộp: 20 samples + gold/transcripts/manifest, QA notes. Xong khi schema valid, 
 
 ### D2.1 — generator tái lập và validation, tuần 2–3
 
+Dependency và effort dự kiến: D1.2; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Tách values/templates/render để cùng seed/config/version tạo cùng output theo reproducibility policy.
 2. Thêm test Unicode/font/rows 0/1/30/overflow, ngày/tiền/missing; schema/ID/hash/path/image validation.
 3. Render image/PDF one page và transcript/regions từ cùng object; không lấy OCR output làm gold.
@@ -119,6 +125,8 @@ Nộp: 20 samples + gold/transcripts/manifest, QA notes. Xong khi schema valid, 
 Nộp: generator/validator code/config/tests và sample manifest tái chạy. Xong khi fresh run tìm được cùng IDs/gold/hashes theo policy, labels không overflow đã biết chưa xử lý.
 
 ### D2.2 — families, augmentation và split, tuần 3–5
+
+Dependency và effort dự kiến: D2.1/G0; 12–18h chia PR. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: D2.1, OCR/extraction errors trên dev và capacity G0.
 
@@ -133,6 +141,8 @@ Nộp: split/generator configs, manifests/hash và counts per type/family/status
 
 ### D3.1 — evaluator scalar và OCR, tuần 2–4
 
+Dependency và effort dự kiến: D1.2/O1.3/M2.1; 6–10h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 Input: gold D1, prediction artifacts B0/M0, normalization policy AI-2, OCR conventions AI-1.
 
 1. Tạo tiny cases với score biết trước: đúng hết, sai value, null present, false fill absent, unlabeled.
@@ -145,6 +155,8 @@ Nộp: evaluator/tests, definitions/version, B0/M0 report với sample errors. X
 
 ### D3.2 — evaluator bảng/evidence và comparison, tuần 4–8
 
+Dependency và effort dự kiến: D3.1/M3.2/O4.1; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Khóa row matching policy với cases wrap/reorder/duplicate/missing; không chỉ zip rows theo thứ tự.
 2. Report matched cell accuracy/exact-row cùng unmatched/duplicate counts; số tiền/quantity/unit riêng khi phù hợp.
 3. Evidence/text-association/geometry chỉ chấm gold regions có annotation; ghi coverage/ambiguity.
@@ -155,6 +167,8 @@ Nộp: table/evidence tests/reports, comparisons và error taxonomy. Xong khi dr
 
 ### D4.1 — independent mock và optional public audit, tuần 5–9
 
+Dependency và effort dự kiến: D2.2 + Lead protocol/public authority; 6–10h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Nhờ người không viết generator phác 2–3 independent layouts mỗi type; bạn render/label/QA, không clone train coordinates.
 2. Giữ authors/source/family lineage và chấm slice riêng. Mock vẫn synthetic, không chứng minh real-document accuracy.
 3. Public source tùy chọn: trước tải/sử dụng audit terms/license/PII/language/labels/access, theo quyền được giao.
@@ -163,6 +177,8 @@ Nộp: table/evidence tests/reports, comparisons và error taxonomy. Xong khi dr
 Nộp: audited data card/manifests hoặc exclusion decision. Xong khi không có unknown PII/terms trong demo và independent layouts có gold đủ QA.
 
 ### D5.1 — frozen holdout và data handoff, tuần 10–12
+
+Dependency và effort dự kiến: M6.1/O5.1/L4.1; 8–12h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Nhận candidate/evaluator manifests/hash từ Lead; không mở holdout trước protocol.
 2. Chạy target 200–400 base documents tổng hai types, report per-type/family/quality/missing/table/independent slices, failures và support.

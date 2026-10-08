@@ -2,26 +2,23 @@
 
 ## Purpose và owner
 
-HTTP API process Owner: Backend composition; owning compute theo vai trò.
+Private compute HTTP process Owner: AI-2; AI-1 stage reviewer.
 
 ## Đặt gì ở đây?
 
-App/dependencies/routes/error envelope/health; calls public services
+FastAPI app/lifecycle/request/response/errors/compute/health.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không load weights/blocking inference/direct SQL Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Khác Java public API; load model lifecycle ở process này, compute ngoài async event loop, semaphore1.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. B1/B2/B4: real endpoints/auth/ownership/errors/OpenAPI
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. M2.3 actual OCR HTTP, auth/hash/schema/busy/timeout/OOM/cleanup; no DB credentials. Ghi actual commands/results và limitations, [Git Flow](../../../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../../../specs/scope.md).
+[Scope](../../../../specs/scope.md), [structure](../../../../docs/source-structure.md), [architecture](../../../../docs/architecture.md).
 - [routes](routes/SPEC.md)
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

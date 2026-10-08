@@ -1,6 +1,6 @@
-# UML v1
+# UML hiện hành: Java/Thymeleaf + Python AI
 
-Mười `.puml`/`.svg` là copy nguyên trạng từ [snapshot](../design/v1/08-uml-guide.md). SVG track là presentation từ canonical model, không output PlantUML compiler. [Verification 07/10](../reviews/verification-2026-10-07.md) đã compile 20 sources active/snapshot và render 10 active diagrams bằng PlantUML 1.2026.8; outputs local ignored .verification, không ghi đè SVG track.
+10 views theo target architecture, không claim code đã implement. Component/processing/deployment/activity cập nhật ADR-0009; domain/review invariants giữ nguyên. SVG hiện hành được tạo bằng PlantUML local, verification ghi trong [redesign report](../reviews/architecture-redesign-2026-10-07.md).
 
 | View | Source | SVG |
 |---|---|---|
@@ -15,4 +15,5 @@ Mười `.puml`/`.svg` là copy nguyên trạng từ [snapshot](../design/v1/08-
 | Deployment | [source](09-deployment.puml) | [view](09-deployment.svg) |
 | Training activity | [source](10-training-activity.puml) | [view](10-training-activity.svg) |
 
-Khi code thay state/contract, sửa source/diagram ở `docs/uml` trong cùng PR và review semantic relationships. Không sửa bản lưu `docs/design/v1`; khi có compiler local, compile lại và báo verification thực tế. Không gửi tài liệu lên renderer public mặc định.
+
+Sửa .puml trước, compile/render lại bằng local PlantUML, inspect SVG và semantic relationships. Snapshot docs/design/v1 bất biến, HTML snapshot còn stack cũ không dùng làm deployment authority. Không gửi source lên renderer public mặc định.

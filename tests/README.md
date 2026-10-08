@@ -1,10 +1,14 @@
-# Tests
+# Tests ownership
 
-- unit/: domain và pipeline logic.
-- integration/: API/DB/queue/storage boundaries.
-- contract/: schema và input/output giữa các module.
-- architecture/: kiểm module dependencies khi source có logic.
-- e2e/: upload → processing → review → approve → export.
-- fixtures/: chỉ tiny fictional samples; không đặt dữ liệu cá nhân, dataset đầy đủ hoặc weights.
+Chưa application tests executable.
 
-Chưa có app tests. Mỗi việc triển khai bổ sung tests cho hành vi thực sự thay đổi.
+- Java unit/integration/module/Flyway/DB/CAS tests ở backend/src/test/java, Backend owns.
+- Python unit/pipeline/data/extraction/compute tests ở đây, provider owns.
+- contract/: shared valid/invalid fixtures và cross-language parse; Backend + AI producers.
+- e2e/: actual-provider upload→job→review→approve→export, browser two-tab/CSRF/escape.
+- architecture/: Python no business DB imports, Java rules tại backend tests.
+- fixtures/: tiny fictional audited data only.
+
+tests/unit/documents,jobs,review và integration/persistence,queue,storage là legacy Python locations, không đặt Java tests tại đó. integration/api giờ là private Python compute tests, không public FastAPI business API.
+
+Test fixtures để wiring không là measured OCR/model quality. Read [architecture failure matrix](../docs/architecture.md) và [compute semantic checks](../specs/contracts/compute-api.md).

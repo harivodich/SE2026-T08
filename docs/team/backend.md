@@ -1,251 +1,253 @@
-# Backend Engineer — API, lưu trữ và UI tối giản
+# Backend Engineer: Java/Spring Boot + Thymeleaf
 
-Bạn đưa các phần Data/OCR/extraction thành ứng dụng có upload, xử lý nền, review, approve và export. Team chưa có frontend engineer riêng, nên bạn cũng làm viewer/editor cơ bản theo scope.
+Bạn sở hữu business API/DB/job/review/approval/export/UI. Bạn không viết preprocessing/OCR/fine-tune hay Python pipeline wiring. Python serving do AI-2 (M2.3), OCR/geometry do AI-1; bạn viết Java HTTP client và kiểm completion.
 
-## Bắt đầu trước: typed contracts và tests
+Đọc [backend SPEC](../../backend/SPEC.md), [architecture](../architecture.md), [source structure](../source-structure.md), [compute contract](../../specs/contracts/compute-api.md), [approval policy](../../specs/approval-policy.md). Hiện chưa Java source/pom/app chạy; filenames dưới là đích của task, không implementation có sẵn.
 
-1. Đọc [reference schemas](../../specs/contracts/README.md), [API design](../design/v1/03-contracts.md) và OCR proposal của AI-1.
-2. Viết typed models trong `src/vietdoc/contracts/`: receipt/invoice/line items, OCR/page/block, extraction input/raw/result, field metadata/issues, review DTO, job states/message và errors.
-3. Generate JSON Schema từ models khi có code. Giữ một source-of-truth; reference files được đồng bộ, không viết lại hai hệ types khác nhau mãi.
-4. Test payload hợp lệ hai loại, null/money strings, missing/unknown keys, wrong type/schema, items limit, bbox bounds và broker message chỉ chứa IDs/version.
-5. Bàn giao types + valid/invalid fixtures; AI/Data consumers thử parse. Lead review shared fields và constraints trước merge.
+## Roadmap tuần
 
-Xong khi contract rõ và consumers dùng được cùng format. Hỗ trợ fixtures để integration trong lúc model chưa xong; result fixtures không dùng để báo AI accuracy.
+Tuần tính từ kickoff, không ngày deadline đã cam kết. Ước lượng task là effort coding/checks ban đầu, cần refine sau B1.3; không cộng tất cả task vào tuần ghi ở title. Backend cần khoảng16–20h/tuần W1–4 để nhắm G1/W4, sau đó12–16h; nếu chỉ12h thì Lead điều chỉnh G1 sang W5–6 và dùng buffer13–16. Không chuyển backlog code sang Lead.
 
-## Sau contracts: upload và persistence
-
-1. Tạo app/dependency wiring, SQLAlchemy session/UoW và Alembic lineage; environment/config có bounds, secrets không commit.
-2. Implement user auth/ownership theo profile demo; kiểm document/run/revision/page/export access qua document owner.
-3. Implement `POST /api/v1/documents`: multipart file + type, 201 metadata. Kiểm streaming size, format/decoder, page/pixel/profile; file corrupt/oversize trả error rõ.
-4. Lưu original private asset bằng server-generated key/hash. DB failure không được làm mất trace của orphan asset; cleanup có registry/bounds.
-5. Implement list/detail/canonical page stream. Browser không đọc file system hoặc arbitrary object paths trực tiếp.
-
-## Job và nối pipeline
-
-1. `POST /api/v1/documents/{id}/jobs` tạo job + outbox trong transaction, trả 202; không chạy inference nặng trong route.
-2. Dispatcher publish job ID; worker claim/heartbeat, đọc pinned manifest, gọi pipeline do AI bàn giao.
-3. Completion service kiểm lease/fence, ghi một immutable run/job, update state/audit. Initial result chỉ tạo head draft nếu document chưa có head.
-4. `GET /api/v1/jobs/{id}` trả state/stage/error; worker crash/transient errors có bounded retry/recovery. OOM/model-load/output-invalid không retry vô hạn.
-5. Rerun terminal job tạo job/run mới; document đã có head nhận candidate, không overwrite edits.
-
-## Review, approve và export
-
-1. Implement revision list/get/save. Save nhận full payload, base revision, expected document version và reason; append revision + CAS head + audit cùng transaction.
-2. Stale request bị conflict; UI giữ local edits. Không last-write-wins hoặc sửa payload revision in-place.
-3. Implement adopt-run riêng với cùng version/head guard; candidate trở thành draft revision mới.
-4. Approve current revision, revalidate đúng payload, yêu cầu review confirmation và warning acknowledgement. Total phải non-null; blockers không được bypass.
-5. Export explicit approved revision thành business JSON. Cùng revision/format/exporter version cho cùng bytes/hash; draft mới không thay export cũ.
-6. Audit actor/time/action/base/new revision/reason; logs chỉ IDs/stage/duration/error, không raw documents/OCR hoặc secrets.
-
-## UI phải dùng được
-
-- Danh sách: type, job state, head review state; upload và mở detail.
-- Detail: canonical image zoom/pan; field editor; items grid thêm/sửa/xóa; issue panel; evidence highlight khi có.
-- Save/Approve/Export đúng policy server; hiển thị lỗi và version conflict bằng lời dễ hiểu.
-- Rerun result là candidate có nút adopt; history chỉ rõ revision được approve/export.
-- Generate API types từ OpenAPI khi API ổn định; polling status đủ cho bản đầu.
-
-UI không tự gán confidence hoặc quyết định approval rules; khi source region unavailable thì báo không có vùng nguồn thay vì vẽ box đoán.
-
-## Code bạn sở hữu
-
-`contracts/`, `identity/`, `documents/`, `jobs/`, `review/`, `exports/`, `infrastructure/`, `entrypoints/`, `migrations/`, `web/`, `infra/` và CI. Theo phân công tích hợp đề xuất ở [team guide](README.md), bạn viết lớp nối mỏng `pipeline/service.py`; hai AI bàn giao adapters và review cách gọi. Không duplicate thuật toán AI hoặc business rules giữa route và task.
-
-## Nghiệm thu trước bàn giao
-
-- Một receipt thật chạy từ upload đến export; sau đó thêm invoice/table.
-- Invalid file/profile, owner khác, missing total và unapproved export bị từ chối đúng specs.
-- Hai tab save cùng version: một success, một conflict; save/approve race cùng invariant.
-- Duplicate delivery chỉ một committed run; stale worker không commit; outbox/recovery đóng commit/publish gap.
-- Rerun không overwrite approved/user-edited head; export cũ vẫn đúng snapshot.
-- Fresh environment có commands/config đã chạy, dependency lock phù hợp, health/readiness, backup/restore và rollback instructions khi implementation đủ.
-
-Bàn giao: runnable source, OpenAPI/examples, migrations, UI screenshots trên mẫu giả, focused checks đã chạy, config/runbook và limitations. Lead nghiệm thu hệ thống; hai AI review integration, Data xác nhận sample labels.
-
-## Cách dùng tài liệu và reviewer
-
-Đọc [SPEC trong vùng phụ trách](../../src/vietdoc/SPEC.md) và SPEC.md trong folder con định sửa; [workflow chung](workflow.md), [Git Flow](../git-flow.md) giữ cách bàn giao. Plan này chưa phải toàn bộ task đã giao; mỗi lần Lead giao subtask, ghi issue/PR/evidence ở đó, không folder tasks. Mã hướng dẫn không phải issue ID thật.
-
-Thứ tự bắt đầu: B1.1 → B1.2/B1.3 → B2.1/B2.2 → B3.1. Reviewer: Lead review nghiệp vụ; AI review inference/geometry integration; Data xác nhận fixtures. Giữ một task coding chính đang làm, bàn giao increment nhỏ; không chờ hoàn tất cả vai trò mới tích hợp.
-
-## Roadmap cá nhân theo tuần
-
-Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiểm chứng, chưa phải tính năng hiện đã chạy. Capacity giả định IC 12–16 giờ/tuần, Lead 4–8 giờ/tuần; model/hardware/profile chốt G0. W13–16 là buffer, không tự mở scope.
-
-| Tuần | Công việc | Kết quả cần bàn giao |
+| Tuần | Việc chính | Output nghiệm thu |
 |---|---|---|
-| 1 | B1: types/tests; app/CI tối thiểu | Shared types/tests và app runnable tối thiểu |
-| 2 | B2: upload/ownership/private storage; B3: job wiring | Upload/private storage/ownership + job wiring |
-| 3 | B3: worker gọi stages thật; B4–B5: review/viewer đầu tiên | Worker actual providers; viewer/review draft |
-| 4 | B4–B5: sửa/approve/export receipt; invoice smoke | Receipt edit/approve/export E2E + invoice smoke |
-| 5 | B4–B5: invoice/items; CAS và warning guards | Invoice/items/editor và CAS/warnings |
-| 6 | B3/B6: outbox/recovery/duplicates; table workflow | Outbox/recovery/duplicate tests + G2 |
-| 7 | B4–B6: rerun/adopt/history; ownership/race tests | Rerun/adopt/history + owner/race checks |
-| 8 | B6: cancel/recovery và export history | Feature complete/cancel/export history |
-| 9 | B6: load/failure tests, logs, readiness | Load/failure/logging/readiness evidence |
-| 10 | B7: release candidate, restore rehearsal | Release candidate/restore rehearsal |
-| 11 | B7: runbook/rollback, UI/demo hoàn thiện | Runbook/rollback và clean-env reproduction |
-| 12 | B7: E2E clean environment | Two-type E2E handoff |
-| 13–16 | Reliability/performance/presentation buffer | Reliability/performance/presentation fixes theo gap |
+| 1 | B1.1, B1.2 shape, B1.3 slice | Shared fixtures, Java DTO, health/Thymeleaf chạy |
+| 2 | B2.1/B2.2 minimal; B3.1 create/claim | Auth/private upload, durable job, AI HTTP contract locked |
+| 3 | B3.2 actual compute, B4.1, B5.1 | Receipt run thật, viewer, save CAS |
+| 4 | B4.2 + B5.2 minimum | Receipt sửa field/row→approve→JSON; G1 |
+| 5 | Invoice/items; B4.3 first | Two-type editor, candidate history |
+| 6 | B3.3/B4.3/B5.2 | G2 two types/items; fencing/cancel/adopt tests |
+| 7 | Review conflicts/evidence/history | Viewer/metadata/candidate đúng revision |
+| 8 | B3.3/B5.2 feature completion | G3 đủ scope, no silent overwrite |
+| 9 | B6.1 | Failure/bounds/performance reports |
+| 10 | B7.1 release candidate | G4 correctness + restore rehearsal |
+| 11 | B7.1 clean-env/rollback | Người khác chạy được theo runbook |
+| 12 | B7.1 demo/handoff | G5 app/versions/limitations |
+| 13–16 | Đóng reliability/quality gaps | Buffer, không scope mới |
 
-## Task chi tiết: input, bước làm, output và nghiệm thu
+## Task cards để giao từng phần
 
-Folder: `src/vietdoc/contracts/`, `identity/`, `documents/`, `jobs/`, `review/`, `exports/`, `infrastructure/`, `entrypoints/`; `migrations/`, `web/`, `infra/`, CI và thin stage wiring đề xuất. Một Backend chịu cả UI tối giản; Lead cần kiểm capacity ở mỗi gate.
+Lead chỉ giao task hiện có input; mã B không là issue đã tạo. Tách mỗi card thành PR nhỏ khi effort>1–2 buổi. Mọi task nộp actual commands/results và known failures; không gọi fixture wiring là model chạy thật.
 
-### B1.1 — business contracts/tests, tuần 1
+### B1.1 — Business schema và Java DTO, tuần 1
 
-1. Implement receipt/invoice/line-item types theo schema, decimal strings/null/keys/30 rows; không đổi domain để hợp model.
-2. Test valid/invalid/unknown/missing keys/type/schema mismatch và date/money conventions với owning validators.
-3. Generate schema từ code và đồng bộ reference, không maintain hai type systems khác nhau.
-4. Data/AI-2 thử parse fixtures, Lead review fields/rules.
+Dependency/input: L1.1; schema hiện có. Effort dự kiến: 4–6h. Reviewer: Data/AI-2 + Lead.
 
-Nộp: business types/schema/tests và tiny fictional examples. Xong khi consumers dùng được và contracts không import FastAPI/ORM/Celery/model frameworks.
+1. Đọc receipt/invoice/line items và approval policy; giữ keys/null/decimal strings/30rows đúng schema trung lập.
+2. Tạo Java DTO/schema-validation adapter; không sửa schema theo defaults của Jackson/JPA. URN refs resolve local, chặn remote fetch.
+3. Tạo tiny positive/negative fixtures: missing/unknown key, wrong type/version, money float, null, row boundary; Data/AI-2 parse cùng fixtures.
+4. Ghi date/arithmetic/state rules thuộc domain validator, không claim schema kiểm đủ; đồng bộ shared examples khi đổi contract.
 
-### B1.2 — page/OCR/extraction/job contracts, tuần 1–2
+Nộp: Java DTO + schema tests + fixtures + actual command.
 
-1. Review O1.1 và M1 input proposal; implement PreparedPage/OCR blocks/raw prediction/pipeline result/errors cần slice đầu.
-2. Geometry/order/dimensions/versions rõ; payload business tách metadata/runtime IDs, run/job IDs do application tạo.
-3. Job message chỉ IDs/version, state/error typed; review DTO/head/version thêm lúc triển khai slice liên quan.
-4. Test bounds/finite/unknown keys/type mismatches, provider/consumer same fixtures; version changes có reviewer affected.
+Xong khi: Java/Data/Python consumer parse cùng format; unknown/missing keys không silently accepted.
 
-Nộp: shared types/boundary tests. Xong khi hai AI có interface implement adapters mà không import ORM/API framework.
+### B1.2 — Private compute contract và Java client shape, tuần 1–2
 
-### B1.3 — app/config/checks tối thiểu, tuần 1–2
+Dependency/input: B1.1; O1.1; M1.1. Effort dự kiến: 4–6h. Reviewer: AI-1/AI-2 + Lead.
 
-1. App/dependency composition/config thực dùng, health endpoint không load weights; Python/runtime theo repo.
-2. Dependency groups/lock sau smoke, ML runtime không bị import nặng trong API; AI review cần pin gì.
-3. CI focused formatting/unit/contract checks từ commands đã chạy, permissions tối thiểu, không thêm workflows giả.
-4. `.env.example` chỉ variables dùng, secrets local ignored. Commands install/start/check ghi sau verification.
+1. Review compute-api.md cùng AI-2: multipart original bytes/metadata, IDs supplied Java, response/canonical assets/provenance, errors/busy/deadline.
+2. Tạo Java request/response/error DTO theo schemas; Backend là shared schema writer, AI-2 tự viết Python adapters.
+3. Test receipt/invoice/type/version mismatch, asset prefix/hash/size, field paths/canonical dimensions, invalid correlation.
+4. Chốt fixture dùng chung và service credential config names; không gắn file/URL tùy ý hay business DB credentials vào Python.
 
-Nộp: runnable app/config/lock/checks. Xong khi app khởi động và checks chạy trong môi trường kiểm chứng, không chỉ scaffold.
+Nộp: Boundary DTO/fixtures + contract-review evidence.
 
-### B2.1 — persistence/ownership/private storage, tuần 2–3
+Xong khi: AI-2 dùng fixtures để implement server; geometry examples được AI-1/Backend hiểu giống nhau.
 
-1. Tạo SQLAlchemy/UoW/Alembic cho increment hiện dùng; FK/head parent document constraints và unique invariants cần review.
-2. Auth demo/seed fake users theo thiết kế; owner check trên document/page/run/revision/export.
-3. Private storage key server-generated, paths safe/hash/size; không dùng filename làm filesystem path.
-4. Test second user không đọc asset/history/export; migrations upgrade clean/existing DB, staging cleanup bounded/registry.
+### B1.3 — Spring Boot/Maven, Thymeleaf slice và checks, tuần 1–2
 
-Nộp: storage/auth/repositories/migrations/tests. Xong khi services authorize mọi object và no public raw-data folder.
+Dependency/input: B1.1; L1.2 architecture decision. Effort dự kiến: 6–8h. Reviewer: Lead; AI-2 runtime consumer.
 
-### B2.2 — upload/list/detail/canonical page, tuần 2–3
+1. Chọn JDK/Spring versions được hỗ trợ, smoke actual environment rồi pin Maven wrapper/BOM; không dùng version latest động.
+2. Tạo app runnable health + một Thymeleaf page; tách web/job-runner profiles, chưa gọi inference trong web handler.
+3. Config actual variables có bounds; .env.example chỉ khi dùng thật; secrets local ignored. Flyway duy nhất, ddl-auto validate khi có schema.
+4. Thêm tests/build commands đã chạy; đề xuất CI Java/Python jobs theo task có code, minimal permissions, không viết CI fake pass.
+5. Mỗi Java working folder mới có SPEC ngay nơi code đặt, không tạo classes TODO hàng loạt.
 
-1. Upload multipart + selected receipt/invoice type; bytes/signature/decode/one-page/pixel limits, encrypted/corrupt handling.
-2. Persist original metadata/private asset, phối hợp O1 canonical renderer dưới cùng bounds; transaction failure không mất orphan trace.
-3. List/detail/page authorized API, 201 upload; browser không nhận arbitrary object paths.
-4. Tests valid image/PDF, oversize/wrong type/multipage/path attacks/ownership; limits khóa G0, không invent benchmark.
+Nộp: Runnable minimal Java slice + wrapper/config/tests/checks.
 
-Nộp: APIs/OpenAPI/examples/tests. Xong khi sample upload/read được qua authorized services, no inference blocking in route.
+Xong khi: Maven build/test/start và page/health verified; README lệnh đúng môi trường đã thử.
 
-### B3.1 — job lifecycle/create/outbox, tuần 2–3
+### B2.1 — Persistence, session auth và private storage, tuần 2–3
 
-1. Define queued/running/retry/terminal transitions, active-job uniqueness/idempotency theo thiết kế.
-2. Create job+outbox cùng transaction, pin pipeline/model manifest, trả 202; message IDs only.
-3. Claim/heartbeat/lease/fence và complete/fail services, bounded attempts/deadline; DB giữ state authority.
-4. Test duplicate create/claim/terminal reclaim và rollback/unique boundaries ngay khi viết.
+Dependency/input: B1.3; B1.1. Effort dự kiến: 8–12h. Reviewer: Lead.
 
-Nộp: lifecycle/job services/migrations/tests. Xong khi job không chạy trong API và duplicate không tạo active inference vô kiểm soát.
+1. Implement feature repositories/UoW bằng JPA; Flyway db/migration cho increment cần dùng, FK/head/document/unique constraints.
+2. Spring Security session fake demo users, hashed passwords, owner guard cho document/job/run/revision/page/export.
+3. CSRF token cho forms/JS mutations; stable JSON auth/errors ở /api/v1, HTML login theo web boundary.
+4. Original/export private keys server-generated, path containment/hash/size; failed transaction/staging có registry để cleanup bounded.
+5. Test user2 không đọc/ghi user1, CSRF missing rejected, migrate clean/existing DB; không auto schema create production.
 
-### B3.2 — worker và thin compute pipeline, tuần 3–4
+Nộp: Auth/repositories/Flyway/storage + integration tests.
 
-1. Composition root inject adapters O1/M2, call preprocess/OCR/extraction/normalization/evidence/confidence, không duplicate algorithms.
-2. Worker claim→compute→complete, attempt artifacts riêng lease token; loader lifecycle theo measured GPU/CPU profile.
-3. Completion fence/unique run/job, immutable prediction, initial draft chỉ nếu head null; existing head nhận candidate.
-4. Test wiring bằng fixtures, nghiệm thu bằng actual OCR/extraction receipt G1. Raw/execution errors typed, no fake success.
+Xong khi: Private assets không public static; permission enforced server-side, không chỉ UI hide buttons.
 
-Nộp: runnable worker/pipeline/output storage/completion tests. Xong khi receipt compute thật và late/duplicate completion không ghi sai head/run.
+### B2.2 — Upload/list/detail và page access, tuần 2–3
 
-### B3.3 — dispatcher/recovery/cancel, tuần 3–8
+Dependency/input: B2.1; O1.1/O1.2 profile. Effort dự kiến: 6–10h. Reviewer: AI-1 + Lead.
 
-1. Dispatcher publish outbox/mark delivery, retry/reconciliation có bounds, publish duplicate an toàn.
-2. Expired lease/queued no claim → recover theo DB, stale tokens không commit; Redis delivery không là business truth.
-3. Classify transient/permanent/OOM/invalid output, không retry endless; status/error APIs actionable.
-4. Cancel theo lifecycle guards, late completion bị chặn khi không còn quyền commit; heartbeat/resources cleanup.
-5. Tests commit/publish gap, duplicate delivery/worker kill/late complete và cancel race theo policy.
+1. POST documents multipart file/type trả201; streaming byte limit, signature/decoder, image pixels, PDF encrypted/page count dưới resource bounds.
+2. Java admission kiểm rẻ trước job; Python canonical render kiểm lại. Không hứa viewer geometry từ original preview.
+3. Lưu original immutable/hash, list/detail authorized; canonical route lấy đúng run của revision, chưa có run thì báo pending.
+4. Phối hợp O1 decode policy để không Java accepted mà Python silently xử lý ngoài profile.
+5. Test corrupt/wrong signature/oversize/multipage/path/ownership; PDF inspection timeout rõ, no user filename path.
 
-Nộp: dispatcher/recovery/cancel/config/tests. Xong khi failures recover hoặc fail rõ có giới hạn; một committed run/job, không claim exactly-once execute.
+Nộp: Upload/list/detail/page endpoints + documented examples.
 
-### B4.1 — review get/save và CAS, tuần 3–4
+Xong khi: Fake images/PDF hợp lệ upload được; ngoài profile fail rõ, no model in request thread.
 
-1. Get trả immutable prediction, head revision/version/payload/metadata. Save full payload+base head/expected version/reason.
-2. Revalidate input, append revision, CAS document head/version và audit cùng transaction, rollback khi stale.
-3. Giữ revision cũ/prediction bất biến; stable row IDs là editor metadata, không model-generated business values.
-4. Test hai saves cùng version: một success/một 409, không orphan revision/audit; different-owner/document IDs reject.
+### B3.1 — PostgreSQL job lifecycle và runner claim, tuần 2–3
 
-Nộp: review APIs/service/tests. Xong khi sửa không last-write-wins và consumer giữ được edits khi conflict.
+Dependency/input: B2.1/B2.2; B1.2. Effort dự kiến: 8–12h. Reviewer: Lead; AI-2 boundary.
 
-### B4.2 — approve và approved export, tuần 4–5
+1. Tạo job QUEUED + idempotency + pinned manifest/audit transaction; public create trả202. Active unique/document và queue cap serialized.
+2. Runner profile poll DB, eligible next_attempt_at/deadline; FOR UPDATE SKIP LOCKED + fresh attempt/fence/lease trong transaction ngắn.
+3. Commit claim trước HTTP; bounded executor concurrency1; scheduler heartbeat độc lập, không giữ DB transaction khi inference.
+4. Implement state transition/claim/heartbeat/complete/fail CAS; duplicate/terminal/exhausted guards ngay từ đầu.
+5. Test hai claims, rollback, idempotency same/different hash, partial unique/queue cap races với PostgreSQL thật, không mock lock semantics.
 
-1. Approve current head/version, revalidate snapshot, non-null/unambiguous total, no blockers, review confirmation/warning acknowledgement.
-2. Transaction approval+version CAS+audit, save/approve race serialize; frontend button không là authority.
-3. Export explicit approved revision, stable bytes/hash cùng exporter version; latest draft trả conflict, chọn approved cũ được.
-4. Test missing total/unapproved/blocked/unknown owner, save-vs-approve, repeated export checksum và approved snapshot unchanged.
+Nộp: Job service/runner/repositories/migrations/tests.
 
-Nộp: approval/export APIs/tests. Xong G1 khi receipt sửa/approve/export thật, G2 thêm invoice/items; no admin bypass ngầm.
+Xong khi: Job không mất khi web restart; đúng current token, no lock held through compute; không outbox/Redis.
 
-### B4.3 — rerun/adopt/history, tuần 5–7
+### B3.2 — Java → Python HTTP và atomic completion, tuần 3–4
 
-1. Rerun tạo job/run mới, không thay head đã sửa/approve.
-2. Show candidate/run history; adopt CAS append draft revision mới, preserve old revisions/approvals.
-3. Save sau approval cũng tạo draft; export approved cũ vẫn same snapshot/hash.
-4. Test rerun complete sau edits và adopt/save race, selected run cùng document/owner.
+Dependency/input: B3.1; M2.3; O1.3; M2.1. Effort dự kiến: 6–10h. Reviewer: AI-1/AI-2 + Lead.
 
-Nộp: candidate/adopt/history APIs/tests. Xong khi người dùng chọn thay kết quả có chủ ý, model không tự ghi đè.
+1. Implement fixed private HTTP client streaming original bytes, metadata IDs/hash/remaining budget; service auth và response body/time caps.
+2. Map typed errors, schema/correlation/provenance/safe attempt prefix; stream-copy sang committed storage Java-only, hash/size trên bytes copy, decode bản copy, atomic publish. DB/viewer dùng promoted keys, không mutable Python attempt path.
+3. Completion CAS current unexpired lease/deadline/cancel, unique run/job; transaction run/state/audit.
+4. Atomic document guard: initial draft chỉ head-null; head tồn tại nhận candidate, kể cả user save xảy ra trong compute.
+5. Test fixtures cho network/bad response wiring, then receipt actual OCR/extraction provider E2E; Python không ghi business DB.
 
-### B5.1 — upload/list/viewer/status UI, tuần 2–4
+Nộp: Java aiclient/result ingestion + actual-provider output + tests.
 
-1. UI upload/type/list/detail, polling job stage/error; dùng API types/fixtures theo contract lúc API chưa xong.
-2. Viewer canonical zoom/pan, no direct storage paths, auth/expiry errors rõ.
-3. Evidence overlay O4 khi có, missing regions báo unavailable; không vẽ guessed box.
-4. Nối actual APIs/provider trước E2E, test fake receipt/invoice và failures.
+Xong khi: Receipt run/canonical/OCR/prediction thật lưu đúng; duplicate/late response không tạo sai run/head.
 
-Nộp: runnable web slice/screenshots/focused checks. Xong khi người khác upload/xem output thực, không chỉ mock UI.
+### B3.3 — Recovery, retry và cancellation, tuần 3–8
 
-### B5.2 — fields/items/review controls UI, tuần 3–7
+Dependency/input: B3.1/B3.2; M2.3. Effort dự kiến: 6–10h chia increments. Reviewer: AI-2 + Lead.
 
-1. Editor scalar/items add/edit/delete, keep decimal strings/null, description wrap; không zero-fill absent.
-2. Issues/warnings/review confirmation controls gửi đúng server policy/version/revision; no client-only approval rules.
-3. Save conflict giữ local edits, compare/reload/reconcile version có chủ ý; không auto-resubmit ghi đè.
-4. Approve/export explicit revision, rerun candidate/adopt/history rõ, confidence limitations hiển thị đúng.
-5. Test operator sửa field+row rồi export bằng UI, stale tab/rerun flow; screenshot fake data only.
+1. Recovery expired lease/runner chết, invalidate fence atomic theo DB time; reclaim không reset total deadline.
+2. Retry allowlist busy/network/transient, bounded max3/backoff/jitter/deadline; OOM/config/invalid output permanent.
+3. Cancel queued/retry terminal; running terminal+fence revoke, late response reject. UI báo logical cancel, không GPU-stop giả.
+4. Status stage/error/attempt rõ; MVP stages RUNNING/terminal đủ, không invent live OCR progress nếu không có signal.
+5. Test runner kill/lost response/cancel-vs-complete/DB outage/AI busy và restart; phối hợp AI slot cleanup, no infinite queue.
 
-Nộp: editor/history UI và E2E evidence. Xong khi không cần SQL/manual DB sửa để demo; Backend giữ UI giản dị để đủ capacity.
+Nộp: Recovery/cancel/status/config + failure tests.
 
-### B6.1 — failure/security/resource/performance checks, tuần 6–9
+Xong khi: Recover hoặc fail actionable bounded; một committed run/job, duplicate computation được report đúng.
 
-1. API chết sau commit, dispatcher chết sau publish, Redis message loss, worker kill/expired fence, DB outage completion: inject theo failure matrix.
-2. Ownership trên page/run/revision/export; logs IDs/stage/time/error, no secret/raw payload/OCR/PII.
-3. Input/resource bounds và permanent failure retries, storage missing/actionable error, no arbitrary URL fetch/tool execution.
-4. Measure API responsive during inference, queue caps/age, cold/warm model memory/latency, health/readiness/heartbeat. p95 cần nhiều measured observations và hardware rõ.
-5. Focused unit/integration/E2E + migration compatibility, inspect actual test evidence và unresolved failures.
+### B4.1 — Revision get/save và CAS, tuần 3–4
 
-Nộp: failure/concurrency/security-boundary tests và measured report. Xong khi invariants pass; không trì hoãn CAS/idempotency design đến task này mới nghĩ.
+Dependency/input: B1.1; B2.1; B3.2 hoặc valid integration fixture. Effort dự kiến: 6–10h. Reviewer: Lead.
 
-### B7.1 — clean environment, backup/restore/rollback và handoff, tuần 10–12
+1. GET head/version/prediction/metadata; save full payload/base head/expected version/reason.
+2. Java structural/domain validation; append revision + CAS document + audit transaction, rollback khi409.
+3. Preserve immutable run/revision, stable row IDs metadata ngoài business JSON; không last-write-wins.
+4. Test two saves cùng version, owner/parent/run cross-document, save cạnh tranh initial completion; assert no orphan revision/audit.
 
-1. Nhận frozen pipeline/model manifests O5/M6, pin runtime/config, activation theo Lead gate; old jobs pin old release.
-2. Backup DB+storage manifest, restore rehearsal kiểm FK/hashes/approved export; không destructive DB rollback.
-3. Runbook thực: setup/config/migrate/seed/start/smoke/stop/rollback từ commands đã chạy, no secrets.
-4. Người khác chạy clean environment two types/invalid/stale/rerun/export cũ, screenshots/tests/report.
-5. Handoff app/OpenAPI/migrations/UI/locked env/artifact locations/limitations; raw dataset/weights/runtime không Git, deployment cần quyền riêng.
+Nộp: Review APIs/services + PostgreSQL concurrency tests.
 
-Nộp: release candidate/runbook/restore/reproduction evidence. Xong G5 khi app không phụ thuộc hidden local state máy tác giả.
+Xong khi: Một request thắng, stale409; human edits không bị overwritten, schema errors422.
+
+### B4.2 — Approve snapshot và deterministic export, tuần 4–5
+
+Dependency/input: B4.1; approval-policy. Effort dự kiến: 6–10h. Reviewer: Lead; Data sample gold.
+
+1. Approve exact current head/version, revalidate snapshot total/nonambiguity/date/rules; completeness confirmation và warning ack IDs.
+2. Approval unique/revision + CAS version + audit atomic; save-vs-approve race test, no silent admin bypass.
+3. Export explicit approved revision + exporter version; UTF-8/decimal strings/key ordering, persisted snapshot timestamps.
+4. Test blocker/missing total/unapproved/stale/owner; repeated bytes/hash identical, approved cũ còn export sau draft mới.
+
+Nộp: Approval/export services/APIs + checksum/race tests.
+
+Xong khi: Receipt W4 approve/export dùng được, invoice W5–6; UI không authority.
+
+### B4.3 — Rerun/candidate/adopt/history, tuần 5–7
+
+Dependency/input: B3.2/B3.3; B4.1. Effort dự kiến: 6–8h. Reviewer: Lead; AI-2 consumer.
+
+1. Rerun creates new job/run pinned release; existing head untouched.
+2. Run/revision/approval history; adopt candidate cùngdocument/owner, CAS append draft revision mới.
+3. Canonical image theo adopted run, không overlay evidence cũ lên canonical mới; old approved revision/export vẫn truy được.
+4. Test rerun completion sau edit, adopt/save race, wrong run/document, old approved export snapshot unchanged.
+
+Nộp: History/adopt endpoints + tests.
+
+Xong khi: Chỉ người dùng chọn adopt mới đổi head; model không tự overwrite.
+
+### B5.1 — Thymeleaf upload/list/viewer/status, tuần 2–4
+
+Dependency/input: B1.3; B2.2; B3.2 khi actual integration. Effort dự kiến: 5–8h. Reviewer: AI-1 overlay; Lead UX.
+
+1. Templates auth/documents list/upload/detail, reuse same services; same-origin session, CSRF forms.
+2. JS polling stable status/error; bounded interval/backoff khi page hidden/unload, no leaked timers.
+3. Canonical image zoom/pan + SVG/canvas overlay normalized quad; original preview không vẽ evidence kháccoords.
+4. Escape OCR/model/user strings; no th:utext/innerHTML raw; owner routes stream assets.
+5. Browser check fake receipt/PDF, loading/failed/auth expiry/mobile, actual provider nối trước G1.
+
+Nộp: Thymeleaf templates/static JS + browser evidence.
+
+Xong khi: Operator upload/xem run thật được; no React app/npm types pipeline.
+
+### B5.2 — Scalar/items editor, conflict và approval controls, tuần 3–7
+
+Dependency/input: B4.1/B4.2; B5.1; O4.1. Effort dự kiến: 6–12h chia increments. Reviewer: AI-1 evidence; Lead policy.
+
+1. Render/edit scalar + items add/edit/delete giữ strings/null; number input không chuyển tiền sang binary float.
+2. JS giữ local edit buffer và version, gọi same-origin APIs kèm CSRF;409 không auto-reload mất dữ liệu hoặc auto-resubmit.
+3. Hiển thị issues, completeness/warnings controls; approve/export explicit revision, candidate/adopt/history rõ.
+4. Click field/item source overlay nếu available; null confidence/ambiguous evidence báo đúng; no fabricated box.
+5. Browser E2E two tabs save/approve/adopt, malicious text escaped, row edit/export. Giữ UI 3 màn hình tối giản.
+
+Nộp: Editor/history fragments + JS + browser tests/screenshots.
+
+Xong khi: Không cần manual SQL để demo; stale edits giữ được, server guards luôn có.
+
+### B6.1 — Failure/security/resource/performance evidence, tuần 6–9
+
+Dependency/input: B3/B4/B5 increments; M2.3/O5. Effort dự kiến: 8–12h. Reviewer: AI-2 runtime + Lead.
+
+1. Inject app/runner/Python crash, response loss, DB outage, cancellation race, expired token theo architecture failure matrix.
+2. Kiểm owner/CSRF/XSS/paths/symlinks/hash/model-text-as-data; logs IDs-only và credential redaction.
+3. Check byte/page/pixel/response/token/deadline/queue admission/capacity, no endless OOM/transient retries.
+4. Đo API responsive khi inference, cold/warm time/memory/capacity, readiness; ghi hardware/config/number observations.
+5. Run relevant Java/Python/contract/browser suites, Flyway checksum/migration compatibility; giữ failures rõ không skip để pass.
+
+Nộp: Failure/concurrency/boundary tests + measured report.
+
+Xong khi: Domain invariants pass riêng ML accuracy; không tuyên bố production-ready.
+
+### B7.1 — Clean environment, restore/rollback/handoff, tuần 10–12
+
+Dependency/input: O5.1; M6.1; D5.1; B6.1. Effort dự kiến: 8–12h. Reviewer: Lead + consumer khác máy.
+
+1. Compose app/web-profile, job-runner/runner-profile, ai-service,postgres; privateAI/DB, model readonly, restricted attempt volume.
+2. Receive pinned model/processor/OCR/schema manifests; activation only new jobs, old pinned releases giữ được hoặc fail rõ.
+3. Backup DB + originals/approved exports + hashes; restore rehearsal, forward migration, không destructive rollback đã applied.
+4. Runbook từ commands thật: install/migrate/seed/start/health/smoke/stop/restore/model rollback; no hidden local config/secrets.
+5. Người khác demo hai types + invalid/stale/rerun/export cũ; artifacts lớn ngoàiGit, deploy/publish cần quyền riêng.
+
+Nộp: Release candidate + actual runbook + clean-env/restore evidence.
+
+Xong khi: G5 reproduction không phụ thuộc máy tác giả; limitations, quyền còn thiếu được ghi.
+
+## Folder và kiểm thử
+
+Java features/tests ở `backend/`; Thymeleaf `src/main/resources/templates`, JS/CSS `static`, Flyway `db/migration`. Python legacy business/web/Alembic scaffold chỉ tham chiếu, không code song song. Public contracts schema ở `specs/contracts`, cross-runtime fixtures/browser ở `tests/contract`/`tests/e2e`; CI/Compose do bạn implement khi có runnable increments.
+
+JUnit/Spring tests cho Java, PostgreSQL integration cho locks/CAS/Flyway, Python producer contract tests do AI-2, browser E2E cross-runtime. Chưa có commands executable của app, không invent Maven/Python test success.
 
 ## Git Flow cho Backend
 
-1. Nhận một subtask/acceptance từ Lead; tạo hoặc dùng issue thật, branch feature/bug từ develop theo [Git Flow](../git-flow.md). Không push trực tiếp main/develop.
-2. Sửa đúng ownership ở trên; shared contract/lockfile/migration cần báo owner/consumer trước. Không stage datasets/weights/secrets/runtime hoặc unrelated edits.
-3. Chạy focused checks thật, inspect diff, ghi command/config/versions/input-output mẫu và limitations. Chưa có check executable thì ghi phần chưa xác minh; không tự báo CI pass.
-4. PR đích develop, peer reviewer theo mục reviewer, Lead duyệt cuối. Tác giả không tự approve; đổi logic/contract sau approval cần review lại.
-5. Conflict: tác giả đọc cả hai thay đổi cùng consumer, merge origin/develop vào branch đã chia sẻ, không force-push hoặc chọn ours/theirs toàn file. Chạy lại checks sau resolve.
-6. Sau merge, consumer smoke trên develop; issue ghi evidence rồi mới Done. Release main/hotfix theo quy trình riêng, không suy ra quyền deploy từ task.
+1. Khi team coding bắt đầu: feature/SE-<issue>_<snake_case> từ develop; một output/PR, stage cụ thể.
+2. Shared schema/Flyway/lock/config báo consumer và Lead trước; không sửa Python algorithm thay AI.
+3. Focused checks/diff/secrets/compatibility; ghi actual output, failures/versions/hardware.
+4. PR develop, peer consumer review, Lead duyệt/merge; code thay sau approve phải review lại.
+5. Shared branch merge origin/develop, không force-push/ours-theirs toàn file; retest semantic conflict.
+6. Sau merge consumer smoke rồi Done; release/hotfix theo [Git Flow](../git-flow.md). Bootstrap main chỉ theo Lead yêu cầu riêng; không tự commit/push/deploy.
 
-Một PR giải quyết một kết quả nhỏ; các outputs lớn ở local ignored, chỉ manifests an toàn/tiny fictional fixtures/reports đã review được đưa Git.
+## Bàn giao mỗi increment
 
-## Checklist bàn giao
-
-- Code/output thực, input/output đúng contract và version/manifest rõ.
-- Consumer chạy được sample, tests/report/commands thực và failed cases có sample IDs.
-- Không raw dataset/weights/secrets/PII/runtime trong diff; không hard-coded demo output thay inference.
-- Peer review/Lead review nội dung cuối, post-merge smoke và limitations đã ghi.
-- Gate/quality targets dùng [workflow chung](workflow.md), không tự đổi ngưỡng sau mở final test.
+Runnable source, input/output fixtures/versions, tests/commands đã chạy, API/errors/migration affected, tiny synthetic screenshots, known failures, consumer check. UI và docs không thay domain concurrency tests hoặc ML holdout reports.

@@ -2,26 +2,23 @@
 
 ## Purpose và owner
 
-Private asset I/O Owner: Backend.
+Attempt artifacts của Python compute Owner: AI-2; Backend consumer.
 
 ## Đặt gì ở đây?
 
-Server keys/paths/hash/private local files; originals/attempts/exports
+Canonical/OCR/preprocess/transform/raw outputs + manifest dưới attempts/job/attempt.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không user filenames làm path hoặc public static docs Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Server-config root, no absolute caller paths/symlinks/traversal, no overwrite attempt/original/export.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Path/owner/bounds/orphans/missing object/checksums
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../../../docs/team/ai-2-extraction.md), nhận một task có input/version/output/acceptance. M2.3/B3.2 hash/size/prefix/canonical dimensions; temp→atomic attempt publish, Java promotes verified copy trước DB commit; orphan cleanup reviewed. Ghi actual commands/results và limitations, [Git Flow](../../../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../../../specs/scope.md).
-Folder này không có subfolder làm việc cần spec riêng.
+[Scope](../../../../specs/scope.md), [structure](../../../../docs/source-structure.md), [architecture](../../../../docs/architecture.md).
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.

@@ -20,30 +20,32 @@ Chỉ chứng từ tiếng Việt: receipt/invoice một trang, chữ in, có sc
 - `SPEC.md` trong từng folder làm việc: local purpose/ownership/content/boundaries/checks. `specs/repository-layout.md` chỉ index tương thích, không cần đọc bảng folder chung.
 - `docs/team/`: roadmap/task theo người, workflow/Git Flow; tiến độ/evidence ở Issue/PR được giao. Không dùng folder `tasks/`.
 - `docs/design/v1/`: snapshot thiết kế gốc bất biến, không phải runtime authority.
-- Khi code bắt đầu: `src/vietdoc/`, `web/`, `tests/` và `migrations/` theo source-structure design; chỉ tạo file cần cho increment hiện hành.
+- Active source: `backend/` Java/Spring Boot/Thymeleaf, `src/vietdoc/` Python AI/Data, `tests/` shared/Python/E2E. Java tests/Flyway ở backend. `web/`, `migrations/` và Python business-only scaffold là legacy, không implementation mới. Chỉ tạo file có logic cho increment được giao.
 
 Nếu specs, tests và implementation mâu thuẫn, báo bằng evidence và giải quyết theo yêu cầu hiện hành; không sửa tests chỉ để pass. Cập nhật specs/ADR khi implementation thực sự làm chúng stale.
 
 ## Architecture boundaries
 
-- Modular monolith; API, dispatcher và worker có process riêng, dùng chung contracts/services.
-- PostgreSQL giữ state; Redis chỉ delivery. Không claim exactly-once execution; completion phải idempotent và có fencing.
-- Một ORM và API style đã chọn; không bổ sung data-management approach khác nếu chưa có lý do/ADR.
-- `contracts` không import FastAPI, ORM, Celery hoặc model frameworks.
-- Domain services dùng contracts/ports; ORM ở persistence adapters.
-- Routes không chạy inference hoặc query SQL trực tiếp; worker không duplicate approval rules.
-- Pipeline/model không ghi business DB. Cross-module calls qua public service; tránh import cycle.
-- Không load model weights trong API. Training, evaluation và serving tách nhau.
+- Target: Java business modular monolith + Python private compute service; theo docs/architecture và Proposed ADR-0009. UI Thymeleaf do người dùng chọn.
+- PostgreSQL durable jobs; Java runner poll/lease/fence/complete, không Celery/Redis/outbox. API web không chạy inference; HTTP compute ngoài DB transaction.
+- Chỉ Java ghi business DB/approve/export. Python không DB credentials/callback business state, chỉ attempt-scoped artifacts và immutable results.
+- Shared JSON Schema Draft2020-12 + protocol là contract trung lập; Java DTO/Python models validate cùng fixtures, không tự đổi authority theo Pydantic.
+- Một ORM business: JPA/Hibernate; Flyway một lineage; native claim/CAS trong owning repository và transaction manager.
+- Python contracts không import FastAPI/ORM/model frameworks. AI-2 pipeline/serving, AI-1 preprocess/OCR/evidence; offline Data/train/eval riêng.
+- Canonical assets theo run/revision; validate correlation/provenance/path/hash/dimensions, promote verified copies sang Java-owned committed storage trước completion. Không serve mutable Python attempt files.
+- Không claim exactly-once computation hoặc GPU dừng tức thì khi cancel; stale/cancelled/expired attempt không commit.
+- Không load model trong Java web/runner process. Python ai-service có explicit model lifecycle/capacity/readiness.
+- HTML/REST controllers dùng cùng business services; CSRF/ownership/escaping enforce server, no duplicate approval rules.
 
 ## Ownership
 
 | Vùng | Implementer | Reviewer |
 |---|---|---|
-| Scope/contracts/ADR | Backend triển khai, Lead thiết kế | Lead và consumer liên quan |
+| Scope/shared schemas/ADR; Java DTO | Backend triển khai, Lead thiết kế | Lead và consumer liên quan |
 | Data/generator/adapters/splits/evaluation | Data Engineer | AI-1/AI-2; Lead duyệt metric/split |
 | Preprocess/geometry/OCR/evidence | AI-1 | AI-2; Backend khi viewer contract đổi |
-| Extraction/model adapter/training/confidence | AI-2 | AI-1 và Lead |
-| API/business DB/review/export/web/CI/migrations | Backend | Lead; AI reviewer ở integration boundary |
+| Extraction/model adapter/training/confidence/Python serving/wiring | AI-2 | AI-1 và Lead |
+| Java API/DB/runner/client/review/export/Thymeleaf/CI/Flyway | Backend | Lead; AI reviewer ở integration boundary |
 
 Lead tập trung design, workflow, review, merge và conflict, không tự nhận backlog coding của các IC.
 
@@ -63,7 +65,7 @@ Lead tập trung design, workflow, review, merge và conflict, không tự nhậ
 ## Verification
 
 - Chạy focused tests/checks có thật trong repo; không invent commands hoặc kết quả.
-- Python/API: unit/contract/integration cho thay đổi liên quan; CI permissions/queue/review races phải có test khi code được tạo.
+- Java/Python: focused unit/contract/integration; real PostgreSQL claim/CAS/Flyway tests, shared-schema fixture parity, browser Thymeleaf/conflict/CSRF/escaping và actual-provider E2E. CI/runtime checks cần có code trước claim pass.
 - ML: baseline, per-type field/table metrics, missing/false-fill, versioned evaluator/dataset/model và hardware evidence.
 - Inspect diff, schema compatibility, migration heads, secrets và unrelated changes trước handoff.
 - Mọi check chưa chạy hoặc limitation phải ghi rõ. Docs/UML không là bằng chứng app hoạt động.

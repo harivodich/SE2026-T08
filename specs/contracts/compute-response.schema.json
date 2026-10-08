@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vietdoc:compute-response:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "attempt_id",
+    "result",
+    "canonical_page",
+    "artifacts"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "result": {
+      "$ref": "urn:vietdoc:extraction-result:v1"
+    },
+    "canonical_page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "width",
+        "height",
+        "asset_key",
+        "sha256"
+      ],
+      "properties": {
+        "page": {
+          "const": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000000
+        },
+        "asset_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^attempts/[0-9a-f-]{36}/[0-9a-f-]{36}/[A-Za-z0-9][A-Za-z0-9._/-]*$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "asset_key",
+          "sha256",
+          "size_bytes",
+          "media_type"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "canonical_page",
+              "ocr",
+              "preprocessed_page",
+              "transform",
+              "raw_prediction"
+            ]
+          },
+          "asset_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "pattern": "^attempts/[0-9a-f-]{36}/[0-9a-f-]{36}/[A-Za-z0-9][A-Za-z0-9._/-]*$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 52428800
+          },
+          "media_type": {
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "application/json",
+              "text/plain"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

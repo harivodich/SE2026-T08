@@ -1,48 +1,64 @@
 @startuml
-title Sequence — job đến prediction
+title Processing target — DB queue + private HTTP + fenced completion
 skinparam defaultFontName Arial
 skinparam shadowing false
-skinparam backgroundColor #FFFFFF
-skinparam ArrowColor #405670
 hide footbox
-participant "Review UI" as ui
-participant "API" as api
-participant "Job service" as svc
-participant "PostgreSQL" as db
-participant "Dispatcher" as dispatch
-participant "Redis" as broker
-participant "Worker" as worker
-participant "Pipeline" as pipe
-ui -> api : POST jobs + Idempotency-Key
-api -> svc : authorize; create_job(manifest pinned)
-svc -> db : TX: job QUEUED + outbox + audit
-db --> svc : COMMIT
-svc --> api : job_id
-api --> ui : 202 Accepted
-dispatch -> db : claim outbox row; read job
-dispatch ->> broker : publish(job_id)
-dispatch -> db : mark delivered after confirmation
-broker ->> worker : deliver job_id
-worker -> svc : claim with lease/fencing token
-svc -> db : CAS state + attempt/token
-alt Claim accepted / fresh token
-worker -> pipe : canonical → OCR → extraction → checks
-worker -> svc : heartbeat(token) during computation
-pipe --> worker : payload + evidence + issues
-worker -> svc : complete(job_id, token, result)
-svc -> db : TX: validate token; UNIQUE run/job; SUCCEEDED
-svc -> db : create head draft only if head is null
-worker ->> broker : ACK after committed completion
-else Terminal / duplicate active delivery / stale token
-svc --> worker : no-op or reject stale completion
-worker ->> broker : ACK duplicate; no new committed run
+actor "Operator" as user
+participant "Java web API" as api
+participant "Java Job service" as jobs
+database "PostgreSQL" as db
+participant "Java runner\nbounded executor" as runner
+participant "Heartbeat scheduler" as beat
+participant "Python compute API\nAI-2" as ai
+participant "OCR + extraction pipeline" as pipeline
+participant "Private attempt storage" as storage
+user -> api : create job + Idempotency-Key
+api -> jobs : authorize; pin release
+jobs -> db : TX job QUEUED + audit + idempotency
+db --> jobs : COMMIT
+api --> user : 202 job_id
+runner -> jobs : poll eligible job when slot available
+jobs -> db : short TX: SKIP LOCKED;\nfresh attempt/run IDs + fence + lease
+db --> runner : COMMIT claim; no held lock
+par While private HTTP computation
+ runner -> ai : multipart original bytes + IDs/hash/manifest\nremaining_budget_ms + service auth
+ alt Busy / not ready
+  ai --> runner : 503 typed error, bounded Retry-After
+ else Accepted compute slot
+  ai -> pipeline : canonical / OCR / extraction / checks
+  pipeline -> storage : immutable attempt prefix + hashes
+  pipeline --> ai : result/provenance/canonical manifest
+  ai --> runner : 200 compute response\nor typed permanent/timeout error
+ end
+else Independent heartbeat
+ loop until outcome/cancel/deadline/lease lost
+  beat -> jobs : heartbeat(current token)
+  jobs -> db : CAS RUNNING + unexpired lease/token
+ end
 end
-note over dispatch,db
-Crash recovery: expired lease or lost delivery → bounded requeue; previous token cannot commit.
+alt 200 response + valid schema/correlation/assets
+ runner -> runner : stream-copy to Java-owned committed assets\nverify hash/decode copied bytes; publish promoted keys
+ runner -> jobs : complete(current attempt/fence, validated result)
+ alt Current RUNNING, lease/deadline valid, not cancelled
+  jobs -> db : TX UNIQUE run/job + job success + audit\npromoted immutable asset references
+  jobs -> db : atomic document guard:\nhead null => draft; else candidate, keep head
+  db --> runner : COMMIT
+ else Stale / cancelled / expired
+  jobs --> runner : reject, no run/head mutation\npromoted orphans retain cleanup trace
+ end
+else Busy / network / typed error / invalid response
+ runner -> jobs : transient retry or permanent fail\naccording to code + remaining budget
+ jobs -> db : CAS current attempt + guarded transition/audit
+end
+note over runner,db
+Crash/lost response may execute again.
+Recovery revokes old fence and bounded retry.
+No transaction held across HTTP.
 end note
-ui -> api : GET job / run
-api --> ui : status; draft or candidate result
-legend bottom
-DB commit/publish gap, duplicate delivery và stale attempt được xử lý bằng outbox, lease và fencing.
-endlegend
+note over ai,storage
+Python does not commit business jobs.
+Cancel may leave GPU busy until actual cleanup.
+end note
+user -> api : poll status / open revision
+api --> user : success draft/candidate, or typed failure
 @enduml

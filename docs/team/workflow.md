@@ -2,9 +2,9 @@
 
 ## 1. Cách bắt đầu
 
-Đọc [spec folder](../../specs/repository-layout.md), [scope](../../specs/scope.md) và doc của [vai trò mình](README.md). Roadmap theo tuần và 48 task chi tiết nằm trong năm doc cá nhân; file này chỉ giữ workflow/handoffs/gates dùng chung.
+Đọc [spec folder](../../specs/repository-layout.md), [scope](../../specs/scope.md) và doc của [vai trò mình](README.md). Roadmap theo tuần và 49 task chi tiết nằm trong năm doc cá nhân; file này chỉ giữ workflow/handoffs/gates dùng chung.
 
-Repo hiện là scaffold, chưa có API/OCR/model/UI chạy. Kế hoạch 12 tuần và buffer 13–16 tính từ kickoff; capacity giả định mỗi IC 12–16 giờ/tuần, Lead 4–8 giờ/tuần. Lead xác nhận capacity/hardware/scope/owner trước giao task. Task đang làm theo GitHub Issue/PR hoặc phiếu giao việc trực tiếp, không dùng folder tasks. Không tự tạo toàn bộ issues hôm nay.
+Repo hiện là scaffold, chưa có API/OCR/model/UI chạy. Kế hoạch 12 tuần và buffer 13–16 tính từ kickoff; capacity giả định mỗi IC 12–16 giờ/tuần, Lead 4–8 giờ/tuần; Backend đề xuất16–20h/tuần W1–4 để nhắm G1, nếu không đủ dời gate/dùng buffer. AI-2 dành4–8h W2–3 cho M2.3, giữ fine-tune pilot. Lead xác nhận capacity/hardware/scope/owner trước giao task. Task đang làm theo GitHub Issue/PR hoặc phiếu giao việc trực tiếp, không dùng folder tasks. Không tự tạo toàn bộ issues hôm nay.
 
 ## 2. Workflow của một task từ giao đến xong
 
@@ -18,6 +18,8 @@ Repo hiện là scaffold, chưa có API/OCR/model/UI chạy. Kế hoạch 12 tu�
 8. Sau merge consumer chạy smoke trên develop; ghi evidence và limitations rồi mới gọi task Done. Việc bị blocked phải nêu ai cần cung cấp gì, không chỉ “đang chờ”.
 
 Một gói bàn giao tối thiểu gồm code/config, command đã chạy, manifest/version, input/output fake mẫu, test/report result, lỗi còn biết, consumer và PR/task reference. Outputs lớn local ignored; báo cáo đưa Git phải loại secrets/PII và absolute private paths.
+
+Dependencies trong cards có hai loại: proposal/fixture (có thể gửi partial early để unblock) và runnable artifact/gate (phải có trước nghiệm thu). B1.2/O1.1/D1.2 không cần chờ nhau Done toàn bộ; thống nhất một geometry example rồi triển khai song song. M6.1 freeze candidate trước D5.1 holdout; final report D5.1 chỉ là input bước model-card/handoff cuối M6.1, không tạo dependency cycle. D2.2 gửi pilot v0.1 trước full dataset v1 để M3.1/M3.2 bắt đầu.
 
 ## 3. Workflow bàn giao giữa người với người
 
@@ -35,7 +37,7 @@ AI-1 gửi OCR blocks/order/quads/scores/page dimensions/versions/transforms và
 
 ### AI-1/AI-2 → Backend
 
-Provider gửi callable adapter/input-output/error contract, artifact/config/version/hash và runtime resource profile. Backend smoke ngoài API process, review loader/timeout, pin manifest trong job, không viết lại model algorithm. Viewer dùng canonical regions; unavailable không guessed.
+AI-2 gửi private HTTP service (M2.3), actual responses/errors/attempt assets/manifests, AI-1 OCR/canonical qua service này. Java client dùng shared schema/fixtures; runner pin manifest/remaining budget và kiểm fence before completion. Viewer page theo run/revision; unavailable không guessed.
 
 ### Backend → Lead
 
@@ -51,13 +53,15 @@ Buổi là thứ tự công việc, không cam kết mỗi buổi đủ xong n�
 
 | Buổi | Lead | Data | AI-1 | AI-2 | Backend |
 |---|---|---|---|---|---|
-| 1 | L1.1 scope/fields và owners | D1.1 dictionary/fake gold | O1.1 geometry proposal | M1.1 hardware/model/license | B1.1 business types/examples |
-| 2 | L1.2 review interface examples | D1.2 render vài sample đầu | O1.2 loader/canonical | M1.2 load/infer smoke | B1.2 page/OCR/extraction types |
-| 3 | Giao dependency/blocker cụ thể | D1.2 đủ 20 và QA/manifest | O1.3 OCR thật/outputs | M1.3 train step; M2.1 rules nhỏ theo capacity | B1.3 app/checks, B2.1 storage/ownership |
+| 1 | L1.1 scope/fields và owners | D1.1 dictionary/fake gold | O1.1 geometry proposal | M1.1 hardware/model/license | B1.1 Java DTO/schema fixtures |
+| 2 | L1.2 review interface examples | D1.2 render vài sample đầu | O1.2 loader/canonical | M1.2 load/infer smoke | B1.2 compute/page contract |
+| 3 | Giao dependency/blocker cụ thể | D1.2 đủ 20 và QA/manifest | O1.3 OCR thật/outputs | M1.3 train step; M2.3 serving shape; M2.1 rules nhỏ | B1.3 app/checks, B2.1 storage/ownership |
 | 4 | L2.1 đọc G0 evidence | D2.1 generator, D3.1 evaluator cases | O2.1 overlays, O2.2 metrics | M2.1/2 actual OCR baseline/normalizer | B2.2 upload, B3.1 job service |
-| Sau G0 | Chốt model/config và việc tuần 3–4 | D2.2 v0.1, D3 report | O2/O3 geometry/preprocess | M3 loader/pilot | B3.2 worker, B4/B5 receipt review/UI |
+| Sau G0 | Chốt model/config và việc tuần 3–4 | D2.2 v0.1, D3 report | O2/O3 geometry/preprocess | M2.3 actual HTTP + M3 loader/pilot | B3.2 Java runner/client, B4/B5 receipt review/UI |
 
 Không bắt Data đợi app để render, AI-2 đợi full OCR để smoke/train step, hoặc Backend đợi fine-tune mới làm review. Wiring fixtures được phép trong development, E2E nghiệm thu phải actual providers.
+
+M2.3 phụ thuộc B1.2/O1.3/M2.1, không chờ full fine-tune. B3.2 nghiệm thu private HTTP thật; B4/B5 có fixture khi phát triển nhưng G1 actual provider. Busy503 và Java retry phải giữ single GPU slot.
 
 ## 5. Git Flow thực hành
 
@@ -104,7 +108,7 @@ Branch protection/required checks/invitations/access trên GitHub chưa được
 ### G1 — cuối tuần 4: một receipt xuyên suốt
 
 1. Upload sample fake hợp lệ, chọn receipt, tạo job nền.
-2. Worker dùng preprocessing/OCR thật và baseline hoặc model adapter thật. Fixture chỉ dùng test wiring, không thay inference để nghiệm thu.
+2. Java runner gọi Python service dùng preprocessing/OCR thật và baseline hoặc model adapter thật. Fixture chỉ dùng test wiring, không thay inference để nghiệm thu.
 3. Người dùng nhìn canonical image, sửa một scalar và một item, save tạo revision mới.
 4. Approve đúng revision có total, đủ xác nhận/warning acknowledgements, export JSON khớp snapshot.
 5. AI-2 có fine-tune pilot và báo cáo dev ban đầu; Data/Lead khóa metric definitions và targets trước mở final test.
@@ -117,7 +121,7 @@ Model pilot có thể còn lỗi. Receipt E2E pass không chứng minh model qua
 - Evidence có coverage/ambiguity report; unavailable thì UI báo rõ.
 - Hai tab save cùng version: chỉ một lần thành công; request stale trả 409 và UI giữ edits.
 - Rerun tạo candidate; adopt tạo draft revision mới; head người dùng không bị thay âm thầm.
-- Duplicate job delivery không tạo hai committed runs; stale worker không commit.
+- Duplicate/retried compute không tạo hai committed runs; stale attempt không commit.
 - Confidence có calibration report khi đủ support; thiếu support dùng null/flags. Không autoapprove.
 
 ### G4 — tuần 10: quality và correctness

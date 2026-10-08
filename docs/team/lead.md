@@ -6,7 +6,7 @@ Bạn phụ trách scope, workflow, architecture, interfaces, review/merge và p
 
 1. Đọc [scope](../../specs/scope.md), [business schema](../../specs/contracts/business.schema.json) và [approval policy](../../specs/approval-policy.md). Chốt receipt/invoice một trang, tiếng Việt, scalar fields và line items.
 2. Kiểm ví dụ chung trong [team guide](README.md). Xác nhận tiền/quantity là string, field không thấy là null, runtime IDs và metadata nằm ngoài business payload.
-3. Với Backend và hai AI, chốt OCR/extraction interfaces: text, box/quad, thứ tự đọc, image dimensions, versions, lỗi và payload đầu ra. Backend viết types; bạn review các trường và consumer xác nhận dùng được.
+3. Với Backend và hai AI, chốt OCR/extraction interfaces: text, box/quad, thứ tự đọc, image dimensions, versions, lỗi và payload đầu ra. Backend viết Java DTO; AI-1 OCR types, AI-2 private compute types trong Python, cùng schema/fixtures; Lead review boundary.
 4. Gán mỗi vai trò cho một người cụ thể. Chưa cần mở toàn bộ backlog; giao một việc đầu tiên trong từng bản hướng dẫn.
 5. Yêu cầu người nhận trả lại: hiểu input/output gì, sẽ sửa folder nào và cần ai hỗ trợ. Nếu hai người cùng sửa một interface, chọn một người implement và người còn lại review.
 
@@ -35,7 +35,7 @@ Approval cần được cấp trên nội dung cuối. Nếu tác giả sửa lo
 
 - Lần đầu: một receipt chạy thật qua upload → OCR → extraction → sửa → approve → JSON.
 - Lần tiếp theo: invoice và line items; ngày/tiền/missing có validation đúng.
-- Trước handoff: test duplicate job, worker chết, hai tab save/approve, quyền truy cập và export cũ sau rerun; model quality có report riêng.
+- Trước handoff: test duplicate job, runner/Python chết, hai tab save/approve, quyền truy cập và export cũ sau rerun; model quality có report riêng.
 - Model/GPU được chọn sau spike có số đo. Nếu không đạt tiêu chí, ghi phần còn thiếu và chọn bước sửa; không đổi tiêu chí để gọi là pass.
 
 ## Bạn giữ/cập nhật ở đâu?
@@ -44,7 +44,7 @@ Scope và acceptance ở `specs/`, durable decisions ở `docs/adr/`, Git Flow �
 
 ## Ví dụ giao việc
 
-> Backend: viết receipt/invoice typed contracts và test các JSON mẫu hiện có. Tiền/quantity phải là string; key thiếu hoặc key lạ bị từ chối. Bàn giao schema sinh từ code và test command/kết quả. AI-1/AI-2 review các types dùng chung, mình review cuối.
+> Backend: viết receipt/invoice typed contracts và test các JSON mẫu hiện có. Tiền/quantity phải là string; key thiếu hoặc key lạ bị từ chối. Bàn giao Java DTO validate schema trung lập/shared fixtures và actual test command/kết quả. AI-1/AI-2 review các types dùng chung, mình review cuối.
 
 Bạn không cần giao lại toàn bộ phần phía sau của tài liệu khi task đầu tiên còn chưa xong.
 
@@ -78,6 +78,8 @@ Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiể
 
 ### L1.1 — chốt yêu cầu, tuần 1
 
+Dependency và effort dự kiến: scope/schema/3–4month; 1–2h review. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 Input: scope, business schema, approval policy và giới hạn 3–4 tháng.
 
 1. Liệt kê chính xác receipt/invoice fields/items hiện có; ví dụ source không có buyer/address thì null, không tự thêm field loại khác.
@@ -89,11 +91,13 @@ Nộp: scope/acceptance được team xác nhận. Xong khi Data biết gold nà
 
 ### L1.2 — chốt owners và interfaces, tuần 1
 
+Dependency và effort dự kiến: B1/O1/M1 + ADR-0009; 2–3h coordination. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 Input: proposals của Data/AI và reference contracts.
 
 1. Gán người thật vào bốn vai trò; không đoán username thành vị trí.
-2. Backend implement shared types; AI-1 review canonical/quad/order, AI-2 review extraction/raw output, Data review labels/manifest.
-3. Xác nhận thin pipeline wiring owner đề xuất là Backend. AI giữ algorithm adapters; một người sửa lockfile/migration/shared schema, các consumer review.
+2. Backend owns shared schema/protocol/Java DTO; AI-1 OCR types, AI-2 compute adapters, Data gold validation. Duyệt [ADR-0009](../adr/0009-java-python-thymeleaf.md), retry/storage/service-auth cùng consumers.
+3. Python pipeline/service.py + ai-service owner AI-2; AI-1 owns OCR, Backend owns Java runner/client/completion/Thymeleaf. Shared schema writer Backend; Python lock AI-2; Flyway Backend; consumers review.
 4. Review ít nhất một valid và invalid example mỗi boundary; chốt decimal strings, null, metadata riêng business payload, version/error conventions.
 5. Quyết định ADR khi team thực sự chấp nhận, không tự đổi Proposed do có scaffold.
 
@@ -101,14 +105,18 @@ Nộp: owner map/interfaces và decision notes. Xong khi consumer xác nhận pa
 
 ### L2.1 — tháo blocker và duyệt G0, tuần 2
 
+Dependency và effort dự kiến: D1.2/O1.3/M1.3/B2 evidence; 1–2h gate. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Nhận Data sample/QA, AI-1 OCR/overlay, AI-2 infer/train-step/resources/license, Backend upload/contracts.
 2. Nếu thiếu hardware hoặc model OOM, yêu cầu candidate nhỏ hơn và measured alternative; không tự cấp paid API/GPU budget.
 3. Xác nhận config/resource profile, train khả thi và dependency order. Accuracy 20 samples chỉ smoke, không final benchmark.
-4. Giao increment tiếp theo: generator/evaluator, geometry, training loader/pilot, worker/review.
+4. Giao increment tiếp theo: generator/evaluator, geometry, training loader/pilot, Java runner/review và M2.3 Python private compute.
 
 Nộp: G0 pass hoặc gap/owner/next step. Xong khi không có blocker model feasibility bị giấu dưới chữ “sẽ fine-tune sau”.
 
 ### L2.2 — nghiệm thu G1 và khóa metrics, tuần 4
+
+Dependency và effort dự kiến: B4/B5 + M3.2/D3; 1–2h gate. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Upload receipt fake mới trong profile; kiểm stages thật, sửa scalar/item, save, approve/export.
 2. Đối chiếu export với đúng approved snapshot; yêu cầu evidence không dựa fixture/hard-coded output.
@@ -119,15 +127,19 @@ Nộp: checklist E2E + metric protocol. Xong khi proof tái hiện được và 
 
 ### L3.1 — review/merge và G2/G3, tuần 5–9
 
+Dependency và effort dự kiến: consumer PRs + D2.2/B3/B4/B5; 4–8h/week review. Refine sau smoke; đây không là SLA/deadline đã cam kết.
+
 1. Review từng PR với acceptance; consumer approve schema/model/migration changes. Kiểm source boundaries, tests và diff secrets/binaries.
 2. Merge contracts trước providers/consumers phụ thuộc; shared migrations/lockfile không merge đồng thời mù.
 3. Kiểm Data frozen split/test protocol; AI không tune final. Regression critical totals/items và failures cần report riêng.
-4. Nghiệm thu invoice/items, CAS, rerun/adopt, duplicate/stale worker, evidence/null confidence.
+4. Nghiệm thu invoice/items, CAS, rerun/adopt, duplicate/stale attempt, evidence/null confidence.
 5. Conflict semantic do tác giả giải quyết cùng consumer; Lead điều phối và re-review. Sau ba vòng không giảm lỗi, reassess thay vì train tiếp.
 
 Nộp: gate evidence và gap list. Xong khi tính năng W8 đủ scope, không biến buffer thành feature expansion.
 
 ### L4.1 — final gate/handoff, tuần 10–12
+
+Dependency và effort dự kiến: candidate freeze + B7.1/D5.1/M6.1/O5.1; 2–4h acceptance. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Khóa candidate/evaluator/data hashes, cho Data mở final protocol; đọc support/per-type/slices và failures.
 2. Quality không đạt phải ghi gap/buffer/limitation, không sửa target để pass. Correctness invariants phải pass độc lập.
@@ -164,7 +176,7 @@ Lead điều phối merge order và semantic conflict, không nhận viết code
 | OCR sai dấu/số, boxes lệch | AI-1 | Sample repro, raw/canonical/processed overlay, before/after |
 | OCR đúng nhưng payload sai/rows trộn | AI-2 | B0/M0/M1 diff, raw prediction và field/row error |
 | Model không load/train được | AI-2 | Hardware/memory/config, alternative feasible và trade-off |
-| Job stuck/duplicate/rerun overwrite | Backend | State/fence/outbox trace và regression test |
-| Hai bên hiểu schema khác nhau | Lead điều phối; Backend sửa types | Consumer examples và compatibility check trước merge |
+| Job stuck/duplicate/rerun overwrite | Backend | State/fence/HTTP attempt trace và regression test |
+| Hai bên hiểu schema khác nhau | Lead điều phối; Backend shared schema/Java, AI Python adapter | Consumer examples và compatibility check trước merge |
 
 Bạn giữ quyết định và review; người sở hữu phần lỗi viết fix và tests của họ.

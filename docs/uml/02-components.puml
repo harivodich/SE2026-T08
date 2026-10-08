@@ -1,56 +1,51 @@
 @startuml
-title Components — API, job và computation
+title Target components — Java business + Python compute (Proposed ADR-0009)
 skinparam defaultFontName Arial
 skinparam shadowing false
-skinparam backgroundColor #FFFFFF
-skinparam ArrowColor #405670
 left to right direction
-component "React Review UI" as web #E8F0FC
-component "FastAPI / Auth / Routes" as api #E8F0FC
-component "Dispatcher / Recovery" as dispatch #E8F0FC
-component "Celery worker entrypoint" as worker #E8F0FC
-package "Application services" {
-component "Documents service" as docs #E8F0FC
-component "Job lifecycle / completion" as jobs #E8F0FC
-component "Revision / Approval" as review #E8F0FC
-component "Snapshot exporter" as exports #E8F0FC
+actor "Browser / Operator" as user
+package "Java business modular monolith" {
+ component "Web profile\nSpring MVC + Thymeleaf\nSession / CSRF" as web #DDEBFA
+ component "Documents / Review / Approval / Export\napplication services" as biz #DDEBFA
+ component "Runner profile\nclaim / heartbeat / retry / recovery" as runner #DDEBFA
+ component "Job lifecycle + completion\nCAS / lease / fencing" as jobs #DDEBFA
+ component "Private AI HTTP client\nschema / correlation / asset validation" as client #DDEBFA
+ component "JPA repositories\nnative claim/CAS adapters\nFlyway" as repos #DDEBFA
 }
-package "Infrastructure" {
-component "UnitOfWork / Repositories" as uow #E8F0FC
-database "PostgreSQL\nstate + outbox + audit" as db #E8F0FC
-database "Redis broker" as redis #E8F0FC
-database "Private storage / model artifacts" as files #E8F0FC
+package "Python ai-service (private)" {
+ component "FastAPI boundary\nservice auth / limits / semaphore 1\nAI-2" as ai #DDF3E8
+ component "Pipeline wiring / extraction / normalization\nmodel lifecycle + confidence\nAI-2" as pipeline #DDF3E8
+ component "Canonical render / preprocess / OCR\ngeometry / evidence\nAI-1" as ocr #DDF3E8
 }
-package "Compute" {
-component "Pipeline orchestration" as pipeline #E8F0FC
-component "OCR / Geometry" as ocr #E8F0FC
-component "Extraction adapter" as extractor #E8F0FC
-component "Normalize / Evidence / Validate" as checks #E8F0FC
-}
-web --> api : REST + polling
-api --> docs : upload/get
-api --> jobs : create/status
-api --> review : edit/approve
-api --> exports : export revision
-docs --> uow : transaction
-jobs --> uow : job/outbox/fence
-review --> uow : CAS/revision/audit
-exports --> uow : approval lookup
-uow --> db : SQLAlchemy
-docs --> files : original asset
-exports --> files : approved artifact
-dispatch --> jobs : dispatch/recover
-dispatch --> redis : publish job_id
-redis --> worker : at-least-once delivery
-worker --> jobs : claim/heartbeat/commit
-worker --> pipeline : compute
-pipeline --> ocr : canonical page
-ocr --> extractor : text + boxes
-extractor --> checks : raw prediction
-checks --> pipeline : validated result
-pipeline --> files : attempt assets
-pipeline --> extractor : pin manifest
+database "PostgreSQL\nbusiness + durable jobs + audit\nJava writer only" as db #FFF0D5
+artifact "Java-owned originals / committed assets / approved exports\nJava write" as privatefiles
+artifact "Attempt artifacts\nPython write / Java validate read" as attempts
+artifact "Pinned model/pipeline releases\nread-only serving" as models
+component "Offline Python Data / training / evaluation\nData + AI-2; no auto activation" as offline
+user --> web : HTML + same-origin API/JS polling
+web --> biz
+web --> jobs : create/status/cancel
+biz --> repos
+runner --> jobs : claim/recover/complete
+jobs --> repos
+runner --> client : outside DB transaction
+client --> ai : multipart bytes/metadata\nJSON response; private HTTP
+ai --> pipeline : bounded execution
+pipeline --> ocr
+pipeline --> models
+pipeline --> attempts : attempt-scoped output
+client --> privatefiles : read original
+client --> attempts : read untrusted attempt assets
+client --> privatefiles : stream-copy / verify hash + decode\natomic publish promoted keys
+biz --> privatefiles : authorized stream/export
+repos --> db : short transactions
+offline --> models : release handoff after gate
+note bottom of ai
+No business DB credentials.
+No public review API.
+Java alone commits business state.
+end note
 legend bottom
-Một repository, nhiều process. Redis chỉ delivery; PostgreSQL giữ state; model không viết DB.
+One repo, two runtimes. No Celery/Redis/outbox/React in target MVP. Proposed design, not running code.
 endlegend
 @enduml

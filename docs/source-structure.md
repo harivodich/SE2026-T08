@@ -1,181 +1,106 @@
-# 04 — Cấu trúc source dự kiến và ownership
+# Source structure và ownership đích
 
-## 1. Repository layout
+## Hiện có và đích
 
-Cây dưới là thiết kế target đầy đủ. Theo yêu cầu ngày 05/10/2026, các folder/package chính đã được tạo để team bắt đầu làm việc; xem [source hiện tại](../src/vietdoc/README.md). Các file service/adapter trong cây sẽ được thêm khi triển khai từng việc, chưa có implementation runtime.
+Hiện có: package Python docstring-only, SPEC local, schemas/docs/fixtures thiết kế. `backend/` mới có tài liệu hướng dẫn, chưa Maven app. Cây dưới là target, chỉ tạo file có logic khi triển khai task. Không xóa scaffold cũ trong lượt thiết kế; chúng được đánh dấu legacy để không giao nhầm người.
 
 ```text
-vietdoc/
-├── AGENTS.md                         # quy ước ổn định, không chứa tiến độ task
-├── pyproject.toml                    # core + api + worker + ml optional groups
-├── uv.lock                          # dependency lock sau spike
-├── specs/
-│   ├── scope.md
-│   ├── approval-policy.md
-│   ├── errors.md
-│   └── contracts/                    # schema/OpenAPI sinh từ Pydantic
-├── docs/
-│   ├── adr/
-│   ├── uml/
-│   ├── team/                        # roadmap/task chi tiết từng người + workflow/Git Flow
-│   ├── data-cards/
-│   ├── model-cards/
-│   └── runbooks/
-├── src/vietdoc/
-│   ├── contracts/
-│   │   ├── business.py               # ReceiptPayload, InvoicePayload, LineItem
-│   │   ├── ocr.py                    # PreparedPage, OcrBlock, OcrPage
-│   │   ├── extraction.py             # ExtractionInput, RawPrediction, PipelineResult
-│   │   ├── review.py                 # Review DTO, SourceRegion, FieldMetadata
-│   │   ├── jobs.py                   # JobState, JobMessage, PipelineManifest
-│   │   └── errors.py                 # typed error codes
-│   ├── identity/
-│   │   ├── public.py
-│   │   ├── service.py
-│   │   └── policies.py               # ownership/RBAC
-│   ├── documents/
-│   │   ├── public.py
-│   │   ├── entities.py
-│   │   ├── service.py                # upload + head CAS
-│   │   └── ports.py                  # DocumentRepository, file store
-│   ├── jobs/
-│   │   ├── public.py
-│   │   ├── entities.py
-│   │   ├── service.py                # create/claim/complete/recovery
-│   │   ├── lifecycle.py
-│   │   └── ports.py
-│   ├── review/
-│   │   ├── public.py
-│   │   ├── entities.py
-│   │   ├── service.py                # initial/edit/adopt/approve
-│   │   ├── validation.py             # approval rules, money/date consistency
-│   │   └── ports.py
-│   ├── exports/
-│   │   ├── public.py
-│   │   ├── service.py
-│   │   ├── json_exporter.py
-│   │   └── ports.py
-│   ├── pipeline/
-│   │   ├── service.py                # pure orchestration of compute stages
-│   │   ├── preprocess.py
-│   │   ├── geometry.py               # inverse transforms canonical coordinates
-│   │   ├── ocr/
-│   │   │   ├── port.py
-│   │   │   └── paddle_adapter.py
-│   │   ├── extraction/
-│   │   │   ├── port.py
-│   │   │   ├── rule_baseline.py
-│   │   │   ├── model_adapter.py
-│   │   │   └── prompts/              # versioned, local templates
-│   │   ├── normalization.py
-│   │   ├── evidence.py
-│   │   └── confidence.py             # fitted calibrator or null+flags
-│   ├── data/
-│   │   ├── manifest.py
-│   │   ├── generator/
-│   │   │   ├── render.py
-│   │   │   ├── values.py
-│   │   │   └── templates/{receipt,invoice}/
-│   │   ├── adapters/receiptvqa.py
-│   │   ├── validation.py
-│   │   └── splits.py
-│   ├── ml/
-│   │   ├── train_extractor.py
-│   │   ├── model_loading.py
-│   │   ├── training_dataset.py
-│   │   ├── release_manifest.py
-│   │   └── configs/
-│   ├── evaluation/
-│   │   ├── run.py
-│   │   ├── fields.py
-│   │   ├── line_items.py
-│   │   ├── geometry.py
-│   │   └── reports.py
-│   ├── infrastructure/
-│   │   ├── persistence/{models,repositories,uow}.py
-│   │   ├── storage/{local,s3}.py      # chỉ local được implement trong MVP
-│   │   ├── queue/celery_adapter.py
-│   │   ├── model_registry.py
-│   │   └── observability.py
-│   └── entrypoints/
-│       ├── api/{app,dependencies,exception_handlers}.py
-│       │   └── routes/{auth,documents,jobs,review,exports,admin}.py
-│       ├── worker/{app,tasks}.py
-│       ├── dispatcher/main.py
-│       └── cli/{seed_users,generate_data,evaluate,publish_release}.py
-├── web/
-│   ├── package.json
-│   ├── src/
-│   │   ├── api/generated/            # từ OpenAPI
-│   │   ├── features/{auth,documents,review}/
-│   │   ├── components/{DocumentViewer,FieldEditor,ItemsGrid,IssuePanel}/
-│   │   └── app/
-│   └── tests/
-├── migrations/                      # một Alembic lineage; Backend điều phối
-├── tests/
-│   ├── unit/{documents,jobs,review,pipeline}/
-│   ├── integration/{api,queue,persistence,storage}/
-│   ├── contract/
-│   ├── architecture/
-│   ├── e2e/
-│   └── fixtures/                    # fictional tiny fixtures, không full dataset
-├── datasets/{raw,processed,manifests}/ # raw/processed ignored, manifest tracked
-├── artifacts/{models,evaluation}/     # model binaries ignored
-├── storage/                          # runtime ignored
-├── infra/{compose.yaml,Dockerfile.api,Dockerfile.worker,web.conf}
-├── .github/{workflows,CODEOWNERS,PULL_REQUEST_TEMPLATE.md}
-└── .env.example                     # chỉ tên biến và giá trị không nhạy cảm
+backend/                          Java/Spring Boot; Backend owns
+  pom.xml, mvnw, .mvn/             thêm khi B1.3 smoke thành công
+  src/main/java/vn/vietdoc/
+    VietDocApplication.java
+    config/                       web vs runner profiles, security/limits
+    contracts/                    Java DTO + shared-schema validation
+    identity/                     auth/ownership
+    documents/                    upload/metadata/head CAS
+    jobs/                         durable lifecycle/runner/recovery/fence
+    review/                       revision/approval/semantic validator
+    exports/                      deterministic approved JSON
+    aiclient/                     private compute HTTP adapter
+    infrastructure/               persistence/storage/logging
+  src/main/resources/
+    templates/
+      auth/                       login
+      documents/                  list/upload/detail
+      review/                     scalar/items/issues/history fragments
+    static/{css,js}/               viewer.js/editor.js/status.js
+    db/migration/                 Flyway V<n>__<name>.sql
+  src/test/java/vn/vietdoc/        unit/integration/module checks
+src/vietdoc/                      Python compute + offline AI/Data
+  contracts/                      OCR/compute typed adapters, no business services
+  pipeline/
+    service.py                    AI-2 stage wiring, AI-1 review
+    preprocess.py, geometry.py    AI-1 image/canonical transforms
+    evidence.py                   AI-1 source association
+    ocr/                          AI-1 engine port/adapter
+    extraction/                   AI-2 rules/model/prompt adapters
+    normalization.py              AI-2 locale canonical values
+    confidence.py                 AI-2 calibrated scores/null
+  data/{generator,adapters}/       Data, dictionary/manifests/splits/QA
+  ml/                             AI-2 train/loading/releases/config
+  evaluation/                     Data, independent metric/report code
+  infrastructure/storage/         AI-2 attempt outputs; no DB/broker
+  entrypoints/api/                AI-2 private FastAPI compute/health
+  entrypoints/cli/                Data CLI + AI-2 training/eval composition
+tests/
+  unit/pipeline/                  Python geometry/extraction/data tests
+  contract/                       language-neutral valid/invalid fixtures
+  integration/api/                Python compute boundary tests
+  architecture/                   Python no business DB imports
+  e2e/                            cross-runtime/browser tests
+  fixtures/                       tiny fictional samples only
+specs/                            scope/policy/contracts/protocol
+docs/team/                        per-role weekly roadmap/task/Git Flow
+infra/                            app + runner + AI + PostgreSQL Compose
+datasets/{raw,processed,manifests}/
+artifacts/{models,evaluation}/
+storage/                          originals, attempts, exports; ignored
 ```
 
-`s3.py` ở cây là vị trí tương lai, không tạo implementation rỗng. Hạn chế thêm repository/interface nếu chỉ một helper pure; các ports trên được dùng ở I/O hoặc model boundary thật.
+Mỗi working folder mới phải có SPEC.md ngay khi có task cần tạo folder. Không tạo toàn bộ cây/class rỗng chỉ để đẹp. Backend tests/migrations không viết vào Python legacy folders.
 
-## 2. Dependency rules
+## Legacy: không viết tính năng mới
 
-1. `contracts` không import entrypoints, database, Celery, Paddle, Transformers.
-2. Business entities/services không import FastAPI decorators, ORM hoặc GPU libraries; chỉ contracts và ports cần thiết.
-3. `pipeline` dùng contracts + compute adapters; không import modules persistence hoặc gọi services review/export.
-4. `data/ml/evaluation` không gọi production API để training; dùng dataset snapshot/artifacts.
-5. Routes gọi public services, không model inference/SQL trong handler.
-6. Worker task chỉ claim → compute → completion service. Không lặp business rules riêng của API.
-7. Cross-module calls qua `public.py`; UoW injection từ entrypoint composition root.
-8. `infrastructure/persistence` implement owning-module ports; dùng chung SQLAlchemy session, không thêm ORM khác.
+| Vùng đang tồn tại | Đích thay thế |
+|---|---|
+| src/vietdoc/identity,documents,jobs,review,exports | backend/src/main/java/vn/vietdoc/<feature> |
+| src/vietdoc/infrastructure/persistence,queue | Java persistence/jobs adapters |
+| src/vietdoc/entrypoints/worker,dispatcher | Java job-runner profile, không Python Celery |
+| web/ | backend/src/main/resources/templates và static |
+| migrations/ | backend/src/main/resources/db/migration (Flyway) |
+| tests/unit/documents,jobs,review; tests/integration/persistence,queue,storage | Java tests, trừ cross-runtime tests viết có chủ đích |
 
-DAG mong muốn: contracts ở đáy; services/ports phụ thuộc contracts; adapters phụ thuộc ports/contracts; entrypoints compose services/adapters. `review` được dùng `documents.public`; `exports` được dùng `review.public`; `jobs` điều phối `documents.public` và `review.public` nhưng review không gọi jobs. Status UI lấy API composition, không tạo cycle modules.
+Legacy markers/docstrings giữ để đối chiếu và tránh destructive cleanup. Sau Java slice được kiểm, Backend có thể đề xuất PR loại scaffold cũ với diff/recovery rõ; không dùng cả hai implementations.
 
-## 3. CODEOWNERS và integration ownership
+## Dependency rules
 
-| Path | Implementer chính | Reviewer bắt buộc |
+- Java controllers → owning services → domain/ports; adapters thực hiện I/O. Domain không import Python/model framework.
+- `aiclient` chuyển protocol JSON thành DTO, kiểm ids/schema/provenance/assets; không chứa OCR algorithms.
+- Python contracts không import FastAPI/Paddle/Transformers hoặc ORM. Entrypoint compose lifecycle; pipeline không business persistence.
+- Data/ML/evaluation offline không gọi approval API hay tự activate model.
+- HTML và REST reuse cùng business service; Java server là approval authority, không UI/Python.
+- Pure helper không cần port/factory nếu không có I/O boundary thật.
+
+## Ownership và hợp đồng cần khóa W1
+
+| Path/boundary | Implementer | Reviewer |
 |---|---|---|
-| contracts, specs, ADR | Backend implement contract; Lead thiết kế | Lead + consumer bị ảnh hưởng |
-| data/generator/adapters/splits | Data Engineer | AI-1/AI-2 + Lead khi schema/split đổi |
-| preprocess/geometry/ocr/evidence | AI-1 | AI-2 khi input đổi; Backend khi UI bbox đổi |
-| extraction/model adapter/ml/confidence | AI-2 | AI-1 + Lead |
-| pipeline/service.py (thin stage wiring, phân công đề xuất) | Backend; Lead xác nhận kickoff | AI-1 + AI-2 |
-| evaluation | Data Engineer | Cả hai AI; Lead metric/release gate |
-| identity/documents/jobs/review/exports/persistence/API/web | Backend | Lead; AI reviewer cho integration contract |
-| infra/CI/migrations | Backend | Lead; model worker config cần AI-2 |
+| specs/contracts + protocol | Backend chỉnh shared spec; Lead thiết kế | Data/AI-1/AI-2 |
+| Java DTO/app/domain/storage/runner/UI/migrations/CI | Backend | Lead; AI tại boundary |
+| Python OCR/page types + preprocess/OCR/geometry/evidence | AI-1 | AI-2, Backend viewer |
+| Python compute request/response types, serving/service.py | AI-2 | Backend, AI-1 |
+| Python extractor/model/train/normalizer/confidence | AI-2 | AI-1, Data; Lead gate |
+| Python generator/splits/evaluator + offline data CLI | Data | Hai AI; Lead metric/split |
+| Python model lock/runtime | AI-2 điều phối; AI-1 OCR dependency | Backend build/deploy consumer |
 
-Lead **không có backlog coding thường xuyên**. Lead quyết scope/contract, review, merge và điều phối conflict; Backend chịu phần code bootstrap/CI. Nếu Backend quá tải UI, giảm polish hoặc xin bổ sung người, không âm thầm dồn code cho Lead.
+Khóa page/quad/order, model input/raw output, compute multipart/result/errors, attempt asset manifest, revision/head/version, export, dataset supervision/split. Shared schema chỉ một PR writer tại một thời điểm; consumers có adapter độc lập.
 
-## 4. Các unit interfaces cần khóa tuần 1
+## Thứ tự source increments và migration
 
-- OCR → extraction: text, ordering, canonical geometry, limits.
-- Model → pipeline: raw output, finish reason, timing; JSON schema không phụ thuộc vendor model.
-- Pipeline → jobs: payload/evidence/issues/provenance; terminal errors typed.
-- Review → frontend: revision/head/version, stable row IDs, issues severity.
-- Export → consumer: approved snapshot, schema version, decimal strings.
-- Dataset → training: source IDs, template families, split, label status và evidence.
+1. B1.1/B1.2 shared examples + Java DTO; O1 page/OCR proposal; M2.3 private compute skeleton chỉ khi task implementation được giao.
+2. B1.3 Java health/login/Thymeleaf minimal runnable; B2 private upload; Data20 samples; AI1 OCR thật; AI2 model/train-step smoke.
+3. B3 PostgreSQL runner gọi Python thật; M2.3 connects stages; B4/B5 receipt save/approve/export W4.
+4. Invoice/items W6; evidence/confidence + cancel/rerun/history W8.
+5. Failure/quality/clean-env gates W10–12, buffer13–16. Có fixtures để test wiring, không dùng chúng để nghiệm thu OCR/model quality.
 
-## 5. Trình tự xây source
-
-1. Backend tạo contracts + upload/job metadata và lớp nối compute stages; AI-2 viết rule baseline, AI-1 đưa một OCR fixture đúng contract rồi thay bằng engine thật. Data tạo 10–20 fictional documents có labels. Phân công lớp nối cho Backend là đề xuất làm rõ ở [hướng dẫn team](team/README.md), Lead xác nhận kickoff.
-2. Chạy vertical slice trên một receipt: upload → xử lý thật → review → approve → JSON; không chờ model fine-tune mới tích hợp.
-3. AI-1 thay OCR fixture bằng engine thật; AI-2 thêm model adapter đã chạy smoke; tests fixture không được dùng để báo AI accuracy.
-4. Mở invoice và line items bằng cùng orchestration, không fork backend thứ hai.
-5. Hoàn thiện outbox/recovery/CAS, model release manifest và evaluation gates trước release.
-
-CLI names là đề xuất; command cụ thể chỉ ghi README khi code đã thực thi thành công. Không copy chạy snippets training ngoài repo mà không audit dependencies/model licensing.
-
-## 6. Spec folder và kế hoạch hiện hành
-
-[Spec sử dụng folder](../specs/repository-layout.md) giải thích purpose/owner/current status và Git exclusions. Roadmap/task từng người ở [docs team](team/README.md), workflow/Git Flow/gates chung ở [workflow](team/workflow.md). Tiến độ/evidence ở Issue/PR hoặc phiếu Lead giao, không tasks folder. Snapshot docs/design/v1 giữ layout cũ để đối chiếu.
+Không ghi start/train commands trong README khi chưa chạy được. API contracts đích ở [protocol](../specs/contracts/compute-api.md); workflow ở [team](team/workflow.md); quyết định ở [ADR-0009](adr/0009-java-python-thymeleaf.md).

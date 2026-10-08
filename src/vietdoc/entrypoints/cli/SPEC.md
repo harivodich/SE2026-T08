@@ -2,26 +2,23 @@
 
 ## Purpose và owner
 
-Thin offline commands Owner: Backend composition; owning compute theo vai trò.
+Offline Data/ML commands Owner: Data dataset/eval; AI-2 training/model.
 
 ## Đặt gì ở đây?
 
-Generate/evaluate/seed wrappers khi owning logic chạy thật
+Generator/QA/splits/eval/train/reproduce CLI khi có implementation.
 
-## Ranh giới và dữ liệu
+## Ranh giới
 
-Không duplicate core logic/commands fake/auto deploy Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
+Không seed Java users, business DB mutation hoặc activate model tự động; no paid/model downloads ngoài quyền task.
 
-## Workflow và kết quả cần kiểm
+## Workflow và kiểm tra
 
-1. Nhận một task nhỏ có input/version/output/acceptance từ Lead; xem [doc vai trò](../../../../docs/team/backend.md) khi cần task chi tiết.
-2. Sửa đúng vùng này, báo affected consumer nếu contract/config/version đổi; không tự nhận phần module khác.
-3. Commands thực + config/version/output, Data/AI/Backend review
-4. Ghi commands/checks/output thật và limitations, peer review trước Lead duyệt; [Git Flow](../../../../docs/git-flow.md), không direct push main/develop.
+Đọc [doc vai trò](../../../../docs/team/data-engineer.md), nhận một task có input/version/output/acceptance. Commands thật, config/seed/version/hashes + repeatable subset. Ghi actual commands/results và limitations, [Git Flow](../../../../docs/git-flow.md); không tự commit/push/deploy.
 
-## Folder liên quan
+## Liên quan
 
-[Folder cha](../SPEC.md). [Scope](../../../../specs/scope.md).
-Folder này không có subfolder làm việc cần spec riêng.
+[Scope](../../../../specs/scope.md), [structure](../../../../docs/source-structure.md), [architecture](../../../../docs/architecture.md).
 
-SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.
+
+File đích chưa implement không là code chạy được; tạo implementation/SPEC con theo increment được giao.
