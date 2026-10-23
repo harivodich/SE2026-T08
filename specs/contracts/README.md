@@ -20,3 +20,9 @@ Chi tiết fields, API/error envelopes và ports: [contracts design](../../docs/
 - `$ref` dùng URN nội bộ, validator phải đăng ký schemas, không tự fetch URL ngoài.
 - Contract PR đi trước consumer PR. Breaking version change phải đồng bộ dataset/model/evaluator/frontend/exporter.
 - Backend tạo Pydantic source-of-truth rồi generate JSON Schema/OpenAPI/types, thêm full validator positive/negative tests. Lượt bootstrap chưa chạy conforming JSON Schema compiler.
+
+Backend hiện có implementation Java riêng: `ContractValidator` nạp JSON Schema từ classpath rồi map payload hợp lệ sang business DTO. DTO hiện là typed projection, chưa sinh schema; việc đồng bộ schema giữa `specs/contracts/` và `backend/src/main/resources/contracts/` vẫn là điểm cần thống nhất với quyết định kiến trúc trước khi mở rộng contract.
+
+## Shared backend contract vectors
+
+`../../tests/fixtures/contracts/business-validation.json` là bộ JSON fixtures synthetic dùng chung cho receipt/invoice. Bộ case bao gồm null, unknown/missing key, ngày lịch không tồn tại, boundary 30/31 items, sai kiểu ở business fields, line items và chính item, số JSON nguyên/thực cho tiền/số lượng, cùng `schema_version` thiếu/sai trên extraction và export envelopes. Backend contract test đọc trực tiếp fixtures này; Data/AI-2 có thể dùng cùng vectors khi triển khai consumer.
