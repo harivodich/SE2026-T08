@@ -7,6 +7,18 @@
 Java DTO; AI-2 owns compute envelope. Không thay [compute protocol](../specs/contracts/compute-api.md),
 [result schema](../specs/contracts/extraction-result.schema.json) hay ADR status.
 
+## Trạng thái bàn giao hiện tại — 2026-10-24
+
+- Có loader/OCR pretrained/geometry/evidence và local HTML review report chạy được.
+  AI-2 có entrypoint `recognize_document`; xem hướng dẫn ở Python README bên dưới.
+- Theo yêu cầu người dùng, **D1/D3 và baseline-dependent preprocess improvement
+  để sau** khi Data bàn giao. Không tự tạo dataset/evaluator thay phần Data.
+- Chưa nghiệm thu G0/O2.2/O3/O4/O5 toàn hệ thống: còn consumer review/wiring của
+  AI-2, canonical asset promotion và viewer integration của Backend. Không sửa
+  business DB/Java UI hoặc tự ghép các feature branches để thay consumer approval.
+- Tests/synthetic outputs chứng minh code behavior; chưa là CER/WER/per-type
+  quality evidence trên chứng từ độc lập. Detector vẫn có box rộng ở mẫu số lặp.
+
 ## Ảnh và pixel format
 
 | Dạng | Ý nghĩa | Quy ước đề xuất |
@@ -211,8 +223,8 @@ Chỉ cặp fixture nhỏ trên được commit, không commit 20 bộ ảnh/out
 
 - Chưa có D1 documents/transcript/region gold, CER/WER/per-type metrics, Data evaluator
   hoặc AI-2/Backend consumer acceptance; chưa đóng G0 hay tuyên bố chất lượng receipt/invoice.
-- Chưa semantic table/column/wrapped-description order: dùng SortQuadBoxes native
-  top-to-bottom/left-to-right (10px tolerance); không ghép cells, không bảo đảm word-level boxes.
+- Snapshot O1.3 dùng SortQuadBoxes native (10px tolerance). O2.1 bên dưới thay sorter;
+  chưa semantic table grouping và không bảo đảm word-level boxes.
 - Chưa auto-detect orientation cho raster không có EXIF, deskew/contrast nâng cao,
   evidence matching, Java viewer/API hoặc extraction. Những phần đó thuộc increment sau.
 - OCR budget kiểm trước/sau native call, giữ slot đến khi native thực sự xong;
@@ -221,3 +233,174 @@ Chỉ cặp fixture nhỏ trên được commit, không commit 20 bộ ảnh/out
   blank. Một detected crop không đọc được text hợp lệ hiện làm output invalid,
   chưa silent-drop block. Score không phải calibrated field confidence.
 - Shared schemas và ADR status vẫn giữ nguyên Proposed; backend cần review wire contract.
+
+## Geometry và reading order O2.1 — 2026-10-24
+
+[`geometry.py`](../src/vietdoc/pipeline/geometry.py) chứa mapping pixel-edge thuần
+Python, dùng cùng convention homogeneous column vectors của PreparedPage. Adapter
+map từng detected quad về canonical, normalize theo đúng dimensions, sửa winding
+khi phản chiếu; không clamp tọa độ lỗi hoặc tự điền box khi mapping unavailable.
+Projection reject singular matrix, undefined denominator và polygon cắt projective
+horizon. Ngưỡng denominator tương đối giữ kết quả khi nhân toàn matrix với scalar.
+
+Repro sorter cũ: hai cột x=10/70, hai dòng y=10/17, vùng cao4px. Ở scale1, native
+sorter trả trái-dòng1 → trái-dòng2 → phải-dòng1 → phải-dòng2; scale3 lại đúng.
+Sorter mới dùng overlap/độ cao tương đối và top/center alignment. Ô ngắn cùng mép
+trên làm row anchor để ô cao không nối nhiều dòng. Trong dòng sắp trái→phải, giữ
+mọi vùng riêng, gồm mô tả xuống dòng và số tiền lặp. Đây là geometric row order,
+không phải semantic column traversal hay association mô tả với sản phẩm.
+
+Order được xác định trên **processed frame** đã thẳng để OCR. Khi canonical xoay
+90°/180° hoặc phản chiếu, giữ nguyên bộ text/quad/score theo thứ tự đó, không sort
+lại theo trục viewer. Block IDs đánh theo output order trong immutable result.
+Version mới có `cpu4.v2;pixel-edge-projective-relative-rows.v1`; model/package pins
+không đổi. Fixture observed O1.3 vẫn giữ version cũ, không sửa lịch sử prediction.
+
+Kiểm tra thực đã chạy:
+
+- 18 OCR contract tests và 55 pipeline tests đều pass, có bật native OCR.
+- Round-trip identity/resize/crop/90°/17°/reflection/perspective so với NumPy inverse
+  độc lập: tolerance `1e-7` pixel. Matrix scales ±1e-15/±1e15 cho cùng projection.
+- Native geometry smoke: **6 biến thể từ một trang giả**, 7 vùng có dấu/số tiền,
+  mô tả `loại nhỏ` riêng: identity, resize, crop+resize, 90°/180°+resize, reflection.
+  Cả 42 regions đúng reference text và đúng row order; min ink-bbox IoU=0.4445,
+  ink coverage=1.0. Ink masks tạo từ text/font trước OCR, rồi transpose bằng Pillow,
+  độc lập với helper mapping; ngưỡng smoke IoU≥0.40 và ink coverage≥0.95.
+- 20 format/EXIF/PDF/blank/corrupt cases O1.3 vẫn pass với sorter mới. Hai bộ smoke
+  không phải 26 D1 documents, chưa thay evaluator/CER/WER hay consumer acceptance.
+
+Commands/env ở [tests README](../tests/README.md). Lần kiểm cuối lưu local ignored
+`artifacts/evaluation/o2_1-geometry-verified/report.json` và mỗi case có canonical,
+overlay, OCR JSON; format smoke ở `artifacts/evaluation/o2_1-formats-verified/`.
+Các outputs này được sinh khi chạy, không đưa toàn bộ ảnh vào Git.
+
+Native geometry test chủ động dựng LoadedPage với inverse crop/rotate/reflection
+đã biết để kiểm mapping về viewer pixels. Production loader vẫn chỉ EXIF/PDF
+orientation + resize; chưa auto-deskew/crop/orientation cho raster không có EXIF.
+AI-2/Backend cần review version và kiểm consumer overlay trước khi chốt O2.1.
+
+## Source evidence O4.1a — exact raw text/context
+
+[`evidence.py`](../src/vietdoc/pipeline/evidence.py) nhận `OcrPage` và
+`EvidenceRequest(path, raw_value, context_block_ids=(), label_text=None)` từ AI-2.
+`raw_value` là text nguồn trước business normalization, ví dụ `80.000`; không
+truyền normalized decimal `80000` rồi yêu cầu mapper suy ra cách viết trên ảnh.
+Increment đầu dùng version `exact-raw-context-spans.v1`; phiên bản hiện tại ở
+O4.1b bên dưới. Helper thuần Python, không load model/ghi DB.
+
+```python
+from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
+
+# IDs từ observed fixture; consumer xác định context từ extraction của mình.
+request = EvidenceRequest(
+    "/total_amount", "80.000", ("p0-b0001", "p0-b0002"), "Tổng tiền",
+)
+match = match_evidence(ocr_page, request)
+field_metadata = match.to_field_metadata()
+```
+
+- So complete blocks, NFC/whitespace/case; giữ dấu, số và punctuation. Có thể nối
+  tối đa4 blocks liên tiếp trong context theo page order; không sửa OCR bằng value.
+- Số tiền xuất hiện nhiều nơi trả `ambiguous`, candidate IDs và source_regions rỗng.
+  Consumer cấp context IDs đúng row/field để phân biệt. Label chỉ xác nhận xuất
+  hiện duy nhất trong scope, chưa tự thiết lập quan hệ label→value bằng khoảng cách.
+- Mô tả xuống dòng cần context chứa các description blocks; mỗi block giữ region
+  riêng. Không union rectangles qua dòng/cột. Context IDs không tồn tại/duplicate
+  là lỗi input; thứ tự hint IDs không thay page reading order.
+- `matched` giữ nguyên canonical quads/block IDs và single-block engine score.
+  Multi-block ocr_score=null, confidence/confidence_method luôn null để AI-2 xử lý.
+- Không match, thiếu geometry/context hoặc thiếu prediction trả source_regions=[]
+  cùng SOURCE_* review flags. raw_value=null vẫn value_origin=prediction; không
+  suy diễn field absent. Candidate IDs nằm trong internal EvidenceMatch, không
+  thêm key ngoài schema vào FieldMetadata hoặc thay business payload.
+
+Đã chạy **18 contract + 70 pipeline tests**, gồm15 evidence unit checks và native
+OCR. Native kiểm `/total_amount` ở cả6 transform cases: region bằng đúng source
+quad của `40.000`, cùng block ID/score sau xoay/crop/resize. Output local ignored
+ở `artifacts/evaluation/o4_1a-evidence-versioned/`: report pin evidence_version,
+có total_evidence và từng
+case có `total-overlay.png` chỉ highlight vùng số tiền đã chọn. Đã xem overlay.
+Đối chiếu Draft2020-12 FieldMetadata từ shared schema:6 native outputs +5 trạng
+thái negative/unavailable đều valid (checker Python có sẵn, không thêm dependency).
+
+Đây là matcher increment đầu, chưa hoàn tất O4.1: chưa fuzzy/substring alignment,
+tự chọn row context/semantic geometry, extraction pipeline wiring, Java viewer
+integration hoặc AI-2/Backend acceptance. O2.2 vẫn cần Data D1 transcripts/regions
+và evaluator D3; smoke synthetic không thay baseline chất lượng theo từng type.
+
+## Source evidence O4.1b — label và row geometry
+
+`match_evidence(..., prepared=loaded.metadata)` bổ sung context theo vị trí cho
+raw values lặp. Không truyền PreparedPage thì giữ hành vi exact/context O4.1a.
+Version hiện tại `exact-raw-label-row-spans.v2`; shared schema không đổi.
+
+```python
+request = EvidenceRequest("/total_amount", "40.000", label_text="Tổng tiền")
+match = match_evidence(ocr_page, request, prepared=loaded.metadata)
+field_metadata = match.to_field_metadata()
+```
+
+Nhãn phải match duy nhất một complete OCR block. Mapper đảo inverse transform để
+đưa quads canonical trở lại processed pixel-edge frame; kiểm đúng dimensions,
+projection và bounds. Sau đó chỉ chọn khi **đúng một candidate bên phải nhãn,
+cùng row**: vertical overlap≥nửa độ cao nhỏ hơn, center delta≤nửa độ cao nhỏ hơn.
+Không chọn nearest candidate khi có hai số cùng row. Context IDs vẫn có thể giới
+hạn scope trước; mọi candidate ID ban đầu giữ trong internal diagnostics.
+
+Thiếu label/geometry hoặc nhiều candidates còn hợp lệ vẫn trả uncertainty/flags;
+unknown geometry không bị loại như thể chắc chắn nằm ở row khác. Quads output
+giữ nguyên canonical coordinates, không dùng processed coordinates để highlight.
+Row rule là heuristic cho label→value bên phải, chưa hỗ trợ mọi layout/table,
+value bên dưới nhãn, substring hoặc fuzzy OCR. Confidence vẫn null; caller phải
+gắn đúng page/metadata cùng run, dimensions không chứng minh asset identity.
+
+Đã chạy **18 contract +77 pipeline tests** (21 evidence unit checks; native bật).
+Inverse projective helper đối chiếu NumPy inverse và tolerance `1e-7` pixel, gồm
+perspective/scalar scales. Native có6 geometry-base cases giữ nguyên mẫu7 regions
+và6 repeated-value cases (mẫu9 regions), cả hai dùng PNG source giả cùng font.
+Hai số `40.000` ở Tổng tiền/Đã trả được đọc đúng, chỉ chọn block tổng tiền, giữ
+quad/ID/score sau resize/crop/90°/180°/reflection. 12 FieldMetadata outputs đã
+validate với shared Draft2020-12 schema; chưa có AI-2/Java viewer acceptance.
+
+Output local ignored: `artifacts/evaluation/o4_1b-label-row-verified/`, mỗi family
+có report/version/transform/candidate IDs và canonical/OCR/total-overlay images.
+Geometry-base min IoU=0.4445, ink coverage=1.0. Mẫu số lặp có **4/6 cases IoU<0.40**,
+min=0.3878 do detector box rộng, ink coverage vẫn1.0; report ghi indices của các
+boxes đó. Bài số lặp kiểm source selection/coverage, không chứng minh detector
+đạt tight-box threshold hay có cải thiện OCR quality. Ngưỡng0.40 trên geometry
+regression cũ giữ nguyên; chưa tune detector theo sample này. D1/D3 baseline còn thiếu.
+
+## Local review report và entrypoint bàn giao
+
+CLI hiện xuất thêm `preview.html` cùng canonical/overlay/OCR/run. File chứa PNG
+canonical và OCR JSON/transcript; chọn vùng để xem text, ID, engine score, quad
+pixel/normalized, hoặc bật/tắt/tất cả vùng. Dùng trình duyệt ngoài VS Code để tránh
+lỗi vscode-media-preview. Không tải tài nguyên ngoài/server; OCR/transcript được
+escape JSON và đưa vào DOM bằng textContent, không dùng innerHTML.
+
+`pipeline.ocr.recognize_document(data, engine, limits=..., remaining_budget_ms=...,
+expected_sha256=...)` dùng engine do service đã load; không tải model hoặc sở hữu
+engine lifecycle. Context trả loaded canonical/processed images và immutable
+OcrPage; cả hai ảnh đóng khi thoát, kể cả lỗi OCR/consumer. Một monotonic deadline
+cho decode/OCR, `stage.remaining_budget_ms` tính live để consumer chuyển sang stage
+sau. Result sai canonical metadata trả typed OUTPUT_INVALID. Stage version
+`bounded-preprocess-ocr.v1` được ghi trong local CLI run report.
+
+Usage/config/commands ở [Python README](../src/vietdoc/README.md#chạy-ocr-ai-1).
+AI-2 vẫn owns extraction/attempt storage/compute envelope/hard native isolation;
+Backend owns verified asset promotion và viewer theo run/revision. Entry point
+này không tự trả business result hoặc ghi DB. Caller phải dùng ảnh trong context,
+giữ cùng image/run/provenance cho OCR và evidence.
+
+Checks cuối: **18 contract +88 pipeline tests pass**, native OCR bật, `pip check`
+không có broken requirements. Có7 stage lifecycle/deadline checks và4 HTML report
+checks (embedded pixels/data, blank/unavailable, mismatched image, script escaping).
+Native20 format/error cases đi qua entrypoint thật; geometry/evidence giữ12 cases
+và report limitation như trên. Kết quả local ở ignored
+`artifacts/evaluation/ai1-handoff-formats/` và `ai1-handoff-geometry/`.
+Browser interaction chưa được kiểm tự động: Computer Use dừng do chưa hỗ trợ
+URL-policy enforcement trên Cốc Cốc/Windows; in-app browser từ chối file:// theo
+URL security policy. Không chuyển sang server/protocol khác để né policy. Đã
+kiểm `node --check` và bundle CLI có ảnh nhúng/JSON/dimensions/version khớp bytes
+canonical, nhưng HTML parsing/data tests không được
+gọi là browser E2E hoặc Java viewer acceptance.

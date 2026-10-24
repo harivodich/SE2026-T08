@@ -7,7 +7,6 @@ service owns model_root and lifecycle. Input is a LoadedPage, never a request UR
 from hashlib import sha256
 from importlib.metadata import version
 import json
-import math
 import os
 from pathlib import Path
 import tarfile
@@ -20,7 +19,10 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage
+from vietdoc.pipeline.geometry import GEOMETRY_VERSION, canonical_quad, pixel_quad, reading_order
 from vietdoc.pipeline.preprocess import LoadedPage
+from vietdoc.pipeline.ocr import OCR_STAGE_VERSION, OcrError, recognize_document
+from vietdoc.pipeline.ocr.preview import render_preview
 
 
 RUNTIME_VERSIONS = {
@@ -47,18 +49,11 @@ MODELS = {
 MODEL_SET_ID = "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d"
 OCR_VERSION = (
     MODEL_SET_ID + ";paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;"
-    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.v1"
+    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.v2;"
+    + GEOMETRY_VERSION
 )
 MAX_BLOCKS = 1000
 MAX_TEXT_CHARS = 50_000
-
-
-class OcrError(ValueError):
-    """Stable safe code/message; native exceptions stay outside the wire response."""
-
-    def __init__(self, code: str, message: str):
-        self.code = code
-        super().__init__(message)
 
 
 def _file_hash(path: Path) -> str:
@@ -129,46 +124,22 @@ def provision_models(model_root: Path) -> None:
             staged.rename(destination)
 
 
-def _ordered_quad(points: np.ndarray) -> tuple:
-    points = [tuple(float(n) for n in point) for point in points]
-    area = sum(points[i][0] * points[(i + 1) % 4][1] - points[(i + 1) % 4][0] * points[i][1] for i in range(4))
-    if area < 0:
-        points.reverse()
-    first = min(range(4), key=lambda i: (points[i][1], points[i][0]))
-    points = tuple(points[first:] + points[:first])
-    # Reuse contract validation for convexity/degeneracy; this is not a source box.
-    OcrBlock("geometry-check", "geometry-check", points, None, None)
-    return points
-
-
 def _source_quad(polygon, width: int, height: int) -> np.ndarray:
     raw = np.asarray(polygon)
     if raw.shape != (4, 2) or raw.dtype.kind not in "fiu" or not np.isfinite(raw).all():
         raise ValueError("Invalid detector quad")
     raw = raw.astype(np.float64)
-    normalized = raw / (width, height)
-    if (normalized < 0).any() or (normalized > 1).any():
-        raise ValueError("Detector quad is outside the processed image")
-    _ordered_quad(normalized)
+    pixel_quad(raw.tolist(), width, height)
     return raw
 
 
 def _canonical_quad(polygon, metadata: PreparedPage) -> tuple | None:
     raw = _source_quad(polygon, metadata.processed.width, metadata.processed.height)
-    if metadata.geometry_status == "unavailable":
-        return None
-    projected = np.column_stack((raw, np.ones(4))) @ np.asarray(metadata.inverse_transform).T
-    denominator = projected[:, 2]
-    if not np.isfinite(projected).all() or (np.abs(denominator) < 1e-12).any():
-        raise ValueError("Undefined canonical projection")
-    # A polygon crossing the projective horizon cannot have a finite image box.
-    if (denominator > 0).any() and (denominator < 0).any():
-        raise ValueError("Canonical projection crosses a horizon")
-    canonical = projected[:, :2] / denominator[:, None]
-    normalized = canonical / (metadata.canonical.width, metadata.canonical.height)
-    if not np.isfinite(normalized).all() or (normalized < 0).any() or (normalized > 1).any():
-        raise ValueError("Mapped quad is outside the canonical image")
-    return _ordered_quad(normalized)
+    return canonical_quad(raw.tolist(), metadata)
+
+
+def _sort_polygons(polygons):
+    return [polygons[index] for index in reading_order([np.asarray(polygon).tolist() for polygon in polygons])]
 
 
 def _to_page(result, metadata: PreparedPage) -> OcrPage:
@@ -233,7 +204,7 @@ def _build_predictor(root: Path):
     if os.environ.get("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "").lower() != "true":
         raise OcrError("MODEL_LOAD_FAILED", "Disable Paddle model source checks before loading local models")
     from paddleocr import TextDetection
-    from paddlex.inference.pipelines.components import CropByPolys, SortQuadBoxes
+    from paddlex.inference.pipelines.components import CropByPolys
     import tesserocr
 
     if not tesserocr.tesseract_version().startswith("tesseract 5.5.3\n"):
@@ -246,7 +217,7 @@ def _build_predictor(root: Path):
         path=str(root / "tessdata-vie_infer"), lang="vie",
         psm=tesserocr.PSM.SINGLE_LINE, oem=tesserocr.OEM.LSTM_ONLY,
     )
-    return _PaddleTessPredictor(detector, recognizer, SortQuadBoxes(), CropByPolys("quad"))
+    return _PaddleTessPredictor(detector, recognizer, _sort_polygons, CropByPolys("quad"))
 
 
 class VietnameseOcrEngine:
@@ -361,7 +332,7 @@ def draw_overlay(canonical: Image.Image, page: OcrPage) -> Image.Image:
 def main() -> int:
     """Small local smoke CLI; service integration is owned by AI-2."""
     import argparse
-    from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits, load_document
+    from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", nargs="?", type=Path)
@@ -389,16 +360,16 @@ def main() -> int:
             if len(reference) > MAX_TEXT_CHARS:
                 raise ValueError("Transcript exceeds text cap")
         engine.load()  # Warm lifecycle startup happens outside a job's deadline.
-        started = time.monotonic()
-        with load_document(data, limits=limits, remaining_budget_ms=180_000) as loaded:
-            remaining = 180_000 - math.ceil((time.monotonic() - started) * 1000)
-            page = engine.recognize(loaded, remaining_budget_ms=remaining)
+        with recognize_document(data, engine, limits=limits, remaining_budget_ms=180_000) as result:
+            loaded, page = result.loaded, result.ocr
             args.output_dir.mkdir(parents=True, exist_ok=False)
             loaded.canonical.save(args.output_dir / "canonical.png")
             with draw_overlay(loaded.canonical, page) as overlay:
                 overlay.save(args.output_dir / "overlay.png")
             (args.output_dir / "ocr.json").write_text(json.dumps(page.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+            (args.output_dir / "preview.html").write_text(render_preview(loaded.canonical, page, transcript=reference), encoding="utf-8")
             summary = {
+                "ocr_stage_version": OCR_STAGE_VERSION,
                 "ocr_version": OCR_VERSION, "input_sha256": loaded.input_sha256,
                 "prepared": loaded.metadata.to_dict(), "load_seconds": engine.load_seconds,
                 "inference_seconds": engine.last_inference_seconds,

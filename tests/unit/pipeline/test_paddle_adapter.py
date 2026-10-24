@@ -12,7 +12,8 @@ from unittest.mock import Mock, patch
 import numpy as np
 from PIL import Image
 
-from vietdoc.contracts.ocr import ImageInfo, PreparedPage
+from vietdoc.contracts.ocr import ImageInfo, OcrPage, PreparedPage
+from vietdoc.pipeline.ocr import OCR_STAGE_VERSION, recognize_document
 from vietdoc.pipeline.preprocess import LoadedPage
 from vietdoc.pipeline.ocr.paddle_adapter import (
     OcrError, VietnameseOcrEngine, RUNTIME_VERSIONS, _PaddleTessPredictor,
@@ -353,6 +354,100 @@ class ModelProvisionTest(unittest.TestCase):
                 self.assertEqual(caught.exception.code, "MANIFEST_UNAVAILABLE")
                 self.assertEqual(list(root.iterdir()), [])
 
+class OcrStageTest(unittest.TestCase):
+    def setUp(self):
+        self.loaded = LoadedPage(
+            Image.new("RGB", (10, 10)), Image.new("RGB", (10, 10)),
+            PreparedPage(0, ImageInfo(10, 10, "RGB", "uint8"), ImageInfo(10, 10, "RGB", "uint8"),
+                         "fixture.v1", "available", ((1,0,0),(0,1,0),(0,0,1)), None), "0" * 64,
+        )
+        self.addCleanup(self.loaded.close)
+        self.page = OcrPage(0, 10, 10, "fixture.v1", ())
+        self.engine = Mock()
+        self.engine.recognize.return_value = self.page
+
+    def assert_images_closed(self):
+        for image in (self.loaded.canonical, self.loaded.processed):
+            with self.assertRaises(ValueError):
+                image.getpixel((0,0))
+
+    def test_shared_deadline_keeps_engine_lifecycle_with_caller_and_closes_images(self):
+        clock = [10.0]
+        def decode(*args, **kwargs):
+            clock[0] += .2
+            return self.loaded
+        def recognize(*args, **kwargs):
+            self.assertLessEqual(kwargs["remaining_budget_ms"], 800)
+            clock[0] += .3
+            return self.page
+        self.engine.recognize.side_effect = recognize
+        with patch("vietdoc.pipeline.ocr.time.monotonic", side_effect=lambda: clock[0]), patch("vietdoc.pipeline.preprocess.load_document", side_effect=decode):
+            with recognize_document(b"input", self.engine, remaining_budget_ms=1000) as result:
+                self.assertIs(result.loaded, self.loaded)
+                self.assertIs(result.ocr, self.page)
+                self.assertLessEqual(result.remaining_budget_ms, 500)
+                self.assertGreaterEqual(result.remaining_budget_ms, 490)
+                clock[0] += .1
+                self.assertLessEqual(result.remaining_budget_ms, 400)
+        self.assert_images_closed()
+        self.engine.load.assert_not_called()
+        self.engine.close.assert_not_called()
+
+    def test_engine_failure_propagates_and_releases_images(self):
+        self.engine.recognize.side_effect = RuntimeError("native failure")
+        with patch("vietdoc.pipeline.preprocess.load_document", return_value=self.loaded), self.assertRaisesRegex(RuntimeError, "native failure"):
+            with recognize_document(b"input", self.engine):
+                self.fail("Must not publish a failed OCR result")
+        self.assert_images_closed()
+
+    def test_output_on_wrong_canonical_page_is_rejected_and_images_close(self):
+        self.engine.recognize.return_value = replace(self.page, width=11)
+        with patch("vietdoc.pipeline.preprocess.load_document", return_value=self.loaded), self.assertRaises(OcrError) as caught:
+            with recognize_document(b"input", self.engine):
+                self.fail("Must not publish mismatched geometry")
+        self.assertEqual(caught.exception.code, "OUTPUT_INVALID")
+        self.assert_images_closed()
+
+    def test_expired_decode_budget_skips_engine_and_closes_images(self):
+        clock = [0.0]
+        def decode(*args, **kwargs):
+            clock[0] = 2.0
+            return self.loaded
+        from vietdoc.pipeline.preprocess import PreprocessError
+        with patch("vietdoc.pipeline.ocr.time.monotonic", side_effect=lambda: clock[0]), patch("vietdoc.pipeline.preprocess.load_document", side_effect=decode), self.assertRaises(PreprocessError) as caught:
+            with recognize_document(b"input", self.engine, remaining_budget_ms=1000):
+                self.fail("Must not publish an expired result")
+        self.assertEqual(caught.exception.code, "COMPUTE_TIMEOUT")
+        self.engine.recognize.assert_not_called()
+        self.assert_images_closed()
+
+    def test_expired_native_call_is_not_published_as_success(self):
+        clock = [0.0]
+        def recognize(*args, **kwargs):
+            clock[0] = 2.0
+            return self.page
+        self.engine.recognize.side_effect = recognize
+        from vietdoc.pipeline.preprocess import PreprocessError
+        with patch("vietdoc.pipeline.ocr.time.monotonic", side_effect=lambda: clock[0]), patch("vietdoc.pipeline.preprocess.load_document", return_value=self.loaded), self.assertRaises(PreprocessError) as caught:
+            with recognize_document(b"input", self.engine, remaining_budget_ms=1000):
+                self.fail("Must not publish an expired result")
+        self.assertEqual(caught.exception.code, "COMPUTE_TIMEOUT")
+        self.assert_images_closed()
+
+    def test_consumer_exception_also_releases_images(self):
+        with patch("vietdoc.pipeline.preprocess.load_document", return_value=self.loaded), self.assertRaisesRegex(RuntimeError, "consumer failed"):
+            with recognize_document(b"input", self.engine):
+                raise RuntimeError("consumer failed")
+        self.assert_images_closed()
+
+    def test_decode_failure_skips_engine(self):
+        from vietdoc.pipeline.preprocess import PreprocessError
+        with patch("vietdoc.pipeline.preprocess.load_document", side_effect=PreprocessError("INPUT_INVALID", "Bad image")), self.assertRaises(PreprocessError):
+            with recognize_document(b"bad", self.engine):
+                self.fail("Must not return a decode failure as success")
+        self.engine.recognize.assert_not_called()
+
+
 @unittest.skipUnless(os.environ.get("VIETDOC_OCR_MODEL_ROOT"), "Set VIETDOC_OCR_MODEL_ROOT for real pretrained OCR")
 class NativeOcrSmokeTest(unittest.TestCase):
     """20 encoding/orientation/error cases from ONE fictional page, not D1 gold."""
@@ -368,7 +463,7 @@ class NativeOcrSmokeTest(unittest.TestCase):
         from PIL import ImageDraw, ImageFont
         import pypdfium2 as pdfium
         from vietdoc.contracts.ocr import OcrPage
-        from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits, load_document
+        from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits
 
         font_path = os.environ.get("VIETDOC_OCR_TEST_FONT")
         if not font_path:
@@ -433,8 +528,8 @@ class NativeOcrSmokeTest(unittest.TestCase):
                 with self.subTest(sample_id=sample_id):
                     started = time.monotonic()
                     try:
-                        with load_document(data, limits=PreprocessLimits(processed_long_edge=400)) as loaded:
-                            page = engine.recognize(loaded, remaining_budget_ms=180_000 - int((time.monotonic() - started) * 1000))
+                        with recognize_document(data, engine, limits=PreprocessLimits(processed_long_edge=400)) as result:
+                            loaded, page = result.loaded, result.ocr
                             record.update({"ocr": page.to_dict(), "input_sha256": loaded.input_sha256, "inference_seconds": engine.last_inference_seconds})
                             self.assertEqual(OcrPage.from_dict(page.to_dict()), page)
                             if output:
@@ -464,6 +559,7 @@ class NativeOcrSmokeTest(unittest.TestCase):
             latency = [record["inference_seconds"] for record in records if "inference_seconds" in record]
             report = {
                 "kind": "synthetic-format-geometry-smoke; not D1 quality evaluation",
+                "ocr_stage_version": OCR_STAGE_VERSION,
                 "python": platform.python_version(), "system": platform.platform(),
                 "font_sha256": sha256(Path(font_path).read_bytes()).hexdigest(),
                 "runtime": RUNTIME_VERSIONS, "load_seconds": engine.load_seconds,

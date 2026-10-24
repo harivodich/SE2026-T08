@@ -1,6 +1,6 @@
 # Python AI/Data source
 
-Có OCR/page types tại `contracts/ocr.py` và loader tại `pipeline/preprocess.py`, theo [proposal AI-1](../../docs/ocr-input-proposal.md) chờ Backend/AI-2 review. Có adapter Paddle detector + Tesseract `vie` tại `pipeline/ocr/paddle_adapter.py`; chưa extraction/training/server implementation. Python chỉ computation và offline Data/ML; Java quản lý business state.
+Có OCR/page types, loader, geometry/evidence và adapter Paddle detector + Tesseract `vie`, theo [proposal AI-1](../../docs/ocr-input-proposal.md) chờ Backend/AI-2 review. Entrypoint `pipeline.ocr.recognize_document` chạy preprocess→OCR với một deadline và quản lý lifetime ảnh. Chưa extraction/training/server implementation trên branch này. Python chỉ computation và offline Data/ML; Java quản lý business state.
 
 | Vùng active | Owner và output |
 |---|---|
@@ -72,17 +72,44 @@ $env:HF_HUB_OFFLINE = "1"
 Chọn output directory mới mỗi lần. Có thể thêm `--transcript sample.txt` để so
 text sau chuẩn hóa whitespace; không truyền transcript vào recognizer. Có thể
 thêm `--processed-long-edge 400` để tái kiểm resize của smoke. Output gồm
-`canonical.png`, `overlay.png`, `ocr.json` và `run.json` với timing/config/hash.
+`canonical.png`, `overlay.png`, `ocr.json`, `run.json` với timing/config/hash và
+`preview.html` chứa ảnh/OCR/transcript để kiểm trực quan. Mở `preview.html` bằng
+trình duyệt ngoài VS Code, chọn block trong danh sách hoặc vùng trên ảnh để xem
+text, ID, score, pixel/normalized coordinates; có nút tất cả vùng/bật-tắt highlight.
+File tự chứa, không cần server hoặc tải tài nguyên ngoài. Đây là local OCR report,
+không phải Java business viewer.
 `quad` trong `ocr.json` là canonical normalized coordinates; overlay dùng đúng
 canonical pixels. Vùng là text detector tìm được; không chia grid.
 
-AI-2 dùng `VietnameseOcrEngine(model_root).load()` khi startup, gọi
-`recognize(loaded, remaining_budget_ms=budget_after_preprocess)` và `close()` khi
-shutdown. Model root do service config quản lý, không lấy từ request. Load kiểm
+AI-2 dùng `VietnameseOcrEngine(model_root).load()` khi startup và `close()` khi
+shutdown. Entrypoint nhận bytes, engine đã load, remaining job budget và input hash:
+
+```python
+from vietdoc.pipeline.ocr import recognize_document
+from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
+
+with recognize_document(document_bytes, engine, remaining_budget_ms=budget_ms,
+                        expected_sha256=input_sha256) as stage:
+    canonical = stage.loaded.canonical  # Chỉ dùng/save ảnh bên trong with.
+    ocr_page = stage.ocr                # Metadata bất biến, giữ được sau with.
+    remaining_for_extraction = stage.remaining_budget_ms  # Live budget, không reset.
+    # Sau khi AI-2 trả raw value, có thể gọi mapper ngay trong cùng context:
+    evidence = match_evidence(ocr_page, EvidenceRequest(
+        "/total_amount", raw_total_text, label_text="Tổng tiền",
+    ), prepared=stage.loaded.metadata)
+```
+
+Entrypoint đóng cả hai ảnh khi thoát context hoặc decode/OCR/consumer lỗi, không
+load/close engine của caller. Output sai canonical metadata trả OUTPUT_INVALID.
+AI-2 owns extraction, attempt paths/artifact hashes và compute response; Backend
+promote verified canonical assets trước khi viewer dùng. Model root do service
+config quản lý, không lấy từ request. Load kiểm
 exact package/native versions, model file set và SHA-256; load/inference offline.
 Một engine giữ một slot, busy trả `OcrError.code=AI_BUSY`. Deadline kiểm trước/sau
 native call; hard timeout/isolation của OCR thuộc lifecycle M2.3, chưa implement ở đây.
 
 `score` là Tesseract `MeanTextConf()/100`, có provenance trong `ocr_version`;
-không dùng làm field correctness confidence. Chưa làm semantic table grouping,
-evidence matcher hoặc API/server wiring. Xem [report/limits](../../docs/ocr-input-proposal.md#ocr-o13).
+không dùng làm field correctness confidence. Evidence mapper đã có exact/context
+và label-row selection, chưa semantic table grouping hay API/server wiring.
+D1/D3 và preprocess improvement dựa trên baseline được người dùng hoãn tới khi
+Data bàn giao. Xem [report/limits](../../docs/ocr-input-proposal.md).
