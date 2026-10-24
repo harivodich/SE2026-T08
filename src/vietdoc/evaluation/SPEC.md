@@ -11,7 +11,9 @@ Fields/rows/OCR/geometry/evidence/reports; đọc frozen artifacts không produc
 D3.1 implementation: `scalar_ocr.py`, `policy.py`, CLI `python -m vietdoc.evaluation`.
 Input envelope/definitions/version/review points ở [README](README.md).
 Policy `d31-canonical-nfc-v1-proposed` chưa được AI-1/AI-2 duyệt; không thay production normalization.
-Known-score tests: `tests/unit/test_evaluation.py`; rows/evidence vẫn thuộc D3.2.
+D3.2 implementation: `matching.py`, `tables.py`, `evidence.py`, `extended.py`;
+CLI thêm `--candidate NAME=PATH`. Policy/protocol/freeze vẫn Proposed, xem [D32](D32.md).
+Known-score tests: `tests/unit/test_evaluation.py`, `tests/unit/test_evaluation_tables.py`.
 
 ## Ranh giới và dữ liệu
 
