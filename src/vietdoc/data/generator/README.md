@@ -140,3 +140,108 @@ parse một trang, render thành PNG và extract raster nhúng giống từng pi
 Nếu thiếu thì test này skip rõ, không cài tool tự động. PNG render lại từ PDF có thể
 resample/anti-alias theo viewer; không yêu cầu nó byte/pixel-identical với PNG gốc.
 Xem evidence/limitations tại `datasets/manifests/d21-QA.md`.
+
+## D2.2 — layout families, grouped assignment và bounded variants
+
+`d22.py` dùng value vocabulary D1.1 và value factory D1.2, validation/PDF/environment
+của D2.1. `templates/families.py` thêm structural renderer riêng; không thay output
+renderer D1.2/D2.1. Business schema không đổi. CLI mặc định chỉ sinh **20 clean
+bases**, không phải dataset pilot đủ support hoặc final đã freeze.
+
+Mỗi type có cùng catalog cấu trúc nhưng fields/labels riêng của receipt/invoice.
+Font, màu và canvas được giữ cố định. Family IDs chứa type để không nhập nhằng.
+
+| Index | Thứ tự cột | Header / totals | Split |
+|---|---|---|---|
+| f00 | description, quantity, unit, unit_price, line_total | stacked / sau bảng | train |
+| f01 | quantity, description, unit_price, unit, line_total | stacked / sau bảng | train |
+| f02 | line_total, description, unit, quantity, unit_price | stacked / sau bảng | train |
+| f03 | unit_price, quantity, description, line_total, unit | stacked / sau bảng | train |
+| f04 | unit, line_total, quantity, unit_price, description | stacked / sau bảng | train |
+| f05 | như f00 | hai cột / trước bảng, vocabulary thay thế | train |
+| f06 | như f01 | hai cột / trước bảng, vocabulary thay thế | dev |
+| f07 | như f02 | hai cột / trước bảng, vocabulary thay thế | dev |
+| f08 | như f03 | hai cột / trước bảng, vocabulary thay thế | final |
+| f09 | như f04 | hai cột / trước bảng, vocabulary thay thế | final |
+
+Ví dụ vocabulary thay `Cửa hàng` → `Điểm bán`, `Ngày lập` → `Ngày phát hành`,
+`Tổng thanh toán` → `Phải trả`. Các families này vẫn chung renderer/vocabulary
+nguồn, **không phải independent mocks**. AI-1/AI-2 và Lead cần review mức đa dạng.
+
+### Assignment và targets
+
+`splits.assign_groups` nối transitive family/source/base aliases trước khi values
+được tạo. `source_aliases` map family sang nguồn trùng đã biết; conflicting split
+bị reject, không tự đổi holdout. `source_group` là issuance/layout source group,
+không phải tên merchant được bốc từ vocabulary; shared generator/vocabulary được
+ghi riêng trong provenance. Không dùng giả định này cho public data chưa audit.
+Plan, assignment hash và value seed từng base được ghi vào manifest. Variant seed
+derive từ base seed + variant name; Python hash randomization không tham gia.
+
+`bases_per_family=150` hỗ trợ 3.000 clean bases; `300` hỗ trợ 6.000. Đây là khả năng
+cấu hình, chưa là approval G0. CLI có `--base-limit=40` mặc định, chặn accidental
+large run trước khi tạo output. Chỉ tăng limit và sửa config sau quyết định capacity
+của Lead, giữ evidence nguồn quyết định trong handoff. Không tự chạy quy mô lớn.
+Không có thao tác final freeze/approve trong CLI. `dataset_version` có thể đặt cho
+v0.1/v1 candidate; mọi manifest hiện vẫn `final_frozen=false`.
+
+Dev partitions chỉ bật khi **mỗi type có đủ clean bases trong cả hai partitions**
+theo `dev_min_clean_per_type` (mặc định 100, là operational threshold đề xuất).
+Giữ toàn bộ connected group/family trong một partition; thiếu support thì toàn bộ
+dev giữ `dev_partition=null`. Report số thật, kể cả unpartitioned bases. Đủ count
+**không chứng minh calibration đủ**: cần correctness labels, field/class coverage,
+metric protocol và Lead/AI-2 review riêng. Không tune trên final.
+
+### Augmentation và labels
+
+- Skew là affine horizontal shear có dấu, `abs(shear)<=0.025` (~1,43° lệch đường
+  dọc), không phải rotation. Gaussian blur radius `[0,1]`, noise amplitude integer
+  `[0,18]` trên kênh 8-bit. Noise grid seeded nội bộ, bilinear resize, cộng có clip;
+  không dùng RNG toàn cục. Crop mỗi mép `[0,200]` pixels.
+- `mild`: shear 0.015 / blur 0.4 / noise 8; `crop`: shear -0.025, left 100 và top
+  180; `unreadable`: full-text masking + blur/noise. Unreadable là failure slice
+  synthetic về mất thông tin, không mô phỏng đủ mọi ảnh unreadable thực tế.
+- Bounds kiểm cả bốn góc sau shear/crop. Nếu một fragment/occurrence bị mất,
+  renderer che **mọi** occurrence của field, null value trong gold variant,
+  status `obscured`, raw null, bỏ regions/transcript field đó. Không đổi thành
+  `absent`; absent nguồn vẫn absent. Gold sạch nằm trong clean base, có
+  `source_gold_sha256` để nối lineage. Static text bị crop cũng bỏ fragment.
+- PNG/PDF của variant dùng cùng raster. Regions là pixel trên **chính** canonical
+  PNG đã biến đổi, thêm quads và affine forward/inverse; width/height đổi theo
+  crop. Geometry là renderer-local, chưa phải shared viewer contract. Loss được
+  đánh dấu; inverse tọa độ không khôi phục nội dung đã mất.
+- Transcript chỉ chứa các fragments còn giữ. Không có OCR output/prediction nào
+  làm gold. Severity bounds không thay human readability QA; `bounded` là policy
+  slice, không phải xác nhận từng ảnh đều dễ đọc.
+
+### Integrity, screening và consumer
+
+SHA-256 từng asset, source/config/schema/vocabulary/font/environment và manifest
+được lưu; reproducibility chỉ trong cùng renderer stack như D2.1. `--verify`
+regenerate tất cả assets và so bytes, metadata, plan, report; không chỉ tin hashes
+do manifest khai. Không overwrite directory. Build lỗi không có manifest hoàn chỉnh
+thì không dùng directory đó làm dataset. IDs local trong dataset version.
+
+Exact PNG trùng trong cùng base bị loại và report; trùng giữa bases fail. Exact
+content (bỏ invoice_number để tránh ID giả che leakage) cross-split cũng fail.
+Near-duplicate screening dùng clean bases: dHash 64-bit distance <=8 hoặc content
+value-set Jaccard >=0.85. Các candidate pairs được công khai kèm split và metric,
+không tự gọi là đã xử lý. Sparse pages dễ tạo false positives; heuristic này
+không chứng minh không còn semantic duplicates. Không dùng variants làm observations
+độc lập. Report có counts base/image, type/family/source/split/quality/rows/status,
+base summaries và cross-count slices. Ambiguous findings phải review trước pilot/freeze.
+
+CLI và consumer smoke (output phải là đường dẫn mới):
+
+```sh
+PYTHONPATH=src PYTHONHASHSEED=11 python3 -m vietdoc.data.generator.d22 --seed 2202 --output datasets/processed/d22-smoke-c
+PYTHONPATH=src python3 -O -m vietdoc.data.generator.d22 --verify datasets/manifests/d22-smoke-v01.json --assets-root datasets/processed/d22-smoke-c
+PYTHONPATH=src PYTHONHASHSEED=89 python3 -m unittest discover -s tests/unit -p 'test_data*.py' -v
+```
+
+Manifest paths relative directory chứa manifest. Safe snapshot chuyển sang
+`datasets/manifests/` có thể verify với `--assets-root datasets/processed/d22-smoke-c`.
+`integration.load_artifacts(Path.cwd(), output / 'manifest.json')` vẫn đọc format
+image/gold/labels/regions/transcript hiện có; thêm convention asset root rõ ràng và
+status obscured/unlabeled null. Đây là **consumer smoke loader**, không phải AI-2
+training loader. AI-2 vẫn cần kiểm wiring thực, filters và batching của mình.

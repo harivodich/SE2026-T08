@@ -74,6 +74,7 @@ def build(root, output, manifest, seed=1202, font_path=FONT, tiny=False):
 def load_artifacts(root, manifest):
     """Consumer smoke loader: validate hashes, decodability, schema and evidence coverage."""
     data = json.loads(manifest.read_text())
+    asset_root = manifest.parent if data.get('asset_paths') == 'relative to manifest directory' else root
     validator = Draft202012Validator(json.loads((root / 'specs/contracts/business.schema.json').read_text()))
     ids = set()
     for sample in data['samples']:
@@ -82,8 +83,8 @@ def load_artifacts(root, manifest):
         ids.add(sid)
         assets = {}
         for suffix, asset in sample['assets'].items():
-            path = (root / asset['path']).resolve()
-            assert path.is_relative_to(root.resolve())
+            path = (asset_root / asset['path']).resolve()
+            assert path.is_relative_to(asset_root.resolve())
             assert sha(path) == asset['sha256'], path
             assets[suffix] = path
         with Image.open(assets['png']) as image:
@@ -99,7 +100,9 @@ def load_artifacts(root, manifest):
         assert set(labels) == set(leaves(gold))
         for pointer, value in leaves(gold).items():
             hits = [r['text'] for r in regions if r['pointer'] == pointer]
-            assert labels[pointer]['status'] == ('absent' if value is None else 'present')
+            status = labels[pointer]['status']
+            assert status in ('present', 'absent', 'obscured', 'unlabeled')
+            assert (status == 'present') == (value is not None)
             assert labels[pointer]['raw'] == raw(pointer.rsplit('/', 1)[-1], value)
             if value is None:
                 assert not hits, pointer
