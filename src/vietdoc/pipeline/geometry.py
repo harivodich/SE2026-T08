@@ -9,7 +9,7 @@ import math
 from vietdoc.contracts.ocr import PreparedPage
 
 
-GEOMETRY_VERSION = "pixel-edge-projective-relative-rows.v1"
+GEOMETRY_VERSION = "pixel-edge-projective-relative-rows.v2"
 
 
 def _number(value):
@@ -56,6 +56,26 @@ def pixel_quad(points, width, height):
     if any(not (0 <= x <= width and 0 <= y <= height) for x, y in points):
         raise ValueError("Quad is outside the image")
     return points
+
+
+def _projected_pixel_quad(points, width, height):
+    """Correct boundary roundoff from arithmetic on already-validated points.
+
+    Only excursions <= 16 ULPs of the image extent may snap to an edge. Source
+    detector/normalized quads always pass strict pixel_quad validation first;
+    real out-of-bounds projections still fail. Interior coordinates stay intact.
+    """
+    tolerance = 16 * math.ulp(float(max(width, height)))
+
+    def edge(value, extent):
+        if -tolerance <= value < 0:
+            return 0.0
+        if extent < value <= extent + tolerance:
+            return float(extent)
+        return value
+
+    corrected = tuple((edge(x, width), edge(y, height)) for x, y in _points(points))
+    return pixel_quad(corrected, width, height)
 
 
 def _validated_transform(matrix):
@@ -118,7 +138,7 @@ def canonical_quad(points, metadata: PreparedPage):
     if metadata.geometry_status == "unavailable":
         return None
     mapped = project_points(points, metadata.inverse_transform)
-    mapped = pixel_quad(mapped, metadata.canonical.width, metadata.canonical.height)
+    mapped = _projected_pixel_quad(mapped, metadata.canonical.width, metadata.canonical.height)
     return ordered_quad(tuple((x / metadata.canonical.width, y / metadata.canonical.height) for x, y in mapped))
 
 
@@ -126,11 +146,11 @@ def processed_quad(canonical_normalized, metadata: PreparedPage):
     """Recover processed pixel-edge corners for spatial context, never for display."""
     if metadata.geometry_status == "unavailable" or canonical_normalized is None:
         return None
-    points = _points(canonical_normalized)
+    points = pixel_quad(canonical_normalized, 1, 1)
     canonical = pixel_quad(tuple((x * metadata.canonical.width, y * metadata.canonical.height) for x, y in points),
                            metadata.canonical.width, metadata.canonical.height)
     mapped = project_points(canonical, inverse_projective_transform(metadata.inverse_transform))
-    return pixel_quad(mapped, metadata.processed.width, metadata.processed.height)
+    return _projected_pixel_quad(mapped, metadata.processed.width, metadata.processed.height)
 
 
 def reading_order(polygons):

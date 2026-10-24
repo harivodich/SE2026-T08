@@ -11,6 +11,8 @@ Java DTO; AI-2 owns compute envelope. Không thay [compute protocol](../specs/co
 
 - Có loader/OCR pretrained/geometry/evidence và local HTML review report chạy được.
   AI-2 có entrypoint `recognize_document`; xem hướng dẫn ở Python README bên dưới.
+- Versions hiện tại: geometry `pixel-edge-projective-relative-rows.v2`, evidence
+  `exact-raw-label-row-spans.v3`. Các observed snapshots cũ giữ version lịch sử.
 - Theo yêu cầu người dùng, **D1/D3 và baseline-dependent preprocess improvement
   để sau** khi Data bàn giao. Không tự tạo dataset/evaluator thay phần Data.
 - Chưa nghiệm thu G0/O2.2/O3/O4/O5 toàn hệ thống: còn consumer review/wiring của
@@ -42,6 +44,9 @@ convert đúng format được kiểm chứng; không đổi RGB/BGR âm thầm.
   khung canonical là `[0,width] × [0,height]`, không phải pixel-center indices.
 - OCR output `quad` luôn ở canonical normalized coordinates: `x/width`, `y/height`.
   Mỗi số finite trong `[0,1]`; không clamp để che mapping sai.
+  Source detector quads và canonical normalized input được kiểm bounds nghiêm.
+  Riêng kết quả phép biến đổi có thể snap về biên nếu lệch ≤16 ULP theo image
+  extent (dưới6e-8 pixel trong profile20MP); ngoài mức sai số máy này vẫn reject.
 - Bốn đỉnh đi clockwise theo hệ ảnh, convex và không trùng/collinear/self-crossing.
   Bắt đầu tại điểm có `(y,x)` nhỏ nhất: y nhỏ nhất, hòa thì x nhỏ nhất. Với rectangle
   nằm ngang là top-left → top-right → bottom-right → bottom-left. Với chữ nghiêng,
@@ -332,7 +337,8 @@ và evaluator D3; smoke synthetic không thay baseline chất lượng theo từ
 
 `match_evidence(..., prepared=loaded.metadata)` bổ sung context theo vị trí cho
 raw values lặp. Không truyền PreparedPage thì giữ hành vi exact/context O4.1a.
-Version hiện tại `exact-raw-label-row-spans.v2`; shared schema không đổi.
+Increment O4.1b dùng `exact-raw-label-row-spans.v2`; bản fix sau review hiện ở v3.
+Shared schema không đổi.
 
 ```python
 request = EvidenceRequest("/total_amount", "40.000", label_text="Tổng tiền")
@@ -392,15 +398,30 @@ Backend owns verified asset promotion và viewer theo run/revision. Entry point
 này không tự trả business result hoặc ghi DB. Caller phải dùng ảnh trong context,
 giữ cùng image/run/provenance cho OCR và evidence.
 
-Checks cuối: **18 contract +88 pipeline tests pass**, native OCR bật, `pip check`
+Checks cuối: **18 contract +96 pipeline tests pass**, native OCR bật, `pip check`
 không có broken requirements. Có7 stage lifecycle/deadline checks và4 HTML report
 checks (embedded pixels/data, blank/unavailable, mismatched image, script escaping).
 Native20 format/error cases đi qua entrypoint thật; geometry/evidence giữ12 cases
 và report limitation như trên. Kết quả local ở ignored
-`artifacts/evaluation/ai1-handoff-formats/` và `ai1-handoff-geometry/`.
+`artifacts/evaluation/ai1-fix-regression-formats/` và `ai1-fix-regression-geometry/`.
 Browser interaction chưa được kiểm tự động: Computer Use dừng do chưa hỗ trợ
 URL-policy enforcement trên Cốc Cốc/Windows; in-app browser từ chối file:// theo
 URL security policy. Không chuyển sang server/protocol khác để né policy. Đã
 kiểm `node --check` và bundle CLI có ảnh nhúng/JSON/dimensions/version khớp bytes
 canonical, nhưng HTML parsing/data tests không được
 gọi là browser E2E hoặc Java viewer acceptance.
+
+### Regression fixes sau review
+
+- Evidence kiểm label/row geometry khi caller cấp PreparedPage + label_text,
+  kể cả chỉ có một text candidate. Ví dụ line total45.000 nhưng document total60.000:
+  request total45.000 không được chọn vùng dòng hàng; source_regions rỗng + flag.
+  Unique candidate thiếu geometry của nhãn, nằm sai dòng hoặc sai phía nhãn
+  cũng không matched. Match đúng vẫn giữ raw text, quad/ID/score ban đầu.
+- Quad sát mép sau resize2007→2000 từng bị reject vì `2007.0000000000002`;
+  mapping/round-trip hiện xử lý sai số máy sát biên cho resize/rotate/reflection.
+  Input ngoài bounds dù1 ULP và projection lệch thật1e-7px vẫn bị reject.
+- Đã quan sát regression tests fail trên code trước fix, pass sau fix. Thêm
+  adapter contract case cho detector quad sát mép; không sửa fixture OCR lịch sử
+  hoặc nới threshold IoU. Sweep4500 geometry cases từng phát hiện34 forward và431
+  round-trip failures; sau fix cả4500 đều qua. Đây là geometry checks, không D1 metrics.

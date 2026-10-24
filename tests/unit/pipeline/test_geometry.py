@@ -3,6 +3,7 @@
 from dataclasses import replace
 from hashlib import sha256
 import json
+import math
 import os
 from pathlib import Path
 import unittest
@@ -12,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from vietdoc.contracts.ocr import ImageInfo, OcrPage, PreparedPage
 from vietdoc.pipeline.geometry import canonical_quad, inverse_projective_transform, ordered_quad, pixel_quad, processed_quad, project_points, reading_order
-from vietdoc.pipeline.preprocess import LoadedPage
+from vietdoc.pipeline.preprocess import LoadedPage, PreprocessLimits, load_document
 from vietdoc.pipeline.evidence import EVIDENCE_VERSION, EvidenceRequest, match_evidence
 from vietdoc.pipeline.ocr.paddle_adapter import VietnameseOcrEngine, _sort_polygons, draw_overlay
 
@@ -22,6 +23,54 @@ def rectangle(x, y, width, height):
 
 
 class GeometryTest(unittest.TestCase):
+    def test_actual_loader_resize_edge_quads_survive_mapping_and_roundtrip(self):
+        from io import BytesIO
+
+        for size, long_edge in (((2007, 1000), 2000), ((503, 1000), 400)):
+            with self.subTest(size=size, long_edge=long_edge):
+                with Image.new("RGB", size, "white") as image:
+                    stream = BytesIO()
+                    image.save(stream, format="PNG")
+                with load_document(stream.getvalue(), limits=PreprocessLimits(processed_long_edge=long_edge)) as loaded:
+                    width, height = loaded.processed.size
+                    source = rectangle(0, 0, width, height)
+                    mapped = canonical_quad(source, loaded.metadata)
+                    np.testing.assert_allclose(mapped, rectangle(0, 0, 1, 1), rtol=0, atol=1e-15)
+                    restored = processed_quad(mapped, loaded.metadata)
+                    np.testing.assert_allclose(restored, source, rtol=0, atol=1e-7)
+
+    def test_transformed_full_frame_edges_keep_valid_bounds(self):
+        source = rectangle(0, 0, 201, 400)
+        scale_x = 503 / 201
+        cases = (
+            ((503, 1000), ((scale_x, 0, 0), (0, 2.5, 0), (0, 0, 1))),
+            ((1000, 503), ((0, -2.5, 1000), (scale_x, 0, 0), (0, 0, 1))),
+            ((503, 1000), ((-scale_x, 0, 503), (0, -2.5, 1000), (0, 0, 1))),
+            ((503, 1000), ((-scale_x, 0, 503), (0, 2.5, 0), (0, 0, 1))),
+        )
+        for dimensions, matrix in cases:
+            metadata = PreparedPage(0, ImageInfo(*dimensions, "RGB", "uint8"), ImageInfo(201, 400, "RGB", "uint8"),
+                                    "fixture.edge.v1", "available", matrix, None)
+            with self.subTest(matrix=matrix):
+                mapped = canonical_quad(source, metadata)
+                np.testing.assert_allclose(mapped, rectangle(0, 0, 1, 1), rtol=0, atol=1e-15)
+                restored = processed_quad(mapped, metadata)
+                # Mapping changes corner anchor/winding, not the actual corner set.
+                np.testing.assert_allclose(sorted(restored), sorted(source), rtol=0, atol=1e-7)
+
+    def test_roundoff_tolerance_never_repairs_invalid_source_or_real_overflow(self):
+        metadata = PreparedPage(0, ImageInfo(100, 100, "RGB", "uint8"), ImageInfo(100, 100, "RGB", "uint8"),
+                                "fixture.edge.v1", "available", ((1,0,0),(0,1,0),(0,0,1)), None)
+        for source in (rectangle(-math.ulp(100), 0, 10, 10), rectangle(0, 0, 100 + math.ulp(100), 10)):
+            with self.subTest(source=source), self.assertRaises(ValueError):
+                canonical_quad(source, metadata)
+        with self.assertRaises(ValueError):
+            processed_quad(rectangle(0, 0, 1 + math.ulp(1), 1), metadata)
+        for offset in (-1e-7, 1e-7):
+            outside = replace(metadata, inverse_transform=((1,0,offset),(0,1,0),(0,0,1)))
+            with self.subTest(offset=offset), self.assertRaises(ValueError):
+                canonical_quad(rectangle(0, 0, 100, 100), outside)
+
     def test_round_trip_against_independent_numpy_inverse_with_pixel_tolerance(self):
         points = ((0, 0), (17.25, 31.5), (120, 80), (400, 300))
         angle = np.deg2rad(17)

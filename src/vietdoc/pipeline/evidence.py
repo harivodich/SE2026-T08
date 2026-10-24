@@ -12,7 +12,7 @@ from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage
 from vietdoc.pipeline.geometry import processed_quad
 
 
-EVIDENCE_VERSION = "exact-raw-label-row-spans.v2"
+EVIDENCE_VERSION = "exact-raw-label-row-spans.v3"
 MAX_SPAN_BLOCKS = 4
 
 
@@ -90,9 +90,10 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
 
     Explicit context is traversed in page reading order, independent of the hint
     array's order. This lets the consumer scope a row or wrapped description.
-    Label text must identify one complete block in that scope. With verified
-    PreparedPage geometry, one candidate to the right on the label's processed
-    row can resolve repetitions. Multiple row candidates remain ambiguous.
+    Label text must identify one complete block in that scope. When PreparedPage
+    geometry and a label are supplied, every candidate must satisfy that spatial
+    context, including a unique text match. Exactly one candidate to the right
+    on the label's processed row may be selected; otherwise remain uncertain.
     """
     if not isinstance(page, OcrPage) or not isinstance(request, EvidenceRequest):
         raise ValueError("Expected OcrPage and EvidenceRequest")
@@ -129,9 +130,7 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
     if not candidates:
         return outcome("not_found", "SOURCE_NOT_FOUND")
     selected = candidates[0]
-    if len(candidates) > 1:
-        if prepared is None or request.label_text is None:
-            return outcome("ambiguous", "SOURCE_AMBIGUOUS", candidates=candidate_ids)
+    if prepared is not None and request.label_text is not None:
         label_quad = processed_quad(labels[0].quad, prepared)
         candidate_quads = [tuple(processed_quad(block.quad, prepared) for block in span) for span in candidates]
         # Unknown candidate geometry cannot be excluded as if it were elsewhere.
@@ -142,6 +141,8 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
         if len(row_candidates) != 1:
             return outcome("ambiguous", "SOURCE_AMBIGUOUS", candidates=candidate_ids)
         selected = row_candidates[0]
+    elif len(candidates) > 1:
+        return outcome("ambiguous", "SOURCE_AMBIGUOUS", candidates=candidate_ids)
     if any(block.quad is None for block in selected):
         return outcome("geometry_unavailable", "SOURCE_GEOMETRY_UNAVAILABLE", candidates=candidate_ids)
     return outcome("matched", selected=selected, candidates=candidate_ids)

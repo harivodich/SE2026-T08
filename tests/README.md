@@ -55,6 +55,11 @@ Matcher giữ từng source quad/ID; ambiguity không được biến thành sel
 Khi có `PreparedPage`, nhãn duy nhất và đúng một candidate bên phải cùng processed
 row có thể giải quyết số lặp; hai candidates cùng row hoặc geometry thiếu vẫn
 ambiguous. Unit checks có resize/rotated/reflected viewer và wrong-frame rejection.
+Label/row constraint cũng áp dụng cho unique candidate khi cấp PreparedPage +
+label_text: wrong-row/wrong-side hoặc thiếu label geometry không được matched.
+Geometry regressions có loader thật2007→2000 và503×1000, boundary round-trips sau
+resize/rotate/reflection. Chỉ projection roundoff ≤16 ULP được snap sát biên;
+raw input ngoài bounds và projection overflow thật vẫn phải reject.
 
 Entrypoint `recognize_document` được native20 case gọi trực tiếp. Stage checks
 trong test_paddle_adapter.py kiểm live budget không reset, đóng cả hai ảnh khi

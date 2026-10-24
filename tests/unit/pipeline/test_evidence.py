@@ -43,6 +43,36 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(result.candidate_block_ids, (("line-amount",), ("total-amount",)))
         self.assertEqual(result.to_field_metadata()["ocr_score"], .93)
 
+    def test_unique_value_on_wrong_row_must_not_bypass_requested_label(self):
+        page = replace(self.page, blocks=self.page.blocks[:-1] + (replace(self.page.blocks[-1], text="60.000"),))
+        result = match_evidence(page, EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền"), prepared=self.prepared)
+        self.assertNotEqual(result.status, "matched")
+        self.assertEqual(result.candidate_block_ids, (("line-amount",),))
+        self.assertEqual(result.to_field_metadata()["source_regions"], [])
+        self.assertIsNone(result.to_field_metadata()["ocr_score"])
+
+    def test_unique_value_on_wrong_side_of_label_is_not_selected(self):
+        misplaced = replace(self.page.blocks[-1], quad=((.01,.7),(.08,.7),(.08,.74),(.01,.74)))
+        page = replace(self.page, blocks=(self.page.blocks[-2], misplaced))
+        result = match_evidence(page, EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền"), prepared=self.prepared)
+        self.assertNotEqual(result.status, "matched")
+        self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_unique_value_requires_label_geometry_when_spatial_context_requested(self):
+        label = replace(self.page.blocks[-2], quad=None, geometry_reason="NO_MAPPING")
+        page = replace(self.page, blocks=(label, self.page.blocks[-1]))
+        result = match_evidence(page, EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền"), prepared=self.prepared)
+        self.assertNotEqual(result.status, "matched")
+        self.assertEqual(result.to_field_metadata()["source_regions"], [])
+        self.assertIn("SOURCE_CONTEXT_GEOMETRY_UNAVAILABLE", result.review_flags)
+
+    def test_unique_value_on_correct_label_row_still_preserves_source(self):
+        page = replace(self.page, blocks=self.page.blocks[-2:])
+        result = match_evidence(page, EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền"), prepared=self.prepared)
+        self.assertEqual(result.status, "matched")
+        self.assertEqual(result.blocks, (page.blocks[-1],))
+        self.assertEqual(result.to_field_metadata()["ocr_score"], .93)
+
     def test_row_selection_survives_resize_rotated_and_reflected_viewer(self):
         request = EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền")
         # Independent closed-form normalized coordinates, no production mapper.
@@ -54,11 +84,13 @@ class EvidenceTest(unittest.TestCase):
             (replace(self.page, blocks=reflected), replace(self.prepared, inverse_transform=((-1, 0, 800), (0, 1, 0), (0, 0, 1)))),
         )
         for page, prepared in cases:
-            with self.subTest(matrix=prepared.inverse_transform):
-                result = match_evidence(page, request, prepared=prepared)
-                self.assertEqual(result.status, "matched")
-                self.assertEqual(result.blocks, (page.blocks[-1],))
-                self.assertEqual(result.to_field_metadata()["source_regions"][0]["quad"], [list(p) for p in page.blocks[-1].quad])
+            unique = replace(page, blocks=page.blocks[-2:])
+            for scoped in (page, unique):
+                with self.subTest(matrix=prepared.inverse_transform, candidates=len(scoped.blocks)):
+                    result = match_evidence(scoped, request, prepared=prepared)
+                    self.assertEqual(result.status, "matched")
+                    self.assertEqual(result.blocks, (scoped.blocks[-1],))
+                    self.assertEqual(result.to_field_metadata()["source_regions"][0]["quad"], [list(p) for p in scoped.blocks[-1].quad])
 
     def test_two_values_on_label_row_remain_ambiguous_instead_of_choosing_nearest(self):
         narrow = replace(self.page.blocks[-1], quad=((.5, .7), (.6, .7), (.6, .74), (.5, .74)))

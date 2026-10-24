@@ -90,6 +90,20 @@ class PaddleAdapterTest(unittest.TestCase):
         page = _to_page(self.result, metadata)
         self.assertEqual(page.blocks[0].quad, ((0.6, 0.1), (0.8, 0.1), (0.8, 0.3), (0.6, 0.3)))
 
+    def test_valid_detector_quad_on_odd_resize_edge_produces_contract_output(self):
+        metadata = replace(
+            self.metadata, canonical=ImageInfo(2007, 1000, "RGB", "uint8"),
+            processed=ImageInfo(2000, 997, "RGB", "uint8"),
+            inverse_transform=((2007 / 2000, 0, 0), (0, 1000 / 997, 0), (0, 0, 1)),
+        )
+        result = {"rec_texts": ["Mép phải"], "rec_polys": [[[1980,100],[2000,100],[2000,130],[1980,130]]], "rec_scores": [.9]}
+        page = _to_page(result, metadata)
+        self.assertEqual(OcrPage.from_dict(page.to_dict()), page)
+        self.assertEqual(page.blocks[0].text, "Mép phải")
+        self.assertEqual(page.blocks[0].score, .9)
+        np.testing.assert_allclose(page.blocks[0].quad,
+                                   ((1980/2000,100/997),(1,100/997),(1,130/997),(1980/2000,130/997)), rtol=0, atol=1e-15)
+
     def test_reflection_reverses_winding_without_inventing_corners(self):
         metadata = replace(self.metadata, inverse_transform=((-2, 0, 200), (0, 2, 0), (0, 0, 1)))
         page = _to_page(self.result, metadata)
