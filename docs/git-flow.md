@@ -45,7 +45,7 @@ Mỗi branch giải quyết một task. Tránh tên chung như `feature/update`,
 
 Nếu chưa dùng Jira, lấy số GitHub issue làm mã `SE-<số_issue>`, ví dụ `feature/SE-1_receipt_schema`. Chỉ mở issue khi bắt đầu giao việc, không cần tạo toàn bộ backlog trước.
 
-Lần publish đầu tiên của repo dùng `main` cho khung chung, sau đó tạo `develop` từ cùng commit. Đây là bước khởi tạo; các thay đổi phát triển tiếp theo đi qua feature/bug branch và PR theo quy trình dưới đây. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
+Ngoại lệ bootstrap VietDoc: khi Lead đang hoàn thiện khung và yêu cầu riêng, có thể commit/push main; không tự tạo branch mới trái chỉ dẫn. Lượt redesign hiện chỉ sửa local, chưa được yêu cầu commit/push. Trước team coding, Lead đồng bộ develop từ main đã kiểm bằng fast-forward/PR phù hợp lịch sử, không force/reset; sau đó feature/bug đi qua PR như dưới đây. Ngoại lệ này không áp dụng cho feature thường xuyên. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
 
 ## 3. Feature và QA bug
 
@@ -162,3 +162,12 @@ Khi có conflict:
 ## 8. Vai trò của code review
 
 Review chéo giúp phát hiện lỗi logic, regression và vấn đề maintainability sớm; chia sẻ kiến thức để thành viên khác có thể tiếp quản; và tạo dấu vết rõ ràng về quyết định trước khi code vào branch tích hợp. Reviewer phản hồi vào thay đổi cụ thể, tác giả trả lời và cập nhật code; Tech Lead chịu trách nhiệm duyệt cuối theo quyền được phân công.
+
+## 9. Áp dụng cho VietDoc và doc cá nhân
+
+- Roadmap/task ở [Lead](team/lead.md), [Data](team/data-engineer.md), [AI-1](team/ai-1-ocr.md), [AI-2](team/ai-2-extraction.md), [Backend](team/backend.md). Mỗi doc có Git Flow/reviewer/output checklist; tiến độ ở Issue/PR, không folder tasks.
+- O1.3/M3.2 là mã tra guide, không issue đã tồn tại. Branch dùng issue/Jira ID thật và slug snake_case.
+- [Spec folder](../specs/repository-layout.md) quy định vùng sửa/owner. Shared contracts/migrations/lockfile cần consumer review, Lead điều phối merge order; không chọn cả một phía khi conflict.
+- PR data/model ghi dataset/model/evaluator/processor/preprocess/config versions, manifests/hashes và report thật. Không commit raw data/weights/PII để reviewer chạy thử.
+- [Workflow](team/workflow.md) có commands có điều kiện, handoffs/gates. Kiểm working tree trước switch/pull; không stash/reset/clean tự động để vượt dirty tree.
+- Protection/required checks/access GitHub cần xác minh riêng, lượt audit local không thay settings. CI chưa implement thì giao B1.3, không claim checks đã pass.

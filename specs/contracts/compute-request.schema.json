@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vietdoc:compute-request:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "job_id",
+    "run_id",
+    "attempt_id",
+    "document_type",
+    "schema_version",
+    "language",
+    "input_sha256",
+    "pipeline_manifest_id",
+    "remaining_budget_ms"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": 1
+    },
+    "job_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "attempt_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "document_type": {
+      "enum": [
+        "receipt",
+        "invoice"
+      ]
+    },
+    "schema_version": {
+      "enum": [
+        "receipt.v1",
+        "invoice.v1"
+      ]
+    },
+    "language": {
+      "const": "vi"
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "pipeline_manifest_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "remaining_budget_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 180000
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "document_type": {
+            "const": "receipt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "schema_version": {
+            "const": "receipt.v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "document_type": {
+            "const": "invoice"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "schema_version": {
+            "const": "invoice.v1"
+          }
+        }
+      }
+    }
+  ]
+}
