@@ -8,6 +8,11 @@ Independent evaluator Owner: Data; hai AI/Lead review.
 
 Fields/rows/OCR/geometry/evidence/reports; đọc frozen artifacts không production API
 
+D3.1 implementation: `scalar_ocr.py`, `policy.py`, CLI `python -m vietdoc.evaluation`.
+Input envelope/definitions/version/review points ở [README](README.md).
+Policy `d31-canonical-nfc-v1-proposed` chưa được AI-1/AI-2 duyệt; không thay production normalization.
+Known-score tests: `tests/unit/test_evaluation.py`; rows/evidence vẫn thuộc D3.2.
+
 ## Ranh giới và dữ liệu
 
 Không tune final test, bỏ failures hoặc dùng unlabeled như absent Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
