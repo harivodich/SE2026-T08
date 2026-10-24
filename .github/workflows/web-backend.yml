@@ -46,6 +46,7 @@ jobs:
       - name: Build image from repository root
         run: docker build -f backend/Dockerfile -t vietdoc-web-smoke .
       - name: Start demo container
+        id: container
         run: docker run -d --name vietdoc-web-smoke -p 18080:8080 -e SPRING_PROFILES_ACTIVE=demo -e WORKER_ENABLED=false vietdoc-web-smoke
       - name: Check rendered page and static assets
         run: |
@@ -59,7 +60,7 @@ jobs:
           done
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/api/v1/auth/me)" = 401
       - name: Container logs on failure
-        if: failure()
+        if: failure() && steps.container.outcome == 'success'
         run: docker logs vietdoc-web-smoke
       - name: Stop demo container
         if: always()
