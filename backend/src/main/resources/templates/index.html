@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4f6f8" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
     <title>VietDoc — Đối chiếu chứng từ</title>
     <link rel="stylesheet" href="/styles.css" />
     <script type="module" src="/app.js"></script>

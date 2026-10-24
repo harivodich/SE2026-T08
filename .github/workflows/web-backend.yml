@@ -1,0 +1,66 @@
+name: Web and backend
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main, 'feature/**', 'bug/**', 'hotfix/**']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Web tests
+        run: node --test
+        working-directory: web
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Java tests
+        run: bash mvnw -B test
+        working-directory: backend
+      - name: Package application
+        run: bash mvnw -B -DskipTests package
+        working-directory: backend
+      - name: Check packaged web assets
+        run: |
+          jar tf backend/target/vietdoc-backend-1.0.0.jar > jar-contents.txt
+          for asset in templates/index.html static/app.js static/api.js static/domain.js static/styles.css; do
+            grep -Fx "BOOT-INF/classes/$asset" jar-contents.txt
+          done
+
+  docker-smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image from repository root
+        run: docker build -f backend/Dockerfile -t vietdoc-web-smoke .
+      - name: Start demo container
+        run: docker run -d --name vietdoc-web-smoke -p 18080:8080 -e SPRING_PROFILES_ACTIVE=demo -e WORKER_ENABLED=false vietdoc-web-smoke
+      - name: Check rendered page and static assets
+        run: |
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://localhost:18080/ -o index.html; then break; fi
+            sleep 2
+          done
+          grep -q 'name="_csrf"' index.html
+          for asset in app.js api.js domain.js styles.css; do
+            curl -fsS "http://localhost:18080/$asset" -o /dev/null
+          done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/api/v1/auth/me)" = 401
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs vietdoc-web-smoke
+      - name: Stop demo container
+        if: always()
+        run: docker rm -f vietdoc-web-smoke || true

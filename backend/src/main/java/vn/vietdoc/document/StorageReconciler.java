@@ -2,6 +2,7 @@ package vn.vietdoc.document;
 
 import java.nio.file.*;
 import java.time.*;
+import java.util.*;
 import org.slf4j.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ public class StorageReconciler {
   private final Store store;
   private final TransactionTemplate transaction;
   private final AuthService auth;
+  private String lastScanned;
 
   public StorageReconciler(
       PrivateStorage storage, Store store, PlatformTransactionManager manager, AuthService auth) {
@@ -32,10 +34,27 @@ public class StorageReconciler {
   public void cleanup() {
     auth.cleanup();
     try (var files = Files.list(storage.root())) {
-      files
-          .filter(Files::isDirectory)
-          .limit(500)
-          .forEach(
+      Comparator<Path> byName = Comparator.comparing(path -> path.getFileName().toString());
+      PriorityQueue<Path> smallest = new PriorityQueue<>(500, byName.reversed());
+      files.filter(path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS))
+          .filter(path -> lastScanned == null || path.getFileName().toString().compareTo(lastScanned) > 0)
+          .forEach(path -> {
+            if (smallest.size() < 500) smallest.add(path);
+            else if (byName.compare(path, smallest.peek()) < 0) {
+              smallest.remove();
+              smallest.add(path);
+            }
+          });
+      var batch = new ArrayList<>(smallest);
+      batch.sort(byName);
+      if (batch.isEmpty()) {
+        lastScanned = null;
+        return;
+      }
+      for (Path path : batch) {
+        lastScanned = path.getFileName().toString();
+      }
+      batch.forEach(
               path -> {
                 try {
                   String id = path.getFileName().toString();

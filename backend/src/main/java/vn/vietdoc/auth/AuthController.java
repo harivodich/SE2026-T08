@@ -5,7 +5,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import vn.vietdoc.common.ApiException;
 
@@ -19,12 +21,14 @@ public class AuthController {
 
   private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
   private final AuthService auth;
+  private final int tokenHours;
 
-  public AuthController(AuthService auth) {
+  public AuthController(AuthService auth, @Value("${vietdoc.token-hours}") int tokenHours) {
     this.auth = auth;
+    this.tokenHours = tokenHours;
   }
 
-  @PostMapping("/token")
+  @PostMapping("/session")
   public Map<String, Object> login(
       @Valid @RequestBody Credentials input, HttpServletRequest request) {
     long now = System.currentTimeMillis();
@@ -40,7 +44,12 @@ public class AuthController {
     if (b.attempts > 15 || buckets.size() > 20000)
       throw new ApiException(
           429, "LOGIN_RATE_LIMIT", "Bạn thử đăng nhập quá nhiều lần. Hãy đợi một phút.");
-    return auth.login(input.username, input.password);
+    Map<String, Object> result = auth.login(input.username, input.password);
+    var session = request.getSession(true);
+    request.changeSessionId();
+    session.setMaxInactiveInterval(tokenHours * 60 * 60);
+    session.setAttribute("vietdoc-token", result.get("access_token"));
+    return Map.of("user", result.get("user"), "expires_at", result.get("expires_at"));
   }
 
   @GetMapping("/me")
@@ -48,9 +57,20 @@ public class AuthController {
     return user;
   }
 
+  @GetMapping("/csrf")
+  public Map<String, String> csrf(HttpServletRequest request) {
+    CsrfToken token = (CsrfToken) request.getAttribute("_csrf");
+    return Map.of("token", token.getToken());
+  }
+
   @PostMapping("/logout")
-  public Map<String, Boolean> logout(@RequestHeader("Authorization") String header) {
-    auth.logout(header.substring(7));
+  public Map<String, Boolean> logout(HttpServletRequest request) {
+    var session = request.getSession(false);
+    if (session != null) {
+      String token = (String) session.getAttribute("vietdoc-token");
+      if (token != null) auth.logout(token);
+      session.invalidate();
+    }
     return Map.of("ok", true);
   }
 }

@@ -3,6 +3,7 @@ package vn.vietdoc;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -433,38 +435,158 @@ class WorkflowIntegrationTest {
 
   @Test
   void realHttpApiReturnsTypedErrorsAndRevokesSessions() throws Exception {
+    mvc.perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"_csrf\"")));
     mvc.perform(get("/api/v1/documents"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.error.code").value("UNAUTHENTICATED"));
     mvc.perform(
-            post("/api/v1/auth/token")
+            post("/api/v1/auth/session")
+                .with(csrf())
                 .contentType("application/json")
                 .content(json.write(Map.of("username", owner.username(), "password", "wrong"))))
         .andExpect(status().isUnauthorized());
-    String response =
+    var login =
         mvc.perform(
-                post("/api/v1/auth/token")
+                 post("/api/v1/auth/session")
+                     .with(csrf())
                     .contentType("application/json")
                     .content(
                         json.write(
                             Map.of(
                                 "username", owner.username(), "password", "integration-password"))))
             .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    String token = json.read(response).path("access_token").asText();
+             .andReturn();
+    String response = login.getResponse().getContentAsString();
+    assertFalse(json.read(response).has("access_token"));
+    MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+    assertNotNull(session);
     mvc.perform(
             multipart("/api/v1/documents")
                 .file(sample("receipt", "png"))
-                .param("document_type", "receipt")
-                .header("Authorization", "Bearer " + token))
+                .session(session)
+                .param("document_type", "receipt"))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            multipart("/api/v1/documents")
+                 .file(sample("receipt", "png"))
+                 .session(session)
+                 .with(csrf())
+                 .param("document_type", "receipt"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.document_type").value("receipt"));
-    mvc.perform(post("/api/v1/auth/logout").header("Authorization", "Bearer " + token))
+    mvc.perform(post("/api/v1/auth/logout").session(session).with(csrf()))
         .andExpect(status().isOk());
-    mvc.perform(get("/api/v1/documents").header("Authorization", "Bearer " + token))
+    mvc.perform(get("/api/v1/documents").session(session))
         .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void thymeleafCsrfTokenAuthenticatesSessionAndRefreshesAfterLogout() throws Exception {
+    var page = mvc.perform(get("/")).andExpect(status().isOk()).andReturn();
+    var pattern = java.util.regex.Pattern.compile("name=\"_csrf\"[^>]*content=\"([^\"]+)\"");
+    var matcher = pattern.matcher(page.getResponse().getContentAsString());
+    assertTrue(matcher.find());
+    String token = matcher.group(1);
+    MockHttpSession session = (MockHttpSession) page.getRequest().getSession(false);
+    assertNotNull(session);
+    mvc.perform(post("/api/v1/auth/session")
+            .session(session)
+            .header("X-CSRF-TOKEN", token)
+            .contentType("application/json")
+            .content(json.write(Map.of("username", owner.username(), "password", "integration-password"))))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isOk());
+    String afterLogin = json.read(mvc.perform(get("/api/v1/auth/csrf").session(session))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString())
+        .path("token").asText();
+    mvc.perform(post("/api/v1/auth/logout").session(session).header("X-CSRF-TOKEN", afterLogin))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/v1/auth/csrf"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").isNotEmpty());
+  }
+
+  @Test
+  void arithmeticWarningsAreRecomputedWhenAnOperandChanges() throws Exception {
+    var initial = extracted("invoice");
+    ObjectNode payload = initial.head().payload().deepCopy();
+    payload.put("subtotal", "100");
+    payload.put("tax_amount", "10");
+    payload.put("discount_amount", "0");
+    payload.put("total_amount", "120");
+    var mismatch = review.save(initial.id(), owner.id(),
+        new Requests.Save(initial.headRevisionId(), initial.version(), payload,
+            "Đối chiếu phép tính", rowIds(initial), List.of("/subtotal", "/tax_amount", "/discount_amount", "/total_amount")));
+    assertTrue(mismatch.head().issues().toString().contains("TOTAL_ARITHMETIC"));
+    ObjectNode corrected = mismatch.head().payload().deepCopy();
+    corrected.put("subtotal", "110");
+    var saved = review.save(initial.id(), owner.id(),
+        new Requests.Save(mismatch.headRevisionId(), mismatch.version(), corrected,
+            "Sửa tiền trước thuế theo ảnh", rowIds(mismatch), List.of("/subtotal")));
+    assertFalse(saved.head().issues().toString().contains("TOTAL_ARITHMETIC"));
+  }
+
+  @Test
+  void extractionRejectsDegenerateAndCrossedSourceQuads() throws Exception {
+    var d = documents.upload(owner.id(), sample("receipt", "png"), "receipt", Store.id());
+    var job = jobs.create(d.id(), owner.id(), Store.id());
+    var claim = jobs.claim(job.id());
+    ObjectNode result = (ObjectNode) ai.extract(claim);
+    ObjectNode field = metadata("/total_amount", "");
+    ArrayNode regions = (ArrayNode) field.get("source_regions");
+    ObjectNode region = regions.addObject();
+    region.put("page", 0);
+    region.putArray("ocr_block_ids");
+    ArrayNode quad = region.putArray("quad");
+    for (int i = 0; i < 4; i++) quad.addArray().add(0.2).add(0.2);
+    ((ArrayNode) result.get("field_metadata")).add(field);
+    assertEquals("CONTRACT_INVALID", assertThrows(ApiException.class,
+        () -> contracts.extraction(claim.type(), claim.runId(), claim.id(), claim.manifest(), result)).code);
+    quad.removeAll();
+    quad.addArray().add(0.1).add(0.1);
+    quad.addArray().add(0.9).add(0.9);
+    quad.addArray().add(0.9).add(0.1);
+    quad.addArray().add(0.1).add(0.9);
+    assertEquals("CONTRACT_INVALID", assertThrows(ApiException.class,
+        () -> contracts.extraction(claim.type(), claim.runId(), claim.id(), claim.manifest(), result)).code);
+  }
+
+  @Test
+  void ownerAdmissionLockKeepsConcurrentJobsWithinCap() throws Exception {
+    List<DocumentService.DocumentView> uploads = new ArrayList<>();
+    for (int i = 0; i < 6; i++)
+      uploads.add(documents.upload(owner.id(), sample("receipt", "png"), "receipt", Store.id()));
+    for (int i = 0; i < 4; i++) jobs.create(uploads.get(i).id(), owner.id(), Store.id());
+    var executor = Executors.newFixedThreadPool(2);
+    var ready = new CountDownLatch(2);
+    var go = new CountDownLatch(1);
+    try {
+      List<Future<String>> outcomes = new ArrayList<>();
+      for (int i = 4; i < 6; i++) {
+        String id = uploads.get(i).id();
+        outcomes.add(executor.submit(() -> {
+          ready.countDown();
+          go.await();
+          try {
+            jobs.create(id, owner.id(), Store.id());
+            return "accepted";
+          } catch (ApiException e) {
+            return e.code;
+          }
+        }));
+      }
+      assertTrue(ready.await(5, TimeUnit.SECONDS));
+      go.countDown();
+      List<String> results = List.of(outcomes.get(0).get(10, TimeUnit.SECONDS),
+          outcomes.get(1).get(10, TimeUnit.SECONDS));
+      assertEquals(1, results.stream().filter("accepted"::equals).count());
+      assertEquals(1, results.stream().filter("JOB_LIMIT"::equals).count());
+    } finally {
+      go.countDown();
+      executor.shutdownNow();
+    }
   }
 
   ObjectNode metadata(String path, String flag) {

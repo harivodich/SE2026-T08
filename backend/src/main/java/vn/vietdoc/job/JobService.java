@@ -1,6 +1,7 @@
 package vn.vietdoc.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,11 +58,16 @@ public class JobService {
     this.maxAttempts = maxAttempts;
     if (!Set.of("manual", "demo", "http").contains(mode))
       throw new IllegalStateException("AI_MODE must be manual, demo or http");
+    if (mode.equals("http"))
+      throw new IllegalStateException(
+          "AI_MODE=http is unavailable until the shared compute contract and canonical assets are implemented");
   }
 
   @Transactional
   public DocumentService.JobView create(String id, String user, String requestKey) {
     Document d = store.owned(id, user, true);
+    // Serialize admission across different documents owned by the same user.
+    store.em().find(UserAccount.class, user, LockModeType.PESSIMISTIC_WRITE);
     String key = DocumentService.key(requestKey);
     if (key != null) {
       List<Job> old =

@@ -1,5 +1,10 @@
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
   error:
     include-message: never
 spring:
@@ -46,4 +51,3 @@ vietdoc:
   job-deadline-seconds: 180
   lease-seconds: 30
   max-attempts: 3
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}

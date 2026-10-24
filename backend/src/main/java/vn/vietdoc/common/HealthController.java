@@ -24,7 +24,9 @@ public class HealthController {
   @GetMapping("/health/ready")
   public ResponseEntity<?> ready() {
     try (var connection = database.getConnection()) {
-      return ResponseEntity.ok(Map.of("status", connection.isValid(2) ? "UP" : "DOWN"));
+      return connection.isValid(2)
+          ? ResponseEntity.ok(Map.of("status", "UP"))
+          : ResponseEntity.status(503).body(Map.of("status", "DOWN"));
     } catch (Exception e) {
       return ResponseEntity.status(503).body(Map.of("status", "DOWN"));
     }

@@ -69,6 +69,13 @@ public class ContractValidator {
           && (m.path("confidence_method").isNull()
               || m.path("confidence_method").asText().isBlank()))
         invalid(p, "Confidence cần phương pháp hiệu chuẩn.");
+      for (JsonNode region : m.path("source_regions")) {
+        validateQuad(region.path("quad"), p);
+        Set<String> blockIds = new HashSet<>();
+        for (JsonNode blockId : region.path("ocr_block_ids"))
+          if (blockId.asText().isBlank() || !blockIds.add(blockId.asText()))
+            invalid(p, "OCR block ID rỗng hoặc trùng.");
+      }
     }
     Set<String> ids = new HashSet<>();
     for (JsonNode issue : result.path("issues")) {
@@ -215,6 +222,26 @@ public class ContractValidator {
 
   private BigDecimal decimal(JsonNode n) {
     return n == null || n.isNull() ? null : new BigDecimal(n.asText());
+  }
+
+  private void validateQuad(JsonNode quad, String path) {
+    double area = 0;
+    double sign = 0;
+    for (int i = 0; i < 4; i++) {
+      JsonNode a = quad.get(i), b = quad.get((i + 1) % 4), c = quad.get((i + 2) % 4);
+      double ax = a.get(0).asDouble(), ay = a.get(1).asDouble();
+      double bx = b.get(0).asDouble(), by = b.get(1).asDouble();
+      double cx = c.get(0).asDouble(), cy = c.get(1).asDouble();
+      if (!Double.isFinite(ax) || !Double.isFinite(ay) || !Double.isFinite(bx) ||
+          !Double.isFinite(by) || !Double.isFinite(cx) || !Double.isFinite(cy))
+        invalid(path, "Quad có tọa độ không hữu hạn.");
+      area += ax * by - bx * ay;
+      double cross = (bx - ax) * (cy - by) - (by - ay) * (cx - bx);
+      if (Math.abs(cross) < 1e-8 || (sign != 0 && Math.signum(cross) != sign))
+        invalid(path, "Quad phải là tứ giác lồi, không tự cắt và có diện tích.");
+      sign = Math.signum(cross);
+    }
+    if (Math.abs(area) < 1e-8) invalid(path, "Quad không có diện tích.");
   }
 
   private void invalid(String path, String message) {

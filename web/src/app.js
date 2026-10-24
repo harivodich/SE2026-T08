@@ -13,16 +13,18 @@ import {
 
 const root = document.querySelector("#app");
 const state = {
-  token: sessionStorage.getItem("vietdoc-token") || "",
   user: null,
   documents: [],
   selectedId: null,
   document: null,
+  editorBase: null,
+  remoteDocument: null,
   revisions: [],
   runs: [],
   payload: null,
   rowIds: [],
   changedPaths: new Set(),
+  changedItemFields: new Map(),
   acknowledged: new Set(),
   reviewed: false,
   reviewReason: "Đã đối chiếu với ảnh nguồn",
@@ -39,7 +41,36 @@ const state = {
 
 let listTimer;
 let jobTimer;
-const api = () => new ApiClient(state.token);
+let sessionGeneration = 0;
+let navigationGeneration = 0;
+let listGeneration = 0;
+let navigationAbort;
+const api = () => new ApiClient();
+async function refreshCsrf() {
+  const result = await api().csrf();
+  document.querySelector('meta[name="_csrf"]').content = result.token;
+}
+const currentView = (session, navigation, id) =>
+  session === sessionGeneration && navigation === navigationGeneration &&
+  state.selectedId === id && !!state.user;
+const remoteChanged = () => !!(state.remoteDocument && state.editorBase &&
+  (state.remoteDocument.head_revision_id !== state.editorBase.id ||
+   state.remoteDocument.version !== state.editorBase.version));
+
+function setEditorDocument(document) {
+  state.document = document;
+  state.editorBase = document.head ? {
+    id: document.head_revision_id, version: document.version,
+    payload: copy(document.head.payload),
+  } : null;
+  state.remoteDocument = null;
+  state.payload = document.head ? copy(document.head.payload) : null;
+  state.rowIds = [...(document.head?.row_ids || [])];
+  state.changedPaths.clear();
+  state.changedItemFields.clear();
+  state.acknowledged.clear();
+  state.reviewed = false;
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -79,12 +110,22 @@ function setBusy(active, action = "") {
 }
 
 function clearSession() {
-  sessionStorage.removeItem("vietdoc-token");
-  state.token = "";
+  sessionGeneration++;
+  navigationGeneration++;
+  navigationAbort?.abort();
   state.user = null;
   state.documents = [];
   state.document = null;
+  state.editorBase = null;
+  state.remoteDocument = null;
+  state.payload = null;
+  state.revisions = [];
+  state.runs = [];
+  state.changedPaths.clear();
+  state.changedItemFields.clear();
   state.selectedId = null;
+  state.busy = false;
+  state.busyAction = "";
   stopPolling();
   releaseImage();
 }
@@ -102,16 +143,19 @@ function releaseImage() {
 }
 
 async function start() {
-  if (!state.token) {
-    render();
-    return;
-  }
+  const session = sessionGeneration;
   try {
-    state.user = await api().me();
+    const user = await api().me();
+    if (session !== sessionGeneration) return;
+    state.user = user;
     await refreshDocuments();
+    if (session !== sessionGeneration) return;
     render();
-    listTimer = setInterval(() => refreshDocuments().catch(apiFailure), 5000);
+    listTimer = setInterval(() => refreshDocuments().catch(error => {
+      if (session === sessionGeneration) apiFailure(error);
+    }), 5000);
   } catch (error) {
+    if (session !== sessionGeneration) return;
     if (error instanceof ApiError && error.status === 401) clearSession();
     render();
   }
@@ -119,81 +163,112 @@ async function start() {
 
 async function login(event) {
   event.preventDefault();
+  if (state.busy) return;
+  const session = sessionGeneration;
   setBusy(true, "login");
   try {
-    const session = await api().login(state.username.trim(), state.password);
-    state.token = session.access_token;
-    sessionStorage.setItem("vietdoc-token", state.token);
-    state.user = session.user;
+    await refreshCsrf();
+    if (session !== sessionGeneration) return;
+    const result = await api().login(state.username.trim(), state.password);
+    if (session !== sessionGeneration) return;
+    await refreshCsrf();
+    if (session !== sessionGeneration) return;
+    state.user = result.user;
     state.password = "";
     state.message = null;
     await refreshDocuments();
     render();
-    listTimer = setInterval(() => refreshDocuments().catch(apiFailure), 5000);
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+    listTimer = setInterval(() => refreshDocuments().catch(error => {
+      if (session === sessionGeneration) apiFailure(error);
+    }), 5000);
+  } catch (error) { if (session === sessionGeneration) apiFailure(error); }
+  finally { if (session === sessionGeneration) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function logout() {
-  setBusy(true, "logout");
-  try { await api().logout(); } catch { /* Expired tokens are discarded locally. */ }
+  const request = api().logout();
+  sessionGeneration++;
+  navigationGeneration++;
+  navigationAbort?.abort();
+  stopPolling();
+  state.user = null;
+  state.busy = true;
+  state.busyAction = "logout";
+  render();
+  try { await request; } catch { /* Session is already discarded locally. */ }
+  try { await refreshCsrf(); } catch { /* Login reports a connection error if refresh fails. */ }
   clearSession();
   state.message = null;
   render();
 }
 
 async function refreshDocuments() {
-  if (!state.token) return;
+  if (!state.user) return;
+  const session = sessionGeneration;
+  const sequence = ++listGeneration;
   const page = await api().listDocuments();
+  if (session !== sessionGeneration || sequence !== listGeneration || !state.user) return;
   state.documents = page.items || [];
   if (state.selectedId) {
     const updated = state.documents.find((item) => item.id === state.selectedId);
-    if (updated) {
-      const oldVersion = state.document?.version;
-      state.document = updated;
-      if (oldVersion !== updated.version && !isDirty()) {
-        state.payload = updated.head ? copy(updated.head.payload) : null;
-        state.rowIds = [...(updated.head?.row_ids || [])];
-        state.acknowledged.clear();
-        state.reviewed = false;
-      }
-    }
+    if (updated && state.editorBase && updated.version > state.editorBase.version)
+      state.remoteDocument = updated;
+    else if (updated && !state.editorBase && updated.head && state.document) {
+      const id = state.selectedId, navigation = navigationGeneration;
+      const [detail, revisions, runs] = await Promise.all([
+        api().document(id), api().revisions(id), api().runs(id),
+      ]);
+      if (!currentView(session, navigation, id) || state.editorBase) return;
+      setEditorDocument(detail);
+      state.revisions = revisions.items || [];
+      state.runs = runs.items || [];
+    } else if (updated && state.document && updated.id === state.document.id &&
+               (!state.editorBase || updated.version === state.editorBase.version))
+      state.document.job = updated.job;
   }
   if (state.document && isActiveJob(state.document.job)) startJobPolling();
   else clearInterval(jobTimer);
-  render();
+  render({ passive: true });
 }
 
 async function openDocument(id) {
-  if (state.selectedId && state.selectedId !== id && isDirty() &&
+  if (state.busy && state.busyAction !== "open") return;
+  if (state.selectedId && state.selectedId !== id &&
+      (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
       !window.confirm("Bạn có thay đổi chưa lưu. Mở chứng từ khác sẽ bỏ các thay đổi này. Tiếp tục?")) return;
+  const session = sessionGeneration;
+  const navigation = ++navigationGeneration;
+  navigationAbort?.abort();
+  navigationAbort = new AbortController();
+  const signal = navigationAbort.signal;
   setBusy(true, "open");
   try {
     state.selectedId = id;
     state.document = null;
+    state.editorBase = null;
+    state.remoteDocument = null;
     state.payload = null;
     state.rowIds = [];
-    state.document = await api().document(id);
-    state.payload = state.document.head ? copy(state.document.head.payload) : null;
-    state.rowIds = [...(state.document.head?.row_ids || [])];
-    state.changedPaths.clear();
-    state.acknowledged.clear();
-    state.reviewed = false;
+    state.revisions = [];
+    state.runs = [];
+    releaseImage();
+    const [document, revisions, runs, image] = await Promise.all([
+      api().document(id, { signal }), api().revisions(id, { signal }),
+      api().runs(id, { signal }), api().page(id, { signal }),
+    ]);
+    if (!currentView(session, navigation, id)) return;
+    setEditorDocument(document);
     state.reviewReason = "Đã đối chiếu với ảnh nguồn";
     state.exportRevisionId = "";
     state.message = null;
-    const [revisions, runs, image] = await Promise.all([
-      api().revisions(id), api().runs(id), api().page(id),
-    ]);
     state.revisions = revisions.items || [];
     state.runs = runs.items || [];
-    releaseImage();
     state.imageUrl = URL.createObjectURL(image);
     render();
     if (isActiveJob(state.document.job)) startJobPolling();
     else clearInterval(jobTimer);
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id) && error.name !== "AbortError") apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 function startJobPolling() {
@@ -204,165 +279,183 @@ function startJobPolling() {
 
 async function pollJob() {
   const job = state.document?.job;
+  const id = state.selectedId;
+  const session = sessionGeneration, navigation = navigationGeneration;
   if (!job?.id || !isActiveJob(job)) {
     clearInterval(jobTimer);
     return;
   }
   try {
-    state.document.job = await api().request(`/jobs/${encodeURIComponent(job.id)}`);
+    const updatedJob = await api().request(`/jobs/${encodeURIComponent(job.id)}`);
+    if (!currentView(session, navigation, id) || state.document?.job?.id !== job.id) return;
+    state.document.job = updatedJob;
     if (!isActiveJob(state.document.job)) {
-      const changed = await api().document(state.selectedId);
-      state.document = changed;
-      if (!isDirty()) {
-        state.payload = changed.head ? copy(changed.head.payload) : null;
-        state.rowIds = [...(changed.head?.row_ids || [])];
-      }
       const [revisions, runs] = await Promise.all([
-        api().revisions(state.selectedId), api().runs(state.selectedId),
+        api().revisions(id), api().runs(id),
       ]);
+      const changed = await api().document(id);
+      if (!currentView(session, navigation, id) || state.document?.job?.id !== job.id) return;
+      if (!state.editorBase && changed.head) setEditorDocument(changed);
+      else if (state.editorBase && changed.version > state.editorBase.version)
+        state.remoteDocument = changed;
+      else state.document.job = changed.job;
       state.revisions = revisions.items || [];
       state.runs = runs.items || [];
       clearInterval(jobTimer);
       await refreshDocuments();
       return;
     }
-    render();
-  } catch (error) { apiFailure(error); }
+    render({ passive: true });
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
 }
 
 async function uploadAndProcess(event) {
   event.preventDefault();
+  if (state.busy) return;
+  const session = sessionGeneration;
   const file = state.uploadFile;
   if (!file) return message("Chọn ảnh hoặc PDF trước khi tải lên.", "error");
   const extension = file.name.split(".").pop().toLowerCase();
-  if (!(file.type.startsWith("image/") || extension === "pdf"))
-    return message("Chỉ hỗ trợ file ảnh hoặc PDF.", "error");
+  if (!(["image/jpeg", "image/png", "application/pdf"].includes(file.type) ||
+        ["jpg", "jpeg", "png", "pdf"].includes(extension)))
+    return message("Chỉ hỗ trợ JPG, PNG hoặc PDF.", "error");
   setBusy(true, "upload");
   try {
     const document = await api().upload(file, state.uploadType);
+    if (session !== sessionGeneration) return;
     state.documents = [document, ...state.documents.filter((item) => item.id !== document.id)];
     state.uploadFile = null;
     render();
     const job = await api().createJob(document.id);
-    state.document = { ...document, job };
-    state.selectedId = document.id;
-    state.payload = document.head ? copy(document.head.payload) : null;
-    state.rowIds = [...(document.head?.row_ids || [])];
+    if (session !== sessionGeneration) return;
+    state.documents = [{ ...document, job }, ...state.documents.filter(item => item.id !== document.id)];
     state.message = { text: "File đã lưu an toàn. Job đã vào hàng đợi; bạn có thể theo dõi trạng thái ở đây.", kind: "success" };
-    await refreshDocuments();
+    state.busy = false;
+    state.busyAction = "";
     await openDocument(document.id);
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (session === sessionGeneration) apiFailure(error); }
+  finally { if (session === sessionGeneration) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function rerun() {
-  if (!state.document) return;
+  if (!state.document || state.busy || remoteChanged()) return;
+  const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
   setBusy(true, "rerun");
   try {
-    const job = await api().createJob(state.document.id);
+    const job = await api().createJob(id);
+    if (!currentView(session, navigation, id)) return;
     state.document.job = job;
     state.message = { text: "Job mới đã được xếp hàng. Kết quả sẽ xuất hiện thành candidate riêng, không ghi đè revision hiện tại.", kind: "success" };
     await refreshDocuments();
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function saveReview() {
   const document = state.document;
-  if (!document?.head || !isDirty()) return;
+  if (!document?.head || state.busy || remoteChanged() ||
+      (!isDirty() && !state.changedPaths.size && !state.changedItemFields.size)) return;
+  const session = sessionGeneration, navigation = navigationGeneration;
+  const id = document.id;
+  const payload = toBusinessPayload(document.document_type, currentPayload());
+  const reviewedPaths = [...state.changedPaths];
+  for (const [rowId, fields] of state.changedItemFields) {
+    const index = state.rowIds.indexOf(rowId);
+    if (index >= 0) for (const field of fields) reviewedPaths.push(`/items/${index}/${field}`);
+  }
   setBusy(true, "save");
   try {
     const rowIds = [...state.rowIds];
-    while (rowIds.length < currentPayload().items.length) rowIds.push(crypto.randomUUID());
-    rowIds.length = currentPayload().items.length;
+    while (rowIds.length < payload.items.length) rowIds.push(crypto.randomUUID());
+    rowIds.length = payload.items.length;
     const updated = await api().save(document.id, {
-      base_revision_id: document.head_revision_id,
-      expected_document_version: document.version,
-      payload: toBusinessPayload(document.document_type, currentPayload()),
+      base_revision_id: state.editorBase.id,
+      expected_document_version: state.editorBase.version,
+      payload,
       reason: state.reviewReason.trim() || "Đã chỉnh sửa sau khi đối chiếu ảnh nguồn",
       row_ids: rowIds,
-      reviewed_paths: [...state.changedPaths],
+      reviewed_paths: [...new Set(reviewedPaths)],
     });
-    state.document = updated;
-    state.payload = copy(updated.head.payload);
-    state.rowIds = [...(updated.head.row_ids || [])];
-    state.changedPaths.clear();
-    state.acknowledged.clear();
-    state.reviewed = false;
+    if (!currentView(session, navigation, id)) return;
+    setEditorDocument(updated);
     state.message = { text: "Đã lưu thành revision mới. Prediction và các revision trước vẫn được giữ nguyên.", kind: "success" };
     const revisions = await api().revisions(document.id);
+    if (!currentView(session, navigation, id)) return;
     state.revisions = revisions.items || [];
     await refreshDocuments();
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function adoptCandidate(runId) {
   const document = state.document;
   if (!document?.head) return;
-  if (isDirty()) return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi áp dụng candidate.", "error");
+  if (state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size)
+    return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi áp dụng candidate.", "error");
+  const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   setBusy(true, "adopt");
   try {
     const updated = await api().adoptRun(document.id, {
       run_id: runId,
-      base_revision_id: document.head_revision_id,
-      expected_document_version: document.version,
+      base_revision_id: state.editorBase.id,
+      expected_document_version: state.editorBase.version,
       reason: "Áp dụng candidate từ lần chạy AI mới",
     });
-    state.document = updated;
-    state.payload = copy(updated.head.payload);
-    state.rowIds = [...(updated.head.row_ids || [])];
-    state.changedPaths.clear();
-    state.acknowledged.clear();
-    state.reviewed = false;
+    if (!currentView(session, navigation, id)) return;
+    setEditorDocument(updated);
     state.message = { text: "Candidate được lưu thành revision mới; prediction và bản sửa cũ vẫn còn trong lịch sử.", kind: "success" };
     const revisions = await api().revisions(document.id);
+    if (!currentView(session, navigation, id)) return;
     state.revisions = revisions.items || [];
     await refreshDocuments();
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function approve() {
   const document = state.document;
-  if (!document?.head || isDirty()) return;
+  if (!document?.head || state.busy || remoteChanged() || isDirty() ||
+      state.changedPaths.size || state.changedItemFields.size) return;
+  const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   setBusy(true, "approve");
   try {
     const updated = await api().approve(document.id, {
       revision_id: document.head.id,
-      expected_document_version: document.version,
+      expected_document_version: state.editorBase.version,
       confirmed_review: true,
       acknowledged_issue_ids: [...state.acknowledged],
       reason: state.reviewReason.trim() || "Đã đối chiếu với ảnh nguồn",
     });
-    state.document = updated;
-    state.payload = copy(updated.head.payload);
-    state.rowIds = [...(updated.head.row_ids || [])];
+    if (!currentView(session, navigation, id)) return;
+    setEditorDocument(updated);
     state.reviewed = false;
     state.message = { text: "Đã duyệt đúng revision đang mở. Có thể xuất JSON từ revision này.", kind: "success" };
     const revisions = await api().revisions(document.id);
+    if (!currentView(session, navigation, id)) return;
     state.revisions = revisions.items || [];
     await refreshDocuments();
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 async function exportRevision() {
   const document = state.document;
-  if (!document || !state.exportRevisionId) return;
+  if (!document || !state.exportRevisionId || state.busy) return;
+  const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const selected = state.revisions.find((revision) => revision.id === state.exportRevisionId);
   if (!selected?.approved_at) return message("Chỉ revision đã duyệt mới được xuất.", "error");
   setBusy(true, "export");
   try {
     const artifact = await api().createExport(document.id, selected.id);
     const blob = await api().downloadExport(artifact.id);
+    if (!currentView(session, navigation, id)) return;
     const url = URL.createObjectURL(blob);
     const anchor = documentElement("a", { href: url, download: `vietdoc-${selected.id}.json` });
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 0);
     state.message = { text: `Đã xuất JSON của revision ${selected.id}.`, kind: "success" };
-  } catch (error) { apiFailure(error); }
-  finally { state.busy = false; state.busyAction = ""; render(); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
 }
 
 function documentElement(tag, attributes) {
@@ -372,9 +465,9 @@ function documentElement(tag, attributes) {
 }
 
 function isDirty() {
-  if (!state.document?.head || !state.payload) return false;
+  if (!state.editorBase || !state.payload) return false;
   return stableStringify(toBusinessPayload(state.document.document_type, state.payload)) !==
-    stableStringify(state.document.head.payload);
+    stableStringify(state.editorBase.payload);
 }
 
 function stableStringify(value) {
@@ -392,18 +485,31 @@ function updateBoundValue(target) {
   } else if (target.dataset.itemField) {
     const index = Number(target.dataset.index);
     state.payload.items[index][target.dataset.itemField] = target.value === "" ? null : target.value;
-    state.changedPaths.add(`/items/${index}/${target.dataset.itemField}`);
+    const rowId = state.rowIds[index];
+    if (!state.changedItemFields.has(rowId)) state.changedItemFields.set(rowId, new Set());
+    state.changedItemFields.get(rowId).add(target.dataset.itemField);
   }
   const stateLabel = root.querySelector("[data-save-state]");
   if (stateLabel) stateLabel.textContent = isDirty() ? "Có thay đổi chưa lưu" : "Đã khớp bản đang mở";
 }
 
-function render() {
+function render({ passive = false } = {}) {
+  if (passive && root.contains(document.activeElement) &&
+      document.activeElement?.matches?.("input, textarea, select")) {
+    const notice = root.querySelector("[data-remote-notice]");
+    if (notice) notice.hidden = !remoteChanged();
+    return;
+  }
+  const scrollTop = passive ? root.querySelector(".review-scroll")?.scrollTop : undefined;
   if (!state.user) {
     root.innerHTML = renderLogin();
     return;
   }
   root.innerHTML = renderShell();
+  if (scrollTop !== undefined) {
+    const scroll = root.querySelector(".review-scroll");
+    if (scroll) scroll.scrollTop = scrollTop;
+  }
   if (state.message) {
     const notice = root.querySelector("[data-message]");
     if (notice) {
@@ -465,8 +571,8 @@ function renderUpload() {
   return `<section class="panel upload-card"><div class="panel-head"><h2>Tải chứng từ lên</h2><span class="eyebrow">Bước 1</span></div>
     <div class="panel-body"><form data-upload>
       <div class="dropzone" data-dropzone tabindex="0" role="button" aria-label="Chọn hoặc thả file chứng từ">
-        <div class="upload-icon">↑</div><strong>Kéo thả ảnh hoặc PDF vào đây</strong><p>Hỗ trợ JPG, PNG, WEBP hoặc PDF · tối đa 20 MB</p>
-        <label class="browse" for="upload-file">Chọn file</label><input id="upload-file" type="file" accept="image/*,.pdf,application/pdf" hidden />
+        <div class="upload-icon">↑</div><strong>Kéo thả ảnh hoặc PDF vào đây</strong><p>Hỗ trợ JPG, PNG hoặc PDF · tối đa 20 MB</p>
+        <label class="browse" for="upload-file">Chọn file</label><input id="upload-file" type="file" accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf" hidden />
         ${fileText ? `<div class="file-name">${fileText}</div>` : ""}
       </div>
       <div class="upload-controls"><select name="document_type" aria-label="Loại chứng từ"><option value="receipt" ${state.uploadType === "receipt" ? "selected" : ""}>Receipt / Hóa đơn bán lẻ</option><option value="invoice" ${state.uploadType === "invoice" ? "selected" : ""}>Invoice / Hóa đơn</option></select>
@@ -504,7 +610,7 @@ function renderReview(document, status) {
   const blockers = (head?.issues || []).filter((issue) => issue.severity === "blocking");
   const allWarningsChecked = warnings.every((issue) => state.acknowledged.has(issue.id));
   const approvedRevisions = state.revisions.filter((revision) => revision.approved_at);
-  const candidates = state.runs.filter((run) => run.id !== head?.runId);
+  const candidates = state.runs.filter((run) => run.id !== head?.run_id);
   const selectedExportId = approvedRevisions.some((revision) => revision.id === state.exportRevisionId)
     ? state.exportRevisionId
     : approvedRevisions[0]?.id || "";
@@ -515,6 +621,7 @@ function renderReview(document, status) {
     ${document.job?.state === "FAILED" ? `<div class="notice error"><strong>${escapeHtml(document.job.error_code || "JOB_FAILED")}</strong><br />${escapeHtml(document.job.error_message || "Không xử lý được file. Bạn có thể chạy lại job.")}</div>` : ""}
     <div class="review-scroll">
       <div class="revision-info"><span>${head ? `Revision ${escapeHtml(head.id.slice(0, 8))} · ${head.state === "APPROVED" ? "Đã duyệt" : "Bản nháp"}` : "Chưa có kết quả để review"}</span><span data-save-state>${isDirty() ? "Có thay đổi chưa lưu" : "Prediction gốc được giữ nguyên"}</span></div>
+      <div class="notice error" data-remote-notice ${remoteChanged() ? "" : "hidden"}>Chứng từ đã thay đổi ở phiên khác. Tải lại để đối chiếu revision mới trước khi lưu hoặc duyệt.</div>
       ${head ? `<div class="field-grid">${fields.map(([key, label, kind]) => renderField(key, label, kind, payload[key])).join("")}</div>
         ${renderItems(payload.items || [])}
         ${renderIssues(head.issues || [])}
@@ -529,19 +636,19 @@ function renderField(key, label, kind, value) {
   const inputType = kind === "date" ? "date" : kind === "time" ? "time" : "text";
   const inputMode = kind === "decimal" ? 'inputmode="decimal"' : "";
   const placeholder = kind === "decimal" ? 'placeholder="Ví dụ: 85000"' : 'placeholder="Chưa xác định"';
-  return `<div class="field"><label for="field-${key}">${escapeHtml(label)}</label><input id="field-${key}" data-scalar="${key}" type="${inputType}" ${inputMode} ${placeholder} value="${escapeHtml(value ?? "")}" /></div>`;
+  return `<div class="field"><label for="field-${key}">${escapeHtml(label)}</label><input id="field-${key}" data-scalar="${key}" type="${inputType}" ${inputMode} ${placeholder} value="${escapeHtml(value ?? "")}" ${state.busy ? "disabled" : ""} /><button type="button" class="btn btn-quiet btn-small" data-review-field="${key}" ${state.busy ? "disabled" : ""}>${state.changedPaths.has(`/${key}`) ? "Đã đánh dấu đối chiếu" : "Đánh dấu đã đối chiếu"}</button></div>`;
 }
 
 function renderItems(items) {
-  const cards = items.map((item, index) => `<article class="item-card"><div class="item-card-head"><span>Dòng hàng ${index + 1}</span><button type="button" class="btn btn-quiet btn-small" data-remove-item="${index}" aria-label="Xóa dòng hàng ${index + 1}">Xóa</button></div>
+  const cards = items.map((item, index) => `<article class="item-card"><div class="item-card-head"><span>Dòng hàng ${index + 1}</span><button type="button" class="btn btn-quiet btn-small" data-remove-item="${index}" aria-label="Xóa dòng hàng ${index + 1}" ${state.busy ? "disabled" : ""}>Xóa</button></div>
       <div class="item-grid">${ITEM_FIELDS.map(([key, label, kind]) => renderItemField(index, key, label, kind, item[key])).join("")}</div></article>`).join("");
-  return `<div class="section-heading"><h3>Dòng hàng (${items.length})</h3><button type="button" class="btn btn-secondary btn-small" data-action="add-item" ${items.length >= 30 ? "disabled" : ""}>+ Thêm dòng</button></div>
+  return `<div class="section-heading"><h3>Dòng hàng (${items.length})</h3><button type="button" class="btn btn-secondary btn-small" data-action="add-item" ${items.length >= 30 || state.busy ? "disabled" : ""}>+ Thêm dòng</button></div>
     ${cards || '<div class="empty-state" style="padding:18px">Chưa có dòng hàng. Có thể thêm nếu chứng từ có bảng hàng hóa.</div>'}`;
 }
 
 function renderItemField(index, key, label, kind, value) {
   const inputMode = kind === "decimal" ? 'inputmode="decimal"' : "";
-  return `<div class="field"><label for="item-${index}-${key}">${escapeHtml(label)}</label><input id="item-${index}-${key}" data-index="${index}" data-item-field="${key}" type="text" ${inputMode} placeholder="Chưa xác định" value="${escapeHtml(value ?? "")}" /></div>`;
+  return `<div class="field"><label for="item-${index}-${key}">${escapeHtml(label)}</label><input id="item-${index}-${key}" data-index="${index}" data-item-field="${key}" type="text" ${inputMode} placeholder="Chưa xác định" value="${escapeHtml(value ?? "")}" ${state.busy ? "disabled" : ""} /></div>`;
 }
 
 function renderIssues(issues) {
@@ -558,11 +665,12 @@ function renderIssues(issues) {
 
 function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
   const dirty = isDirty();
-  const canApprove = state.reviewed && !dirty && !blockers.length && allWarningsChecked && !state.busy;
-  const disabledSave = !dirty || state.busy || !document.head;
+  const pending = dirty || state.changedPaths.size || state.changedItemFields.size;
+  const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy;
+  const disabledSave = !pending || remoteChanged() || state.busy || !document.head;
   return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" /></div>
     <label class="approval-check"><input type="checkbox" data-reviewed ${state.reviewed ? "checked" : ""} /><span>Tôi đã đối chiếu dữ liệu với ảnh nguồn và xác nhận mức độ đầy đủ của chứng từ.</span></label>
-    ${dirty ? '<div class="notice">Có chỉnh sửa chưa lưu. Hãy lưu thành revision mới trước khi duyệt.</div>' : ""}
+    ${pending ? '<div class="notice">Có thay đổi hoặc xác nhận field chưa lưu. Hãy lưu thành revision mới trước khi duyệt.</div>' : ""}
     ${blockers.length ? `<div class="notice error">Còn ${blockers.length} điều kiện chặn. Sửa dữ liệu hoặc kiểm tra lại nội dung trên ảnh trước khi duyệt.</div>` : ""}
     ${warnings.length && !allWarningsChecked ? '<div class="notice">Hãy xác nhận từng cảnh báo để tiếp tục duyệt.</div>' : ""}
     <div class="action-row"><button class="btn btn-secondary" data-action="save" ${disabledSave ? "disabled" : ""}>${state.busyAction === "save" ? '<span class="spinner"></span>' : "Lưu bản sửa"}</button>
@@ -576,7 +684,7 @@ function renderJobProgress(job) {
 }
 
 function renderCandidates(runs) {
-  return `<div class="section-heading"><h3>Kết quả chạy AI khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || isDirty() || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
+  return `<div class="section-heading"><h3>Kết quả chạy AI khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
 }
 
 function renderExport(document, approved, selectedId) {
@@ -625,9 +733,16 @@ root.addEventListener("change", (event) => {
 root.addEventListener("click", (event) => {
   const open = event.target.closest("[data-open]");
   if (open) return openDocument(open.dataset.open);
+  if (state.busy && event.target.closest("[data-remove-item], [data-adopt-run], [data-review-field]")) return;
+  const reviewedField = event.target.closest("[data-review-field]");
+  if (reviewedField) {
+    state.changedPaths.add(`/${reviewedField.dataset.reviewField}`);
+    return render();
+  }
   const remove = event.target.closest("[data-remove-item]");
   if (remove) {
     const index = Number(remove.dataset.removeItem);
+    state.changedItemFields.delete(state.rowIds[index]);
     state.payload.items.splice(index, 1);
     state.rowIds.splice(index, 1);
     state.changedPaths.add("/items");
@@ -637,12 +752,16 @@ root.addEventListener("click", (event) => {
   if (adopt) return adoptCandidate(adopt.dataset.adoptRun);
   const action = event.target.closest("[data-action]")?.dataset.action;
   if (action === "logout") return logout();
-  if (action === "reload") return openDocument(state.selectedId);
+  if (action === "reload") {
+    if (state.selectedId && (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
+        !window.confirm("Tải lại sẽ bỏ các thay đổi chưa lưu. Tiếp tục?")) return;
+    return openDocument(state.selectedId);
+  }
   if (action === "save") return saveReview();
   if (action === "approve") return approve();
   if (action === "rerun") return rerun();
   if (action === "export") return exportRevision();
-  if (action === "add-item" && state.payload.items.length < 30) {
+  if (action === "add-item" && !state.busy && state.payload.items.length < 30) {
     state.payload.items.push(emptyItem());
     state.rowIds.push(crypto.randomUUID());
     state.changedPaths.add("/items");
@@ -673,7 +792,12 @@ root.addEventListener("click", (event) => {
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && state.token) refreshDocuments().catch(apiFailure);
+  if (document.visibilityState === "visible" && state.user) {
+    const session = sessionGeneration;
+    refreshDocuments().catch(error => {
+      if (session === sessionGeneration) apiFailure(error);
+    });
+  }
 });
 
 start();

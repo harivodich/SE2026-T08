@@ -13,7 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.vietdoc.common.*;
 
@@ -32,19 +31,11 @@ public class SecurityConfig {
   SecurityFilterChain security(
       HttpSecurity http,
       AuthService auth,
-      Json json,
-      @Value("${vietdoc.allowed-origins}") String origins)
+      Json json)
       throws Exception {
-    CorsConfiguration cors = new CorsConfiguration();
-    cors.setAllowedOrigins(Arrays.asList(origins.split(",")));
-    cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "OPTIONS"));
-    cors.setAllowedHeaders(List.of("Authorization", "Content-Type", "Idempotency-Key"));
-    cors.setExposedHeaders(List.of("Content-Disposition", "X-Request-Id"));
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", cors);
-    http.cors(c -> c.configurationSource(source))
-        .csrf(c -> c.disable())
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    http.csrf(c -> c.csrfTokenRepository(
+            new org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository()))
+        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
         .authorizeHttpRequests(
             a ->
                 a.requestMatchers(
@@ -54,7 +45,8 @@ public class SecurityConfig {
                         "/api.js",
                         "/domain.js",
                         "/styles.css",
-                        "/api/v1/auth/token",
+                        "/api/v1/auth/session",
+                        "/api/v1/auth/csrf",
                         "/health/**",
                         "/actuator/health/**",
                         "/error")
@@ -140,13 +132,15 @@ public class SecurityConfig {
                         }
                       };
                 }
-                String header = req.getHeader("Authorization");
-                if (header != null && header.startsWith("Bearer ")) {
-                  AuthService.Identity identity = auth.authenticate(header.substring(7));
+                HttpSession session = req.getSession(false);
+                if (session != null) {
+                  String token = (String) session.getAttribute("vietdoc-token");
+                  AuthService.Identity identity = auth.authenticate(token);
                   if (identity != null)
                     SecurityContextHolder.getContext()
                         .setAuthentication(
                             new UsernamePasswordAuthenticationToken(identity, null, List.of()));
+                  else if (token != null) session.removeAttribute("vietdoc-token");
                 }
                 chain.doFilter(req, res);
               }

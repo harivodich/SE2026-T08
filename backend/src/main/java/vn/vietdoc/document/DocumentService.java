@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import vn.vietdoc.common.*;
 import vn.vietdoc.contracts.ContractValidator;
@@ -75,59 +77,61 @@ public class DocumentService {
   private final Json json;
   private final PrivateStorage storage;
   private final ContractValidator validator;
+  private final TransactionTemplate uploadTransaction;
 
   public DocumentService(
-      Store store, Json json, PrivateStorage storage, ContractValidator validator) {
+      Store store, Json json, PrivateStorage storage, ContractValidator validator,
+      PlatformTransactionManager transactionManager) {
     this.store = store;
     this.json = json;
     this.storage = storage;
     this.validator = validator;
+    this.uploadTransaction = new TransactionTemplate(transactionManager);
   }
 
-  @Transactional
   public DocumentView upload(String user, MultipartFile file, String type, String key) {
     validator.type(type);
-    key = key(key);
-    if (store.em().find(UserAccount.class, user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
-        == null) throw ApiException.missing();
-    if (key != null) {
-      List<Document> existing =
-          store
-              .em()
-              .createQuery(
-                  "select d from Document d where d.ownerId=:u and d.uploadKey=:k", Document.class)
-              .setParameter("u", user)
-              .setParameter("k", key)
-              .getResultList();
-      if (!existing.isEmpty()) {
-        try {
-          if (!existing.get(0).documentType.equals(type)
-              || !existing.get(0).fileHash.equals(Json.sha256(file.getBytes())))
-            throw new ApiException(
-                409, "IDEMPOTENCY_CONFLICT", "Khóa upload đã được dùng cho file khác.");
-        } catch (java.io.IOException e) {
-          throw new ApiException(422, "INPUT_CORRUPT", "Không đọc được file.");
-        }
-        return view(existing.get(0));
-      }
-    }
+    String requestKey = key(key);
     Document d = new Document();
     d.id = Store.id();
     PrivateStorage.Asset asset = storage.put(d.id, file);
-    d.ownerId = user;
-    d.documentType = type;
-    d.filename = filename(file.getOriginalFilename());
-    d.contentType = asset.contentType();
-    d.fileHash = asset.hash();
-    d.fileBytes = asset.size();
-    d.imageWidth = asset.width();
-    d.imageHeight = asset.height();
-    d.version = 1;
-    d.createdAt = Instant.now();
-    d.uploadKey = key;
-    store.em().persist(d);
-    store.audit(d, user, "UPLOAD", Map.of("document_type", type));
-    return view(d);
+    try {
+      DocumentView result = uploadTransaction.execute(status -> {
+        if (store.em().find(UserAccount.class, user,
+            jakarta.persistence.LockModeType.PESSIMISTIC_WRITE) == null) throw ApiException.missing();
+        if (requestKey != null) {
+          List<Document> existing = store.em()
+              .createQuery("select d from Document d where d.ownerId=:u and d.uploadKey=:k", Document.class)
+              .setParameter("u", user).setParameter("k", requestKey).getResultList();
+          if (!existing.isEmpty()) {
+            if (!existing.get(0).documentType.equals(type)
+                || !existing.get(0).fileHash.equals(asset.hash()))
+              throw new ApiException(409, "IDEMPOTENCY_CONFLICT",
+                  "Khóa upload đã được dùng cho file khác.");
+            return view(existing.get(0));
+          }
+        }
+        d.ownerId = user;
+        d.documentType = type;
+        d.filename = filename(file.getOriginalFilename());
+        d.contentType = asset.contentType();
+        d.fileHash = asset.hash();
+        d.fileBytes = asset.size();
+        d.imageWidth = asset.width();
+        d.imageHeight = asset.height();
+        d.version = 1;
+        d.createdAt = Instant.now();
+        d.uploadKey = requestKey;
+        store.em().persist(d);
+        store.audit(d, user, "UPLOAD", Map.of("document_type", type));
+        return view(d);
+      });
+      if (!result.id().equals(d.id)) storage.remove(d.id);
+      return result;
+    } catch (RuntimeException e) {
+      storage.remove(d.id);
+      throw e;
+    }
   }
 
   @Transactional(readOnly = true)

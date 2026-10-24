@@ -10,18 +10,18 @@ export class ApiError extends Error {
 }
 
 export class ApiClient {
-  constructor(token = "") {
-    this.token = token;
-  }
+  constructor() {}
 
   async request(path, options = {}) {
     const { responseType, ...requestOptions } = options;
     const headers = new Headers(requestOptions.headers || {});
-    if (this.token) headers.set("Authorization", `Bearer ${this.token}`);
+    const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+    if (csrf && !["GET", "HEAD"].includes(requestOptions.method || "GET"))
+      headers.set("X-CSRF-TOKEN", csrf);
     if (requestOptions.body && !(requestOptions.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
-    const response = await fetch(`${API_ROOT}${path}`, { ...requestOptions, headers });
+    const response = await fetch(`${API_ROOT}${path}`, { ...requestOptions, headers, credentials: "same-origin" });
     if (!response.ok) {
       let body = {};
       try { body = await response.json(); } catch { /* response has no JSON body */ }
@@ -35,18 +35,19 @@ export class ApiClient {
   }
 
   login(username, password) {
-    return this.request("/auth/token", {
+    return this.request("/auth/session", {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
   }
 
   me() { return this.request("/auth/me"); }
+  csrf() { return this.request("/auth/csrf"); }
   logout() { return this.request("/auth/logout", { method: "POST" }); }
   listDocuments() { return this.request("/documents?limit=50"); }
-  document(id) { return this.request(`/documents/${encodeURIComponent(id)}`); }
-  revisions(id) { return this.request(`/documents/${encodeURIComponent(id)}/revisions`); }
-  runs(id) { return this.request(`/documents/${encodeURIComponent(id)}/runs`); }
+  document(id, options = {}) { return this.request(`/documents/${encodeURIComponent(id)}`, options); }
+  revisions(id, options = {}) { return this.request(`/documents/${encodeURIComponent(id)}/revisions`, options); }
+  runs(id, options = {}) { return this.request(`/documents/${encodeURIComponent(id)}/runs`, options); }
 
   async upload(file, type) {
     const form = new FormData();
@@ -99,7 +100,7 @@ export class ApiClient {
     return this.request(`/exports/${encodeURIComponent(id)}/download`, { responseType: "blob" });
   }
 
-  page(documentId) {
-    return this.request(`/documents/${encodeURIComponent(documentId)}/pages/0`);
+  page(documentId, options = {}) {
+    return this.request(`/documents/${encodeURIComponent(documentId)}/pages/0`, options);
   }
 }

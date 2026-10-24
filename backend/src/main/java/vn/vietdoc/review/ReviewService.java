@@ -285,6 +285,10 @@ public class ReviewService {
       List<String> rows) {
     ArrayNode result = validator.issues(type, payload);
     for (JsonNode issue : source) {
+      // Derived rules are recalculated from all operands in the new payload.
+      if (Set.of("LINE_ARITHMETIC", "TOTAL_ARITHMETIC", "TOTAL_REQUIRED", "FIELD_MISSING",
+              "INVALID_DATE", "INVALID_TIME", "TABLE_COMPLETENESS")
+          .contains(issue.path("code").asText())) continue;
       boolean keep = true;
       ArrayNode mapped = json.mapper.createArrayNode();
       for (JsonNode p : issue.path("paths")) {

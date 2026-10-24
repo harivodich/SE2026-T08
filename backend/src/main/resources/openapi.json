@@ -12,13 +12,13 @@
   ],
   "security": [
     {
-      "bearerAuth": []
+      "sessionCookie": []
     }
   ],
   "paths": {
-    "/api/v1/auth/token": {
+    "/api/v1/auth/session": {
       "post": {
-        "operationId": "post__auth_token",
+        "operationId": "post__auth_session",
         "responses": {
           "200": {
             "description": "Success",
@@ -74,6 +74,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/csrf": {
+      "get": {
+        "operationId": "get__auth_csrf",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "CSRF token for the current HTTP session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["token"],
+                  "properties": {"token": {"type": "string"}}
                 }
               }
             }
@@ -1350,22 +1370,11 @@
       "Session": {
         "type": "object",
         "required": [
-          "access_token",
-          "token_type",
           "expires_at",
           "user"
         ],
         "additionalProperties": false,
         "properties": {
-          "access_token": {
-            "type": "string"
-          },
-          "token_type": {
-            "type": "string",
-            "enum": [
-              "Bearer"
-            ]
-          },
           "expires_at": {
             "type": "string",
             "format": "date-time"
@@ -2011,9 +2020,11 @@
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Same-origin HTTP session. Mutating requests require X-CSRF-TOKEN from the Thymeleaf page."
       }
     }
   }
