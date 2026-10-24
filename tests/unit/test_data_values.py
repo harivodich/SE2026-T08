@@ -11,7 +11,7 @@ from jsonschema import Draft202012Validator
 from vietdoc.data.generator.values import generate
 
 ROOT = Path(__file__).resolve().parents[2]
-SCHEMA = json.loads((ROOT / 'specs/contracts/business.schema.json').read_text())
+SCHEMA = json.loads((ROOT / 'specs/contracts/business.schema.json').read_text(encoding='utf-8'))
 FIXTURES = ROOT / 'tests/fixtures'
 DECIMAL = re.compile(r'^(0|[1-9][0-9]*)(\.[0-9]+)?$')
 
@@ -20,7 +20,7 @@ class DataValuesTest(unittest.TestCase):
     def test_committed_gold_matches_generator(self):
         for sample_id, payload, labels in generate():
             for suffix, expected in (('gold', payload), ('labels', labels)):
-                actual = json.loads((FIXTURES / f'{sample_id}.{suffix}.json').read_text())
+                actual = json.loads((FIXTURES / f'{sample_id}.{suffix}.json').read_text(encoding='utf-8'))
                 self.assertEqual(actual, expected)
 
     def test_schema_semantics_and_annotation_coverage(self):

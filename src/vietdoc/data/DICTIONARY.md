@@ -91,6 +91,13 @@ Metadata hiện chỉ là kịch bản nội dung, không chứng minh field đ�
 
 ## Tái tạo và giới hạn
 
+Prerequisite cho tests D1.1: Python >=3.11 và `jsonschema`; dùng offline Data
+environment riêng, cài extra `python -m pip install -e ".[data]"` từ repository root.
+Bash: `PYTHONPATH=src python3 -m unittest discover -s tests/unit -p "test_data_values.py" -v`.
+PowerShell: `$env:PYTHONPATH="src"` rồi `python -m unittest discover -s tests/unit -p "test_data_values.py" -v`.
+D1.1 không cần font/Pillow; cài extra Data trong virtualenv riêng với AI serving/train.
+Artifacts luôn UTF-8/LF; tests đọc UTF-8 tường minh, không phụ thuộc locale Windows.
+
 Config: `generator/fake-values.json`; logic: `generator/values.py` (Python stdlib).
 Từ repository root, tạo vào thư mục mới:
 
