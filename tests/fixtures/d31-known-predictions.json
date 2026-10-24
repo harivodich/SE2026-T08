@@ -1,0 +1,83 @@
+{
+  "artifact_version": "vietdoc.predictions.v1",
+  "dataset_manifest_sha256": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c",
+  "model_version": "fixture-only.v1",
+  "normalizer_version": "fixture-canonical.v1",
+  "ocr_version": "fixture-only.v1",
+  "purpose": "Hand-edited synthetic known-score test; NOT B0/M0/OCR engine output",
+  "predictions": [
+    {
+      "sample_id": "d12-receipt-03",
+      "status": "ok",
+      "payload": {
+        "merchant_name": "Sai tên cửa hàng",
+        "merchant_address": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+        "transaction_date": "2026-10-03",
+        "transaction_time": "10:05",
+        "total_amount": null,
+        "items": [
+          {
+            "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu",
+            "quantity": "0.5",
+            "unit": "kg",
+            "unit_price": "80000",
+            "line_total": "40000"
+          },
+          {
+            "description": "Vải màu hư cấu",
+            "quantity": "1.5",
+            "unit": "mét",
+            "unit_price": "32000",
+            "line_total": "48000"
+          },
+          {
+            "description": "Trà sen hư cấu",
+            "quantity": "2",
+            "unit": "hộp",
+            "unit_price": "45000",
+            "line_total": "90000"
+          }
+        ]
+      },
+      "ocr_text": "PHIẾU THANH TOÁN\nDỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH\nCửa hàng: Cửa hàng Hư Cấu Mây Tím\nĐịa chỉ: Lô GIẢ-LẬP, khu phố Hư Cấu\nNgày bán: 03/10/2026\nGiờ: 10:05\nTên hàng\nSL\nĐVT\nĐơn giá\nThành tiền\nBộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy\ntrưng bày mùa thu\n0,5\nkg\n80.000 đ\n40.000 đ\nVải màu hư cấu\n1,5\nmét\n32.000 đ\n48.000 đ\nTrà sen hư cấu\n2\nhộp\n45.000 đ\n90.000 đ\nTổng thanh toán: 178.000 đ\nSố tiền ghi lại: 178.000 đ\n"
+    },
+    {
+      "sample_id": "d12-invoice-04",
+      "status": "ok",
+      "payload": {
+        "invoice_number": "GIẢ-LẬP-1202-04",
+        "issue_date": "2026-10-04",
+        "seller_name": "Xưởng Hư Cấu Cánh Diều",
+        "buyer_name": "Người mua bịa",
+        "subtotal": "228000",
+        "tax_amount": "10000",
+        "discount_amount": "5000",
+        "total_amount": "233000",
+        "items": [
+          {
+            "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu",
+            "quantity": "2",
+            "unit": "hộp",
+            "unit_price": "45000",
+            "line_total": "90000"
+          },
+          {
+            "description": "Trà sen hư cấu",
+            "quantity": "2",
+            "unit": "hộp",
+            "unit_price": "45000",
+            "line_total": "90000"
+          },
+          {
+            "description": "Vải màu hư cấu",
+            "quantity": "1.5",
+            "unit": "mét",
+            "unit_price": "32000",
+            "line_total": "48000"
+          }
+        ]
+      },
+      "ocr_text": "HÓA ĐƠN BÁN HÀNG\nDỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH\nSố hóa đơn: GIẢ-LẬP-1202-04\nNgày lập: 04/10/2026\nĐơn vị bán: Xưởng Hư Cấu Cánh Diều\nTên hàng\nĐVT\nSL\nĐơn giá\nThành tiền\nBộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy\ntrưng bày mùa thu\nhộp\n2\n45.000 đ\n90.000 đ\nTrà sen hư cấu\nhộp\n2\n45.000 đ\n90.000 đ\nVải màu hư cấu\nmét\n1,5\n32.000 đ\n48.000 đ\nCộng tiền hàng: 228.000 đ\nTiền thuế GTGT: 10.000 đ\nChiết khấu: 5.000 đ\nTổng thanh toán: 233.000 đ\nSố tiền ghi lại: 233.000 đ\n"
+    }
+  ]
+}

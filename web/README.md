@@ -1,5 +1,5 @@
-# Web
+# Legacy React scaffold
 
-Backend phụ trách giao diện React/TypeScript. src/app chứa wiring; features/auth, features/documents, features/review chứa màn hình; components chứa viewer/editor/items grid; api/generated dành cho types sinh từ OpenAPI.
+Người dùng đã chọn Spring Boot/Thymeleaf. Không triển khai React/npm app trong folder này. Templates/JS/CSS đích ở backend/src/main/resources; xem [Backend guide](../docs/team/backend.md) và [source structure](../docs/source-structure.md).
 
-Chưa có React app hoặc package.json. Thêm dependencies và code khi bắt đầu việc giao diện.
+Các markers/SPEC giữ để đối chiếu, chưa xóa source. Các SPEC con đều đánh dấu legacy; không là roadmap/UI authority.
