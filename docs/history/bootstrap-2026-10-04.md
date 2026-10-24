@@ -1,6 +1,6 @@
 # Bootstrap workspace — 2026-10-04
 
-Ghi chép lịch sử của lần khởi tạo ngày 04/10. Trạng thái repo hiện tại được mô tả ở [README](../../README.md); việc đang làm ở [tasks](../../tasks/README.md).
+Ghi chép lịch sử của lần khởi tạo ngày 04/10. Trạng thái repo hiện tại được mô tả ở [README](../../README.md); kế hoạch/task ở [docs team](../team/README.md). Tasks cũ được lưu [history](tasks-retired-2026-10-07/README.md), không là workflow hiện hành.
 
 ## Scope và acceptance
 

@@ -1,6 +1,6 @@
 # Scope v1
 
-Reference đầy đủ: [scope/workflows gốc](../docs/design/v1/01-scope-workflows.md). Đây là requirement summary; chưa có implementation.
+Reference đầy đủ: [scope/workflows gốc](../docs/design/v1/01-scope-workflows.md). Đây là requirement summary; chưa có implementation. Thiết kế đích Java/Thymeleaf + Python ở [architecture](../docs/architecture.md), [public API](contracts/public-api.md) và [compute API](contracts/compute-api.md); snapshot gốc chỉ đối chiếu.
 
 ## Input/output
 

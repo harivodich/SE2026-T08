@@ -1,0 +1,49 @@
+{
+  "rejected": [
+    {
+      "sample_id": "d21-receipt-l0-r31",
+      "document_type": "receipt",
+      "row_count": 31,
+      "status": "rejected",
+      "reason": "schema: ['items']: maxItems constraint failed"
+    },
+    {
+      "sample_id": "d21-receipt-overflow",
+      "document_type": "receipt",
+      "row_count": 30,
+      "status": "rejected",
+      "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+    },
+    {
+      "sample_id": "d21-receipt-l1-r31",
+      "document_type": "receipt",
+      "row_count": 31,
+      "status": "rejected",
+      "reason": "schema: ['items']: maxItems constraint failed"
+    },
+    {
+      "sample_id": "d21-invoice-l0-r31",
+      "document_type": "invoice",
+      "row_count": 31,
+      "status": "rejected",
+      "reason": "schema: ['items']: maxItems constraint failed"
+    },
+    {
+      "sample_id": "d21-invoice-overflow",
+      "document_type": "invoice",
+      "row_count": 30,
+      "status": "rejected",
+      "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+    },
+    {
+      "sample_id": "d21-invoice-l1-r31",
+      "document_type": "invoice",
+      "row_count": 31,
+      "status": "rejected",
+      "reason": "schema: ['items']: maxItems constraint failed"
+    }
+  ],
+  "excluded": [],
+  "accepted_count": 14,
+  "rejected_count": 6
+}
