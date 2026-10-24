@@ -1,0 +1,11 @@
+# Allowlist: Python images need only these. Datasets, models, storage, secrets,
+# backend/web sources and Git metadata never enter the build context.
+*
+!pyproject.toml
+!src/
+!specs/contracts/
+!tests/
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
