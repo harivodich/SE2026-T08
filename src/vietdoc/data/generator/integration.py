@@ -1,24 +1,18 @@
 """Bounded D1.2 integration renderer. No OCR, model, split or business persistence."""
 import argparse
 from collections import Counter
-from decimal import Decimal
 import hashlib
 import json
 from pathlib import Path
-import random
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from jsonschema import Draft202012Validator
 
-from .values import CONFIG
+from .values import CONFIG, integration_samples as samples
+from .rendering import render, raw
 
 VERSION = 'd1.2.v1'
 FONT = Path('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
-MONEY = {'unit_price', 'line_total', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount'}
-LABELS = dict(merchant_name='Cửa hàng', merchant_address='Địa chỉ', transaction_date='Ngày bán',
-              transaction_time='Giờ', invoice_number='Số hóa đơn', issue_date='Ngày lập',
-              seller_name='Đơn vị bán', buyer_name='Đơn vị mua', subtotal='Cộng tiền hàng',
-              tax_amount='Tiền thuế GTGT', discount_amount='Chiết khấu', total_amount='Tổng thanh toán')
 
 
 def dump(path, value):
@@ -36,112 +30,6 @@ def leaves(payload):
     for i, row in enumerate(payload['items']):
         result.update({f'/items/{i}/{k}': v for k, v in row.items()})
     return result
-
-
-def raw(key, value):
-    if value is None:
-        return None
-    if key in MONEY:
-        integer, dot, fraction = value.partition('.')
-        return f'{int(integer):,}'.replace(',', '.') + (',' + fraction if dot else '') + ' đ'
-    if key.endswith('date'):
-        return '/'.join(reversed(value.split('-')))
-    return value.replace('.', ',') if key == 'quantity' else value
-
-
-def samples(seed=1202):
-    config = json.loads(CONFIG.read_text())
-    rng = random.Random(seed)
-    for kind in ('receipt', 'invoice'):
-        for i in range(10):
-            count = [1, 3, 5, 12, 30][i // 2]
-            rows = [dict(rng.choice(config['products'])) for _ in range(count)]
-            if i >= 2:
-                rows[0]['description'] = 'Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu'
-            subtotal = sum((Decimal(r['line_total']) for r in rows), Decimal(0))
-            if kind == 'receipt':
-                payload = dict(merchant_name=config['merchants'][i % 2],
-                               merchant_address=None if i % 3 == 0 else config['addresses'][0],
-                               transaction_date=f'2026-10-{i+1:02}',
-                               transaction_time=None if i % 3 == 0 else f'{8+i:02}:05',
-                               total_amount=str(subtotal), items=rows)
-            else:
-                tax, discount = ('10000', '5000') if i % 2 else ('0', '0')
-                payload = dict(invoice_number=f'GIẢ-LẬP-{seed}-{i+1:02}', issue_date=f'2026-10-{i+1:02}',
-                               seller_name=config['sellers'][i % 2], buyer_name=None if i % 3 == 0 else config['buyers'][0],
-                               subtotal=str(subtotal), tax_amount=tax, discount_amount=discount,
-                               total_amount=str(subtotal + Decimal(tax) - Decimal(discount)), items=rows)
-            yield f'd12-{kind}-{i+1:02}', kind, i % 2, payload
-
-
-def render(payload, kind, layout, font_path=FONT):
-    width, height = 1500, 2600
-    image = Image.new('RGB', (width, height), 'white')
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(str(font_path), 23)
-    title_font = ImageFont.truetype(str(font_path), 32)
-    regions, transcript = [], []
-    y = 35
-
-    def text(value, x, top, pointer=None, title=False):
-        face = title_font if title else font
-        box = list(draw.textbbox((x, top), value, font=face))
-        if not (0 <= box[0] < box[2] < width and 0 <= box[1] < box[3] < height):
-            raise ValueError(f'Clipping: {value}: {box}')
-        draw.text((x, top), value, font=face, fill='black')
-        transcript.append(value)
-        regions.append(dict(text=value, pointer=pointer, page=0, bbox_px=box))
-
-    text('HÓA ĐƠN BÁN HÀNG' if kind == 'invoice' else 'PHIẾU THANH TOÁN', 45, y, title=True)
-    y += 55
-    text('DỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH', 45, y)
-    y += 45
-    for key, value in payload.items():
-        if key == 'items' or key in MONEY or value is None:
-            continue
-        text(LABELS[key] + ': ' + raw(key, value), 45 if layout == 0 else 180, y, '/' + key)
-        y += 36
-    y += 15
-    columns = [('description', 'Tên hàng', 45, 650), ('quantity', 'SL', 720, 100),
-               ('unit', 'ĐVT', 850, 100), ('unit_price', 'Đơn giá', 1000, 190),
-               ('line_total', 'Thành tiền', 1240, 210)]
-    if layout:
-        columns = [columns[0], columns[2], columns[1], columns[3], columns[4]]
-        columns = [(k, label, x, w) for (k, label, _, w), x in zip(columns, [45, 720, 850, 1000, 1240])]
-    for _, label, x, _ in columns:
-        text(label, x, y)
-    y += 38
-    for index, row in enumerate(payload['items']):
-        max_lines = 1
-        for key, _, x, max_width in columns:
-            value = raw(key, row[key])
-            lines, line = [], ''
-            for word in value.split():
-                candidate = (line + ' ' + word).strip()
-                if draw.textlength(candidate, font=font) > max_width:
-                    if not line:
-                        raise ValueError('Word exceeds column')
-                    lines.append(line)
-                    line = word
-                else:
-                    line = candidate
-            lines.append(line)
-            for offset, fragment in enumerate(lines):
-                text(fragment, x, y + offset * 29, f'/items/{index}/{key}')
-            max_lines = max(max_lines, len(lines))
-        y += max_lines * 29 + 8
-        if layout:
-            draw.line((40, y - 3, 1460, y - 3), fill='#bbbbbb')
-    y += 20
-    for key in payload:
-        if key in MONEY:
-            text(LABELS[key] + ': ' + raw(key, payload[key]), 650 if layout == 0 else 45, y, '/' + key)
-            y += 36
-    text('Số tiền ghi lại: ' + raw('total_amount', payload['total_amount']), 45, y + 10, '/total_amount')
-    return image, '\n'.join(transcript) + '\n', dict(
-        convention='renderer-local-v1; not approved shared geometry', page=0,
-        width=width, height=height, origin='top-left', units='pixels',
-        transform='identity; PNG is the rendered page', regions=regions)
 
 
 def build(root, output, manifest, seed=1202, font_path=FONT, tiny=False):
