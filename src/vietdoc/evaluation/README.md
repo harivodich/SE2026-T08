@@ -1,7 +1,11 @@
 # D3.1 — offline scalar/OCR evaluator v1
 
 Independent Data evaluator, stdlib only. Reads frozen artifacts; no inference, API,
-production normalizer, rows/evidence matching or final-test tuning.
+production normalizer or final-test tuning.
+
+D3.2 adds table/evidence/comparison and correctness export through `--candidate`;
+see [D32 policy, protocol and commands](D32.md). Existing `--predictions` mode
+retains the D3.1 behavior documented below.
 
 ## Policy and review status
 
