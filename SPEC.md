@@ -7,6 +7,6 @@
 - [datasets](datasets/SPEC.md), [model/eval artifacts](artifacts/SPEC.md), [private runtime](storage/SPEC.md)
 - [web legacy](web/SPEC.md), [migrations legacy](migrations/SPEC.md)
 
-[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. 25 Python init hiện docstring-only, Java chưa app; docs không app proof.
+[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. Python có OCR/page types, loader, OCR pretrained và tests theo [proposal AI-1](docs/ocr-input-proposal.md); package init còn scaffold, Java chưa app; docs không app proof.
 
-No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 bất biến, current task chỉ local redesign, chưa commit/push. [Git Flow](docs/git-flow.md): bootstrap main theo Lead yêu cầu riêng; team feature→develop khi coding bắt đầu.
+No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 bất biến. [Git Flow](docs/git-flow.md): bootstrap main theo Lead yêu cầu riêng; team feature→develop khi coding bắt đầu. Commit/push cần yêu cầu riêng.

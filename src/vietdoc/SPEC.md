@@ -6,7 +6,7 @@ Compute và offline Data/ML Python Owner: AI-1/AI-2/Data.
 
 ## Đặt gì ở đây?
 
-contracts/pipeline/data/ml/evaluation/entrypoints/api/cli + attempt storage; 25 init docstrings hiện tại.
+contracts/pipeline/data/ml/evaluation/entrypoints/api/cli + attempt storage. `contracts/ocr.py` có OCR/page types theo proposal O1.1; `pipeline/preprocess.py` và `pipeline/ocr/paddle_adapter.py` có loader/OCR thật. Các package legacy còn scaffold.
 
 ## Ranh giới
 

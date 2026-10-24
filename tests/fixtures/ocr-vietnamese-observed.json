@@ -1,0 +1,56 @@
+{
+  "page": 0,
+  "width": 800,
+  "height": 400,
+  "ocr_version": "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d;paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.v1",
+  "blocks": [
+    {
+      "block_id": "p0-b0001",
+      "text": "Tổng tiền",
+      "quad": [
+        [
+          0.075,
+          0.515
+        ],
+        [
+          0.285,
+          0.515
+        ],
+        [
+          0.285,
+          0.665
+        ],
+        [
+          0.075,
+          0.665
+        ]
+      ],
+      "score": 0.93,
+      "geometry_reason": null
+    },
+    {
+      "block_id": "p0-b0002",
+      "text": "80.000",
+      "quad": [
+        [
+          0.59,
+          0.535
+        ],
+        [
+          0.745,
+          0.535
+        ],
+        [
+          0.745,
+          0.65
+        ],
+        [
+          0.59,
+          0.65
+        ]
+      ],
+      "score": 0.96,
+      "geometry_reason": null
+    }
+  ]
+}
