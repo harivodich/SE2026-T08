@@ -1,0 +1,59 @@
+{
+  "version": "d1.1.v1",
+  "notice": "DỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH",
+  "merchants": [
+    "Cửa hàng Hư Cấu Mây Tím",
+    "Quầy Hư Cấu Lá Biếc"
+  ],
+  "addresses": [
+    "Lô GIẢ-LẬP, khu phố Hư Cấu"
+  ],
+  "sellers": [
+    "Công ty Hư Cấu Đèn Đom Đóm",
+    "Xưởng Hư Cấu Cánh Diều"
+  ],
+  "buyers": [
+    "Đơn vị Hư Cấu Mầm Nhỏ",
+    "Cửa tiệm Hư Cấu Sóng Xanh"
+  ],
+  "products": [
+    {
+      "description": "Trà sen hư cấu",
+      "quantity": "2",
+      "unit": "hộp",
+      "unit_price": "45000",
+      "line_total": "90000"
+    },
+    {
+      "description": "Vải màu hư cấu",
+      "quantity": "1.5",
+      "unit": "mét",
+      "unit_price": "32000",
+      "line_total": "48000"
+    },
+    {
+      "description": "Giấy gói hư cấu",
+      "quantity": "3",
+      "unit": "tập",
+      "unit_price": "12500",
+      "line_total": "37500"
+    },
+    {
+      "description": "Nến thơm hư cấu",
+      "quantity": "0.5",
+      "unit": "kg",
+      "unit_price": "80000",
+      "line_total": "40000"
+    }
+  ],
+  "adjustments": [
+    {
+      "tax": "0",
+      "discount": "0"
+    },
+    {
+      "tax": "10000",
+      "discount": "5000"
+    }
+  ]
+}
