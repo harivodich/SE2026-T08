@@ -13,7 +13,7 @@ dependencies = []
 data = ["Pillow==10.2.0", "jsonschema==4.10.3"]
 
 [tool.setuptools.package-data]
-"vietdoc.data.generator" = ["fake-values.json", "d21.json"]
+"vietdoc.data.generator" = ["fake-values.json", "d21.json", "d22.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
