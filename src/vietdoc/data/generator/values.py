@@ -78,7 +78,7 @@ def main():
         for suffix, value in (('gold', payload), ('labels', annotation)):
             path = args.output / f'{sample_id}.{suffix}.json'
             # Exclusive creation protects existing user files; regenerate into a fresh directory.
-            with path.open('x', encoding='utf-8') as stream:
+            with path.open('x', encoding='utf-8', newline='\n') as stream:
                 json.dump(value, stream, ensure_ascii=False, indent=2)
                 stream.write('\n')
 
