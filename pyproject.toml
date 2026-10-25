@@ -9,5 +9,11 @@ description = "Vietnamese document extraction and human review"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+data = ["jsonschema==4.10.3"]
+
+[tool.setuptools.package-data]
+"vietdoc.data.generator" = ["fake-values.json"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
