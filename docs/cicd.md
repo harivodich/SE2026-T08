@@ -108,6 +108,16 @@ Runbook deploy cần: artifact digest/source SHA → backup/restore evidence →
 
 Không cần thay đổi topology/Kubernetes/self-hosted runner để hoàn tất foundation này. Khi module chưa được merge, trạng thái của module là chưa tích hợp, không là skipped-but-release-complete.
 
+## Bằng chứng foundation ngày 25/10/2026
+
+- [PR #17](https://github.com/harivodich/SE2026-T08/pull/17), head `bf17dea`: [hosted CI thành công](https://github.com/harivodich/SE2026-T08/actions/runs/40182526548). Bốn tổ hợp Linux/Windows × Python 3.11/3.12 đạt; schema/gate/package/workflow jobs và ci-gate đạt. Canonical-byte test được báo skip, không coi là đã chứng minh bytes chuẩn.
+- Artifact Data đã kiểm được tạo từ PR test-merge SHA `689c9ef3a4a6c3cbdd8cc1bb99549045fd2d4605`, khác branch head theo cơ chế test merge của GitHub. Wheel SHA-256 `b3beb77f909a3206954941b48359df23583ba8477cf11678bf53fd31909a6256`. Không dùng hash artifact ZIP thay cho hash wheel.
+- [Draft probe #18](https://github.com/harivodich/SE2026-T08/pull/18), source tree trùng CI foundation nhưng parent main để tách vấn đề lịch sử squash: [release run](https://github.com/harivodich/SE2026-T08/actions/runs/40182704326) có tất cả core jobs xanh; release-readiness/ci-gate đỏ đúng kỳ vọng, nêu sáu application checks còn thiếu. Probe không là release PR và không được merge.
+- Ruleset `25817175` — `VietDoc - required CI gate (no bypass)` đã chuẩn bị ở trạng thái **Disabled**, context `ci-gate`, source GitHub Actions app `15368`, strict/up-to-date, bypass list rỗng. Hai ruleset quyền cũ không thay đổi. Chưa enforce CI trên main/develop cho đến khi hoàn tất bootstrap ở trên.
+- Lịch sử #15 squash vẫn giữ nguyên. Mô phỏng merge main với branch CI phát hiện conflicts ở `.github/SPEC.md`, `SPEC.md`, `docs/SPEC.md`, `docs/git-flow.md`; đó là việc nối baseline dài hạn riêng, không sửa lịch sử hoặc giải quyết bằng force-push trong PR CI.
+
+Các run trên gắn với SHA tương ứng. Mỗi update sau đó phải xem run mới nhất của PR, không dùng bảng này để xác nhận một SHA mới chưa chạy.
+
 ## Nguồn chính thức
 
 [GitHub required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks) giải thích latest SHA, workflow path filtering và việc skipped check không chặn merge. [GitHub Actions security](https://docs.github.com/en/actions/reference/security/secure-use) là nguồn về token scope/action pinning. [Deployment environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) mô tả reviewer/self-review và branch restrictions. [jsonschema referencing](https://python-jsonschema.readthedocs.io/en/stable/referencing/) mô tả registry in-memory dùng trong schema suite.
