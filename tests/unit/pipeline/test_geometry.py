@@ -98,10 +98,26 @@ class GeometryTest(unittest.TestCase):
         matrix = np.array(((2, 0, 40), (0, 2, 20), (.001, 0, 1)))
         points = rectangle(10, 10, 30, 20)
         expected = project_points(points, matrix.tolist())
-        for scale in (1e-15, -1e-15, 1e15, -1e15):
+        for scale in (1e-200, -1e-200, 1e-15, -1e-15, 1e15, -1e15, 1e200, -1e200):
             with self.subTest(scale=scale):
                 np.testing.assert_allclose(project_points(points, (matrix * scale).tolist()), expected, rtol=0, atol=1e-7)
                 np.testing.assert_allclose(project_points(expected, inverse_projective_transform((matrix * scale).tolist())), points, rtol=0, atol=1e-7)
+
+    def test_normalized_projection_avoids_intermediate_global_scale_overflow(self):
+        matrix = ((1e200, 0, 0), (0, 1e200, 0), (0, 0, 1e200))
+        points = ((1e200, 2e200),)
+        self.assertEqual(project_points(points, matrix), points)
+
+    def test_contract_and_geometry_accept_the_same_scaled_identity(self):
+        points = rectangle(10, 10, 30, 20)
+        for scale in (1e-200, -1e-200, 1e200, -1e200):
+            matrix = tuple(tuple(scale if row == column else 0.0 for column in range(3)) for row in range(3))
+            with self.subTest(scale=scale):
+                prepared = PreparedPage(0, ImageInfo(100, 100, "RGB", "uint8"), ImageInfo(100, 100, "RGB", "uint8"),
+                                        "fixture.scale.v1", "available", matrix, None)
+                mapped = canonical_quad(points, prepared)
+                np.testing.assert_allclose(mapped, rectangle(.1, .1, .3, .2), rtol=0, atol=1e-15)
+                np.testing.assert_allclose(processed_quad(mapped, prepared), points, rtol=0, atol=1e-12)
 
     def test_invalid_horizon_and_numerically_undefined_projections_are_rejected(self):
         for matrix in (

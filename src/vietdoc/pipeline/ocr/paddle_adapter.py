@@ -49,7 +49,7 @@ MODELS = {
 MODEL_SET_ID = "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d"
 OCR_VERSION = (
     MODEL_SET_ID + ";paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;"
-    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.v2;"
+    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v3;"
     + GEOMETRY_VERSION
 )
 MAX_BLOCKS = 1000
@@ -161,13 +161,20 @@ def _to_page(result, metadata: PreparedPage) -> OcrPage:
     return page
 
 
+def _check_deadline(deadline: float) -> None:
+    if time.monotonic() >= deadline:
+        raise OcrError("COMPUTE_TIMEOUT", "OCR budget has expired")
+
+
 class _PaddleTessPredictor:
     def __init__(self, detector, recognizer, sorter, cropper):
         self.detector, self.recognizer = detector, recognizer
         self.sorter, self.cropper = sorter, cropper
 
-    def predict(self, pixels):
+    def predict(self, pixels, *, deadline: float):
+        _check_deadline(deadline)
         for detected in self.detector.predict(pixels):
+            _check_deadline(deadline)
             polygons = detected["dt_polys"]
             if len(polygons) > MAX_BLOCKS:
                 raise OcrError("OUTPUT_INVALID", "Too many detected text regions")
@@ -180,11 +187,16 @@ class _PaddleTessPredictor:
             texts, scores = [], []
             total_chars = 0
             for polygon in polygons:
+                _check_deadline(deadline)
                 crop = self.cropper(pixels, [polygon])[0]
+                _check_deadline(deadline)
                 with Image.fromarray(np.ascontiguousarray(crop[:, :, ::-1])) as image:
                     try:
+                        _check_deadline(deadline)
                         self.recognizer.SetImage(image)
+                        _check_deadline(deadline)
                         text = self.recognizer.GetUTF8Text().strip()
+                        _check_deadline(deadline)
                         score = self.recognizer.MeanTextConf() / 100.0
                     finally:
                         self.recognizer.Clear()
@@ -193,6 +205,7 @@ class _PaddleTessPredictor:
                     raise OcrError("OUTPUT_INVALID", "OCR text exceeds output cap")
                 texts.append(text)
                 scores.append(score)
+            _check_deadline(deadline)
             yield {"rec_texts": texts, "rec_polys": polygons, "rec_scores": scores}
 
     def close(self):
@@ -224,7 +237,7 @@ class VietnameseOcrEngine:
     """One reusable CPU engine/slot. AI-2 owns service readiness/deadline isolation.
 
     A running native call retains its slot until it really returns. The budget is
-    checked before/after inference, not advertised as hard native cancellation.
+    cooperative between native calls/regions; this is not hard cancellation.
     """
 
     def __init__(self, model_root: Path):
@@ -271,15 +284,18 @@ class VietnameseOcrEngine:
             if type(remaining_budget_ms) is not int or remaining_budget_ms <= 0:
                 raise OcrError("COMPUTE_TIMEOUT", "OCR budget has expired")
             started = time.monotonic()
+            deadline = started + remaining_budget_ms / 1000
             metadata = loaded.metadata
             for image, descriptor in ((loaded.canonical, metadata.canonical), (loaded.processed, metadata.processed)):
                 if image.mode != "RGB" or descriptor.color_order != "RGB" or image.size != (descriptor.width, descriptor.height):
                     raise OcrError("INPUT_INVALID", "Prepared pixels do not match RGB image metadata")
             pixels = np.ascontiguousarray(np.asarray(loaded.processed)[:, :, ::-1])
             try:
-                outputs = iter(self._predictor.predict(pixels))
+                _check_deadline(deadline)
+                outputs = iter(self._predictor.predict(pixels, deadline=deadline))
                 missing = object()
                 result = next(outputs, missing)
+                _check_deadline(deadline)
                 if result is missing or next(outputs, missing) is not missing:
                     raise OcrError("OUTPUT_INVALID", "Expected one OCR page")
             except OcrError:
@@ -290,12 +306,12 @@ class VietnameseOcrEngine:
                 raise OcrError("INTERNAL_ERROR", "OCR engine inference failed") from exc
             finally:
                 self.last_inference_seconds = time.monotonic() - started
-            if self.last_inference_seconds * 1000 >= remaining_budget_ms:
-                raise OcrError("COMPUTE_TIMEOUT", "OCR budget expired during native inference")
             try:
-                return _to_page(result, metadata)
+                page = _to_page(result, metadata)
             except (ValueError, KeyError, TypeError, OverflowError) as exc:
                 raise OcrError("OUTPUT_INVALID", "OCR output violates the page contract") from exc
+            _check_deadline(deadline)
+            return page
         except MemoryError as exc:
             raise OcrError("MODEL_OOM", "OCR memory allocation failed") from exc
         finally:

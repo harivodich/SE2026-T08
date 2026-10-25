@@ -57,9 +57,16 @@ row có thể giải quyết số lặp; hai candidates cùng row hoặc geometr
 ambiguous. Unit checks có resize/rotated/reflected viewer và wrong-frame rejection.
 Label/row constraint cũng áp dụng cho unique candidate khi cấp PreparedPage +
 label_text: wrong-row/wrong-side hoặc thiếu label geometry không được matched.
+PR4 regressions còn kiểm exact amount + occurrence trong block ghép, một số lặp
+hai lần trong cùng block và phân biệt `5.000` với `45.000`/`5.000.000`. Occurrence
+chỉ để chặn false uniqueness, không tạo substring box. Span nhiều blocks cần
+explicit item/description context; hai món/cột không liên quan không được ghép
+thành matched. Label thiếu PreparedPage luôn có flag, không tự bỏ spatial check.
 Geometry regressions có loader thật2007→2000 và503×1000, boundary round-trips sau
 resize/rotate/reflection. Chỉ projection roundoff ≤16 ULP được snap sát biên;
 raw input ngoài bounds và projection overflow thật vẫn phải reject.
+Contract/geometry dùng chung matrix validation, kiểm global scales ±1e-200 và
+±1e200, normalized projection và round-trip; không nới pixel bounds/tolerance.
 
 Entrypoint `recognize_document` được native20 case gọi trực tiếp. Stage checks
 trong test_paddle_adapter.py kiểm live budget không reset, đóng cả hai ảnh khi
@@ -68,6 +75,10 @@ lifecycle với caller. `test_ocr_preview.py` kiểm ảnh PNG nhúng đúng pix
 OCR/transcript được giữ nguyên, script-delimiter escaping và blank/unavailable.
 Các checks HTML này không thay browser interaction/E2E. Preview được sinh bằng
 CLI ở Python README và mở bằng trình duyệt ngoài VS Code.
+Composite predictor deadline regressions dùng fake monotonic clock và doubles:
+detector/crop/SetImage/GetUTF8Text làm hết budget thì không bắt đầu bước native
+tiếp theo, boundary là expired, Clear/slot cleanup vẫn chạy và publication không
+reset budget. Đây là control-flow checks, không phải native latency benchmark.
 
 Loader tests decode pixels thực, 8 EXIF tags, PDF rotation, resize/inverse,
 byte/pixel/hash caps và kill/reap decode timeout. PDF encryption guard được inject

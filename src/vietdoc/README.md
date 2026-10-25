@@ -105,11 +105,21 @@ AI-2 owns extraction, attempt paths/artifact hashes và compute response; Backen
 promote verified canonical assets trước khi viewer dùng. Model root do service
 config quản lý, không lấy từ request. Load kiểm
 exact package/native versions, model file set và SHA-256; load/inference offline.
-Một engine giữ một slot, busy trả `OcrError.code=AI_BUSY`. Deadline kiểm trước/sau
-native call; hard timeout/isolation của OCR thuộc lifecycle M2.3, chưa implement ở đây.
+Một engine giữ một slot, busy trả `OcrError.code=AI_BUSY`. Cùng một monotonic
+deadline được kiểm trước detector, giữa các crops/native recognition calls và
+trước khi trả canonical output. Khi một call trả về sau deadline, không bắt đầu
+call tiếp theo. Slot vẫn giữ tới khi native call đang chạy thực sự trả về;
+hard timeout/isolation của OCR thuộc lifecycle M2.3, chưa implement ở đây.
 
 `score` là Tesseract `MeanTextConf()/100`, có provenance trong `ocr_version`;
 không dùng làm field correctness confidence. Evidence mapper đã có exact/context
 và label-row selection, chưa semantic table grouping hay API/server wiring.
+Span nhiều blocks chỉ được chọn khi consumer cấp `context_block_ids` cho cùng
+item/field; thứ tự IDs trong hint không thay page reading order. `label_text`
+luôn yêu cầu `prepared`, kể cả có explicit IDs hoặc chỉ một exact candidate.
+Occurrence trong block ghép có thể chặn false uniqueness nhưng không tạo
+substring bbox; khi chưa xác định được nguồn, trả empty regions + SOURCE_* flag.
+R04 partial/unreadable OCR outcome đang chờ AI-2/Backend duyệt; hiện crop text
+rỗng vẫn trả OUTPUT_INVALID cho trang. Đề xuất cụ thể nằm trong report bên dưới.
 D1/D3 và preprocess improvement dựa trên baseline được người dùng hoãn tới khi
 Data bàn giao. Xem [report/limits](../../docs/ocr-input-proposal.md).

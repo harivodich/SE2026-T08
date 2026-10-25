@@ -31,6 +31,79 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(result.to_field_metadata()["source_regions"], [])
         self.assertIn("SOURCE_AMBIGUOUS", result.review_flags)
 
+    def test_exact_amount_and_merged_occurrence_cannot_create_false_uniqueness(self):
+        for merged in ("Tổng tiền 45.000", "Tổng tiền: 45.000", "45.000 / 45.000"):
+            page = replace(self.page, blocks=(self.page.blocks[1], block("merged", merged, .7)))
+            with self.subTest(merged=merged):
+                result = match_evidence(page, EvidenceRequest("/total_amount", "45.000"), prepared=self.prepared)
+                self.assertEqual(result.status, "ambiguous")
+                self.assertEqual(result.candidate_block_ids, (("line-amount",), ("merged",)))
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+                self.assertIsNone(result.to_field_metadata()["ocr_score"])
+                self.assertIn("SOURCE_OCCURRENCE_UNRESOLVED", result.review_flags)
+
+    def test_embedded_occurrence_is_diagnostic_not_a_substring_box(self):
+        for text in ("Tổng tiền 45.000", "45.000 45.000"):
+            page = replace(self.page, blocks=(block("merged", text, .7),))
+            with self.subTest(text=text):
+                result = match_evidence(page, EvidenceRequest("/total_amount", "45.000"))
+                self.assertEqual(result.status, "ambiguous")
+                self.assertEqual(result.candidate_block_ids, (("merged",),))
+                self.assertEqual(result.blocks, ())
+                self.assertEqual(page.blocks[0].text, text)
+
+    def test_occurrence_guard_respects_complete_number_tokens(self):
+        for other in ("45.000", "5.000.000", "15.000", "5.0000"):
+            page = replace(self.page, blocks=(block("exact", "5.000", .1), block("other", "Giá " + other, .7)))
+            with self.subTest(other=other):
+                result = match_evidence(page, EvidenceRequest("/items/0/unit_price", "5.000"))
+                self.assertEqual(result.status, "matched")
+                self.assertEqual(result.candidate_block_ids, (("exact",),))
+
+    def test_explicit_scope_can_exclude_a_merged_occurrence(self):
+        page = replace(self.page, blocks=(self.page.blocks[1], block("merged", "Tổng tiền 45.000", .7)))
+        result = match_evidence(page, EvidenceRequest("/items/0/line_total", "45.000", ("line-amount",)))
+        self.assertEqual(result.status, "matched")
+        self.assertEqual(result.blocks, (page.blocks[0],))
+        self.assertEqual(result.review_flags, ())
+
+    def test_spatial_label_does_not_silently_discard_an_embedded_occurrence(self):
+        page = replace(self.page, blocks=(block("merged", "Đã trả 45.000", .1), *self.page.blocks[-2:]))
+        request = EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền")
+        result = match_evidence(page, request, prepared=self.prepared)
+        self.assertEqual(result.status, "ambiguous")
+        self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_unscoped_span_cannot_join_independent_items_or_columns(self):
+        for second in (block("second", "sữa", .6), block("second", "sữa", .1, x=.65)):
+            page = replace(self.page, blocks=(block("first", "Cà phê", .1), second))
+            request = EvidenceRequest("/items/0/description", "Cà phê sữa")
+            with self.subTest(quad=second.quad):
+                result = match_evidence(page, request, prepared=self.prepared)
+                self.assertEqual(result.status, "ambiguous")
+                self.assertEqual(result.candidate_block_ids, (("first", "second"),))
+                self.assertIn("SOURCE_SPAN_CONTEXT_REQUIRED", result.review_flags)
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_duplicate_descriptions_require_item_scope_and_keep_page_order(self):
+        page = replace(self.page, blocks=(block("a", "Cà phê", .1), block("b", "sữa", .16),
+                                         block("c", "Cà phê", .6), block("d", "sữa", .66)))
+        request = EvidenceRequest("/items/1/description", "Cà phê sữa")
+        self.assertEqual(match_evidence(page, request).status, "ambiguous")
+        selected = match_evidence(page, replace(request, context_block_ids=("d", "c")))
+        self.assertEqual(selected.status, "matched")
+        self.assertEqual([b.block_id for b in selected.blocks], ["c", "d"])
+
+    def test_label_without_prepared_page_never_publishes_even_a_unique_match(self):
+        page = replace(self.page, blocks=self.page.blocks[:-1] + (replace(self.page.blocks[-1], text="60.000"),))
+        for context in ((), ("description", "line-amount")):
+            label = "Tổng tiền" if not context else "Bánh mì"
+            with self.subTest(context=context):
+                result = match_evidence(page, EvidenceRequest("/total_amount", "45.000", context, label))
+                self.assertEqual(result.status, "ambiguous")
+                self.assertIn("SOURCE_CONTEXT_GEOMETRY_UNAVAILABLE", result.review_flags)
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
     def test_label_alone_does_not_guess_which_repeated_amount_is_total(self):
         request = EvidenceRequest("/total_amount", "45.000", label_text="Tổng tiền")
         self.assertEqual(match_evidence(self.page, request).status, "ambiguous")
@@ -126,7 +199,7 @@ class EvidenceTest(unittest.TestCase):
 
     def test_explicit_total_context_preserves_actual_block_quad_and_score(self):
         request = EvidenceRequest("/total_amount", "45.000", ("total-label", "total-amount"), "Tổng tiền")
-        result = match_evidence(self.page, request)
+        result = match_evidence(self.page, request, prepared=self.prepared)
         metadata = result.to_field_metadata()
         self.assertEqual(result.status, "matched")
         self.assertEqual(metadata["source_regions"], [{"page": 0, "quad": [list(p) for p in self.page.blocks[-1].quad], "ocr_block_ids": ["total-amount"]}])
@@ -137,7 +210,7 @@ class EvidenceTest(unittest.TestCase):
 
     def test_item_context_selects_line_amount_instead_of_total(self):
         request = EvidenceRequest("/items/0/line_total", "45.000", ("description", "line-amount"), "Bánh mì")
-        self.assertEqual(match_evidence(self.page, request).blocks, (self.page.blocks[1],))
+        self.assertEqual(match_evidence(self.page, request, prepared=self.prepared).blocks, (self.page.blocks[1],))
 
     def test_wrapped_description_keeps_two_regions_and_page_order(self):
         request = EvidenceRequest("/items/0/description", "Bánh mì loại nhỏ", ("wrap", "description"))
@@ -180,7 +253,7 @@ class EvidenceTest(unittest.TestCase):
 
     def test_partial_geometry_does_not_publish_incomplete_wrapped_evidence(self):
         page = replace(self.page, blocks=(self.page.blocks[0], replace(self.page.blocks[2], quad=None, geometry_reason="NO_MAPPING")))
-        result = match_evidence(page, EvidenceRequest("/items/0/description", "Bánh mì loại nhỏ"))
+        result = match_evidence(page, EvidenceRequest("/items/0/description", "Bánh mì loại nhỏ", ("description", "wrap")))
         self.assertEqual(result.status, "geometry_unavailable")
         self.assertEqual(result.to_field_metadata()["source_regions"], [])
 
@@ -213,14 +286,19 @@ class EvidenceTest(unittest.TestCase):
         fixture = Path(__file__).resolve().parents[2] / "fixtures" / "ocr-vietnamese-observed.json"
         page = OcrPage.from_dict(json.loads(fixture.read_text(encoding="utf-8")))
         request = EvidenceRequest("/total_amount", "80.000", ("p0-b0001", "p0-b0002"), "Tổng tiền")
-        metadata = match_evidence(page, request).to_field_metadata()
+        prepared = replace(self.prepared, canonical=ImageInfo(800,400,"RGB","uint8"), processed=ImageInfo(800,400,"RGB","uint8"))
+        metadata = match_evidence(page, request, prepared=prepared).to_field_metadata()
         self.assertEqual(metadata["source_regions"][0]["ocr_block_ids"], ["p0-b0002"])
         self.assertEqual(metadata["source_regions"][0]["quad"], [list(p) for p in page.blocks[1].quad])
         self.assertEqual(metadata["ocr_score"], .96)
 
     def test_span_limit_and_ambiguous_wrapped_matches_are_explicit(self):
         page = replace(self.page, blocks=tuple(block(str(i), text, .05 * i) for i, text in enumerate(("một", "hai", "ba", "bốn", "năm"))))
-        self.assertEqual(match_evidence(page, EvidenceRequest("/items/0/description", "một hai ba bốn")).status, "matched")
+        # R02 replaces the old unsafe assumption that page adjacency proves a
+        # field association; four-block descriptions need consumer item scope.
+        request = EvidenceRequest("/items/0/description", "một hai ba bốn")
+        self.assertEqual(match_evidence(page, request).status, "ambiguous")
+        self.assertEqual(match_evidence(page, replace(request, context_block_ids=("3","1","0","2"))).status, "matched")
         self.assertEqual(match_evidence(page, EvidenceRequest("/items/0/description", "một hai ba bốn năm")).status, "not_found")
         page = replace(self.page, blocks=(block("a", "loại", .1), block("b", "nhỏ", .2), block("c", "loại nhỏ", .3)))
         result = match_evidence(page, EvidenceRequest("/items/0/description", "loại nhỏ"))

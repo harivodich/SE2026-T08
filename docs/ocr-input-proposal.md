@@ -7,12 +7,15 @@
 Java DTO; AI-2 owns compute envelope. Không thay [compute protocol](../specs/contracts/compute-api.md),
 [result schema](../specs/contracts/extraction-result.schema.json) hay ADR status.
 
-## Trạng thái bàn giao hiện tại — 2026-10-24
+## Trạng thái bàn giao hiện tại — 2026-10-25
 
 - Có loader/OCR pretrained/geometry/evidence và local HTML review report chạy được.
   AI-2 có entrypoint `recognize_document`; xem hướng dẫn ở Python README bên dưới.
-- Versions hiện tại: geometry `pixel-edge-projective-relative-rows.v2`, evidence
-  `exact-raw-label-row-spans.v3`. Các observed snapshots cũ giữ version lịch sử.
+- Versions hiện tại: geometry `pixel-edge-projective-relative-rows.v3`, evidence
+  `exact-raw-scoped-spans-occurrence-guard.v4`; OCR có `cpu4.cooperative.v3`.
+  Các observed snapshots cũ giữ version lịch sử.
+- Đã sửa R01/R02/R03/R05/R06 của strict review PR4 ở increment dưới. R04 còn mở:
+  người dùng xác nhận chưa có AI-2/Backend approval cho partial/unreadable policy.
 - Theo yêu cầu người dùng, **D1/D3 và baseline-dependent preprocess improvement
   để sau** khi Data bàn giao. Không tự tạo dataset/evaluator thay phần Data.
 - Chưa nghiệm thu G0/O2.2/O3/O4/O5 toàn hệ thống: còn consumer review/wiring của
@@ -66,6 +69,11 @@ convert đúng format được kiểm chứng; không đổi RGB/BGR âm thầm.
 Với kết quả `[u,v,w]`, canonical là `[u/w,v/w]`, sau đó mới normalize theo canonical
 width/height. O1.2/O2.1 phải kiểm denominator khác 0, finite/bounds và round-trip;
 O1.1 chỉ validate matrix shape/finite/nonsingular, không thực thi preprocess/mapping.
+Contract và geometry dùng chung validator: entries finite float64, chia cho
+max absolute entry trước determinant/projection. Determinant của matrix sau
+normalization phải còn finite/nonzero trong float64; matrices quá ill-conditioned
+ngoài miền đó vẫn reject. Global scales như ±1e-200/±1e200 không làm identity
+bị reject; metadata giữ matrix gốc, không tự đổi JSON transform.
 
 Ví dụ resize 1000×1200 → 500×600: inverse là `diag(2,2,1)`.
 Điểm processed `(250,420)` → canonical `(500,840)` → normalized `(0.5,0.7)`.
@@ -336,8 +344,10 @@ và evaluator D3; smoke synthetic không thay baseline chất lượng theo từ
 ## Source evidence O4.1b — label và row geometry
 
 `match_evidence(..., prepared=loaded.metadata)` bổ sung context theo vị trí cho
-raw values lặp. Không truyền PreparedPage thì giữ hành vi exact/context O4.1a.
-Increment O4.1b dùng `exact-raw-label-row-spans.v2`; bản fix sau review hiện ở v3.
+raw values lặp. O4.1b trước đây giữ text/context behavior khi thiếu PreparedPage;
+R05 hiện fail closed khi có label_text mà thiếu PreparedPage.
+Increment O4.1b dùng `exact-raw-label-row-spans.v2`, fix đầu dùng v3; R01/R02/R05
+hiện dùng `exact-raw-scoped-spans-occurrence-guard.v4`.
 Shared schema không đổi.
 
 ```python
@@ -425,3 +435,103 @@ gọi là browser E2E hoặc Java viewer acceptance.
   adapter contract case cho detector quad sát mép; không sửa fixture OCR lịch sử
   hoặc nới threshold IoU. Sweep4500 geometry cases từng phát hiện34 forward và431
   round-trip failures; sau fix cả4500 đều qua. Đây là geometry checks, không D1 metrics.
+
+## Phản hồi strict review PR4 — 2026-10-25
+
+Review áp dụng cho head `26bd4e10172adbae8f16b3a6f15ed0ed058cd91c`, branch
+`feature/AI1_preprocess_ocr`. Giữ Proposed và shared schemas hiện tại; không nhận
+nghiệm thu consumer, CI, Data hay xử lý base develop thay Lead.
+
+| Mục | Thay đổi ở increment này |
+|---|---|
+| R01 | Kiểm whole-token occurrences trong block ghép trước khi chọn source. Exact `45.000` ở dòng hàng + `Tổng tiền 45.000` không còn false unique; giữ candidates, empty regions và `SOURCE_OCCURRENCE_UNRESOLVED`. Không tạo substring bbox. |
+| R02 | Span 2–4 blocks chỉ publish khi có explicit context IDs do consumer xác định cho cùng field/item. Không context thì `SOURCE_SPAN_CONTEXT_REQUIRED`; wrapped descriptions có scope vẫn hợp lệ, dùng page order. |
+| R03 | Truyền một absolute monotonic deadline từ engine xuống composite predictor; kiểm trước detector/crop/recognition và trước publication. Không bắt đầu call tiếp sau deadline; Clear và slot release vẫn đúng. |
+| R04 | Chưa sửa runtime policy, chưa đóng finding. Mixed empty crop hiện vẫn OUTPUT_INVALID; cần AI-2/Backend duyệt đề xuất dưới. |
+| R05 | Label context thiếu PreparedPage trả uncertainty + `SOURCE_CONTEXT_GEOMETRY_UNAVAILABLE`, kể cả unique candidate/explicit IDs. Consumer calls và tests được cập nhật để truyền đúng metadata. |
+| R06 | Contract/geometry dùng chung normalized matrix validation và normalized projection; giữ raw matrix metadata, không nới bounds. |
+
+Occurrence guard tokenize NFC/casefold text, giữ dotted/comma-separated word/number
+tokens: `5.000` không là occurrence của `45.000`, `15.000`, `5.000.000` hay
+`5.0000`. Dấu phân cách như `:`/ngoặc không làm mất occurrence. Chỉ dùng token
+occurrence để **từ chối chọn nguồn**, không dùng làm positive substring match.
+Nếu còn occurrence trong scope, label-row heuristic cũng không tự loại block
+ghép dựa trên bbox lớn; consumer có thể cấp scope đủ hẹp để phân biệt. Đây không
+là parser tiền tệ/fuzzy alignment hoặc source precision baseline.
+
+Test cũ cho bốn từ trên bốn dòng đã bỏ giả định “page adjacency chứng minh cùng
+description” theo yêu cầu R02: không context phải uncertain, cùng input có explicit
+item scope vẫn matched. Các positive label tests bổ sung PreparedPage theo R05;
+negative wrong-row/wrong-side/missing geometry, repeated amounts và raw text vẫn giữ.
+
+R03 fake-clock diagnostic budget50ms, native-double100ms trước fix bắt đầu3 calls
+ở0/100/200ms; sau fix chỉ call đầu bắt đầu. Detector/crop/SetImage dùng hết budget
+cũng chặn bước tiếp; timeout tại boundary, native exception và conversion/publication
+cleanup có tests. Không khẳng định native call đang chạy bị dừng ngay, process
+isolation, OS memory quota hay service recovery đã có. Những phần đó vẫn ở G4/AI-2.
+
+### R04 — đề xuất partial/unreadable để AI-2 và Backend duyệt
+
+**Chưa implemented/accepted.** Không đổi `OcrBlock.text` để chứa chuỗi rỗng, không
+thêm fields vào shared result schema hoặc tự coi policy đã được duyệt.
+
+Đề xuất mở rộng **OCR artifact nội bộ** ở version mới:
+
+| Phần | Policy đề xuất |
+|---|---|
+| `blocks` | Chỉ recognized blocks có text nonblank; giữ nguyên text/ID/quad/engine score. |
+| `unreadable_regions` | Mỗi detection rỗng/whitespace có `region_id`, canonical `quad` hoặc null + `geometry_reason`, engine `score` hoặc null và `reason=EMPTY_RECOGNITION`; không text giả. ID dùng cùng sequence detection với blocks, unique toàn page. |
+| `recognition_status` | `complete` nếu mọi detection đọc được (kể cả không detect vùng nào), `partial` nếu có cả recognized/unreadable, `unreadable` nếu có detections nhưng tất cả rỗng. |
+| `review_flags` | Có `OCR_UNREADABLE_REGIONS` cho partial/unreadable. Count được tính từ arrays, không lấy text rỗng làm blank-page success. |
+| Invalid/runtime errors | Nonfinite/malformed quad, score, native exception, OOM/timeout vẫn typed error; không chuyển chúng thành unreadable crop để tiếp tục. |
+| Downstream | AI-2 truyền page diagnostic/flags qua extraction/evidence; text không tìm thấy trên partial page không chứng minh field absent. AI-2/Backend quyết định field warning/blocker; OCR score không thành confidence. |
+
+Ví dụ mixed page: `blocks=[p0-b0001]`, `unreadable_regions=[p0-b0002]`, status partial,
+flag OCR_UNREADABLE_REGIONS. Không renumber block1/3 thành1/2 khi detection2 rỗng;
+canonical identity/attempt provenance do G3 giữ như cũ. Geometry unavailable vẫn
+giữ reason, không đoán box. Đây là shape đề nghị, chưa là API/service response mới.
+
+Sau approval: thêm Python types/adapter/preview propagation và các regression
+mixed valid+empty/whitespace, all unreadable, no detections, invalid quad/score,
+native exception/timeout, metadata serialization và evidence missing-vs-absent.
+Backend owns neutral schema/Java DTO nếu boundary này được đưa lên wire; cần
+consumer fixtures/parity và severity acceptance trước khi đánh dấu R04 hoàn tất.
+
+G1/G2/G3/G4/G5/G6 vẫn giữ owner/gate theo strict review. D1/D3 tiếp tục đợi Data;
+không tạo dataset/evaluator hoặc tự merge branches để vượt acceptance gate.
+
+### Kiểm chứng increment này
+
+- **114 pipeline +19 OCR contract tests pass**, native OCR bật, không skip/failure/error.
+  Cả10 package versions trong extra ai1-ocr trùng pins; native Tesseract5.5.3 được
+  loader kiểm; `pip check` không broken requirements. Python3.13.7/Windows11/CPU4.
+- Regression R01/R02/R03/R05/R06 đã tái hiện lỗi trên source trước sửa. Có một
+  MemoryError của môi trường khi hash tiny fixture trong lượt red đầu; focused
+  rerun và toàn suite native sau đó đều pass, không thay cấu hình Windows.
+- Native20 format/error cases vẫn từ **một trang giả**; hai geometry families
+  có6 transforms/family. Source selection giữ đúng quad/ID/score; geometry-base
+  minIoU0.4445, repeated-values minIoU0.3878 và4/6 cases dưới0.40 như hạn chế cũ.
+  Ink coverage1.0 không được đổi thành claim tight-box quality đạt chuẩn.
+- **23 FieldMetadata outputs** (11 diagnostic +12 native) valid shared Draft2020-12,
+  dùng jsonschema đã có, không thêm dependency. Schema-valid không chứng minh
+  semantic source correctness; các regression còn kiểm selected regions/flags.
+- Compile8 Python files đã đổi, diff whitespace và secret-pattern scan đều qua.
+  Shared schemas/ADR/Java không đổi. Không chạy browser/Java/provider-service E2E,
+  Data metrics hoặc native hang/OOM recovery; không claim các gate này hoàn tất.
+
+Outputs ignored: `artifacts/evaluation/pr4-review-fixes-summary.json` (source hashes,
+diagnostics, versions và giới hạn), `pr4-review-fixes-formats/` (actual OCR JSON/ảnh),
+`pr4-review-fixes-geometry/` (reports/overlays/evidence). Không ghi đè observed fixture
+lịch sử hay thêm report file tracked riêng. Commands: native env/model root như
+[tests README](../tests/README.md), rồi:
+
+```powershell
+.\.venv\Scripts\python.exe -B -m unittest discover -s tests/unit/pipeline -p "test_*.py" -v
+.\.venv\Scripts\python.exe -B -m unittest discover -s tests/contract -p test_ocr_contracts.py
+.\.venv\Scripts\python.exe -B -m pip check
+git diff --check
+```
+
+Đã recheck remote: feature head vẫn26bd4e1; develop đã lên4ed7302. Triple-dot diff
+với feature HEAD vẫn165 paths kế thừa/increment như review snapshot; Lead tiếp tục
+xử lý base. Không tự rebase/merge, commit/push hoặc chuyển Draft→Ready ở lượt fix này.

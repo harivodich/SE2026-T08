@@ -5,6 +5,7 @@ from dataclasses import replace
 from hashlib import sha256
 from pathlib import Path
 import os
+import time
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import Mock, patch
@@ -43,7 +44,7 @@ class PaddleAdapterTest(unittest.TestCase):
         }
         self.engine = VietnameseOcrEngine("unused-local-models")
         self.predictor = Mock()
-        self.predictor.predict.side_effect = lambda _: iter([deepcopy(self.result)])
+        self.predictor.predict.side_effect = lambda _, **kwargs: iter([deepcopy(self.result)])
         self.engine._predictor = self.predictor
 
     def tearDown(self):
@@ -122,11 +123,11 @@ class PaddleAdapterTest(unittest.TestCase):
             result = deepcopy(self.result)
             result["rec_polys"] = result["rec_polys"].astype(float)
             result["rec_polys"][0, 0] = point
-            self.predictor.predict.side_effect = lambda _, result=result: iter([result])
+            self.predictor.predict.side_effect = lambda _, result=result, **kwargs: iter([result])
             with self.subTest(point=point):
                 self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
         self.result["rec_polys"] = [[[0, 0], [1, 1], [2, 2]]]
-        self.predictor.predict.side_effect = lambda _: iter([self.result])
+        self.predictor.predict.side_effect = lambda _, **kwargs: iter([self.result])
         self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
 
     def test_self_crossing_polygon_and_undefined_projection_are_rejected(self):
@@ -141,11 +142,11 @@ class PaddleAdapterTest(unittest.TestCase):
         for key in ("rec_texts", "rec_polys", "rec_scores"):
             result = deepcopy(self.result)
             del result[key]
-            self.predictor.predict.side_effect = lambda _, result=result: iter([result])
+            self.predictor.predict.side_effect = lambda _, result=result, **kwargs: iter([result])
             with self.subTest(missing=key):
                 self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
         self.result["rec_scores"] = []
-        self.predictor.predict.side_effect = lambda _: iter([self.result])
+        self.predictor.predict.side_effect = lambda _, **kwargs: iter([self.result])
         self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
 
     def test_score_remains_nullable_and_rejects_bad_native_scores(self):
@@ -184,10 +185,39 @@ class PaddleAdapterTest(unittest.TestCase):
     def test_budget_checked_before_and_after_native_call(self):
         self.assert_error("COMPUTE_TIMEOUT", lambda: self.engine.recognize(self.loaded, remaining_budget_ms=0))
         self.predictor.predict.assert_not_called()
-        with patch("vietdoc.pipeline.ocr.paddle_adapter.time.monotonic", side_effect=[0, 1]):
+        clock = [0.0]
+        def late_result(_, **kwargs):
+            clock[0] = 1.0
+            return iter([deepcopy(self.result)])
+        self.predictor.predict.side_effect = late_result
+        with patch("vietdoc.pipeline.ocr.paddle_adapter.time.monotonic", side_effect=lambda: clock[0]):
             self.assert_error("COMPUTE_TIMEOUT", lambda: self.engine.recognize(self.loaded, remaining_budget_ms=500))
         self.assertTrue(self.engine._slot.acquire(blocking=False))
         self.engine._slot.release()
+
+    def test_deadline_is_not_reset_before_canonical_publication(self):
+        clock = [0.0]
+        def slow_conversion(result, metadata):
+            page = _to_page(result, metadata)
+            clock[0] = .05
+            return page
+        module = "vietdoc.pipeline.ocr.paddle_adapter."
+        with patch(module + "time.monotonic", side_effect=lambda: clock[0]), patch(module + "_to_page", side_effect=slow_conversion):
+            self.assert_error("COMPUTE_TIMEOUT", lambda: self.engine.recognize(self.loaded, remaining_budget_ms=50))
+        self.assertTrue(self.engine._slot.acquire(blocking=False))
+        self.engine._slot.release()
+
+    def test_pixel_conversion_exhausting_budget_never_starts_predictor(self):
+        clock = [0.0]
+        contiguous = np.ascontiguousarray
+        def slow_conversion(pixels):
+            result = contiguous(pixels)
+            clock[0] = .05
+            return result
+        module = "vietdoc.pipeline.ocr.paddle_adapter."
+        with patch(module + "time.monotonic", side_effect=lambda: clock[0]), patch(module + "np.ascontiguousarray", side_effect=slow_conversion):
+            self.assert_error("COMPUTE_TIMEOUT", lambda: self.engine.recognize(self.loaded, remaining_budget_ms=50))
+        self.predictor.predict.assert_not_called()
 
     def test_python_allocation_failures_are_typed_oom_and_release_slot(self):
         module = "vietdoc.pipeline.ocr.paddle_adapter."
@@ -246,7 +276,7 @@ class CompositePredictorTest(unittest.TestCase):
     def test_detected_crop_is_rgb_and_score_is_recognizer_score_divided_by_100(self):
         seen = []
         self.recognizer.SetImage.side_effect = lambda image: seen.append(image.getpixel((0, 0)))
-        result = next(self.predictor.predict(self.pixels))
+        result = next(self.predictor.predict(self.pixels, deadline=time.monotonic() + 10))
         self.assertEqual(result["rec_texts"], ["Tổng tiền"])
         self.assertEqual(result["rec_scores"], [0.91])
         np.testing.assert_array_equal(result["rec_polys"][0], self.polygon)
@@ -259,23 +289,103 @@ class CompositePredictorTest(unittest.TestCase):
     def test_recognition_failure_clears_state_and_does_not_return_blank_success(self):
         self.recognizer.GetUTF8Text.side_effect = RuntimeError("native failure")
         with self.assertRaises(RuntimeError):
-            list(self.predictor.predict(self.pixels))
+            list(self.predictor.predict(self.pixels, deadline=time.monotonic() + 10))
         self.recognizer.Clear.assert_called_once()
 
     def test_invalid_geometry_is_rejected_before_native_crop(self):
         self.polygon[0] = [-1, 1]
         with self.assertRaises(OcrError) as caught:
-            list(self.predictor.predict(self.pixels))
+            list(self.predictor.predict(self.pixels, deadline=time.monotonic() + 10))
         self.assertEqual(caught.exception.code, "OUTPUT_INVALID")
         self.cropper.assert_not_called()
         self.recognizer.SetImage.assert_not_called()
 
     def test_empty_detection_never_calls_recognizer(self):
         self.detector.predict.return_value = [{"dt_polys": []}]
-        result = next(self.predictor.predict(self.pixels))
+        result = next(self.predictor.predict(self.pixels, deadline=time.monotonic() + 10))
         self.assertEqual(result["rec_texts"], [])
         self.cropper.assert_not_called()
         self.recognizer.SetImage.assert_not_called()
+
+    def _run_engine_with_clock(self, clock, budget_ms=50, expected_code="COMPUTE_TIMEOUT"):
+        metadata = PreparedPage(0, ImageInfo(10, 10, "RGB", "uint8"), ImageInfo(10, 10, "RGB", "uint8"),
+                                "fixture.deadline.v1", "available", ((1,0,0),(0,1,0),(0,0,1)), None)
+        self.engine = VietnameseOcrEngine("unused")
+        self.engine._predictor = self.predictor
+        with LoadedPage(Image.new("RGB", (10,10)), Image.new("RGB", (10,10)), metadata, "0"*64) as loaded:
+            with patch("vietdoc.pipeline.ocr.paddle_adapter.time.monotonic", side_effect=lambda: clock[0]):
+                with self.assertRaises(OcrError) as caught:
+                    self.engine.recognize(loaded, remaining_budget_ms=budget_ms)
+                self.assertEqual(caught.exception.code, expected_code)
+        self.assertTrue(self.engine._slot.acquire(blocking=False))
+        self.engine._slot.release()
+        return caught.exception
+
+    def test_expired_first_region_never_starts_the_second_recognition(self):
+        clock, starts = [0.0], []
+        self.detector.predict.return_value = [{"dt_polys": [self.polygon] * 3}]
+
+        def slow_recognition():
+            starts.append(clock[0])
+            self.assertTrue(self.engine._slot.locked())
+            with self.assertRaises(OcrError) as busy:
+                self.engine.close()
+            self.assertEqual(busy.exception.code, "AI_BUSY")
+            clock[0] += .1
+            return "Tổng tiền"
+
+        self.recognizer.GetUTF8Text.side_effect = slow_recognition
+        self._run_engine_with_clock(clock)
+        self.assertEqual(starts, [0.0])
+        self.assertEqual(self.cropper.call_count, 1)
+        self.recognizer.Clear.assert_called_once()
+
+    def test_detector_exhausting_budget_prevents_crop_and_recognition(self):
+        clock = [0.0]
+
+        def slow_detector(_):
+            clock[0] = .05
+            yield {"dt_polys": [self.polygon]}
+
+        self.detector.predict.side_effect = slow_detector
+        self._run_engine_with_clock(clock)
+        self.cropper.assert_not_called()
+        self.recognizer.SetImage.assert_not_called()
+
+    def test_crop_exhausting_budget_prevents_recognition(self):
+        clock = [0.0]
+
+        def slow_crop(*_):
+            clock[0] = .05
+            return [self.crop]
+
+        self.cropper.side_effect = slow_crop
+        self._run_engine_with_clock(clock)
+        self.recognizer.SetImage.assert_not_called()
+
+    def test_deadline_boundary_is_expired_and_recognizer_is_cleared(self):
+        clock = [0.0]
+
+        def boundary_recognition():
+            clock[0] = .05
+            return "Tổng tiền"
+
+        self.recognizer.GetUTF8Text.side_effect = boundary_recognition
+        self._run_engine_with_clock(clock)
+        self.recognizer.Clear.assert_called_once()
+
+    def test_set_image_exhausting_budget_never_starts_get_text(self):
+        clock = [0.0]
+        self.recognizer.SetImage.side_effect = lambda _: clock.__setitem__(0, .05)
+        self._run_engine_with_clock(clock)
+        self.recognizer.GetUTF8Text.assert_not_called()
+        self.recognizer.Clear.assert_called_once()
+
+    def test_native_exception_clears_recognizer_and_releases_engine_slot(self):
+        self.recognizer.GetUTF8Text.side_effect = RuntimeError("private native payload")
+        error = self._run_engine_with_clock([0.0], expected_code="INTERNAL_ERROR")
+        self.assertNotIn("private native payload", str(error))
+        self.recognizer.Clear.assert_called_once()
 
 
 class OverlayAndProvisionTest(unittest.TestCase):

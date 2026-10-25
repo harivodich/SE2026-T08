@@ -6,10 +6,10 @@ upright processed frame; mapping to a rotated viewer must not reorder blocks.
 
 import math
 
-from vietdoc.contracts.ocr import PreparedPage
+from vietdoc.contracts.ocr import PreparedPage, validated_transform
 
 
-GEOMETRY_VERSION = "pixel-edge-projective-relative-rows.v2"
+GEOMETRY_VERSION = "pixel-edge-projective-relative-rows.v3"
 
 
 def _number(value):
@@ -78,28 +78,13 @@ def _projected_pixel_quad(points, width, height):
     return pixel_quad(corrected, width, height)
 
 
-def _validated_transform(matrix):
-    rows = tuple(tuple(_number(n) for n in row) for row in matrix)
-    if len(rows) != 3 or any(len(row) != 3 for row in rows):
-        raise ValueError("Expected a 3x3 transform")
-    scale = max(abs(n) for row in rows for n in row)
-    if scale == 0:
-        raise ValueError("Singular transform")
-    normalized = tuple(tuple(n / scale for n in row) for row in rows)
-    (a, b, c), (d, e, f), (g, h, i) = normalized
-    determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
-    if determinant == 0 or not math.isfinite(determinant):
-        raise ValueError("Singular transform")
-    return rows, normalized
-
-
 def inverse_projective_transform(matrix):
     """Return the inverse up to a nonzero homogeneous scale (the adjugate).
 
     Normalizing first avoids overflow from a harmless global matrix scale.
     Division by the determinant is unnecessary for homogeneous projection.
     """
-    _, normalized = _validated_transform(matrix)
+    _, normalized = validated_transform(matrix)
     (a, b, c), (d, e, f), (g, h, i) = normalized
     return ((e * i - f * h, c * h - b * i, b * f - c * e),
             (f * g - d * i, a * i - c * g, c * d - a * f),
@@ -113,7 +98,7 @@ def project_points(points, matrix):
     tolerance is relative to its own terms, rather than a fixed pixel epsilon.
     Points straddling the projective horizon cannot describe a finite region.
     """
-    rows, _ = _validated_transform(matrix)
+    _, rows = validated_transform(matrix)
     result, signs = [], set()
     for x, y in _points(points):
         terms = tuple(tuple(coefficient * coordinate for coefficient, coordinate in zip(row, (x, y, 1))) for row in rows)

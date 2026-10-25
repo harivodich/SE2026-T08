@@ -76,18 +76,28 @@ def _quad(value: object) -> Quad:
     return tuple(points)
 
 
-def _matrix(value: object) -> Matrix3x3:
+def validated_transform(value: object) -> tuple[Matrix3x3, Matrix3x3]:
+    """Return original/normalized matrices using one shared numerical domain.
+
+    Entries must be finite float64 values. Remove a nonzero global scale before
+    determinant/projection arithmetic; the normalized determinant must remain
+    finite and nonzero in float64. Metadata retains the original matrix.
+    """
     rows = _sequence(value, "inverse_transform")
     if len(rows) != 3:
         raise ValueError("inverse_transform must be a 3x3 matrix")
     matrix = tuple(tuple(_number(n, "matrix entry") for n in _sequence(row, "matrix row")) for row in rows)
     if any(len(row) != 3 for row in matrix):
         raise ValueError("inverse_transform must be a 3x3 matrix")
-    (a, b, c), (d, e, f), (g, h, i) = matrix
+    scale = max(abs(n) for row in matrix for n in row)
+    if scale == 0:
+        raise ValueError("inverse_transform must be nonsingular")
+    normalized = tuple(tuple(n / scale for n in row) for row in matrix)
+    (a, b, c), (d, e, f), (g, h, i) = normalized
     determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
     if not math.isfinite(determinant) or determinant == 0:
         raise ValueError("inverse_transform must be finite and nonsingular")
-    return matrix
+    return matrix, normalized
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,7 +145,8 @@ class PreparedPage:
         if self.geometry_status == "available":
             if self.geometry_reason is not None:
                 raise ValueError("Available geometry must not have an unavailable reason")
-            object.__setattr__(self, "inverse_transform", _matrix(self.inverse_transform))
+            matrix, _ = validated_transform(self.inverse_transform)
+            object.__setattr__(self, "inverse_transform", matrix)
         elif self.geometry_status == "unavailable":
             if self.inverse_transform is not None:
                 raise ValueError("Unavailable geometry must not contain an invented transform")

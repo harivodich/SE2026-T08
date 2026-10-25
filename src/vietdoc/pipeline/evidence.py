@@ -6,20 +6,34 @@ remain reviewable without being published as selected source regions.
 """
 
 from dataclasses import dataclass
+import re
 import unicodedata
 
 from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage
 from vietdoc.pipeline.geometry import processed_quad
 
 
-EVIDENCE_VERSION = "exact-raw-label-row-spans.v3"
+EVIDENCE_VERSION = "exact-raw-scoped-spans-occurrence-guard.v4"
 MAX_SPAN_BLOCKS = 4
+_TOKENS = re.compile(r"\w+(?:[.,]\w+)*|[^\w\s]")
 
 
 def _text(value: str) -> str:
     # Retain Vietnamese accents, punctuation and digits. Never turn 80.000 into
     # 80000 or repair OCR using the extractor value/transcript.
     return " ".join(unicodedata.normalize("NFC", value).split()).casefold()
+
+
+def _contains_occurrence(text: str, target_tokens: tuple[str, ...]) -> bool:
+    """Detect unresolved whole-token occurrences, never derive substring quads.
+
+    Keep dotted/comma-separated numbers as tokens: 5.000 must not match 45.000
+    or 5.000.000. Delimiters such as ':' or parentheses remain separate tokens.
+    This guard can withhold evidence, but cannot select or correct source text.
+    """
+    tokens = tuple(_TOKENS.findall(_text(text)))
+    count = len(target_tokens)
+    return any(tokens[start:start + count] == target_tokens for start in range(len(tokens) - count + 1))
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,10 +104,12 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
 
     Explicit context is traversed in page reading order, independent of the hint
     array's order. This lets the consumer scope a row or wrapped description.
-    Label text must identify one complete block in that scope. When PreparedPage
-    geometry and a label are supplied, every candidate must satisfy that spatial
-    context, including a unique text match. Exactly one candidate to the right
-    on the label's processed row may be selected; otherwise remain uncertain.
+    Multi-block spans require explicit consumer scope for the same item/field;
+    consecutive reading order alone does not prove a wrapped description.
+    Label context requires PreparedPage and a unique complete label block. Every
+    candidate must then satisfy the label's processed row, including unique text
+    matches. Embedded whole-token occurrences block false uniqueness without
+    inventing substring quads; explicit scope can exclude unrelated occurrences.
     """
     if not isinstance(page, OcrPage) or not isinstance(request, EvidenceRequest):
         raise ValueError("Expected OcrPage and EvidenceRequest")
@@ -117,6 +133,7 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
         if len(labels) > 1:
             return outcome("ambiguous", "SOURCE_CONTEXT_AMBIGUOUS")
     target = _text(request.raw_value)
+    target_tokens = tuple(_TOKENS.findall(target))
     candidates = []
     for start in range(len(blocks)):
         for count in range(1, min(MAX_SPAN_BLOCKS, len(blocks) - start) + 1):
@@ -126,7 +143,12 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
                 candidates.append(span)
             if len(candidate) >= len(target):
                 break
-    candidate_ids = tuple(tuple(block.block_id for block in span) for span in candidates)
+    embedded = tuple(block for block in blocks if _text(block.text) != target and _contains_occurrence(block.text, target_tokens))
+    candidate_ids = tuple(tuple(block.block_id for block in span) for span in candidates) + tuple((block.block_id,) for block in embedded)
+    if request.label_text is not None and prepared is None:
+        return outcome("ambiguous", "SOURCE_CONTEXT_GEOMETRY_UNAVAILABLE", candidates=candidate_ids)
+    if embedded:
+        return outcome("ambiguous", "SOURCE_OCCURRENCE_UNRESOLVED", candidates=candidate_ids)
     if not candidates:
         return outcome("not_found", "SOURCE_NOT_FOUND")
     selected = candidates[0]
@@ -143,6 +165,8 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
         selected = row_candidates[0]
     elif len(candidates) > 1:
         return outcome("ambiguous", "SOURCE_AMBIGUOUS", candidates=candidate_ids)
+    if len(selected) > 1 and not scope:
+        return outcome("ambiguous", "SOURCE_SPAN_CONTEXT_REQUIRED", candidates=candidate_ids)
     if any(block.quad is None for block in selected):
         return outcome("geometry_unavailable", "SOURCE_GEOMETRY_UNAVAILABLE", candidates=candidate_ids)
     return outcome("matched", selected=selected, candidates=candidate_ids)

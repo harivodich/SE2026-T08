@@ -103,6 +103,14 @@ class OcrContractsTest(unittest.TestCase):
             with self.subTest(matrix=matrix), self.assertRaises(ValueError):
                 replace(self.prepared, inverse_transform=matrix)
 
+    def test_homogeneous_transform_scales_round_trip_without_rewriting_metadata(self):
+        for scale in (1e-200, -1e-200, 1e200, -1e200):
+            matrix = tuple(tuple(scale if row == column else 0.0 for column in range(3)) for row in range(3))
+            with self.subTest(scale=scale):
+                prepared = replace(self.prepared, inverse_transform=matrix)
+                self.assertEqual(prepared.inverse_transform, matrix)
+                self.assertEqual(PreparedPage.from_dict(prepared.to_dict()), prepared)
+
     def test_unavailable_geometry_requires_reason_and_no_transform(self):
         missing = replace(self.prepared, geometry_status="unavailable", inverse_transform=None, geometry_reason="NONINVERTIBLE_PREPROCESS")
         self.assertIsNone(missing.inverse_transform)
