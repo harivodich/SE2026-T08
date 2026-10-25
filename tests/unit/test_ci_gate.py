@@ -100,5 +100,10 @@ class CiGateTest(unittest.TestCase):
                     checks.run_tests('data')
 
 
+class IntentionalFailureProbe(unittest.TestCase):
+    def test_required_suite_failure_is_propagated(self):
+        self.fail('CONTROLLED CI PROBE ONLY: required test failure must block ci-gate; DO NOT MERGE')
+
+
 if __name__ == '__main__':
     unittest.main()
