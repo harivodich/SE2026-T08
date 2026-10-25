@@ -1,0 +1,102 @@
+{
+  "/merchant_name": {
+    "status": "present",
+    "raw": "Cửa hàng Hư Cấu Mây Tím",
+    "reason": null
+  },
+  "/merchant_address": {
+    "status": "present",
+    "raw": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+    "reason": null
+  },
+  "/transaction_date": {
+    "status": "present",
+    "raw": "03/10/2026",
+    "reason": null
+  },
+  "/transaction_time": {
+    "status": "present",
+    "raw": "10:05",
+    "reason": null
+  },
+  "/total_amount": {
+    "status": "present",
+    "raw": "178.000 đ",
+    "reason": null
+  },
+  "/items/0/description": {
+    "status": "present",
+    "raw": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu",
+    "reason": null
+  },
+  "/items/0/quantity": {
+    "status": "present",
+    "raw": "0,5",
+    "reason": null
+  },
+  "/items/0/unit": {
+    "status": "present",
+    "raw": "kg",
+    "reason": null
+  },
+  "/items/0/unit_price": {
+    "status": "present",
+    "raw": "80.000 đ",
+    "reason": null
+  },
+  "/items/0/line_total": {
+    "status": "present",
+    "raw": "40.000 đ",
+    "reason": null
+  },
+  "/items/1/description": {
+    "status": "present",
+    "raw": "Vải màu hư cấu",
+    "reason": null
+  },
+  "/items/1/quantity": {
+    "status": "present",
+    "raw": "1,5",
+    "reason": null
+  },
+  "/items/1/unit": {
+    "status": "present",
+    "raw": "mét",
+    "reason": null
+  },
+  "/items/1/unit_price": {
+    "status": "present",
+    "raw": "32.000 đ",
+    "reason": null
+  },
+  "/items/1/line_total": {
+    "status": "present",
+    "raw": "48.000 đ",
+    "reason": null
+  },
+  "/items/2/description": {
+    "status": "present",
+    "raw": "Trà sen hư cấu",
+    "reason": null
+  },
+  "/items/2/quantity": {
+    "status": "present",
+    "raw": "2",
+    "reason": null
+  },
+  "/items/2/unit": {
+    "status": "present",
+    "raw": "hộp",
+    "reason": null
+  },
+  "/items/2/unit_price": {
+    "status": "present",
+    "raw": "45.000 đ",
+    "reason": null
+  },
+  "/items/2/line_total": {
+    "status": "present",
+    "raw": "90.000 đ",
+    "reason": null
+  }
+}

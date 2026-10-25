@@ -6,6 +6,7 @@
 - [tests](tests/SPEC.md), [infra](infra/SPEC.md), [Git/PR](.github/SPEC.md)
 - [datasets](datasets/SPEC.md), [model/eval artifacts](artifacts/SPEC.md), [private runtime](storage/SPEC.md)
 - [web legacy](web/SPEC.md), [migrations legacy](migrations/SPEC.md)
+- [build/test scripts](scripts/SPEC.md), [CI/CD runbook](docs/cicd.md)
 
 [Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. 25 Python init hiện docstring-only, Java chưa app; docs không app proof.
 
