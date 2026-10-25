@@ -46,3 +46,4 @@ Model/checkpoint: mount `VIETDOC_MODELS_DIR` (mặc định `artifacts/models`, 
 GPU (NVIDIA, Docker Desktop + WSL2): `docker compose -f infra/compose.ai.yaml --profile gpu run --rm ai-train-gpu`. Image `vietdoc-ai-train:cu126` (~11 GB) dùng torch `cu126` khớp driver 560.x; driver mới hơn có thể đặt `AI_TRAIN_TORCH_INDEX`. Đã kiểm trên RTX 4060 Laptop 8 GB: `cuda_available=true`, bf16 matmul+backward chạy. Chưa đo model thật, chưa có code training. Service inference vẫn CPU.
 
 Logs: JSON lines ra stdout (`ts/level/logger/event` + IDs/status/code/duration), không ghi document text, payload hay token; Docker `json-file` xoay vòng 3×10 MB.
+

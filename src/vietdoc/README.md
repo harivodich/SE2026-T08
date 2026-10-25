@@ -2,6 +2,7 @@
 
 Đã có: compute contract adapter (`contracts/compute.py`), release manifest verifier (`ml/release_manifest.py`), normalizer `vi-VND.v1` (`pipeline/normalization.py`, đề xuất cần Data/Lead review vì evaluator dùng chung), model output parser (`pipeline/extraction/output_parser.py`, no repair, strict shape), JSON logging, private FastAPI service (`entrypoints/api`, auth/limits/schema/hash/release/slot) và env report CLI. Chưa có preprocess/OCR/extraction/training, nên service trả `AI_NOT_READY` thay vì kết quả. Docker: [infra](../../infra/README.md). Python chỉ computation và offline Data/ML; Java quản lý business state.
 
+
 | Vùng active | Owner và output |
 |---|---|
 | contracts/ | AI-1 OCR/page, AI-2 compute typed adapters; shared JSON schemas ở specs/contracts |

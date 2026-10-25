@@ -34,6 +34,13 @@ test = [
   "pytest==9.1.1",
   "httpx2==2.16.0",
 ]
+data = [
+  "Pillow==10.2.0",
+  "jsonschema==4.10.3",
+]
+
+[tool.setuptools.package-data]
+"vietdoc.data.generator" = ["fake-values.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
