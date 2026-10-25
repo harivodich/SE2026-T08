@@ -1,0 +1,330 @@
+{
+  "convention": "renderer-local-v1; not approved shared geometry",
+  "page": 0,
+  "width": 1500,
+  "height": 2600,
+  "origin": "top-left",
+  "units": "pixels",
+  "transform": "identity; PNG is the rendered page",
+  "regions": [
+    {
+      "text": "PHIẾU THANH TOÁN",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        45,
+        32,
+        365,
+        65
+      ]
+    },
+    {
+      "text": "DỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        45,
+        88,
+        628,
+        117
+      ]
+    },
+    {
+      "text": "Cửa hàng: Cửa hàng Hư Cấu Mây Tím",
+      "pointer": "/merchant_name",
+      "page": 0,
+      "bbox_px": [
+        45,
+        137,
+        476,
+        162
+      ]
+    },
+    {
+      "text": "Địa chỉ: Lô GIẢ-LẬP, khu phố Hư Cấu",
+      "pointer": "/merchant_address",
+      "page": 0,
+      "bbox_px": [
+        45,
+        171,
+        463,
+        198
+      ]
+    },
+    {
+      "text": "Ngày bán: 03/10/2026",
+      "pointer": "/transaction_date",
+      "page": 0,
+      "bbox_px": [
+        45,
+        211,
+        303,
+        234
+      ]
+    },
+    {
+      "text": "Giờ: 10:05",
+      "pointer": "/transaction_time",
+      "page": 0,
+      "bbox_px": [
+        45,
+        247,
+        165,
+        265
+      ]
+    },
+    {
+      "text": "Tên hàng",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        44,
+        298,
+        150,
+        321
+      ]
+    },
+    {
+      "text": "SL",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        720,
+        299,
+        748,
+        316
+      ]
+    },
+    {
+      "text": "ĐVT",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        850,
+        299,
+        898,
+        316
+      ]
+    },
+    {
+      "text": "Đơn giá",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        1000,
+        298,
+        1089,
+        321
+      ]
+    },
+    {
+      "text": "Thành tiền",
+      "pointer": null,
+      "page": 0,
+      "bbox_px": [
+        1239,
+        296,
+        1363,
+        316
+      ]
+    },
+    {
+      "text": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy",
+      "pointer": "/items/0/description",
+      "page": 0,
+      "bbox_px": [
+        45,
+        334,
+        645,
+        359
+      ]
+    },
+    {
+      "text": "trưng bày mùa thu",
+      "pointer": "/items/0/description",
+      "page": 0,
+      "bbox_px": [
+        45,
+        365,
+        261,
+        388
+      ]
+    },
+    {
+      "text": "0,5",
+      "pointer": "/items/0/quantity",
+      "page": 0,
+      "bbox_px": [
+        720,
+        337,
+        757,
+        357
+      ]
+    },
+    {
+      "text": "kg",
+      "pointer": "/items/0/unit",
+      "page": 0,
+      "bbox_px": [
+        850,
+        337,
+        878,
+        359
+      ]
+    },
+    {
+      "text": "80.000 đ",
+      "pointer": "/items/0/unit_price",
+      "page": 0,
+      "bbox_px": [
+        1000,
+        337,
+        1103,
+        354
+      ]
+    },
+    {
+      "text": "40.000 đ",
+      "pointer": "/items/0/line_total",
+      "page": 0,
+      "bbox_px": [
+        1240,
+        337,
+        1343,
+        354
+      ]
+    },
+    {
+      "text": "Vải màu hư cấu",
+      "pointer": "/items/1/description",
+      "page": 0,
+      "bbox_px": [
+        45,
+        400,
+        225,
+        420
+      ]
+    },
+    {
+      "text": "1,5",
+      "pointer": "/items/1/quantity",
+      "page": 0,
+      "bbox_px": [
+        720,
+        403,
+        757,
+        423
+      ]
+    },
+    {
+      "text": "mét",
+      "pointer": "/items/1/unit",
+      "page": 0,
+      "bbox_px": [
+        850,
+        402,
+        896,
+        420
+      ]
+    },
+    {
+      "text": "32.000 đ",
+      "pointer": "/items/1/unit_price",
+      "page": 0,
+      "bbox_px": [
+        1000,
+        403,
+        1103,
+        420
+      ]
+    },
+    {
+      "text": "48.000 đ",
+      "pointer": "/items/1/line_total",
+      "page": 0,
+      "bbox_px": [
+        1240,
+        403,
+        1343,
+        420
+      ]
+    },
+    {
+      "text": "Trà sen hư cấu",
+      "pointer": "/items/2/description",
+      "page": 0,
+      "bbox_px": [
+        44,
+        437,
+        212,
+        457
+      ]
+    },
+    {
+      "text": "2",
+      "pointer": "/items/2/quantity",
+      "page": 0,
+      "bbox_px": [
+        720,
+        440,
+        735,
+        457
+      ]
+    },
+    {
+      "text": "hộp",
+      "pointer": "/items/2/unit",
+      "page": 0,
+      "bbox_px": [
+        850,
+        439,
+        893,
+        462
+      ]
+    },
+    {
+      "text": "45.000 đ",
+      "pointer": "/items/2/unit_price",
+      "page": 0,
+      "bbox_px": [
+        1000,
+        440,
+        1103,
+        457
+      ]
+    },
+    {
+      "text": "90.000 đ",
+      "pointer": "/items/2/line_total",
+      "page": 0,
+      "bbox_px": [
+        1240,
+        440,
+        1343,
+        457
+      ]
+    },
+    {
+      "text": "Tổng thanh toán: 178.000 đ",
+      "pointer": "/total_amount",
+      "page": 0,
+      "bbox_px": [
+        649,
+        495,
+        973,
+        519
+      ]
+    },
+    {
+      "text": "Số tiền ghi lại: 178.000 đ",
+      "pointer": "/total_amount",
+      "page": 0,
+      "bbox_px": [
+        45,
+        540,
+        335,
+        565
+      ]
+    }
+  ]
+}

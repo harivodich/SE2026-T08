@@ -1,0 +1,24 @@
+{
+  "environment": {
+    "python": "3.12.3",
+    "platform": "linux",
+    "pillow": "10.2.0",
+    "jsonschema": "4.10.3",
+    "freetype": "2.13.2",
+    "raqm": "0.10.1",
+    "harfbuzz": null,
+    "fribidi": null,
+    "zlib": "1.3",
+    "renderer_binaries": {
+      "_imaging.cpython-312-x86_64-linux-gnu.so": "0793479518d85a6420b925c773efcb74d7861eed98ca6bb303734f14ac237041",
+      "_imagingft.cpython-312-x86_64-linux-gnu.so": "03300ef096a065dfe1469c6b7cf0a7190bd8ceac304ba535a44b77e689fa1c2f",
+      "libfreetype.so.6.20.1": "992dac80abe3a3854f3eb2668da4207c029664ceca5f122ddb46e2a8169e9499",
+      "libfribidi.so.0.4.0": "550020af7ff4f77e3f05500e71051b676ee76f530479c2a836dfe899fcaf8395",
+      "libharfbuzz.so.0.60830.0": "4562cfcfd18935324ba3ac74a944898b867ab87a56e925ab3e351ba773f1513e",
+      "libpng16.so.16.43.0": "eac265b3506df0d9110dd9143e1d0503e2daabafe1d98b23fac8ca17b71d1f6b",
+      "libraqm.so.0.10.1": "9d72974146a848fef39f8341247509d1649ca33ac761a6e9f8feedac13b98bb5",
+      "libz.so.1.3": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+    }
+  },
+  "font_sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280"
+}

@@ -1,0 +1,757 @@
+{
+  "version": "d1.2.v2",
+  "purpose": "shared integration set; not untouched holdout",
+  "font_sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280",
+  "config_sha256": "d959b811a15911c2b66d3fa6f5570b2810c152e4f2ada91cc14635b6c2a10c5c",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "linux",
+    "pillow": "10.2.0",
+    "jsonschema": "4.10.3",
+    "freetype": "2.13.2",
+    "raqm": "0.10.1",
+    "harfbuzz": null,
+    "fribidi": null,
+    "zlib": "1.3",
+    "renderer_binaries": {
+      "_imaging.cpython-312-x86_64-linux-gnu.so": "0793479518d85a6420b925c773efcb74d7861eed98ca6bb303734f14ac237041",
+      "_imagingft.cpython-312-x86_64-linux-gnu.so": "03300ef096a065dfe1469c6b7cf0a7190bd8ceac304ba535a44b77e689fa1c2f",
+      "libfreetype.so.6.20.1": "992dac80abe3a3854f3eb2668da4207c029664ceca5f122ddb46e2a8169e9499",
+      "libfribidi.so.0.4.0": "550020af7ff4f77e3f05500e71051b676ee76f530479c2a836dfe899fcaf8395",
+      "libharfbuzz.so.0.60830.0": "4562cfcfd18935324ba3ac74a944898b867ab87a56e925ab3e351ba773f1513e",
+      "libpng16.so.16.43.0": "eac265b3506df0d9110dd9143e1d0503e2daabafe1d98b23fac8ca17b71d1f6b",
+      "libraqm.so.0.10.1": "9d72974146a848fef39f8341247509d1649ca33ac761a6e9f8feedac13b98bb5",
+      "libz.so.1.3": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "d12-receipt-01",
+      "base_id": "d12-receipt-01",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 1,
+      "label_statuses": {
+        "present": 8,
+        "absent": 2
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-01.png",
+          "sha256": "8148ce83d4fb2b427660f266058d7ba37695a089ae2c62e2b69636b426711a57"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-01.gold.json",
+          "sha256": "97ac0861d84427c1d4684cc2c7564063a3ae5fe82e61c2b009c16c1551950096"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-01.txt",
+          "sha256": "1b07bc1d961c1c739fdf96f1a7ed82f7c988a8b76395f800301093e2cb7c2e51"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-01.regions.json",
+          "sha256": "56ec1c25999caf36f6ae05f9999fa0d06b37e57bbbd3d4abc9c4d89e3f8d3ee7"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-01.labels.json",
+          "sha256": "4552e8a4bbc864f92d694a78c04e79427cd11a303f0fc089cc163498205ff2fc"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-02",
+      "base_id": "d12-receipt-02",
+      "family_id": "receipt-layout-1",
+      "template_id": "receipt-layout-1-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 1,
+      "label_statuses": {
+        "present": 10
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-02.png",
+          "sha256": "efd3b96786f607de3baf1302731071d2423a50d13269c01a3c8b3c095be3138b"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-02.gold.json",
+          "sha256": "731f918bb537cff616e1d3b33a445a1a2114e3c43c1fe9034e1653d8aaa356d0"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-02.txt",
+          "sha256": "c2b0e909ff8b33c9ae4b1dacb05880000ef3594337dcb06c32565c45c2438fd2"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-02.regions.json",
+          "sha256": "c621b74457f640ac003757406991a16fd684f9187828aca5d7926470f1239c7a"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-02.labels.json",
+          "sha256": "76ebee4969160f6f91344234c687956c2343c11017f42d7d874cff8486151cc5"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-03",
+      "base_id": "d12-receipt-03",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 20
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-03.png",
+          "sha256": "a1f0da31052e3be1e3faaa07f95f746838fd345c4fc00bb5220c8104406d95ac"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-03.gold.json",
+          "sha256": "7f5cda4bd303de4b6554de60210f6cf674fdcebd8d1a10e153ae5cdf5f710aca"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-03.txt",
+          "sha256": "5abf6572c299a9f2d5a17df0bfb66d96c96cdfc5576147c0a4e1c9379bdbabff"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-03.regions.json",
+          "sha256": "da466b153e459f1b8a0bc374b6c858d1e64921768c411c4d65ffaf3a2a2b41f9"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-03.labels.json",
+          "sha256": "a8fc1dfd1ef767ec5cf3f54bd0d9bfee7c2d3522dea26884f25dd19e9726ed08"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-04",
+      "base_id": "d12-receipt-04",
+      "family_id": "receipt-layout-1",
+      "template_id": "receipt-layout-1-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 18,
+        "absent": 2
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-04.png",
+          "sha256": "7136c9eb23c2ee0fe57e9beaef50851226e8e453fb3ababa8270cef8a938e895"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-04.gold.json",
+          "sha256": "63ec955cc25496405482c8e8d512d58e4b5c8ba40ee4fd4d192317368a590168"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-04.txt",
+          "sha256": "302ccccb852c1890b102ec6646dc2f0b8a0b351d7d0c12b54f933e38b239748a"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-04.regions.json",
+          "sha256": "d716f100d3330b7cca83034ae7f5caba665a4423f72b1eea1e59e518a2ff0997"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-04.labels.json",
+          "sha256": "fd1f068746343cfebac7a2a9f7cb2f42ae3590c1c96a73c5c0e69e2c7f1697d7"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-05",
+      "base_id": "d12-receipt-05",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 5,
+      "label_statuses": {
+        "present": 30
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-05.png",
+          "sha256": "37c8b4ada85a0d115300d52cd194374779a70385c5f72a4fecbb558bfaf9b462"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-05.gold.json",
+          "sha256": "a7d502b5d08d84210f68d3ad51c44ffcac979e9b53dd47a5a7a44d1355f6ec94"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-05.txt",
+          "sha256": "80ff108c7830eef3c9c9552777031f1aeb34c025869844ed4bd65ebcb9c36dc9"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-05.regions.json",
+          "sha256": "d07d22accfaa0d4fc73d6015906dcc52a2f3993107d8c0051d9a430e23932283"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-05.labels.json",
+          "sha256": "2c03589f657ba35d7c3b1462e11a053bcb3ad0be1f82c3e9b91172801b1bd2ed"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-06",
+      "base_id": "d12-receipt-06",
+      "family_id": "receipt-layout-1",
+      "template_id": "receipt-layout-1-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 5,
+      "label_statuses": {
+        "present": 30
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-06.png",
+          "sha256": "aab0353753fe8e6923b00b5850b6710b3ca10518c403235d185fd07f0f50b2af"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-06.gold.json",
+          "sha256": "9ce9613d48af4af381c266a74a0b059b86cc6be49142ffdbd5816306cd6869ac"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-06.txt",
+          "sha256": "9796512fc8fdb851bf4de702bd92c7a657e8fd02e8a3faee5b362739bad57aa3"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-06.regions.json",
+          "sha256": "bcebb17c73d6904d1a3456edb4df1dcec06efc74e517f591e2f29aee9c0c1767"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-06.labels.json",
+          "sha256": "aba4255e3592fbdeeb16754a9a1187fecb3389e1958faf0e27a4656eeda83134"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-07",
+      "base_id": "d12-receipt-07",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 12,
+      "label_statuses": {
+        "present": 63,
+        "absent": 2
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-07.png",
+          "sha256": "58469d4fbd2c7e22790de891fe61a95fbd74814fe81c651bff34185a012f8190"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-07.gold.json",
+          "sha256": "fea53b55767d50dc91615fa1b62cca177383c3d677f486e1c532efba3b45703e"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-07.txt",
+          "sha256": "4ffe75e6e17526ef21ffd2bec03a9029fd807babde3c8a2e4d57453a796fc837"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-07.regions.json",
+          "sha256": "fe08acdc1eacee198c4be9905b069b27c1a6e80cc6f4d87ac60b16d25b29392a"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-07.labels.json",
+          "sha256": "9b5bde00a79c2523bd4d5b779750b687f704dbd5bc097742806b04c7b760dad5"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-08",
+      "base_id": "d12-receipt-08",
+      "family_id": "receipt-layout-1",
+      "template_id": "receipt-layout-1-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 12,
+      "label_statuses": {
+        "present": 65
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-08.png",
+          "sha256": "5c731b21cb32349234dff6da30ba15a988f1a3be0a35634f6524429484a0207c"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-08.gold.json",
+          "sha256": "21400ae45b865cc724f5159967fef0513aa2cb2e898b49c1b2abeeb8ee20871d"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-08.txt",
+          "sha256": "c3b1f60a73d33e102cae8c83a3dc1d094aa92382122f8037042b4043b9d36b65"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-08.regions.json",
+          "sha256": "7392a4142d94dfac89b361d3e49ec0dbe8bfd723164c33706bbe67730b18e94c"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-08.labels.json",
+          "sha256": "fb5b3146b0d92038c841c79b01b9d3a5a9c5a707c9887c0c41324dffd0f5036e"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-09",
+      "base_id": "d12-receipt-09",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 30,
+      "label_statuses": {
+        "present": 155
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-09.png",
+          "sha256": "3065b657cbe8984555c70d852befc668277f130c6942f8db74e4292eb7e2990f"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-09.gold.json",
+          "sha256": "364d55917010092041ab8fe96f9e7d4de5dbc78ddd91e0bc08009f720be5d290"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-09.txt",
+          "sha256": "6df9366767fa5904184559658287cfbf3efdabc4076240282d1bc21d5d753e97"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-09.regions.json",
+          "sha256": "1b0a8051c58dc07f8b41dd572acfd8d98fd74ba150a00c0938863c21eba09d6b"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-09.labels.json",
+          "sha256": "3a7d16cb46235047634ba60e47f606e023498bfa20813997fecb2c82560d35d2"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-receipt-10",
+      "base_id": "d12-receipt-10",
+      "family_id": "receipt-layout-1",
+      "template_id": "receipt-layout-1-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 30,
+      "label_statuses": {
+        "present": 153,
+        "absent": 2
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-10.png",
+          "sha256": "0d7f8499efc52863bd8a5eb2890c2c8de9cbeca090e40b9fa573223285930808"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-10.gold.json",
+          "sha256": "e0b712f23df938c3d00734b46b64315a33a16db165719e3de47c3b2eb9d692c9"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-10.txt",
+          "sha256": "3702083110c6236df2dae922db2b512743034ea867a2d32f696a2101f0bed3f0"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-10.regions.json",
+          "sha256": "424424a19b356f33d19e4dee3224e35f12c1a24f6f4cee0e2677f2b65e7cd8b0"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-receipt-10.labels.json",
+          "sha256": "afbafa515cd422333f115c0ce77daf5b50e01eea1943ab55c1bbee22e89c9387"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-01",
+      "base_id": "d12-invoice-01",
+      "family_id": "invoice-layout-0",
+      "template_id": "invoice-layout-0-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 1,
+      "label_statuses": {
+        "present": 12,
+        "absent": 1
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-01.png",
+          "sha256": "69824ec536d7afe612b26b682a565ae7789ddab49433e517f26f049e452929db"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-01.gold.json",
+          "sha256": "d01c86437d137e0d4207f55d046cf0b1136e5078a60f8fb8a40222f3e58b95e4"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-01.txt",
+          "sha256": "abddcd0e281373549608b7a4f8a3ee8fc3421f62c8c34a391da7c473f2a46dcc"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-01.regions.json",
+          "sha256": "9edef8724f9443a6f8db373ae9cf33c2cf023798865b654c0aa76603b3958086"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-01.labels.json",
+          "sha256": "1f383b7a9c2bcf9b59a0cbf700a990008e45d60c1b1cff6af9736f5924e9164e"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-02",
+      "base_id": "d12-invoice-02",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 1,
+      "label_statuses": {
+        "present": 13
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-02.png",
+          "sha256": "9317b8c387218219da3cc727f38823d5c927d6356fb5f30e65422344a5d64d08"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-02.gold.json",
+          "sha256": "d56732b505a5268730e88945f6293fdbc86181ae787a522d625942f4e827668f"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-02.txt",
+          "sha256": "a177d27e1215f715f2c3aa503c5dcbdfeaa9c5a189ec6731c1b73bc7e5c6e751"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-02.regions.json",
+          "sha256": "fb8404bc4d7e6fc85b4d57d7efd7acb7e02adb5667c17b68d7cced1040e35315"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-02.labels.json",
+          "sha256": "60da66e572458669ea6de87de6c5981e7be50ab31278220d075dd96cd938d4d2"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-03",
+      "base_id": "d12-invoice-03",
+      "family_id": "invoice-layout-0",
+      "template_id": "invoice-layout-0-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 23
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-03.png",
+          "sha256": "594fc3301378ae6a660d28e808434fd460eefa3f23aec23827ff93232dadf5c4"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-03.gold.json",
+          "sha256": "94676e7269d3517f96e0b6dd820dee0cde0e3aa0f3ddddb7c3ad44b5fb7e6a89"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-03.txt",
+          "sha256": "ccdae46855b8654b1eef9678bbb78170292949cd07b9a51a9f8175bfdafbd917"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-03.regions.json",
+          "sha256": "779500c0b87f91d72ec8f8bda21dc0f33404db22475a2183e73544085db0b8be"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-03.labels.json",
+          "sha256": "cfdbcc1e7792d0314890be9ae8218c63a582cfb144a3506b5b7e49e575279e09"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-04",
+      "base_id": "d12-invoice-04",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 22,
+        "absent": 1
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-04.png",
+          "sha256": "46a917aaf05f8a3461c5eaef62e74d82c886267b8452b2be277b0638f2c4dc99"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-04.gold.json",
+          "sha256": "b66cb9a0b12c37d83fbdcbdeeb635aa7f70f305a730d1ca9e7f5738225954a20"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-04.txt",
+          "sha256": "f8ddb2a3536c9e04af322856cd0ab06eeeb20e88dd1fab62d20469b2049eadeb"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-04.regions.json",
+          "sha256": "74722d4ec6c4d2ee36a6d537b166b3eedf885a120e4fb9c0bf56b61682c153d6"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-04.labels.json",
+          "sha256": "36025462f6e70f9270d78034a7fcc3095e765b876642ff4e764f0daf36e9a703"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-05",
+      "base_id": "d12-invoice-05",
+      "family_id": "invoice-layout-0",
+      "template_id": "invoice-layout-0-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 5,
+      "label_statuses": {
+        "present": 33
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-05.png",
+          "sha256": "b711d5be97d54ee587a8ec71e2d8f630c882257a8862668f3265e3f1ff81fed7"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-05.gold.json",
+          "sha256": "3621f1015c2988c6d9e4ff52f887cd0c15ebc0541bf96b0a8692b4379b3962e1"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-05.txt",
+          "sha256": "d4de50e2683b860a4c8b0bd9eae9e670e827cff6805947db176f750c5a91c7cc"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-05.regions.json",
+          "sha256": "410587c999181e13dce7f9f754446589ac2eb6d1326310debe4722ed9944429f"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-05.labels.json",
+          "sha256": "5f11b10125729aaeed789d79b725226336ea55fd933ff87828f40cd02e3fd0d6"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-06",
+      "base_id": "d12-invoice-06",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 5,
+      "label_statuses": {
+        "present": 33
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-06.png",
+          "sha256": "c9c08f1a2f4a093569cf9d090c02861d027a08395602073022a458c7278f2d9e"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-06.gold.json",
+          "sha256": "22d43a571dab0c77dc5c94bb4ca166905b6e2bdaf8e9d7f6e604de2fe657ad12"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-06.txt",
+          "sha256": "55e094b3c666c6cc84598f527baecee0e41443e607ca8d3344a5d12616df3d2b"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-06.regions.json",
+          "sha256": "587732fcf645770e65782c1d72e4b0e32d9f07ec8128f398af217e7e9494203e"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-06.labels.json",
+          "sha256": "a4c2e0280b14cfd3a17f39420d9654fd9aa3ee8f59e4076533204b8119366407"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-07",
+      "base_id": "d12-invoice-07",
+      "family_id": "invoice-layout-0",
+      "template_id": "invoice-layout-0-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 12,
+      "label_statuses": {
+        "present": 67,
+        "absent": 1
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-07.png",
+          "sha256": "ed205ee2bec2ac55749aed4b09cc6942207b58c35320efeb460786990f99b867"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-07.gold.json",
+          "sha256": "e22681a4f70b1c0cf9a41712c8e2591de8c9fef815b1e85cc9cf20f672b8c16b"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-07.txt",
+          "sha256": "473e9aa631bab2f7c6c09eb15b23466ed763fdcfa27831561ee1a32ebd53308d"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-07.regions.json",
+          "sha256": "db419282be3598ce6633d8d4f42a84bf47323f921e74a76b6fca3ede6b7eb2e5"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-07.labels.json",
+          "sha256": "0e96b846cda7432121fe631cc4ae60f44d65eac48fa58fcdddbc1d7719caedb1"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-08",
+      "base_id": "d12-invoice-08",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 12,
+      "label_statuses": {
+        "present": 68
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-08.png",
+          "sha256": "c0626cd237a542457bd969069d6569cf7a07671f1f6ad32e26356611885a0710"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-08.gold.json",
+          "sha256": "ec951b6c17aa98d9d19b58ef231d8b8490f3fbbab7558df04196e34758f635bd"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-08.txt",
+          "sha256": "a4f8cc727a81e3d7306bb1df2844a2b45e1564ca5606ed05b97956038693d7fc"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-08.regions.json",
+          "sha256": "caa93d3d30602ff38c0049db4c7453908ab67dbc223a739e39a047c453680c78"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-08.labels.json",
+          "sha256": "774a583b1246f2d2d07fd860b0b2c932c9f586da4e173f792ed99f2e29ca27cc"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-09",
+      "base_id": "d12-invoice-09",
+      "family_id": "invoice-layout-0",
+      "template_id": "invoice-layout-0-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 30,
+      "label_statuses": {
+        "present": 158
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-09.png",
+          "sha256": "2dc57e95b98971d7cedd75e147e1cd82d8f427a942950c7263e7e4509c7914aa"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-09.gold.json",
+          "sha256": "119c3269d234503a6ad44415e3bef6a7377ae762f90791ee025dbc67ea831df9"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-09.txt",
+          "sha256": "bdd721af686c853ab0f67f8648f2d23fc5df59cc475b5d4f324a5925f6ad049c"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-09.regions.json",
+          "sha256": "02c0ef0b9cc68daa4449243a810d76cbebf99008ea970b6e8b5a9f2a6a57010f"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-09.labels.json",
+          "sha256": "714642c6454571b8c84eb3be7b289a06ebfb5ba8ff31cbbb75a767f8000ffb2a"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-10",
+      "base_id": "d12-invoice-10",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v2",
+      "row_count": 30,
+      "label_statuses": {
+        "present": 157,
+        "absent": 1
+      },
+      "assets": {
+        "png": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-10.png",
+          "sha256": "061ce37c865d082ae1849d3bc937b184d0fec0e66eac1cc9af16b54790a6c761"
+        },
+        "gold.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-10.gold.json",
+          "sha256": "5f6c3e5245019de011a94f519241e96846c7ef6d96112d24e2669a5f0a3567b8"
+        },
+        "txt": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-10.txt",
+          "sha256": "851fcde9cf8e53846c6be52ccfad956e8f9234a70d5888c913627cdb9128eceb"
+        },
+        "regions.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-10.regions.json",
+          "sha256": "bc857cd6d6b5be219f129001c591eaed7e2e908730ca721c714be822c46d8e41"
+        },
+        "labels.json": {
+          "path": "datasets/processed/d12-review-fixed-v2/d12-invoice-10.labels.json",
+          "sha256": "ae7114ae077f31035796a9d197ae330a5e2a4e0e4d18614796cd26b16f830aaa"
+        }
+      }
+    }
+  ]
+}

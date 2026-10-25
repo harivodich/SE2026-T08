@@ -1,0 +1,33 @@
+{
+  "invoice_number": "GIẢ-LẬP-1202-04",
+  "issue_date": "2026-10-04",
+  "seller_name": "Xưởng Hư Cấu Cánh Diều",
+  "buyer_name": null,
+  "subtotal": "228000",
+  "tax_amount": "10000",
+  "discount_amount": "5000",
+  "total_amount": "233000",
+  "items": [
+    {
+      "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu",
+      "quantity": "2",
+      "unit": "hộp",
+      "unit_price": "45000",
+      "line_total": "90000"
+    },
+    {
+      "description": "Trà sen hư cấu",
+      "quantity": "2",
+      "unit": "hộp",
+      "unit_price": "45000",
+      "line_total": "90000"
+    },
+    {
+      "description": "Vải màu hư cấu",
+      "quantity": "1.5",
+      "unit": "mét",
+      "unit_price": "32000",
+      "line_total": "48000"
+    }
+  ]
+}

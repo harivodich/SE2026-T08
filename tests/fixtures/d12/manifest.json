@@ -1,0 +1,81 @@
+{
+  "version": "d1.2.v1",
+  "purpose": "shared integration set; not untouched holdout",
+  "font_sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280",
+  "config_sha256": "d959b811a15911c2b66d3fa6f5570b2810c152e4f2ada91cc14635b6c2a10c5c",
+  "samples": [
+    {
+      "sample_id": "d12-receipt-03",
+      "base_id": "d12-receipt-03",
+      "family_id": "receipt-layout-0",
+      "template_id": "receipt-layout-0-v1",
+      "document_type": "receipt",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v1",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 20
+      },
+      "assets": {
+        "png": {
+          "path": "tests/fixtures/d12/d12-receipt-03.png",
+          "sha256": "a1f0da31052e3be1e3faaa07f95f746838fd345c4fc00bb5220c8104406d95ac"
+        },
+        "gold.json": {
+          "path": "tests/fixtures/d12/d12-receipt-03.gold.json",
+          "sha256": "7f5cda4bd303de4b6554de60210f6cf674fdcebd8d1a10e153ae5cdf5f710aca"
+        },
+        "txt": {
+          "path": "tests/fixtures/d12/d12-receipt-03.txt",
+          "sha256": "5abf6572c299a9f2d5a17df0bfb66d96c96cdfc5576147c0a4e1c9379bdbabff"
+        },
+        "regions.json": {
+          "path": "tests/fixtures/d12/d12-receipt-03.regions.json",
+          "sha256": "da466b153e459f1b8a0bc374b6c858d1e64921768c411c4d65ffaf3a2a2b41f9"
+        },
+        "labels.json": {
+          "path": "tests/fixtures/d12/d12-receipt-03.labels.json",
+          "sha256": "a8fc1dfd1ef767ec5cf3f54bd0d9bfee7c2d3522dea26884f25dd19e9726ed08"
+        }
+      }
+    },
+    {
+      "sample_id": "d12-invoice-04",
+      "base_id": "d12-invoice-04",
+      "family_id": "invoice-layout-1",
+      "template_id": "invoice-layout-1-v1",
+      "document_type": "invoice",
+      "schema_id": "urn:vietdoc:business:v1",
+      "seed": 1202,
+      "generator_version": "d1.2.v1",
+      "row_count": 3,
+      "label_statuses": {
+        "present": 22,
+        "absent": 1
+      },
+      "assets": {
+        "png": {
+          "path": "tests/fixtures/d12/d12-invoice-04.png",
+          "sha256": "46a917aaf05f8a3461c5eaef62e74d82c886267b8452b2be277b0638f2c4dc99"
+        },
+        "gold.json": {
+          "path": "tests/fixtures/d12/d12-invoice-04.gold.json",
+          "sha256": "b66cb9a0b12c37d83fbdcbdeeb635aa7f70f305a730d1ca9e7f5738225954a20"
+        },
+        "txt": {
+          "path": "tests/fixtures/d12/d12-invoice-04.txt",
+          "sha256": "f8ddb2a3536c9e04af322856cd0ab06eeeb20e88dd1fab62d20469b2049eadeb"
+        },
+        "regions.json": {
+          "path": "tests/fixtures/d12/d12-invoice-04.regions.json",
+          "sha256": "74722d4ec6c4d2ee36a6d537b166b3eedf885a120e4fb9c0bf56b61682c153d6"
+        },
+        "labels.json": {
+          "path": "tests/fixtures/d12/d12-invoice-04.labels.json",
+          "sha256": "36025462f6e70f9270d78034a7fcc3095e765b876642ff4e764f0daf36e9a703"
+        }
+      }
+    }
+  ]
+}

@@ -22,7 +22,8 @@ class "ProcessingJob" as Job #E8F0FC {
   +state, stage: enum
   +manifest_id: str
   +lease_token, lease_until
-  +attempt_count, deadline_at
+  +attempt_id, attempt_count, deadline_at
+  +next_attempt_at
   +claim()
   +heartbeat(token)
   +complete(token, result)
@@ -30,6 +31,7 @@ class "ProcessingJob" as Job #E8F0FC {
 class "ExtractionRun" as Run #E8F0FC {
   +id, job_id: UUID
   +prediction: BusinessPayload
+  +canonical_page_key, attempt_manifest
   +evidence, issues
   +provenance: ModelManifest
   +immutable content
@@ -67,10 +69,6 @@ class "SourceRegion <<value>>" as Region #E8F0FC {
   +quad: 4 canonical points
   +ocr_block_ids
 }
-class "OutboxMessage" as Outbox #E8F0FC {
-  +id, job_id, event_type
-  +delivered_at, retry_at
-}
 class "ModelRelease" as Model #E8F0FC {
   +id, manifest_hash/key
   +schema_version, lifecycle
@@ -93,7 +91,6 @@ Revision "1" --> "0..*" Export : exports
 Revision "1" *-- "0..*" Item : payload rows
 Run "1" *-- "0..*" Meta : field metadata
 Meta "1" *-- "0..*" Region : evidence
-Job "1" --> "1..*" Outbox : delivery/recovery
 Job "0..*" --> "1" Model : pins release
 Document "1" --> "0..*" Audit : history
 User "1" --> "0..*" Approval : approves
