@@ -5,6 +5,8 @@
 !src/
 !specs/contracts/
 !tests/
+# Tiny fictional JSON examples consumed by the shared-schema tests only.
+!docs/design/v1/examples/
 **/__pycache__
 **/*.py[cod]
 **/*.egg-info

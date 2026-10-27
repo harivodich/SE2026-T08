@@ -1,11 +1,13 @@
-"""Normalization policy vi-VND.v1: known raw → canonical values and refusal cases."""
+"""Normalization policy vi-VND.v2: known raw → canonical values and refusal cases."""
 
+from decimal import Inexact, InvalidOperation, Rounded, localcontext
 import re
 
 import pytest
 
 from vietdoc.pipeline.normalization import (
     POLICY_VERSION,
+    MAX_NUMBER_CHARS,
     normalize_date,
     normalize_money,
     normalize_number_literal,
@@ -18,7 +20,7 @@ DECIMAL = re.compile(r"^(0|[1-9][0-9]*)(\.[0-9]+)?$")  # business.schema.json Nu
 
 
 def test_policy_is_versioned():
-    assert POLICY_VERSION == "vi-VND.v1"
+    assert POLICY_VERSION == "vi-VND.v2"
 
 
 @pytest.mark.parametrize(
@@ -160,3 +162,68 @@ def test_text_over_schema_limit_is_invalid():
 def test_number_literal_is_exact_without_locale(raw, status, expected):
     result = normalize_number_literal(raw)
     assert (result.status, result.value) == (status, expected)
+
+
+@pytest.mark.parametrize("precision", [6, 28, 50])
+@pytest.mark.parametrize("normalizer", [normalize_money, normalize_quantity, normalize_number_literal])
+def test_decimal_values_are_exact_independent_of_context(precision, normalizer):
+    values = [
+        "12345678901234567890123456789",  # previously silently rounded at precision 28
+        "12345678901234567890123456789012",  # schema's 32-character boundary
+        "12345678901234567890123456789.12",
+    ]
+    with localcontext() as context:
+        context.prec = precision
+        context.Emax, context.Emin = 9, -9
+        context.traps[Inexact] = context.traps[Rounded] = True
+        for raw in values:
+            result = normalizer(raw)
+            assert (result.status, result.value, result.raw) == ("ok", raw, raw)
+            assert DECIMAL.fullmatch(result.value)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("1e31", "1" + "0" * 31),
+        ("1e32", None),
+        ("1e-30", "0." + "0" * 29 + "1"),
+        ("1e-31", None),
+        ("1e1000000", None),
+        ("1e-1000000", None),
+        ("1e" + "9" * 5000, None),
+        ("1e-" + "9" * 5000, None),
+        ("0e1000000", "0"),
+        ("0e-1000000", "0"),
+        ("-0.0", "0"),
+        ("123450000e-8", "1.2345"),
+        ("1" + "0" * 5000 + "e-5000", "1"),
+        ("0." + "0" * 5000 + "1e5001", "1"),
+    ],
+    ids=["integer-limit", "integer-overflow", "fraction-limit", "fraction-overflow",
+         "large-positive-exponent", "large-negative-exponent", "unrepresentable-positive-exponent",
+         "unrepresentable-negative-exponent", "positive-exponent-zero", "negative-exponent-zero",
+         "signed-zero", "trailing-zeros", "coefficient-exponent-cancellation", "fraction-exponent-cancellation"],
+)
+@pytest.mark.parametrize("trap_invalid", [True, False])
+def test_number_literal_bounds_before_expansion(raw, expected, trap_invalid):
+    with localcontext() as context:
+        context.traps[InvalidOperation] = trap_invalid
+        result = normalize_number_literal(raw)
+    assert result.raw == raw
+    assert result.value == expected
+    assert result.status == ("invalid" if expected is None else "ok")
+    if expected is None:
+        assert result.reason
+    else:
+        assert len(result.value) <= 32 and DECIMAL.fullmatch(result.value)
+
+
+@pytest.mark.parametrize("normalizer", [normalize_money, normalize_quantity, normalize_number_literal])
+def test_decimal_input_and_output_limits(normalizer):
+    result = normalizer("9" * 33)
+    assert result.status == "invalid" and result.value is None
+    assert normalizer("0" * MAX_NUMBER_CHARS).value == "0"
+    too_long = "0" * (MAX_NUMBER_CHARS + 1)
+    result = normalizer(too_long)
+    assert (result.status, result.value, result.raw) == ("invalid", None, too_long)

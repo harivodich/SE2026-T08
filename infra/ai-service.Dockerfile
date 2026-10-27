@@ -25,7 +25,10 @@ ENV VIETDOC_CONTRACTS_DIR=/app/specs/contracts
 FROM base AS test
 RUN pip install ".[test]"
 COPY tests ./tests
-RUN python -m pytest -q -p no:cacheprovider
+COPY docs/design/v1/examples ./docs/design/v1/examples
+# Data rendering has its own pinned environment; do not collect its Pillow tests here.
+RUN python -m pytest -q -p no:cacheprovider \
+    tests/unit/pipeline tests/unit/ml tests/contract tests/architecture tests/integration/api
 
 FROM base AS runtime
 RUN groupadd --gid 10001 app \

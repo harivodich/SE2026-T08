@@ -3,7 +3,7 @@
 No repair: the text must be one standalone JSON object, optionally inside a single
 ```json fence. Shape follows business.schema.json exactly (all keys, no extras,
 ≤30 rows); a broken shape is `schema_invalid`, not a payload of nulls. Present
-values go through normalization `vi-VND.v1`; refusals become null + warning issue
+values go through normalization `vi-VND.v2`; refusals become null + warning issue
 and keep the raw text for field metadata. Numbers are never read as binary floats.
 """
 

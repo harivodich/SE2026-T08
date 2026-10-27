@@ -149,6 +149,33 @@ def test_negative_json_number_becomes_null_with_issue():
     assert [issue["code"] for issue in result.issues] == ["VALUE_INVALID"]
 
 
+@pytest.mark.parametrize("literal", ["12345678901234567890123456789", "12345678901234567890123456789012"])
+@pytest.mark.parametrize("quoted", [False, True])
+def test_large_decimal_values_keep_all_digits(literal, quoted):
+    raw = json.dumps(receipt(total_amount="NUMBER_LITERAL"))
+    raw = raw.replace('"NUMBER_LITERAL"', json.dumps(literal) if quoted else literal)
+    result = parse(raw)
+    assert result.status == "ok" and result.raw_json_valid
+    assert result.payload["total_amount"] == literal
+    assert result.raw_values["/total_amount"] == literal
+    assert result.normalizer_version == "vi-VND.v2"
+    assert result.issues == ()
+    CONTRACTS.validate(BUSINESS_SCHEMA, result.payload)
+
+
+@pytest.mark.parametrize("literal", ["1e1000000", "1e-1000000", "1e" + "9" * 5000, "9" * 33])
+def test_unbounded_json_number_becomes_null_with_issue(literal):
+    raw = json.dumps(receipt(total_amount="NUMBER_LITERAL")).replace('"NUMBER_LITERAL"', literal)
+    result = parse(raw)
+    assert result.status == "ok" and result.raw_json_valid
+    assert result.payload["total_amount"] is None
+    assert result.raw_values["/total_amount"] == literal
+    assert [(issue["code"], issue["paths"]) for issue in result.issues] == [
+        ("VALUE_INVALID", ["/total_amount"])
+    ]
+    CONTRACTS.validate(BUSINESS_SCHEMA, result.payload)
+
+
 def test_refused_values_become_null_with_issues_and_keep_raw():
     item = receipt()["items"][0] | {"quantity": "2.000"}
     result = parse(json.dumps(receipt(transaction_date="31/02/2026", total_amount="abc", items=[item]), ensure_ascii=False))

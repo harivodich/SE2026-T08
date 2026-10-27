@@ -10,10 +10,12 @@ Pin env/deps/images sau actual smoke; test CPU/GPU profile và readiness trướ
 
 | File | Nội dung |
 |---|---|
-| `ai-service.Dockerfile` | Private compute FastAPI, target `test` chạy pytest, target `runtime` non-root/read-only |
+| `ai-service.Dockerfile` | Private compute FastAPI, target `test` chạy Python AI/contract/architecture/API tests, target `runtime` non-root/read-only |
 | `ai-train.Dockerfile` | Offline training env: torch CPU + transformers/peft; mặc định in env report |
 | `compose.ai.yaml` | `ai-service` (loopback 8090) và `ai-train` (profile `train`, `network_mode: none`) |
 | `.env.example` | Ports/limits/volume paths; không chứa secret |
+
+Service cài `.[serve]`, training cài `.[train]`; cả hai khai báo validator hiện đại trực tiếp. Target `test` cài thêm `.[test]` và chỉ chạy `tests/unit/pipeline`, `tests/unit/ml`, `tests/contract`, `tests/architecture`, `tests/integration/api`. Data render tests chạy riêng với `.[data]` theo [Data README](../src/vietdoc/data/generator/README.md), không đưa pins Pillow/jsonschema của renderer vào AI image.
 
 Hiện trạng đã kiểm: service validate auth/limits/schema/hash/release rồi trả `503 AI_NOT_READY` vì chưa có pipeline OCR/extraction (M2.1/M2.3). `/health/ready` luôn 503 cho tới khi có pipeline; Docker healthcheck chỉ dùng `/health/live`. Java `AiClient` hiện gọi `/extract` với payload khác protocol nên chưa nối được với service này.
 

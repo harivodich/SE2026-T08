@@ -7,15 +7,21 @@ name = "vietdoc"
 version = "0.0.1"
 description = "Vietnamese document extraction and human review"
 requires-python = ">=3.11"
-# Core: shared-contract validation only. Web and model frameworks live in extras
-# so contracts/offline tools do not pull FastAPI or torch.
-dependencies = [
-  "jsonschema==4.26.0",
-]
+# Dependencies belong to the environment that uses them. In particular, the
+# historical Data renderer must not inherit the modern compute validator.
+dependencies = []
 
 [project.optional-dependencies]
+# Keep these validator pins aligned in contracts/serve/train. Explicit lists
+# also work during the Docker dependency layer, before application source exists.
+contracts = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
+]
 # Private compute service (inference process, CPU-first).
 serve = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
   "fastapi==0.162.0",
   "uvicorn==0.54.0",
   "python-multipart==0.0.32",
@@ -23,6 +29,8 @@ serve = [
 # Offline training/spike environment. Install torch first from the wheel index
 # matching the hardware (CPU: https://download.pytorch.org/whl/cpu).
 train = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
   "torch==2.14.1",
   "transformers==5.20.2",
   "peft==0.21.2",

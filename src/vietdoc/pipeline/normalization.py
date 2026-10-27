@@ -1,4 +1,4 @@
-"""Locale normalization for Vietnamese receipts/invoices, policy `vi-VND.v1` (AI-2).
+"""Locale normalization for Vietnamese receipts/invoices, policy `vi-VND.v2` (AI-2).
 
 Raw source text → canonical business strings (business.schema.json):
 money/quantity decimal strings without exponent or trailing fractional zeros,
@@ -8,6 +8,8 @@ Refusal is explicit: `absent` (nothing written), `ambiguous` (several readings),
 `invalid` (not a value of that kind). Both refusals return value None so callers
 emit an issue; nothing is guessed, rounded or inferred from other fields.
 Shared by the rule baseline, model adapters and the evaluator; change → new version.
+v2 preserves all digits independently of decimal context and bounds the canonical
+length before expanding exponents. Numeric source text is limited to 64 Ki chars.
 """
 
 from __future__ import annotations
@@ -16,11 +18,12 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, DecimalException
 from typing import Literal
 
-POLICY_VERSION = "vi-VND.v1"
+POLICY_VERSION = "vi-VND.v2"
 MAX_DECIMAL_LENGTH = 32  # business.schema.json NullableDecimal maxLength
+MAX_NUMBER_CHARS = 64 * 1024  # also bounds direct callers, outside the model parser
 MAX_TEXT_LENGTH = 500  # business.schema.json NullableText maxLength
 
 Status = Literal["ok", "absent", "ambiguous", "invalid"]
@@ -50,14 +53,49 @@ _CURRENCY = re.compile(r"^(?:vn[dđ]\s*)?(.*?)(?:\s*(?:vn[dđ]|đ|₫))?$", re.I
 _GROUPED = re.compile(r"^\d{1,3}(?:[.,]\d{3})+$")
 
 
-def _canonical(number: Decimal) -> str:
-    text = format(number.normalize(), "f")
-    if "." in text:
-        text = text.rstrip("0").rstrip(".")
-    return text or "0"
+def _canonical(text: str, raw: str | None) -> Normalized:
+    """Exact construction/as_tuple only: no context-rounded decimal operations."""
+    try:
+        number = Decimal(text)
+    except DecimalException:
+        return _refuse(raw, "invalid", "not a representable decimal")
+    # Decimal can return NaN instead of raising when InvalidOperation is untrapped.
+    if not number.is_finite():
+        return _refuse(raw, "invalid", "not a finite decimal")
+    if number.is_zero():
+        return _ok(raw, "0")
+    sign, digits, exponent = number.as_tuple()
+    if sign:
+        return _refuse(raw, "invalid", "negative values are not supported")
+
+    end = len(digits)
+    while digits[end - 1] == 0:
+        end -= 1
+    exponent += len(digits) - end
+    point = end + exponent
+    if exponent >= 0:
+        length = point
+    elif point > 0:
+        length = end + 1  # decimal point inside coefficient
+    else:
+        length = 2 - exponent  # "0." + leading fractional zeros + coefficient
+    if length > MAX_DECIMAL_LENGTH:
+        return _refuse(raw, "invalid", "too many digits")
+
+    # Only allocate an expanded string after proving it fits the business schema.
+    coefficient = "".join(str(digit) for digit in digits[:end])
+    if exponent >= 0:
+        value = coefficient + "0" * exponent
+    elif point > 0:
+        value = coefficient[:point] + "." + coefficient[point:]
+    else:
+        value = "0." + "0" * -point + coefficient
+    return _ok(raw, value)
 
 
 def _decimal(raw: str | None, kind: Literal["money", "quantity"]) -> Normalized:
+    if raw is not None and len(raw) > MAX_NUMBER_CHARS:
+        return _refuse(raw, "invalid", "numeric input too long")
     text = _clean(raw)
     if not text:
         return _refuse(raw, "absent", "empty")
@@ -92,13 +130,7 @@ def _decimal(raw: str | None, kind: Literal["money", "quantity"]) -> Normalized:
     else:
         digits = text
 
-    try:
-        value = _canonical(Decimal(digits))
-    except InvalidOperation:
-        return _refuse(raw, "invalid", "not a number")
-    if len(value) > MAX_DECIMAL_LENGTH:
-        return _refuse(raw, "invalid", "too many digits")
-    return _ok(raw, value)
+    return _canonical(digits, raw)
 
 
 def normalize_money(raw: str | None) -> Normalized:
@@ -113,18 +145,14 @@ def normalize_quantity(raw: str | None) -> Normalized:
 
 def normalize_number_literal(raw: str | None) -> Normalized:
     """Machine number literal (e.g. JSON `45000.10`): exact Decimal, no locale rules."""
+    if raw is not None and len(raw) > MAX_NUMBER_CHARS:
+        return _refuse(raw, "invalid", "numeric input too long")
     text = (raw or "").strip()
     if not text:
         return _refuse(raw, "absent", "empty")
     if not re.fullmatch(r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?", text):
         return _refuse(raw, "invalid", "not a number literal")
-    number = Decimal(text)
-    if number < 0:
-        return _refuse(raw, "invalid", "negative values are not supported")
-    value = _canonical(number)
-    if len(value) > MAX_DECIMAL_LENGTH:
-        return _refuse(raw, "invalid", "too many digits")
-    return _ok(raw, value)
+    return _canonical(text, raw)
 
 
 _DATE_LABEL =re.compile(r"^(?:ngày|date)\s*:?\s*", re.IGNORECASE)
