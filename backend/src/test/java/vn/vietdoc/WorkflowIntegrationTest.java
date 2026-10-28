@@ -299,7 +299,8 @@ class WorkflowIntegrationTest {
         .andExpect(status().isOk());
     mvc.perform(get("/index.html"))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("VietDoc")));
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("VietDoc")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"vietdoc-mode\" content=\"demo\"")));
     mvc.perform(get("/app.js"))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("uploadAndProcess")));

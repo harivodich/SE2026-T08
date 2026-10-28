@@ -12,6 +12,7 @@ import {
 } from "./domain.js";
 
 const root = document.querySelector("#app");
+const processingMode = document.querySelector('meta[name="vietdoc-mode"]')?.content;
 const state = {
   user: null,
   documents: [],
@@ -99,7 +100,6 @@ function apiFailure(error) {
     ? `${error.message}${error.code ? ` (${error.code})` : ""}`
     : (error?.message || "Không thể kết nối đến VietDoc.");
   state.message = { text, kind: "error" };
-  state.busy = false;
   render();
 }
 
@@ -339,6 +339,8 @@ async function uploadAndProcess(event) {
 
 async function rerun() {
   if (!state.document || state.busy || remoteChanged()) return;
+  if (hasUnsavedReview())
+    return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi chạy xử lý lại.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
   setBusy(true, "rerun");
   try {
@@ -470,6 +472,10 @@ function isDirty() {
     stableStringify(state.editorBase.payload);
 }
 
+function hasUnsavedReview() {
+  return isDirty() || state.changedPaths.size > 0 || state.changedItemFields.size > 0;
+}
+
 function stableStringify(value) {
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
   if (value && typeof value === "object") {
@@ -491,6 +497,21 @@ function updateBoundValue(target) {
   }
   const stateLabel = root.querySelector("[data-save-state]");
   if (stateLabel) stateLabel.textContent = isDirty() ? "Có thay đổi chưa lưu" : "Đã khớp bản đang mở";
+  syncDraftControls();
+}
+
+function syncDraftControls() {
+  const pending = hasUnsavedReview();
+  const remote = remoteChanged();
+  const saveButton = root.querySelector('[data-action="save"]');
+  if (saveButton) saveButton.disabled = !pending || remote || state.busy;
+  const approveButton = root.querySelector('[data-action="approve"]');
+  if (approveButton && (pending || remote || state.busy)) approveButton.disabled = true;
+  const rerunButton = root.querySelector('[data-action="rerun"]');
+  if (rerunButton) rerunButton.disabled = pending || remote ||
+    isActiveJob(state.document?.job) || state.busy;
+  for (const button of root.querySelectorAll("[data-adopt-run]"))
+    if (pending || remote || state.busy) button.disabled = true;
 }
 
 function render({ passive = false } = {}) {
@@ -498,6 +519,7 @@ function render({ passive = false } = {}) {
       document.activeElement?.matches?.("input, textarea, select")) {
     const notice = root.querySelector("[data-remote-notice]");
     if (notice) notice.hidden = !remoteChanged();
+    syncDraftControls();
     return;
   }
   const scrollTop = passive ? root.querySelector(".review-scroll")?.scrollTop : undefined;
@@ -524,12 +546,13 @@ function renderLogin() {
     <section class="login-art">
       <div><div class="brand"><span class="brand-mark">V</span><span>VietDoc<small>document review workspace</small></span></div>
         <h1>Đọc chứng từ. Đối chiếu tự tin.</h1>
-        <p>Ảnh được lưu riêng tư, kết quả AI luôn là bản dự đoán. Bạn kiểm tra, chỉnh sửa và duyệt dữ liệu trước khi xuất.</p>
+        <p>Ảnh được lưu riêng tư. Bạn kiểm tra, chỉnh sửa và duyệt dữ liệu trước khi xuất.</p>
       </div>
     </section>
     <section class="login-content"><div class="login-card">
       <div class="eyebrow">Không gian làm việc an toàn</div>
       <h2>Đăng nhập</h2><p>Dùng tài khoản VietDoc được cấp để tiếp tục.</p>
+      ${renderModeBadge()}
       <form class="login-form" data-login>
         <div class="field"><label for="username">Tên đăng nhập</label><input id="username" name="username" autocomplete="username" required value="${escapeHtml(state.username)}" /></div>
         <div class="field"><label for="password">Mật khẩu</label><input id="password" name="password" type="password" autocomplete="current-password" required value="${escapeHtml(state.password)}" /></div>
@@ -549,7 +572,7 @@ function renderShell() {
       <div class="userbar"><span class="avatar">${escapeHtml((state.user.username || "U").slice(0, 1).toUpperCase())}</span><span>${escapeHtml(state.user.username)}</span><button class="btn btn-quiet btn-small" data-action="logout">Đăng xuất</button></div>
     </header>
     <main class="page">
-      <div class="page-head"><div><div class="eyebrow">VietDoc / Review</div><h1>Chứng từ của bạn</h1><p class="subtitle">Tải lên, đối chiếu dữ liệu và duyệt trước khi xuất.</p></div>
+      <div class="page-head"><div><div class="eyebrow">VietDoc / Review</div><h1>Chứng từ của bạn</h1><p class="subtitle">Tải lên, đối chiếu dữ liệu và duyệt trước khi xuất.</p>${renderModeBadge()}</div>
         ${selected ? `<button class="btn btn-secondary" data-action="reload">Tải lại</button>` : ""}
       </div>
       ${state.message ? `<div class="notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}" data-message>${escapeHtml(state.message.text)}</div>` : ""}
@@ -564,6 +587,12 @@ function renderShell() {
       </div>
     </main>
   </div>`;
+}
+
+function renderModeBadge() {
+  const label = processingMode === "demo" ? "Demo · kết quả giả lập" :
+    processingMode === "manual" ? "Manual · không chạy AI" : "Chế độ xử lý chưa xác định";
+  return `<span class="pill mode-pill" data-processing-mode>${label}</span>`;
 }
 
 function renderUpload() {
@@ -658,7 +687,7 @@ function renderIssues(issues) {
     const checked = state.acknowledged.has(issue.id) ? "checked" : "";
     const content = `<strong>${escapeHtml(issue.code)}</strong>${escapeHtml(issue.message)}`;
     return `<div class="issue issue-${severity}">${issue.severity === "warning"
-      ? `<label><input type="checkbox" data-ack="${escapeHtml(issue.id)}" ${checked} /><span>${content}</span></label>`
+      ? `<label><input type="checkbox" data-ack="${escapeHtml(issue.id)}" ${checked} ${state.busy ? "disabled" : ""} /><span>${content}</span></label>`
       : content}</div>`;
   }).join("")}`;
 }
@@ -668,14 +697,14 @@ function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
   const pending = dirty || state.changedPaths.size || state.changedItemFields.size;
   const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy;
   const disabledSave = !pending || remoteChanged() || state.busy || !document.head;
-  return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" /></div>
-    <label class="approval-check"><input type="checkbox" data-reviewed ${state.reviewed ? "checked" : ""} /><span>Tôi đã đối chiếu dữ liệu với ảnh nguồn và xác nhận mức độ đầy đủ của chứng từ.</span></label>
-    ${pending ? '<div class="notice">Có thay đổi hoặc xác nhận field chưa lưu. Hãy lưu thành revision mới trước khi duyệt.</div>' : ""}
+  return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" ${state.busy ? "disabled" : ""} /></div>
+    <label class="approval-check"><input type="checkbox" data-reviewed ${state.reviewed ? "checked" : ""} ${state.busy ? "disabled" : ""} /><span>Tôi đã đối chiếu dữ liệu với ảnh nguồn và xác nhận mức độ đầy đủ của chứng từ.</span></label>
+    ${pending ? '<div class="notice">Có thay đổi hoặc xác nhận field chưa lưu. Hãy lưu thành revision mới trước khi duyệt hoặc chạy xử lý lại.</div>' : ""}
     ${blockers.length ? `<div class="notice error">Còn ${blockers.length} điều kiện chặn. Sửa dữ liệu hoặc kiểm tra lại nội dung trên ảnh trước khi duyệt.</div>` : ""}
     ${warnings.length && !allWarningsChecked ? '<div class="notice">Hãy xác nhận từng cảnh báo để tiếp tục duyệt.</div>' : ""}
     <div class="action-row"><button class="btn btn-secondary" data-action="save" ${disabledSave ? "disabled" : ""}>${state.busyAction === "save" ? '<span class="spinner"></span>' : "Lưu bản sửa"}</button>
       <button class="btn btn-primary" data-action="approve" ${canApprove ? "" : "disabled"}>${state.busyAction === "approve" ? '<span class="spinner"></span>' : "Duyệt revision này"}</button>
-      <button class="btn btn-secondary" data-action="rerun" ${isActiveJob(document.job) || state.busy ? "disabled" : ""}>${state.busyAction === "rerun" ? '<span class="spinner"></span>' : "Chạy AI lại"}</button></div>`;
+      <button class="btn btn-secondary" data-action="rerun" ${isActiveJob(document.job) || pending || remoteChanged() || state.busy ? "disabled" : ""}>${state.busyAction === "rerun" ? '<span class="spinner"></span>' : "Chạy xử lý lại"}</button></div>`;
 }
 
 function renderJobProgress(job) {
@@ -684,7 +713,7 @@ function renderJobProgress(job) {
 }
 
 function renderCandidates(runs) {
-  return `<div class="section-heading"><h3>Kết quả chạy AI khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
+  return `<div class="section-heading"><h3>Kết quả xử lý khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
 }
 
 function renderExport(document, approved, selectedId) {

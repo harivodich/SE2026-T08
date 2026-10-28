@@ -78,6 +78,7 @@ select:focus, input:focus, textarea:focus { border-color: #5aa58d; box-shadow: 0
 .pill-approved, .pill-succeeded { background: #e3f4ec; color: #167653; }
 .pill-failed { background: var(--red-bg); color: var(--red); }
 .pill-draft { background: var(--amber-bg); color: var(--amber); }
+.mode-pill { margin-top: 10px; background: var(--amber-bg); color: var(--amber); }
 .workspace { display: grid; grid-template-columns: minmax(0, 1.03fr) minmax(360px, .97fr); min-height: 590px; }
 .viewer-side { min-width: 0; background: #eef1f2; border-right: 1px solid var(--line); }
 .review-side { min-width: 0; }
@@ -134,6 +135,7 @@ select:focus, input:focus, textarea:focus { border-color: #5aa58d; box-shadow: 0
 .login-card { width: min(100%, 380px); }
 .login-card h2 { margin: 0 0 8px; color: var(--ink); font: 800 25px "Segoe UI", sans-serif; letter-spacing: -.04em; }
 .login-card > p { margin-bottom: 24px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.login-card .mode-pill { margin: 0 0 20px; }
 .login-form { display: grid; gap: 14px; }
 .login-form .field input { height: 44px; font-size: 13px; }
 .login-form .btn { height: 44px; margin-top: 4px; }
