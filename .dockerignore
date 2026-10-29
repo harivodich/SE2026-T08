@@ -1,0 +1,13 @@
+# Allowlist: Python images need only these. Datasets, models, storage, secrets,
+# backend/web sources and Git metadata never enter the build context.
+*
+!pyproject.toml
+!src/
+!specs/contracts/
+!tests/
+# Tiny fictional JSON examples consumed by the shared-schema tests only.
+!docs/design/v1/examples/
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache

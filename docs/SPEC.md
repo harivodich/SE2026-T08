@@ -10,6 +10,7 @@ architecture/source-structure/git-flow/team/adr/uml/history/reviews; spec con ng
 
 [CI/CD](cicd.md): workflow increment, required checks, release gaps và hướng dẫn nối module.
 
+
 ## Ranh giới và dữ liệu
 
 Không secrets/raw data/weights hoặc context docs thay runnable code. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.

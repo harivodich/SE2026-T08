@@ -7,13 +7,52 @@ name = "vietdoc"
 version = "0.0.1"
 description = "Vietnamese document extraction and human review"
 requires-python = ">=3.11"
+# Dependencies belong to the environment that uses them. In particular, the
+# historical Data renderer must not inherit the modern compute validator.
 dependencies = []
 
 [project.optional-dependencies]
-data = ["Pillow==10.2.0", "jsonschema==4.10.3"]
+# Keep these validator pins aligned in contracts/serve/train. Explicit lists
+# also work during the Docker dependency layer, before application source exists.
+contracts = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
+]
+# Private compute service (inference process, CPU-first).
+serve = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
+  "fastapi==0.162.0",
+  "uvicorn==0.54.0",
+  "python-multipart==0.0.32",
+]
+# Offline training/spike environment. Install torch first from the wheel index
+# matching the hardware (CPU: https://download.pytorch.org/whl/cpu).
+train = [
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
+  "torch==2.14.1",
+  "transformers==5.20.2",
+  "peft==0.21.2",
+  "accelerate==1.15.0",
+  "safetensors==0.8.0",
+  "pillow==13.0.0",
+]
+test = [
+  "pytest==9.1.1",
+  "httpx2==2.16.0",
+]
+data = [
+  "Pillow==10.2.0",
+  "jsonschema==4.10.3",
+]
 
 [tool.setuptools.package-data]
 "vietdoc.data.generator" = ["fake-values.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
