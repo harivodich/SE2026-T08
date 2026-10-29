@@ -56,6 +56,7 @@ jobs:
         run: |
           for attempt in $(seq 1 40); do
             if curl -fsS http://localhost:18080/ -o index.html; then break; fi
+            if [ "$attempt" -eq 40 ]; then exit 1; fi
             sleep 2
           done
           grep -q 'name="_csrf"' index.html
