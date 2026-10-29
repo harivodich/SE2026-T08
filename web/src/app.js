@@ -46,6 +46,8 @@ let sessionGeneration = 0;
 let navigationGeneration = 0;
 let listGeneration = 0;
 let navigationAbort;
+let busyGeneration = 0;
+let busyOwner = 0;
 const api = () => new ApiClient();
 async function refreshCsrf() {
   const result = await api().csrf();
@@ -91,6 +93,11 @@ function message(text, kind = "info") {
 
 function apiFailure(error) {
   if (error instanceof ApiError && error.status === 401) {
+    if (error.code === "INVALID_CREDENTIALS") {
+      state.message = { text: error.message, kind: "error" };
+      render();
+      return;
+    }
     clearSession();
     state.message = { text: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", kind: "error" };
     render();
@@ -103,13 +110,25 @@ function apiFailure(error) {
   render();
 }
 
-function setBusy(active, action = "") {
-  state.busy = active;
-  state.busyAction = active ? action : "";
+function beginBusy(action) {
+  busyOwner = ++busyGeneration;
+  state.busy = true;
+  state.busyAction = action;
+  render();
+  return busyOwner;
+}
+
+function releaseBusy(owner) {
+  if (busyOwner !== owner) return;
+  busyOwner = 0;
+  state.busy = false;
+  state.busyAction = "";
   render();
 }
 
 function clearSession() {
+  busyOwner = 0;
+  busyGeneration++;
   sessionGeneration++;
   navigationGeneration++;
   navigationAbort?.abort();
@@ -165,7 +184,7 @@ async function login(event) {
   event.preventDefault();
   if (state.busy) return;
   const session = sessionGeneration;
-  setBusy(true, "login");
+  const owner = beginBusy("login");
   try {
     await refreshCsrf();
     if (session !== sessionGeneration) return;
@@ -182,7 +201,7 @@ async function login(event) {
       if (session === sessionGeneration) apiFailure(error);
     }), 5000);
   } catch (error) { if (session === sessionGeneration) apiFailure(error); }
-  finally { if (session === sessionGeneration) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function logout() {
@@ -192,9 +211,7 @@ async function logout() {
   navigationAbort?.abort();
   stopPolling();
   state.user = null;
-  state.busy = true;
-  state.busyAction = "logout";
-  render();
+  beginBusy("logout");
   try { await request; } catch { /* Session is already discarded locally. */ }
   try { await refreshCsrf(); } catch { /* Login reports a connection error if refresh fails. */ }
   clearSession();
@@ -231,8 +248,9 @@ async function refreshDocuments() {
   render({ passive: true });
 }
 
-async function openDocument(id) {
-  if (state.busy && state.busyAction !== "open") return;
+async function openDocument(id, { force = false, transferFrom = null } = {}) {
+  if (!force && state.selectedId === id && state.document) return;
+  if (state.busy && state.busyAction !== "open" && transferFrom !== busyOwner) return;
   if (state.selectedId && state.selectedId !== id &&
       (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
       !window.confirm("Bạn có thay đổi chưa lưu. Mở chứng từ khác sẽ bỏ các thay đổi này. Tiếp tục?")) return;
@@ -241,7 +259,7 @@ async function openDocument(id) {
   navigationAbort?.abort();
   navigationAbort = new AbortController();
   const signal = navigationAbort.signal;
-  setBusy(true, "open");
+  const owner = beginBusy("open");
   try {
     state.selectedId = id;
     state.document = null;
@@ -268,7 +286,7 @@ async function openDocument(id) {
     if (isActiveJob(state.document.job)) startJobPolling();
     else clearInterval(jobTimer);
   } catch (error) { if (currentView(session, navigation, id) && error.name !== "AbortError") apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 function startJobPolling() {
@@ -319,7 +337,7 @@ async function uploadAndProcess(event) {
   if (!(["image/jpeg", "image/png", "application/pdf"].includes(file.type) ||
         ["jpg", "jpeg", "png", "pdf"].includes(extension)))
     return message("Chỉ hỗ trợ JPG, PNG hoặc PDF.", "error");
-  setBusy(true, "upload");
+  const owner = beginBusy("upload");
   try {
     const document = await api().upload(file, state.uploadType);
     if (session !== sessionGeneration) return;
@@ -330,11 +348,9 @@ async function uploadAndProcess(event) {
     if (session !== sessionGeneration) return;
     state.documents = [{ ...document, job }, ...state.documents.filter(item => item.id !== document.id)];
     state.message = { text: "File đã lưu an toàn. Job đã vào hàng đợi; bạn có thể theo dõi trạng thái ở đây.", kind: "success" };
-    state.busy = false;
-    state.busyAction = "";
-    await openDocument(document.id);
+    await openDocument(document.id, { transferFrom: owner });
   } catch (error) { if (session === sessionGeneration) apiFailure(error); }
-  finally { if (session === sessionGeneration) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function rerun() {
@@ -342,7 +358,7 @@ async function rerun() {
   if (hasUnsavedReview())
     return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi chạy xử lý lại.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
-  setBusy(true, "rerun");
+  const owner = beginBusy("rerun");
   try {
     const job = await api().createJob(id);
     if (!currentView(session, navigation, id)) return;
@@ -350,7 +366,7 @@ async function rerun() {
     state.message = { text: "Job mới đã được xếp hàng. Kết quả sẽ xuất hiện thành candidate riêng, không ghi đè revision hiện tại.", kind: "success" };
     await refreshDocuments();
   } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function saveReview() {
@@ -365,7 +381,7 @@ async function saveReview() {
     const index = state.rowIds.indexOf(rowId);
     if (index >= 0) for (const field of fields) reviewedPaths.push(`/items/${index}/${field}`);
   }
-  setBusy(true, "save");
+  const owner = beginBusy("save");
   try {
     const rowIds = [...state.rowIds];
     while (rowIds.length < payload.items.length) rowIds.push(crypto.randomUUID());
@@ -386,7 +402,7 @@ async function saveReview() {
     state.revisions = revisions.items || [];
     await refreshDocuments();
   } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function adoptCandidate(runId) {
@@ -395,7 +411,7 @@ async function adoptCandidate(runId) {
   if (state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size)
     return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi áp dụng candidate.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
-  setBusy(true, "adopt");
+  const owner = beginBusy("adopt");
   try {
     const updated = await api().adoptRun(document.id, {
       run_id: runId,
@@ -411,7 +427,7 @@ async function adoptCandidate(runId) {
     state.revisions = revisions.items || [];
     await refreshDocuments();
   } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function approve() {
@@ -419,7 +435,7 @@ async function approve() {
   if (!document?.head || state.busy || remoteChanged() || isDirty() ||
       state.changedPaths.size || state.changedItemFields.size) return;
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
-  setBusy(true, "approve");
+  const owner = beginBusy("approve");
   try {
     const updated = await api().approve(document.id, {
       revision_id: document.head.id,
@@ -437,7 +453,7 @@ async function approve() {
     state.revisions = revisions.items || [];
     await refreshDocuments();
   } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 async function exportRevision() {
@@ -446,7 +462,7 @@ async function exportRevision() {
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const selected = state.revisions.find((revision) => revision.id === state.exportRevisionId);
   if (!selected?.approved_at) return message("Chỉ revision đã duyệt mới được xuất.", "error");
-  setBusy(true, "export");
+  const owner = beginBusy("export");
   try {
     const artifact = await api().createExport(document.id, selected.id);
     const blob = await api().downloadExport(artifact.id);
@@ -457,7 +473,7 @@ async function exportRevision() {
     setTimeout(() => URL.revokeObjectURL(url), 0);
     state.message = { text: `Đã xuất JSON của revision ${selected.id}.`, kind: "success" };
   } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
-  finally { if (currentView(session, navigation, id)) { state.busy = false; state.busyAction = ""; render(); } }
+  finally { releaseBusy(owner); }
 }
 
 function documentElement(tag, attributes) {
@@ -748,7 +764,7 @@ root.addEventListener("change", (event) => {
     return render();
   }
   if (target.name === "document_type") { state.uploadType = target.value; return; }
-  if (target.matches("[data-scalar], [data-item-field]")) { updateBoundValue(target); return render(); }
+  if (target.matches("[data-scalar], [data-item-field]")) { updateBoundValue(target); return; }
   if (target.matches("[data-reason]")) { state.reviewReason = target.value; return; }
   if (target.matches("[data-ack]")) {
     if (target.checked) state.acknowledged.add(target.dataset.ack);
@@ -784,7 +800,7 @@ root.addEventListener("click", (event) => {
   if (action === "reload") {
     if (state.selectedId && (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
         !window.confirm("Tải lại sẽ bỏ các thay đổi chưa lưu. Tiếp tục?")) return;
-    return openDocument(state.selectedId);
+    return openDocument(state.selectedId, { force: true });
   }
   if (action === "save") return saveReview();
   if (action === "approve") return approve();

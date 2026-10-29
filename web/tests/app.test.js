@@ -20,6 +20,7 @@ function deferred() {
 }
 
 async function harness(routes = {}) {
+  const listeners = new Map();
   const controls = {
     '[data-action="save"]': { disabled: true },
     '[data-action="rerun"]': { disabled: false },
@@ -27,7 +28,10 @@ async function harness(routes = {}) {
   };
   const root = {
     innerHTML: "",
-    addEventListener() {},
+    addEventListener(type, listener) {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type).push(listener);
+    },
     querySelector(selector) { return controls[selector] ?? null; },
     querySelectorAll() { return []; },
     contains() { return false; },
@@ -57,7 +61,8 @@ async function harness(routes = {}) {
     csrf() { return routes.csrf?.() ?? Promise.resolve({ token: "new-csrf" }); }
   }
   const context = {
-    ...domain, ApiClient, ApiError, document, root, window: { confirm: () => true },
+    ...domain, ApiClient, ApiError, document, root,
+    window: { confirm: routes.confirm ?? (() => true) },
     URL: { createObjectURL: blob => blob.url, revokeObjectURL() {} },
     crypto: { randomUUID: () => "00000000-0000-4000-8000-000000000001" },
     structuredClone, AbortController, setInterval: () => 1, clearInterval() {}, setTimeout,
@@ -66,7 +71,13 @@ async function harness(routes = {}) {
   runInNewContext(source, context, { filename: "app.js" });
   await new Promise(setImmediate);
   context.hooks.state.user = { id: "u", username: "operator" };
-  return { ...context.hooks, root, document, controls };
+  return {
+    ...context.hooks, root, document, controls,
+    async emit(type, target) {
+      for (const listener of listeners.get(type) || [])
+        await listener({ target, preventDefault() {} });
+    },
+  };
 }
 
 function doc(id, version, total = "100", items = []) {
@@ -115,6 +126,46 @@ test("late detail and image responses cannot replace the selected document", asy
   assert.equal(app.state.selectedId, "B");
   assert.equal(app.state.document.id, "B");
   assert.equal(app.state.imageUrl, "B");
+});
+
+test("reselecting a loaded document preserves payload and review draft without refetching", async () => {
+  const original = doc("A", 1);
+  let reads = 0, prompts = 0;
+  const app = await harness({
+    document: async () => { reads++; return original; },
+    listDocuments: async () => ({ items: [original] }),
+    confirm: () => { prompts++; return false; },
+  });
+  await app.openDocument("A");
+  app.state.payload.total_amount = "200";
+  app.state.changedPaths.add("/total_amount");
+  app.state.changedItemFields.set("row-1", new Set(["description"]));
+  await app.openDocument("A");
+  assert.equal(reads, 1);
+  assert.equal(prompts, 0);
+  assert.equal(app.state.payload.total_amount, "200");
+  assert.equal(app.state.changedPaths.size, 1);
+  assert.equal(app.state.changedItemFields.size, 1);
+  await app.openDocument("B");
+  assert.equal(prompts, 1);
+  assert.equal(reads, 1);
+  assert.equal(app.state.selectedId, "A");
+});
+
+test("reselecting a document retries after its first load fails", async () => {
+  let reads = 0;
+  const app = await harness({
+    document: async () => {
+      if (++reads === 1) throw new Error("temporary failure");
+      return doc("A", 1);
+    },
+    listDocuments: async () => ({ items: [] }),
+  });
+  await app.openDocument("A");
+  assert.equal(app.state.document, null);
+  await app.openDocument("A");
+  assert.equal(reads, 2);
+  assert.equal(app.state.document.id, "A");
 });
 
 test("saving a remaining row remaps reviewed path after deleting an earlier row", async () => {
@@ -286,6 +337,57 @@ test("typing updates Save and Rerun immediately without rebuilding the focused e
   assert.equal(app.controls['[data-action="save"]'].disabled, false);
   assert.equal(app.controls['[data-action="rerun"]'].disabled, true);
   assert.equal(app.root.innerHTML, html);
+});
+
+test("field change before a Save click keeps the button node and sends one request", async () => {
+  const original = doc("A", 1);
+  let saves = 0, sent;
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async (_, body) => { saves++; sent = body; return doc("A", 2, "200"); },
+  });
+  await app.openDocument("A");
+  const html = app.root.innerHTML;
+  const target = {
+    dataset: { scalar: "total_amount" }, value: "200",
+    matches: selector => selector.includes("[data-scalar]"),
+  };
+  await app.emit("change", target);
+  assert.equal(app.root.innerHTML, html);
+  assert.equal(app.controls['[data-action="save"]'].disabled, false);
+  await app.saveReview();
+  assert.equal(saves, 1);
+  assert.equal(sent.payload.total_amount, "200");
+});
+
+test("stale upload finally cannot unlock a newer document open", async () => {
+  const u = deferred(), b = deferred();
+  let uploads = 0;
+  const app = await harness({
+    document: id => id === "U" ? u.promise : b.promise,
+    listDocuments: async () => ({ items: [] }),
+    upload: async () => { uploads++; return doc("U", 1); },
+    createJob: async () => ({ id: "job", state: "QUEUED" }),
+  });
+  app.state.uploadFile = { name: "receipt.png", type: "image/png" };
+  const uploading = app.uploadAndProcess({ preventDefault() {} });
+  await new Promise(setImmediate);
+  assert.equal(app.state.busyAction, "open");
+  assert.equal(app.state.selectedId, "U");
+  const openingB = app.openDocument("B");
+  assert.equal(app.state.busyAction, "open");
+  u.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+  await uploading;
+  assert.equal(app.state.busy, true);
+  assert.equal(app.state.selectedId, "B");
+  app.state.uploadFile = { name: "second.png", type: "image/png" };
+  await app.uploadAndProcess({ preventDefault() {} });
+  assert.equal(uploads, 1);
+  b.resolve(doc("B", 1));
+  await openingB;
+  assert.equal(app.state.busy, false);
+  assert.equal(app.state.document.id, "B");
 });
 
 test("focused editor keeps its draft but disables Save when polling finds a remote version", async () => {
