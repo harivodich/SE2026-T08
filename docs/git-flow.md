@@ -14,6 +14,8 @@
 
 `main` và `develop` phải được bảo vệ trên GitHub: tắt direct push và force push; yêu cầu CI pass và approval trước khi merge. Maintainer/Tech Lead quản lý thiết lập bảo vệ này.
 
+Policy Lead hiện hành: chỉ `harivodich` quyết định merge hai branch này. Lead có PR-only bypass review để merge PR do chính mình tạo mà không bị ép nhờ teammate approve; GitHub không hỗ trợ tác giả tự Approve. Required CI ở ruleset riêng không bypass, theo [runbook CI/CD](cicd.md); quyền bỏ approval không bỏ được CI.
+
 `Commit trực tiếp` ở đây nghĩa là push commit thẳng lên branch dùng chung. Commit trên branch feature/bug/hotfix của mình được phép.
 
 Luồng branch chính:
@@ -45,7 +47,7 @@ Mỗi branch giải quyết một task. Tránh tên chung như `feature/update`,
 
 Nếu chưa dùng Jira, lấy số GitHub issue làm mã `SE-<số_issue>`, ví dụ `feature/SE-1_receipt_schema`. Chỉ mở issue khi bắt đầu giao việc, không cần tạo toàn bộ backlog trước.
 
-Lần publish đầu tiên của repo dùng `main` cho khung chung, sau đó tạo `develop` từ cùng commit. Đây là bước khởi tạo; các thay đổi phát triển tiếp theo đi qua feature/bug branch và PR theo quy trình dưới đây. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
+Ngoại lệ bootstrap VietDoc: khi Lead đang hoàn thiện khung và yêu cầu riêng, có thể commit/push main; không tự tạo branch mới trái chỉ dẫn. Lượt redesign hiện chỉ sửa local, chưa được yêu cầu commit/push. Trước team coding, Lead đồng bộ develop từ main đã kiểm bằng fast-forward/PR phù hợp lịch sử, không force/reset; sau đó feature/bug đi qua PR như dưới đây. Ngoại lệ này không áp dụng cho feature thường xuyên. Quy định bảo vệ branch trong tài liệu là mục tiêu cấu hình, không có nghĩa setting GitHub đã được bật.
 
 ## 3. Feature và QA bug
 
@@ -75,7 +77,7 @@ Lần publish đầu tiên của repo dùng `main` cho khung chung, sau đó t�
 
 2. Commit thay đổi theo task; chạy focused checks trước khi mở Merge Request (MR). Trên GitHub, MR được gọi là Pull Request (PR).
 3. Mở MR từ branch task vào `develop`. Mô tả MR nêu Jira key, mục tiêu, acceptance, cách kiểm tra, ảnh hưởng schema/migration/model và rủi ro liên quan.
-4. Thêm ít nhất một developer khác làm reviewer; tác giả không tự approve. Reviewer ghi comment vào vấn đề cần sửa. Tác giả xử lý hoặc phản hồi từng comment trước khi xin duyệt cuối.
+4. Lead là reviewer quyết định; có thể nhờ consumer/developer khác góp ý. Tác giả không tự approve. Với PR do Lead tạo, không yêu cầu một teammate approve để Lead merge. Xử lý hoặc phản hồi comment trước khi duyệt cuối.
 5. Sau khi review chéo hoàn tất, Lead của dự án kiểm tra thiết kế, hợp đồng, phạm vi và kết quả CI. Chỉ merge khi Lead approve và các required checks đều pass.
 6. Bật xóa tự động branch task sau khi merge. Không xóa `main` hoặc `develop`.
 
@@ -162,3 +164,12 @@ Khi có conflict:
 ## 8. Vai trò của code review
 
 Review chéo giúp phát hiện lỗi logic, regression và vấn đề maintainability sớm; chia sẻ kiến thức để thành viên khác có thể tiếp quản; và tạo dấu vết rõ ràng về quyết định trước khi code vào branch tích hợp. Reviewer phản hồi vào thay đổi cụ thể, tác giả trả lời và cập nhật code; Tech Lead chịu trách nhiệm duyệt cuối theo quyền được phân công.
+
+## 9. Áp dụng cho VietDoc và doc cá nhân
+
+- Roadmap/task ở [Lead](team/lead.md), [Data](team/data-engineer.md), [AI-1](team/ai-1-ocr.md), [AI-2](team/ai-2-extraction.md), [Backend](team/backend.md). Mỗi doc có Git Flow/reviewer/output checklist; tiến độ ở Issue/PR, không folder tasks.
+- O1.3/M3.2 là mã tra guide, không issue đã tồn tại. Branch dùng issue/Jira ID thật và slug snake_case.
+- [Spec folder](../specs/repository-layout.md) quy định vùng sửa/owner. Shared contracts/migrations/lockfile cần consumer review, Lead điều phối merge order; không chọn cả một phía khi conflict.
+- PR data/model ghi dataset/model/evaluator/processor/preprocess/config versions, manifests/hashes và report thật. Không commit raw data/weights/PII để reviewer chạy thử.
+- [Workflow](team/workflow.md) có commands có điều kiện, handoffs/gates. Kiểm working tree trước switch/pull; không stash/reset/clean tự động để vượt dirty tree.
+- Protection/required checks/access GitHub cần xác minh riêng; YAML local không chứng minh settings đã enforce. CI increment và phần release chưa đủ xem [runbook](cicd.md), không claim application checks đã pass từ Data tests.

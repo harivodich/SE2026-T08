@@ -1,0 +1,7 @@
+{
+  "contract_version": 1,
+  "attempt_id": "33333333-3333-4333-8333-333333333333",
+  "code": "AI_BUSY",
+  "message": "Compute slot is busy",
+  "retryable": true
+}

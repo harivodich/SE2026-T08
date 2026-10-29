@@ -3,7 +3,6 @@ WORKDIR /build/backend
 COPY backend/pom.xml ./pom.xml
 RUN mvn -B -q dependency:go-offline
 COPY backend/src ./src
-COPY web/src ../web/src
 RUN mvn -B -q -Dmaven.test.skip=true package
 FROM eclipse-temurin:17-jre
 RUN groupadd --gid 10001 app && useradd --uid 10001 --gid app app && mkdir -p /data/storage && chown -R app:app /data

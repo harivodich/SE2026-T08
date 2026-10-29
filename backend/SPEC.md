@@ -1,9 +1,21 @@
-# Backend Java — implementation
+# SPEC — backend
 
-Owner: Full Stack. Spring Boot REST/business persistence nằm trong thư mục này; Python OCR/extraction vẫn thuộc hai vai trò AI.
+## Purpose và owner
 
-Schema nguồn: `../specs/contracts/`. OpenAPI Web hiện được đóng gói tại `src/main/resources/openapi.json`. Các bản schema đóng gói cần được đối chiếu với `../specs/contracts/` khi sửa contract. Giao thức compute HTTP và canonical artifacts cần được chốt với AI-1/AI-2 trước khi nhận tích hợp provider thật.
+Backend sở hữu business Java API, Thymeleaf UI, job runner, persistence, review/export và Flyway. Foundation `manual`/`demo` đã có implementation chạy được; Python OCR/extraction thuộc AI-1/AI-2.
 
-Commands: `./mvnw test`, `./mvnw package`, `./mvnw spring-boot:run -Dspring-boot.run.profiles=demo`. Windows dùng `mvnw.cmd`. Không commit runtime, .env hoặc target.
+## Source và authority
 
-Review/approve/export và fencing phải được kiểm tra khi sửa. Không viết thuật toán OCR/model trong API.
+Java ở `src/main/java/vn/vietdoc`; Thymeleaf ở `src/main/resources/templates`, viewer/editor JavaScript/CSS ở `src/main/resources/static`, Flyway ở `src/main/resources/db/migration`, Java tests ở `src/test/java`. Schema trung lập tại `../specs/contracts/`; `ContractValidator` hiện đọc bản classpath trong `src/main/resources/contracts/`, cần kiểm parity khi sửa. OpenAPI public hiện đóng gói tại `src/main/resources/openapi.json`.
+
+## Ranh giới
+
+Java là business DB writer và approval authority duy nhất. HTTP compute của Python chạy ngoài DB transaction, nhưng `AI_MODE=http` vẫn fail-fast cho đến khi Java/Python dùng chung compute contract và canonical assets theo run. Không load model weights hay viết OCR/model trong API. Completion vẫn cần fencing, idempotency và kiểm approval theo revision hiện hành.
+
+## Workflow và kiểm tra
+
+Chạy `./mvnw test`, `./mvnw package`, `./mvnw spring-boot:run -Dspring-boot.run.profiles=demo` (Windows dùng `mvnw.cmd`). Kiểm review/approve/export, CAS, migration và static assets khi sửa. Ghi actual commands/results và limitations; không commit runtime, `.env` hoặc `target`.
+
+## Liên quan
+
+[Scope](../specs/scope.md), [Backend guide](../docs/team/backend.md), [structure](../docs/source-structure.md), [architecture](../docs/architecture.md), [compute protocol](../specs/contracts/compute-api.md). Các mốc PostgreSQL/actual-provider E2E chưa được chứng minh bởi tests H2/demo.

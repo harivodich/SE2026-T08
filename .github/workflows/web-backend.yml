@@ -20,7 +20,7 @@ jobs:
           node-version: '22'
       - name: Web tests
         run: node --test
-        working-directory: web
+        working-directory: backend/src/test/js
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
           distribution: temurin

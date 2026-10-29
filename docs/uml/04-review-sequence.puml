@@ -6,8 +6,8 @@ skinparam backgroundColor #FFFFFF
 skinparam ArrowColor #405670
 hide footbox
 participant "Operator" as user
-participant "Review UI" as ui
-participant "API" as api
+participant "Thymeleaf + editor JS" as ui
+participant "Java API" as api
 participant "Review service" as review
 participant "Validation" as rules
 participant "PostgreSQL" as db
