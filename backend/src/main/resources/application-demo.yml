@@ -1,0 +1,5 @@
+vietdoc:
+  mode: ${AI_MODE:demo}
+  pipeline-manifest: ${PIPELINE_MANIFEST:fictional-fixtures.v1}
+  seed-username: demo
+  seed-password: demo-change-me

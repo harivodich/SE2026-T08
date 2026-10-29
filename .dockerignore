@@ -1,0 +1,9 @@
+**
+!backend/
+!backend/Dockerfile
+!backend/pom.xml
+!backend/src/
+!backend/src/**
+!web/
+!web/src/
+!web/src/**

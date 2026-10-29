@@ -1,0 +1,13 @@
+# ADR 0011 — Web session và Thymeleaf
+
+Status: Accepted — lựa chọn của Lead ngày 24/10/2026 khi xử lý review PR #1. Đổi số từ `0009-web-session.md` lúc tích hợp `develop` để không trùng ADR-0009 về kiến trúc Java/Python; nội dung quyết định không đổi.
+
+## Quyết định
+
+Spring Boot render trang gốc bằng Thymeleaf. Browser dùng HTTP session cookie cùng origin; token xác thực nội bộ không trả về JavaScript. Các request POST/PATCH gửi CSRF token từ trang. Editor JavaScript hiện tại tiếp tục xử lý trạng thái tương tác, nhưng base revision cố định và mọi mutation vẫn qua API có CAS.
+
+## Lý do và hệ quả
+
+Hướng này khớp lựa chọn session/Thymeleaf của Lead mà vẫn giữ được workflow editor hiện có. Session ID được đổi khi đăng nhập; logout thu hồi token nội bộ và hủy session. Cần kiểm browser lifecycle, cookie policy và CSRF trong CI. Chạy nhiều API instance cần session store chung hoặc sticky session; cấu hình triển khai này chưa được chứng minh trong PR.
+
+Acceptance này chỉ áp dụng cho cơ chế web session/Thymeleaf, không tự chuyển các lựa chọn persistence/job/compute trong ADR-0009 sang Accepted.

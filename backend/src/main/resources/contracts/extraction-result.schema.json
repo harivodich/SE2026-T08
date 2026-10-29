@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vietdoc:extraction-result:v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["run_id", "job_id", "document_type", "schema_version", "language", "payload", "field_metadata", "issues", "provenance"],
+  "properties": {
+    "run_id": {"type": "string", "format": "uuid"},
+    "job_id": {"type": "string", "format": "uuid"},
+    "document_type": {"enum": ["receipt", "invoice"]},
+    "schema_version": {"enum": ["receipt.v1", "invoice.v1"]},
+    "language": {"const": "vi"},
+    "payload": {"$ref": "urn:vietdoc:business:v1"},
+    "field_metadata": {"type": "array", "items": {"$ref": "#/$defs/FieldMetadata"}},
+    "issues": {"type": "array", "items": {"$ref": "#/$defs/Issue"}},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pipeline_manifest_id", "ocr_version", "extractor_release_id", "normalizer_version"],
+      "properties": {
+        "pipeline_manifest_id": {"type": "string", "minLength": 1},
+        "ocr_version": {"type": "string", "minLength": 1},
+        "extractor_release_id": {"type": "string", "minLength": 1},
+        "normalizer_version": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"document_type": {"const": "receipt"}}}, "then": {"properties": {"schema_version": {"const": "receipt.v1"}, "payload": {"$ref": "urn:vietdoc:business:v1#/$defs/Receipt"}}}},
+    {"if": {"properties": {"document_type": {"const": "invoice"}}}, "then": {"properties": {"schema_version": {"const": "invoice.v1"}, "payload": {"$ref": "urn:vietdoc:business:v1#/$defs/Invoice"}}}}
+  ],
+  "$defs": {
+    "Point": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+    "SourceRegion": {
+      "type": "object", "additionalProperties": false, "required": ["page", "quad", "ocr_block_ids"],
+      "properties": {
+        "page": {"const": 0},
+        "quad": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/Point"}},
+        "ocr_block_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "FieldMetadata": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "raw_value", "value_origin", "source_regions", "ocr_score", "confidence", "confidence_method", "review_flags"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^/"},
+        "raw_value": {"type": ["string", "null"]},
+        "value_origin": {"enum": ["prediction", "human", "absent"]},
+        "source_regions": {"type": "array", "items": {"$ref": "#/$defs/SourceRegion"}},
+        "ocr_score": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "confidence_method": {"type": ["string", "null"]},
+        "review_flags": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "Issue": {
+      "type": "object", "additionalProperties": false, "required": ["id", "code", "severity", "paths", "message"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "code": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["blocking", "warning", "info"]},
+        "paths": {"type": "array", "items": {"type": "string", "pattern": "^/"}},
+        "message": {"type": "string"}
+      }
+    }
+  }
+}

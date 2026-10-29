@@ -13,6 +13,8 @@ Tám ADR v1 dưới giữ quyết định của [thiết kế v1](../design/v1/0
 | [0007](0007-storage-polling.md) | Private local storage, UI polling | Proposed |
 | [0008](0008-business-contracts.md) | Fixed business schema; Pydantic authority cũ | Proposed v1, xem 0009 |
 | [0009](0009-java-python-thymeleaf.md) | Java/Thymeleaf + Python compute; PostgreSQL runner, neutral schemas | Proposed mới |
+| [0010](0010-pdf-render-isolation.md) | Render PDF bằng child JVM có giới hạn trước DB transaction | Accepted 2026-10-24 |
+| [0011](0011-web-session.md) | Thymeleaf + HTTP session cùng origin và CSRF | Accepted 2026-10-24 |
 
 ADR-0009 là hướng thiết kế hiện hành để review. 0001/0002 và phần code-generated authority 0008 không được dùng làm quyết định implementation mới; khi 0009 được chấp nhận mới đánh dấu superseded. UI Thymeleaf đã được người dùng chọn; không suy ra acceptance các lựa chọn kỹ thuật còn lại.
 

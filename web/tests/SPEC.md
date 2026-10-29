@@ -2,11 +2,11 @@
 
 ## Purpose và owner
 
-Legacy scaffold: không dùng để triển khai mới. Owner: Backend giữ reference.
+Legacy test scaffold; Backend giữ reference. Node tests hiện hành nằm ở `backend/src/test/js/`.
 
 ## Đặt gì ở đây?
 
-Không thêm runtime code/dependencies ở đây. Đích: backend/src/main/resources/templates và static.
+Không thêm tests mới ở đây. Kiểm `backend/src/main/resources/static/*.js` bằng `node --test` từ `backend/src/test/js/`.
 
 ## Ranh giới
 
@@ -21,4 +21,4 @@ Java/Thymeleaf + Python AI theo ADR-0009 thay stack v1; không chạy hai busine
 [Scope](../../specs/scope.md), [structure](../../docs/source-structure.md), [architecture](../../docs/architecture.md).
 
 
-Legacy placeholders giữ nguyên để đối chiếu; chưa xóa.
+Legacy placeholders giữ nguyên để đối chiếu.
