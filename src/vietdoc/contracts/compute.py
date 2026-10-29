@@ -124,6 +124,8 @@ class ComputeContracts:
                 raise ContractError(RESPONSE_SCHEMA, path, "does not echo the request")
         prefix = f"attempts/{request['job_id']}/{request['attempt_id']}/"
         artifacts = response["artifacts"]
+        if not any(artifact["kind"] == "ocr" for artifact in artifacts):
+            raise ContractError(RESPONSE_SCHEMA, "/artifacts", "must include an OCR artifact")
         keys = [artifact["asset_key"] for artifact in artifacts]
         if len(set(keys)) != len(keys):
             raise ContractError(RESPONSE_SCHEMA, "/artifacts", "duplicate artifact keys")

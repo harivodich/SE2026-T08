@@ -1,6 +1,6 @@
 # Private compute API v1: Java ↔ Python
 
-Thiết kế đích, chưa endpoint implementation. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
+Reference protocol v1. Python đã có endpoint boundary/fixtures, chưa pipeline OCR/extraction thật hoặc Java↔Python actual-provider acceptance. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
 
 ## Transport và endpoints
 
@@ -17,6 +17,19 @@ Một synchronous bounded compute call từ runner, không public request thread
 Metadata theo [compute request schema](compute-request.schema.json): contract_version, job_id, run_id, attempt_id, selected document_type/schema_version, language=vi, input_sha256, pipeline_manifest_id, remaining_budget_ms. Tất cả IDs do Java tạo; model không sinh IDs. Input hash phải đúng bytes; pipeline manifest phải local allowlisted/pinned, không URL/weights path từ caller.
 
 Java gửi remaining budget theo total job deadline DB; Python deadline bằng monotonic clock khi nhận, không reset budget giữa stages. HTTP connection/read/body limits có margin đo được; khi budget≤0 Java không gọi. AI service kiểm bytes20MiB/page1/pixels20MP/token/decode/output caps, cùng profile version sau G0. Python không dùng ngôn ngữ khác tự chuyển fallback.
+
+Python boundary ghi arrival trước đọc body; thời gian đọc/parse/hash, chờ worker và
+validate/serialize response dùng cùng budget. Hết hạn trước worker-start thì không
+gọi pipeline; hết hạn trong output preparation thì trả 504, không success log.
+Đây là deadline accounting, không hard-stop native/GPU compute; ingress hard timeout
+và resource isolation cần cấu hình/verification riêng khi tích hợp.
+
+Metadata part hiện có cap 16 KiB; Python producer cap nesting 8 object/array containers,
+reject duplicate keys và malformed/decoder-limit errors bằng 422 INPUT_INVALID.
+Metadata v1 là flat object; Backend cần review policy producer này khi nối client.
+Storage I/O failures ở parse/read/cleanup được phân biệt với input invalid: 503
+AI_NOT_READY, retryable theo budget hiện có. Cleanup error không che primary input
+error đã xác định; unexpected programming failures vẫn INTERNAL_ERROR, không retry giả.
 
 ## Success response
 

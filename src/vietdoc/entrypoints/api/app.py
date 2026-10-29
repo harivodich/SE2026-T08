@@ -9,7 +9,6 @@ extraction output. One compute slot, compute runs off the event loop.
 from __future__ import annotations
 
 import hashlib
-import json
 import logging
 import secrets
 import threading
@@ -23,10 +22,13 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-from starlette.datastructures import UploadFile
+from starlette.datastructures import FormData, UploadFile
+from starlette.exceptions import HTTPException
+from starlette.formparsers import MultiPartException
 
 from vietdoc.contracts.compute import REQUEST_SCHEMA, ComputeContracts, ContractError
 from vietdoc.entrypoints.api.settings import Settings
+from vietdoc.entrypoints.api.metadata import decode_metadata
 from vietdoc.infrastructure.logging import configure_logging
 from vietdoc.ml.release_manifest import Release, discover_releases
 from vietdoc.pipeline.service import ComputeInput, ComputePipeline
@@ -37,9 +39,14 @@ MAX_METADATA_BYTES = 16 * 1024
 MULTIPART_OVERHEAD = 64 * 1024
 RETRY_AFTER_SECONDS = "5"
 NO_PIPELINE = "extraction pipeline is not implemented yet (M2.1/M2.3)"
+ARRIVAL_KEY = "vietdoc.compute_arrival"
 
 
 class _BodyTooLarge(Exception):
+    pass
+
+
+class _BudgetExpired(Exception):
     pass
 
 
@@ -116,6 +123,26 @@ def _attempt_id(metadata: Any) -> str | None:
         return None
 
 
+async def _close_form(form: FormData) -> Exception | None:
+    """Attempt every close, preserving the primary request outcome in the caller."""
+    failure = None
+    for _, value in form.multi_items():
+        if not isinstance(value, UploadFile):
+            continue
+        try:
+            await value.close()
+        except Exception as error:
+            failure = error if failure is None or not isinstance(error, OSError) else failure
+            # An async close may fail before closing the underlying spool file.
+            try:
+                await run_in_threadpool(value.file.close)
+            except Exception:
+                log.error("upload_cleanup_failed")
+    if failure is not None:
+        log.error("input_cleanup_failed")
+    return failure
+
+
 def create_app(settings: Settings | None = None, pipeline: ComputePipeline | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     configure_logging(settings.log_level)
@@ -161,6 +188,7 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
     async def access_log(request: Request, call_next: Any) -> Any:
         request_id = str(uuid.uuid4())
         started = time.monotonic()
+        request.scope[ARRIVAL_KEY] = started
         response = await call_next(request)
         response.headers["X-Request-Id"] = request_id
         log.info(
@@ -204,20 +232,29 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
 
     @app.post("/internal/v1/compute")
     async def compute(request: Request) -> JSONResponse:
+        arrival = request.scope[ARRIVAL_KEY]
         if not _authorized(request.headers.get("authorization"), settings.service_token):
             return fail(401, "SERVICE_AUTH_FAILED", "Service credential is missing or invalid", False)
         try:
             form = await request.form(max_files=1, max_fields=1, max_part_size=MAX_METADATA_BYTES)
         except _BodyTooLarge:
             return fail(413, "INPUT_TOO_LARGE", "Request body exceeds the input limit", False)
-        except Exception:
+        except OSError:
+            return fail(503, "AI_NOT_READY", "Input storage is unavailable", True, retry_after=True)
+        except (HTTPException, MultiPartException):
             return fail(422, "INPUT_INVALID", "Multipart body could not be parsed", False)
-        try:
+        except Exception:
+            return fail(500, "INTERNAL_ERROR", "Input preparation failed", False)
+
+        attempt_id = None
+
+        async def read_document() -> tuple[dict[str, Any], bytes] | JSONResponse:
+            nonlocal attempt_id
             metadata, upload = form.get("request"), form.get("file")
             if not isinstance(metadata, str) or not isinstance(upload, UploadFile):
                 return fail(422, "INPUT_INVALID", "Multipart needs a 'request' JSON field and one 'file' part", False)
             try:
-                meta = json.loads(metadata)
+                meta = decode_metadata(metadata)
             except ValueError:
                 return fail(422, "INPUT_INVALID", "Request metadata is not valid JSON", False)
             attempt_id = _attempt_id(meta)
@@ -225,9 +262,30 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
                 contracts.validate(REQUEST_SCHEMA, meta)
             except ContractError as error:
                 return fail(422, "INPUT_INVALID", f"Request metadata invalid at {error.path}", False, attempt_id)
-            document = await upload.read(settings.max_input_bytes + 1)
+            return meta, await upload.read(settings.max_input_bytes + 1)
+
+        try:
+            prepared = await read_document()
+        except OSError:
+            prepared = fail(503, "AI_NOT_READY", "Input storage is unavailable", True, attempt_id, retry_after=True)
+        except Exception:
+            prepared = fail(500, "INTERNAL_ERROR", "Input preparation failed", False, attempt_id)
         finally:
-            await form.close()
+            cleanup_error = await _close_form(form)
+        if isinstance(prepared, JSONResponse):
+            return prepared  # cleanup failure must not hide an existing primary error
+        if cleanup_error is not None:
+            if isinstance(cleanup_error, OSError):
+                return fail(503, "AI_NOT_READY", "Input storage is unavailable", True, attempt_id, retry_after=True)
+            return fail(500, "INTERNAL_ERROR", "Input preparation failed", False, attempt_id)
+        meta, document = prepared
+        deadline = arrival + meta["remaining_budget_ms"] / 1000
+
+        def timeout_response() -> JSONResponse:
+            return fail(504, "COMPUTE_TIMEOUT", "Compute exceeded the remaining budget", False, attempt_id)
+
+        if time.monotonic() >= deadline:
+            return timeout_response()
 
         if len(document) > settings.max_input_bytes:
             return fail(413, "INPUT_TOO_LARGE", "Document exceeds the input limit", False, attempt_id)
@@ -240,6 +298,8 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
             return fail(422, "MANIFEST_UNAVAILABLE", "Pinned pipeline manifest is not available", False, attempt_id)
         if pipeline is None or ready_reasons():
             return fail(503, "AI_NOT_READY", "Compute pipeline is not ready", True, attempt_id, retry_after=True)
+        if time.monotonic() >= deadline:
+            return timeout_response()
         if not state.slot.acquire(blocking=False):
             return fail(503, "AI_BUSY", "Compute slot is busy", True, attempt_id, retry_after=True)
 
@@ -254,32 +314,42 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
             state.slot.release()
             return fail(503, "AI_NOT_READY", "Attempt storage is unavailable", True, attempt_id, retry_after=True)
 
-        deadline = time.monotonic() + meta["remaining_budget_ms"] / 1000
+        if time.monotonic() >= deadline:
+            state.slot.release()
+            return timeout_response()
         job = ComputeInput(meta, document, release, attempt_dir, deadline)
 
         def run() -> dict[str, Any]:
             try:
+                if time.monotonic() >= deadline:
+                    raise _BudgetExpired
                 return pipeline.run(job)
             finally:
                 state.slot.release()  # slot frees only when compute really ends
 
-        started = time.monotonic()
         try:
             response = await run_in_threadpool(run)
+        except _BudgetExpired:
+            return timeout_response()
         except Exception:
             log.exception("compute_failed", extra=ids)
             return fail(500, "INTERNAL_ERROR", "Compute failed", False, attempt_id)
-        if time.monotonic() > deadline:
-            return fail(504, "COMPUTE_TIMEOUT", "Compute exceeded the remaining budget", False, attempt_id)
+        if time.monotonic() >= deadline:
+            return timeout_response()
         try:
             contracts.check_response(meta, response)
         except ContractError as error:
             log.warning("output_invalid", extra={**ids, "path": error.path})
             return fail(422, "OUTPUT_INVALID", "Pipeline output failed contract validation", False, attempt_id)
+        if time.monotonic() >= deadline:
+            return timeout_response()
+        success_response = JSONResponse(response)
+        if time.monotonic() >= deadline:
+            return timeout_response()
         log.info(
             "compute_succeeded",
-            extra={**ids, "duration_ms": round((time.monotonic() - started) * 1000, 1)},
+            extra={**ids, "duration_ms": round((time.monotonic() - arrival) * 1000, 1)},
         )
-        return JSONResponse(response)
+        return success_response
 
     return app

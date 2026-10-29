@@ -82,6 +82,14 @@ def test_response_correlation_matches_request(contracts):
     contracts.check_response(load("compute-request.json"), load("compute-response.json"))
 
 
+def test_missing_ocr_artifact_is_rejected(contracts):
+    response = load("compute-response.json")
+    response["artifacts"][1]["kind"] = "raw_prediction"
+    contracts.validate(RESPONSE_SCHEMA, response)  # shape alone does not require OCR
+    with pytest.raises(ContractError):
+        contracts.check_response(load("compute-request.json"), response)
+
+
 @pytest.mark.parametrize(
     "mutate",
     [

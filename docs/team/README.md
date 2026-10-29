@@ -6,6 +6,8 @@ Repo hiện có scaffold và thiết kế Java/Spring Boot/Thymeleaf + Python AI
 
 UI Thymeleaf đã được chọn. Python pipeline/serving giao AI-2 (M2.3); AI-1 giữ preprocess/OCR; Backend giữ Java runner/client/DB/UI. [Architecture](../architecture.md), [compute protocol](../../specs/contracts/compute-api.md) là active design; v1 là snapshot.
 
+Ghi chép công việc AI-2: [nhật ký và giải thích review](AI-2/README.md). Đây là hồ sơ tham khảo có nguồn/evidence, không thay roadmap trong `ai-2-extraction.md` hoặc trạng thái/approval của Issue/PR.
+
 ## Từ ngữ dùng trong hướng dẫn
 
 | Từ | Hiểu đơn giản |
