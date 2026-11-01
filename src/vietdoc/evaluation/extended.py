@@ -12,7 +12,7 @@ from .policy import FIELDS, VERSION as NORMALIZATION_VERSION
 from .tables import POLICY, cell, evaluate_table, table_metrics
 from .evidence import evaluate_evidence, evidence_metrics
 
-VERSION = 'd3.2.v1'
+VERSION = 'd3.2.v2'
 CALIBRATION_PROTOCOL = 'd32-correctness-v1-proposed'
 PINS = ('dataset_manifest_sha256', 'dataset_version', 'preprocess_version',
         'normalizer_version', 'ocr_version', 'schema_version')
@@ -20,13 +20,14 @@ PINS = ('dataset_manifest_sha256', 'dataset_version', 'preprocess_version',
 
 def load_gold(root, manifest_path):
     manifest, samples, pins = scalar_ocr.load_gold(root, manifest_path)
+    base = Path(manifest_path).parent if manifest['version'] in {'d2.1.v1', 'd2.2.v1'} else Path(root)
     for sample, entry in zip(samples, manifest['samples']):
         for key in ('family_id', 'quality', 'split', 'dev_partition', 'base_id', 'row_count'):
             sample[key] = entry.get(key)
         image = entry['assets'].get('png', {})
         sample['canonical_sha256'] = image.get('sha256')
         if image:
-            image_path = asset_path(Path(root), image['path'])
+            image_path = asset_path(base, image['path'])
             require(sha(image_path) == image['sha256'], f'hash mismatch: {sample["sample_id"]}/png')
             with image_path.open('rb') as stream:
                 header = stream.read(24)
@@ -35,7 +36,7 @@ def load_gold(root, manifest_path):
             pins.append(dict(sample_id=sample['sample_id'], asset='png', **image))
         asset = entry['assets'].get('regions.json')
         if asset:
-            path = asset_path(Path(root), asset['path'])
+            path = asset_path(base, asset['path'])
             require(sha(path) == asset['sha256'], f'hash mismatch: {sample["sample_id"]}/regions.json')
             sample['regions'] = read_json(path)
             pins.append(dict(sample_id=sample['sample_id'], asset='regions.json', **asset))
@@ -165,19 +166,22 @@ def evaluate_files(root, manifest_path, prediction_paths):
         json.dumps(artifact, allow_nan=False)
         require(artifact.get('dataset_manifest_sha256') == manifest_hash, 'prediction dataset pin mismatch')
         if artifact.get('dataset_version') is not None:
-            require(artifact['dataset_version'] == manifest.get('dataset_version', manifest['version']), 'dataset version mismatch')
+            require(artifact['dataset_version'] == scalar_ocr.dataset_version(manifest), 'dataset version mismatch')
         artifacts[name] = artifact
         reports[name] = evaluate(samples, artifact)
-        reports[name]['inputs'] = dict(manifest_sha256=manifest_hash, dataset_version=manifest['version'],
+        reports[name]['inputs'] = dict(manifest_sha256=manifest_hash, dataset_version=scalar_ocr.dataset_version(manifest),
+            manifest_format_version=manifest['version'],
             predictions_sha256=sha(path), assets=pins, evaluator_source_sha256=source_hash(),
             manifest_helpers_sha256=sha(Path(__file__).parents[1] / 'data/manifest.py'),
             prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'})
         for label in reports[name]['correctness_labels']:
-            label.update(candidate=name, predictions_sha256=sha(path), manifest_sha256=manifest_hash)
+            label.update(candidate=name, predictions_sha256=sha(path), manifest_sha256=manifest_hash,
+                         dataset_version=scalar_ocr.dataset_version(manifest), manifest_format_version=manifest['version'])
     freeze = dict(status='prepared_not_frozen', decision=None, evaluator_version=VERSION,
                   evaluator_source_sha256=source_hash(), policy=POLICY,
                   normalization_policy=scalar_ocr.POLICY, calibration_protocol=CALIBRATION_PROTOCOL,
-                  manifest_sha256=manifest_hash,
+                  manifest_sha256=manifest_hash, dataset_version=scalar_ocr.dataset_version(manifest),
+                  manifest_format_version=manifest['version'],
                   candidates={k: sha(p) for k, p in prediction_paths.items()},
                   review_required=['AI-1 evidence geometry/association', 'AI-2 matching/normalization/calibration', 'Lead metrics/splits/freeze decision'],
                   changes='Metric definition changes require evaluator/policy version bump and all candidates rescored.')
@@ -188,7 +192,7 @@ def write_bundle(bundle, output):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     def write(path, value):
-        path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+        path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
     write(output / 'comparison.json', bundle['comparison'])
     write(output / 'freeze-record.json', bundle['freeze_record'])
     for name, report in bundle['reports'].items():
@@ -206,7 +210,7 @@ def write_bundle(bundle, output):
                     'Evidence: ' + json.dumps(report['evidence'], ensure_ascii=False), '',
                     'Calibration: ' + json.dumps(report['calibration_coverage'], ensure_ascii=False), '',
                     scalar_ocr.markdown(report).replace('# VietDoc D3.1 offline evaluation', '## Scalar/OCR and complete report', 1)]
-        (folder / 'report.md').write_text('\n'.join(summary), encoding='utf-8')
+        (folder / 'report.md').write_text('\n'.join(summary), encoding='utf-8', newline='\n')
         (folder / 'correctness-labels.jsonl').write_text(''.join(json.dumps(e, ensure_ascii=False, allow_nan=False)+'\n'
-            for e in report['correctness_labels']), encoding='utf-8')
+            for e in report['correctness_labels']), encoding='utf-8', newline='\n')
         write(folder / 'errors.json', report['errors'])

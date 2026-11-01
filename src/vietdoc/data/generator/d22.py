@@ -198,6 +198,7 @@ def report_for(samples, config):
 
 def provenance(root, config, seed, font):
     return dict(version=VERSION, dataset_version=config['dataset_version'], config=config, config_sha256=digest(config),
+                transcript_scope='full_page', transcript_order='renderer-draw-call-v1',
                 seed=seed, assignments=plan(config, seed), assignment_sha256=digest(plan(config, seed)),
                 families=catalog(), template_version=FAMILY_VERSION, source_sha256=source_hashes(),
                 vocabulary_sha256=sha(CONFIG), schema_sha256=sha(root / 'specs/contracts/business.schema.json'),
@@ -232,7 +233,7 @@ def build(root, output, config_path=DEFAULT_CONFIG, seed=2202, font=FONT, base_l
     (output / 'report.json').write_bytes(encoded(report))
     manifest = dict(metadata, report=dict(path='report.json', sha256=sha(output / 'report.json')), samples=samples)
     (output / 'manifest.json').write_bytes(encoded(manifest))
-    (output / 'manifest.sha256').write_text(sha(output / 'manifest.json') + '  manifest.json\n')
+    (output / 'manifest.sha256').write_text(sha(output / 'manifest.json') + '  manifest.json\n', encoding='utf-8', newline='\n')
     return manifest
 
 

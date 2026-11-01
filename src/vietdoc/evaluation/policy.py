@@ -24,7 +24,7 @@ POLICY = {
     'obscured': 'excluded, like unlabeled; no inferred gold',
     'zero_denominator': 'null, including empty-reference CER/WER; edit numerator retained',
     'failures': 'missing/failed/duplicate/invalid records score as empty predictions; never select duplicate winner',
-    'ocr_scope': 'full_page only; d1.2.v1 renderer txt is known full_page; other manifests must declare transcript_scope',
+    'ocr_scope': 'full_page only; historical D1.2 v1/v2 and D2.1/D2.2 v1 renderer txt use full_page/renderer-draw-call-v1; other formats must declare scope; reading-order protocol pending review',
 }
 
 

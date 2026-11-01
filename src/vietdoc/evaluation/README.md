@@ -1,4 +1,4 @@
-# D3.1 — offline scalar/OCR evaluator v1
+# D3.1 — offline scalar/OCR evaluator v2
 
 Independent Data evaluator, stdlib only. Reads frozen artifacts; no inference, API,
 production normalizer or final-test tuning.
@@ -13,6 +13,8 @@ retains the D3.1 behavior documented below.
 Checkout has no M2.2 normalizer/policy implementation and no O1.3 output contract
 implementation. Team task descriptions specify intent, not accepted conventions.
 This evaluator changes no production normalization.
+Evaluator `d3.1.v2` adds the strict-review boundary/compatibility fixes; D3.2 uses
+`d3.2.v2`. Rescore candidates together rather than comparing old/new reports.
 
 - NFC; preserve Vietnamese accents and case. Trim/collapse Unicode whitespace.
   Empty/whitespace-only scalar = missing. Pin Python Unicode database version.
@@ -30,15 +32,24 @@ This evaluator changes no production normalization.
   micro aggregation, not mean sample rate. AI-1 must review reading-order join,
   whitespace, punctuation and empty-reference handling; exporter must materialize
   `ocr_text` in declared reading order. Evaluator never guesses block order.
-- `txt` in D1.2 v1 is renderer full-page transcript (D1.2 QA convention). Other
-  manifests must declare `transcript_scope: "full_page"` per sample or at root;
-  absent/QA/unknown scopes excluded from OCR, even when text exists.
+- New renderer manifests declare `transcript_scope: "full_page"` and
+  `transcript_order: "renderer-draw-call-v1"`. A versioned compatibility adapter
+  recognizes historical D1.2 v1/v2 and D2.1/D2.2 v1 renderer transcripts with
+  the same scope/order. Other formats must declare scope; QA/unknown scopes stay
+  excluded. Reports retain scope/order per sample. Draw-call order joins wrapped
+  cell fragments before subsequent cells; it is a description of current output,
+  **not an accepted OCR reading-order protocol**. AI-1/Lead review is still required
+  before interpreting actual CER/WER as model quality.
 
 ## Metrics and accounting
 
 Each scalar slot is selected from the fixed business v1 fields for its type;
 `items` excluded. Labels use JSON pointers as in D1.2. Missing label = unlabeled.
 Inconsistent present/null or absent/nonempty gold raises an input error.
+Labels must be a flat (possibly partial) pointer-to-object map, with a known status
+and valid scalar or existing row/cell pointer. D1.1 envelopes, typo pointers and
+non-object labels fail with sample ID before scoring/slice construction; no implicit
+D1.1 adapter is provided. Obscured/unlabeled remain excluded, never absent.
 
 | Gold status / prediction | Accounting |
 | --- | --- |
@@ -75,9 +86,11 @@ Consumers must inspect `issues`/`accounting`, not just the score.
 
 Manifest: D1.2 shape with nonempty `version`, unique `sample_id`, `document_type`,
 `schema_id: "urn:vietdoc:business:v1"`, and `assets` entries `gold.json`,
-`labels.json`, optional `txt`. Each entry has root-relative `path` and `sha256`.
+`labels.json`, optional `txt`. Each entry has `path` and `sha256`.
+D1.2 paths are relative to `--root`; D2.1/D2.2 paths are relative to the manifest's
+directory. Relocated D2 snapshots must retain their assets beside the manifest.
 Only evaluator-consumed assets are loaded and hash verified, never images/models.
-Paths must stay under `--root`. Gold itself uses business scalar keys; labels
+Paths must stay under their declared base. Gold itself uses business scalar keys; labels
 are separate metadata. Versioned manifest pins gold/schema/transcript versions.
 
 Prediction JSON envelope (local offline contract, not a change to shared schemas):
@@ -101,6 +114,11 @@ all are pinned in the report alongside input SHA256, consumed asset hashes,
 evaluator version and source SHA256. Payload may be omitted for OCR-only runs;
 scalar values will then be reported missing. No auto conversion of live compute
 responses: producers own export to this reviewable frozen artifact format.
+
+`inputs.dataset_version` uses manifest `dataset_version`, falling back to `version`;
+`manifest_format_version` separately records the format. A declared prediction
+dataset version must match. Correctness exports and freeze preparation use the
+same dataset/format distinction.
 
 ```bash
 PYTHONPATH=src .venv/bin/python -m unittest discover -s tests/unit -p test_evaluation.py -v

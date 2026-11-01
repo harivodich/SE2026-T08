@@ -27,7 +27,7 @@ def renderer_binaries():
     paths = {Path(Image.core.__file__), Path(ImageFont.core.__file__)}
     maps = Path('/proc/self/maps')
     if maps.is_file():
-        for line in maps.read_text().splitlines():
+        for line in maps.read_text(encoding='utf-8').splitlines():
             name = line.split()[-1]
             if name.startswith('/') and Path(name).name.startswith(
                     ('libfreetype.', 'libraqm.', 'libharfbuzz.', 'libfribidi.', 'libz.', 'libpng')):
@@ -128,6 +128,7 @@ def build(root, output, seed=2101, config_path=DEFAULT_CONFIG, font=FONT, reques
     report_path = output / 'rejections.json'
     report_path.write_bytes(encoded(report))
     manifest = dict(version=VERSION, seed=seed, config=config, config_sha256=hashlib.sha256(encoded(config)).hexdigest(),
+                    transcript_scope='full_page', transcript_order='renderer-draw-call-v1',
                     vocabulary_sha256=sha(CONFIG), schema_sha256=sha(schema_path),
                     schema_id=schema['$id'], font_sha256=sha(font), template_version=TEMPLATE_VERSION,
                     environment=environment(), source_sha256=source_hashes(),
@@ -146,6 +147,8 @@ def validate(root, manifest_path, font=FONT, assets_root=None):
     manifest = read_json(manifest_path)
     base = manifest_path.parent if assets_root is None else assets_root.resolve()
     require(manifest['version'] == VERSION, 'unsupported manifest version')
+    require(manifest.get('transcript_scope') == 'full_page' and
+            manifest.get('transcript_order') == 'renderer-draw-call-v1', 'transcript convention mismatch')
     validate_config(manifest['config'])
     require(type(manifest['seed']) is int and 0 <= manifest['seed'] < 2**63, 'invalid seed')
     require(manifest['template_version'] == TEMPLATE_VERSION, 'template version mismatch')

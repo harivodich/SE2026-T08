@@ -91,6 +91,10 @@ Metadata hiện chỉ là kịch bản nội dung, không chứng minh field đ�
 
 ## Tái tạo và giới hạn
 
+Prerequisite cho tests D1.1: Python >=3.11 và `jsonschema`; dùng offline Data
+environment riêng, cài extra `python -m pip install -e ".[data]"` từ repository root.
+Setup Bash/PowerShell và font cho D1.2 ở [generator README](generator/README.md).
+
 Config: `generator/fake-values.json`; logic: `generator/values.py` (Python stdlib).
 Từ repository root, tạo vào thư mục mới:
 

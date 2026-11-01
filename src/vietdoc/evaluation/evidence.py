@@ -13,7 +13,11 @@ def cross(a, b, c):
 
 
 def area(poly):
-    return abs(sum(a[0]*b[1]-b[0]*a[1] for a, b in zip(poly, poly[1:]+poly[:1]))) / 2
+    if len(poly) < 3:
+        return 0.0
+    # Translate before multiplication to avoid cancellation near image boundaries.
+    origin = poly[0]
+    return abs(math.fsum(cross(origin, a, b) for a, b in zip(poly[1:-1], poly[2:]))) / 2
 
 
 def polygon(quad):
@@ -24,10 +28,14 @@ def polygon(quad):
     # TL,TR,BR,BL winding in top-left image coordinates, strict convexity.
     if any(cross(quad[i], quad[(i+1) % 4], quad[(i+2) % 4]) <= 0 for i in range(4)):
         return None
+    if not math.isfinite(area(quad)) or area(quad) <= 0:
+        return None
     return quad
 
 
 def iou(a, b):
+    if polygon(a) is None or polygon(b) is None:
+        return None
     output = a[:]
     for start, end in zip(b, b[1:]+b[:1]):
         points, output = output, []
@@ -43,7 +51,10 @@ def iou(a, b):
                 output.append(current)
             prev = current
     intersection = area(output) if output else 0
-    return intersection / (area(a)+area(b)-intersection)
+    union = area(a)+area(b)-intersection
+    if not math.isfinite(union) or union <= 0 or not 0 <= intersection <= union:
+        return None
+    return intersection / union
 
 
 def adapt_gold(sample):
@@ -134,9 +145,15 @@ def evaluate_evidence(sample, prediction, table):
         c['missing_evidence_fields'] += not bool(source)
         matches = []
         if available:
+            overlaps = [[iou(g['quad'], p['quad']) for p in source] for g in regions]
+            if any(v is None for row in overlaps for v in row):
+                available = False
+                c['covered_fields'] -= 1
+                c['invalid_region_fields'] += 1
+                c['invalid_overlap_fields'] += 1
+        if available:
             c['comparable_gold_regions'] += len(regions)
             c['comparable_predicted_regions'] += len(source)
-            overlaps = [[iou(g['quad'], p['quad']) for p in source] for g in regions]
             matches = match([[round(v * 1000000) if v >= .5 else 0 for v in row] for row in overlaps])
             c['geometry_matched_regions'] += len(matches)
             c['extra_regions'] += len(source)-len(matches)

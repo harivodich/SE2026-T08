@@ -33,8 +33,8 @@ def main():
     report = evaluate_files(args.root, args.manifest, args.predictions)
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2,
-                                                     allow_nan=False) + '\n', encoding='utf-8')
-    (args.output / 'report.md').write_text(markdown(report), encoding='utf-8')
+                                                     allow_nan=False) + '\n', encoding='utf-8', newline='\n')
+    (args.output / 'report.md').write_text(markdown(report), encoding='utf-8', newline='\n')
 
 
 if __name__ == '__main__':

@@ -247,21 +247,21 @@ class EvaluationTest(unittest.TestCase):
             command = [sys.executable, '-m', 'vietdoc.evaluation', '--root', str(ROOT),
                        '--manifest', str(manifest), '--predictions', str(p), '--output', str(base / 'report')]
             subprocess.run(command, check=True, capture_output=True)
-            self.assertEqual(json.loads((base / 'report/report.json').read_text()), result)
+            self.assertEqual(json.loads((base / 'report/report.json').read_text(encoding='utf-8')), result)
             self.assertTrue((base / 'report/report.md').is_file())
             self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
             data['dataset_manifest_sha256'] = 'bad'
-            p.write_text(json.dumps(data))
+            p.write_text(json.dumps(data), encoding='utf-8', newline='\n')
             with self.assertRaisesRegex(ValueError, 'pin mismatch'):
                 evaluate_files(ROOT, manifest, p)
-            altered = json.loads(manifest.read_text())
+            altered = json.loads(manifest.read_text(encoding='utf-8'))
             altered['samples'][0]['assets']['gold.json']['sha256'] = 'bad'
             m = base / 'manifest.json'
-            m.write_text(json.dumps(altered))
+            m.write_text(json.dumps(altered), encoding='utf-8', newline='\n')
             with self.assertRaisesRegex(ValueError, 'hash mismatch'):
                 load_gold(ROOT, m)
             altered['samples'][0]['assets']['gold.json']['path'] = '../outside.json'
-            m.write_text(json.dumps(altered))
+            m.write_text(json.dumps(altered), encoding='utf-8', newline='\n')
             with self.assertRaisesRegex(ValueError, 'invalid relative path'):
                 load_gold(ROOT, m)
 

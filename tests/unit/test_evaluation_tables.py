@@ -287,7 +287,7 @@ class ComparisonCalibrationTest(unittest.TestCase):
             command = [sys.executable, '-m', 'vietdoc.evaluation', '--root', str(ROOT), '--manifest', str(manifest),
                        '--candidate', 'fixture=' + str(predictions), '--output', str(out)]
             subprocess.run(command, check=True, capture_output=True)
-            self.assertEqual(json.loads((out/'fixture/report.json').read_text()), r)
-            labels = [json.loads(line) for line in (out/'fixture/correctness-labels.jsonl').read_text().splitlines()]
+            self.assertEqual(json.loads((out/'fixture/report.json').read_text(encoding='utf-8')), r)
+            labels = [json.loads(line) for line in (out/'fixture/correctness-labels.jsonl').read_text(encoding='utf-8').splitlines()]
             self.assertTrue(all(e['manifest_sha256'] and e['predictions_sha256'] for e in labels))
             self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)

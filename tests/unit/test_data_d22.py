@@ -9,8 +9,7 @@ from PIL import Image, ImageDraw
 
 from vietdoc.data.generator import d22
 from vietdoc.data.generator.augmentation import augment, validate_policy
-from vietdoc.data.generator.integration import load_artifacts
-from vietdoc.data.generator.rendering import FONT
+from vietdoc.data.generator.integration import load_artifacts, resolve_font
 from vietdoc.data.generator.templates.families import catalog, render_family
 from vietdoc.data.generator.values import CONFIG
 from vietdoc.data.manifest import encoded, read_json, sha
@@ -18,6 +17,7 @@ from vietdoc.data.splits import assign_groups, assert_disjoint, duplicate_report
 from vietdoc.data.validation import leaves
 
 ROOT = Path(__file__).resolve().parents[2]
+FONT = resolve_font()
 
 
 class GroupPolicyTest(unittest.TestCase):
@@ -155,7 +155,9 @@ class DatasetTest(unittest.TestCase):
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
         cls.output = Path(cls.temp.name) / 'first'
-        cls.manifest = d22.build(ROOT, cls.output)
+        cls.config = Path(cls.temp.name) / 'portable-config.json'
+        cls.config.write_bytes(encoded(dict(read_json(d22.DEFAULT_CONFIG), font_sha256=sha(FONT))))
+        cls.manifest = d22.build(ROOT, cls.output, cls.config, font=FONT)
 
     @classmethod
     def tearDownClass(cls):
@@ -179,17 +181,17 @@ class DatasetTest(unittest.TestCase):
 
     def test_reproducibility_all_files_and_strict_verification(self):
         second = Path(self.temp.name) / 'second'
-        self.assertEqual(self.manifest, d22.build(ROOT, second))
+        self.assertEqual(self.manifest, d22.build(ROOT, second, self.config, font=FONT))
         self.assertEqual({p.name: sha(p) for p in self.output.iterdir()}, {p.name: sha(p) for p in second.iterdir()})
-        self.assertTrue(d22.validate(ROOT, second / 'manifest.json')['valid'])
+        self.assertTrue(d22.validate(ROOT, second / 'manifest.json', font=FONT)['valid'])
         with self.assertRaises(FileExistsError):
-            d22.build(ROOT, second)
+            d22.build(ROOT, second, self.config, font=FONT)
         broken = copy.deepcopy(self.manifest)
         broken['samples'][0]['split'] = 'final'
         path = second / 'manifest.json'
         path.write_bytes(encoded(broken))
         with self.assertRaisesRegex(ValueError, 'metadata/lineage'):
-            d22.validate(ROOT, path)
+            d22.validate(ROOT, path, font=FONT)
 
 
 if __name__ == '__main__':

@@ -7,13 +7,37 @@ from pathlib import Path
 from vietdoc.data.manifest import asset_path, read_json, require, sample_id, sha
 from .policy import FIELDS, POLICY, normalize, text
 
-VERSION = 'd3.1.v1'
+VERSION = 'd3.1.v2'
 ARTIFACT_VERSION = 'vietdoc.predictions.v1'
+RENDERER_VERSIONS = {'d1.2.v1', 'd1.2.v2', 'd2.1.v1', 'd2.2.v1'}
+TRANSCRIPT_ORDER = 'renderer-draw-call-v1'
+
+
+def validate_labels(sample):
+    """D1.2 flat/partial pointer map only; missing pointers remain unlabeled."""
+    sid, kind = sample['sample_id'], sample['document_type']
+    labels, gold = sample.get('labels'), sample['gold']
+    require(isinstance(labels, dict), f'{sid}: labels must be a flat pointer map')
+    allowed = {'/' + f for f in FIELDS[kind]}
+    columns = ('description', 'quantity', 'unit', 'unit_price', 'line_total')
+    rows = gold.get('items', [])
+    require(isinstance(rows, list) and all(isinstance(r, dict) for r in rows), f'{sid}: invalid gold items')
+    allowed.update(f'/items/{i}/{f}' for i in range(len(rows)) for f in columns)
+    for pointer, label in labels.items():
+        require(pointer in allowed, f'{sid}: unsupported label pointer/format: {pointer}')
+        require(isinstance(label, dict) and label.get('status') in
+                ('present', 'absent', 'obscured', 'unlabeled'), f'{sid}: invalid label: {pointer}')
+
+
+def dataset_version(manifest):
+    return manifest.get('dataset_version', manifest['version'])
 
 
 def load_gold(root, manifest_path):
     manifest = read_json(manifest_path)
     require(isinstance(manifest.get('version'), str) and manifest['version'], 'manifest version required')
+    # Historical producers have explicit, known path conventions; never guess by existence.
+    base = Path(manifest_path).parent if manifest['version'] in {'d2.1.v1', 'd2.2.v1'} else Path(root)
     samples, pins, ids = [], [], set()
     for entry in manifest['samples']:
         sid = sample_id(entry['sample_id'])
@@ -27,16 +51,21 @@ def load_gold(root, manifest_path):
             if key == 'txt' and key not in entry['assets']:
                 continue
             asset = entry['assets'][key]
-            path = asset_path(Path(root), asset['path'])
+            path = asset_path(base, asset['path'])
             require(sha(path) == asset['sha256'], f'hash mismatch: {sid}/{key}')
             pins.append(dict(sample_id=sid, asset=key, **asset))
             loaded[key] = path.read_text(encoding='utf-8') if key == 'txt' else read_json(path)
         scope = entry.get('transcript_scope', manifest.get('transcript_scope'))
-        if scope is None and manifest['version'] == 'd1.2.v1':
+        order = entry.get('transcript_order', manifest.get('transcript_order'))
+        if scope is None and manifest['version'] in RENDERER_VERSIONS:
             scope = 'full_page'
+        if order is None and manifest['version'] in RENDERER_VERSIONS:
+            order = TRANSCRIPT_ORDER
+        sample = dict(sample_id=sid, document_type=kind, gold=loaded['gold.json'], labels=loaded['labels.json'])
+        validate_labels(sample)
         samples.append(dict(sample_id=sid, document_type=kind, gold=loaded['gold.json'],
                             labels=loaded['labels.json'], transcript=loaded.get('txt'),
-                            transcript_scope=scope))
+                            transcript_scope=scope, transcript_order=order))
     return manifest, samples, pins
 
 
@@ -102,6 +131,7 @@ def evaluate(samples, artifact):
     for sample in samples:
         sid, kind = sample['sample_id'], sample['document_type']
         require(kind in FIELDS, f'unsupported type: {kind}')
+        validate_labels(sample)
         candidates = records.get(sid, [])
         pred = candidates[0] if len(candidates) == 1 else {}
         if not candidates:
@@ -118,7 +148,8 @@ def evaluate(samples, artifact):
             outcome = 'ok'
         payload = pred.get('payload', {}) if outcome == 'ok' else {}
         outcomes.append(dict(sample_id=sid, document_type=kind, outcome=outcome,
-                             reason=pred.get('error'), records=len(candidates)))
+                             reason=pred.get('error'), records=len(candidates),
+                             transcript_scope=sample.get('transcript_scope'), transcript_order=sample.get('transcript_order')))
         if outcome != 'ok':
             issues.append(dict(sample_id=sid, category=outcome + '_prediction', records=len(candidates)))
         for field in FIELDS[kind]:
@@ -208,12 +239,14 @@ def evaluate_files(root, manifest_path, predictions_path):
     json.dumps(artifact, allow_nan=False)
     manifest_hash = sha(manifest_path)
     require(artifact.get('dataset_manifest_sha256') == manifest_hash, 'prediction dataset pin mismatch')
+    if artifact.get('dataset_version') is not None:
+        require(artifact['dataset_version'] == dataset_version(manifest), 'dataset version mismatch')
     report = evaluate(samples, artifact)
     source_hash = hashlib.sha256()
     for path in sorted(Path(__file__).parent.glob('*.py')):
         source_hash.update(path.name.encode())
         source_hash.update(path.read_bytes())
-    report['inputs'] = dict(dataset_version=manifest['version'], manifest_sha256=manifest_hash,
+    report['inputs'] = dict(dataset_version=dataset_version(manifest), manifest_format_version=manifest['version'], manifest_sha256=manifest_hash,
                            predictions_sha256=sha(predictions_path), assets=pins,
                            evaluator_source_sha256=source_hash.hexdigest(),
                            manifest_helpers_sha256=sha(Path(__file__).parents[1] / 'data/manifest.py'),

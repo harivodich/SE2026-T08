@@ -9,13 +9,15 @@ import unittest
 from PIL import Image, ImageChops
 
 from vietdoc.data.generator import d21
-from vietdoc.data.generator.rendering import FONT, render
+from vietdoc.data.generator.rendering import render
+from vietdoc.data.generator.integration import resolve_font
 from vietdoc.data.generator.values import CONFIG, document_cases
 from vietdoc.data.manifest import encoded, read_json, sha
 from vietdoc.data.validation import approval_diagnostics, validate_source
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = read_json(ROOT / 'specs/contracts/business.schema.json')
+FONT = resolve_font()
 
 
 class D21Test(unittest.TestCase):
@@ -24,7 +26,9 @@ class D21Test(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         cls.base = Path(cls.temp.name)
         cls.output = cls.base / 'a'
-        cls.first = d21.build(ROOT, cls.output)
+        cls.config = cls.base / 'portable-config.json'
+        cls.config.write_bytes(encoded(dict(read_json(d21.DEFAULT_CONFIG), font_sha256=sha(FONT))))
+        cls.first = d21.build(ROOT, cls.output, config_path=cls.config, font=FONT)
         cls.manifest = cls.output / 'manifest.json'
         cls.cases = list(document_cases(2101, d21.load_config(d21.DEFAULT_CONFIG), read_json(CONFIG)))
 
@@ -34,14 +38,14 @@ class D21Test(unittest.TestCase):
 
     def test_fresh_runs_all_bytes_and_non_overwrite(self):
         second_dir = self.base / 'b'
-        second = d21.build(ROOT, second_dir)
+        second = d21.build(ROOT, second_dir, config_path=self.config, font=FONT)
         self.assertEqual(self.first, second)
-        self.assertEqual(d21.validate(ROOT, self.manifest), dict(accepted=14, rejected=6, valid=True))
-        self.assertEqual(d21.validate(ROOT, second_dir / 'manifest.json'), dict(accepted=14, rejected=6, valid=True))
+        self.assertEqual(d21.validate(ROOT, self.manifest, font=FONT), dict(accepted=14, rejected=6, valid=True))
+        self.assertEqual(d21.validate(ROOT, second_dir / 'manifest.json', font=FONT), dict(accepted=14, rejected=6, valid=True))
         first_files = {p.name: sha(p) for p in self.output.iterdir()}
         self.assertEqual(first_files, {p.name: sha(p) for p in second_dir.iterdir()})
         with self.assertRaises(FileExistsError):
-            d21.build(ROOT, self.output)
+            d21.build(ROOT, self.output, config_path=self.config, font=FONT)
 
     @unittest.skipUnless(all(shutil.which(p) for p in ('pdfinfo', 'pdfimages', 'pdftoppm')),
                          'optional Poppler tools unavailable')
@@ -111,7 +115,7 @@ class D21Test(unittest.TestCase):
         missing_cell = copy.deepcopy(original)
         missing_cell['items'][0]['quantity'] = None
         validate_source(missing_cell, kind, SCHEMA, FONT)
-        image, transcript, geometry = render(missing_cell, kind, layout)
+        image, transcript, geometry = render(missing_cell, kind, layout, FONT)
         self.assertEqual(d21.labels_for(missing_cell)['/items/0/quantity']['status'], 'absent')
         self.assertFalse(any(r['pointer'] == '/items/0/quantity' for r in geometry['regions']))
         for value in ('0', '1.5', '99999999999999999999999999999999'):
@@ -124,7 +128,7 @@ class D21Test(unittest.TestCase):
         payload = copy.deepcopy(original)
         payload['items'][0]['description'] = 'X' * 500
         with self.assertRaisesRegex(ValueError, 'Word exceeds column'):
-            render(payload, kind, layout)
+            render(payload, kind, layout, FONT)
 
     def test_config_version_seed_and_font(self):
         for key, value in [('version', 'future'), ('rows', [1, 1]), ('rows', [-1]), ('rows', [True]), ('rows', [101])]:
@@ -141,7 +145,7 @@ class D21Test(unittest.TestCase):
         wrong_font = self.base / 'wrong-font.ttf'
         wrong_font.write_bytes(b'not a font')
         with self.assertRaisesRegex(ValueError, 'font hash'):
-            d21.build(ROOT, self.base / 'bad-font', font=wrong_font)
+            d21.build(ROOT, self.base / 'bad-font', config_path=self.config, font=wrong_font)
         self.assertNotEqual(list(document_cases(2101, d21.load_config(d21.DEFAULT_CONFIG), read_json(CONFIG))),
                             list(document_cases(2102, d21.load_config(d21.DEFAULT_CONFIG), read_json(CONFIG))))
 
@@ -227,7 +231,7 @@ class D21Test(unittest.TestCase):
                     data['environment']['pillow'] = 'other'
                 self.manifest.write_bytes(encoded(data))
                 with self.subTest(case=case), self.assertRaises((ValueError, OSError)):
-                    d21.validate(ROOT, self.manifest)
+                    d21.validate(ROOT, self.manifest, font=FONT)
             finally:
                 self.manifest.write_bytes(original_manifest)
                 for path, content in changes.items():
