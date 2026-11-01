@@ -41,6 +41,18 @@ Java đọc attempt assets qua storage adapter, kiểm containment/prefix và st
 
 Java phải kiểm: request/response job/run/attempt/type/schema match, provenance, metadata paths tồn tại trong payload, region finite/quad order/page, no duplicate artifact keys, canonical metadata matches exactly one artifact, state/current token/unexpired lease/deadline/cancel. JSON Schema chỉ cấu trúc; không chứng minh các rules này pass.
 
+Python producer output policy: tối đa **2 MiB JSON UTF-8**, nesting tối đa **32
+object/array containers** (root container tính là 1). Boundary kiểm trước schema
+traversal và giới hạn bytes khi serialize; chỉ nhận built-in JSON types, string
+keys, finite floats và UTF-8 strict strings. Unsupported types, cycles, non-finite,
+lone surrogates hoặc vượt caps trả **422 OUTPUT_INVALID**, không coercion, không
+log raw output. Unicode hợp lệ, C0 được JSON escape và bidi không bị blacklist.
+Đây là producer policy cần Backend review khi tích hợp; neutral schemas không đổi.
+
+Service giữ ingress correlation baseline riêng với metadata giao pipeline; pipeline
+mutation không thay expected IDs/type/schema/manifest. Java vẫn kiểm độc lập với
+request gốc. Deadline accounting bao gồm cả bounded encoding và schema validation.
+
 ## Errors và retry
 
 Error envelope theo [schema](compute-error.schema.json): contract_version, attempt_id (null nếu request chưa parse), code, message, retryable. Message stable không stack trace/raw text. Java không tin retryable đơn lẻ, map allowlist theo code/status.
@@ -65,6 +77,10 @@ Retry cùng job dùng attempt_id/run_id mới, immutable pinned manifest giữ n
 Trong một AI process không cho hai request cùng attempt chạy/overwrite; duplicate active attempt reject typed AI_BUSY. Restart có thể có orphan partial outputs: attempt directory không overwrite, create temp + atomic final publication, caller retry dùng attempt mới. Không coi file tồn tại là completed result.
 
 Cancel ở Java atomically invalidate lease/fence; Python có thể vẫn compute đến deadline. GPU slot vẫn busy cho tới cleanup thực, không tuyên bố cancellation đã free GPU. Kill/restart recovery phải kiểm ở M2.3/B3.3.
+
+Python bàn giao slot từ coroutine sang worker dưới lock. Cancel trước worker-start
+thu hồi reservation; worker tới muộn sau reclaim không gọi pipeline. Khi worker
+đã chạy, cancellation của coroutine không trả slot; worker trả slot sau cleanup.
 
 ## Cross-language acceptance
 

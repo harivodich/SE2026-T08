@@ -44,6 +44,32 @@ jobs:
       - name: Verify gate failure, cancellation and skip policy
         run: python -m scripts.ci.checks tests ci
 
+  ai:
+    name: ai-fixture-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Fresh install the isolated serve and test environment
+        run: python -m pip install ".[serve,test]"
+      - name: Check AI dependency consistency
+        run: python -m pip check
+      - name: Run AI suites with inventory and strict skip policy
+        run: python -m scripts.ci.ai --junitxml=test-results/ai.xml
+      - name: Upload AI fixture test evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ai-tests-${{ github.sha }}
+          path: test-results/ai.xml
+          if-no-files-found: error
+          retention-days: 7
+
   data:
     name: data-${{ matrix.os }}-py${{ matrix.python }}
     runs-on: ${{ matrix.os }}
@@ -98,7 +124,7 @@ jobs:
 
   release-readiness:
     name: release-readiness
-    needs: [workflow, contracts, data, package]
+    needs: [workflow, contracts, data, package, ai]
     if: >-
       ${{ always() &&
       (github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main') }}
@@ -115,7 +141,7 @@ jobs:
 
   ci-gate:
     name: ci-gate
-    needs: [workflow, contracts, data, package, release-readiness]
+    needs: [workflow, contracts, data, package, ai, release-readiness]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5

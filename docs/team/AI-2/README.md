@@ -9,6 +9,7 @@ nhánh `feature/AI2-M2_ai_service_docker`.
 | [HISTORY.md](HISTORY.md) | Những phần đã có, bản sửa dependency/decimal, checks lịch sử, push và phần còn thiếu |
 | [Batch A: R04/R07/R08/R10](batch-a-r04-r07-r08-r10.md) | Giải thích bốn lỗi, đường đi gây lỗi, hướng sửa đề xuất và regression cases cần có |
 | [Plan sửa bốn lỗi](2026-10-29-four-fixes-plan.md) | Các bước implementation, RED/GREEN và giới hạn kiểm chứng ngày 29/10 |
+| [Strict follow-up plan](2026-11-01-strict-followup-plan.md) | R05/R09/R14, CI R17 và ledger kiểm chứng local ngày 01/11 |
 | [SPEC.md](SPEC.md) | Ownership, boundaries và checks của thư mục |
 
 Đọc [kế hoạch vai trò](../ai-2-extraction.md), [workflow/gates](../workflow.md) và
@@ -25,3 +26,7 @@ R04/R07/R08/R10 đã được sửa và có regression evidence trong HISTORY. M
 tra theo Git và hồ sơ bàn giao, không coi một lần sửa local là peer/Lead acceptance.
 R05/R09/R14/R17 vẫn còn ngoài phạm vi lượt sửa này, chưa đóng toàn Batch A.
 Model/OCR thực và G0/G1 chưa được nghiệm thu bởi hồ sơ này.
+
+Follow-up ngày 01/11/2026 bổ sung runtime fixes R05/R09/R14 và job CI R17;
+commands/results và limitations xem HISTORY/plan mới. Chưa có hosted CI/peer
+acceptance cho working tree mới, không dùng trạng thái ngày 29/10 làm current status.

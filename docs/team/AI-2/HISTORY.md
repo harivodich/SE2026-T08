@@ -153,3 +153,57 @@ Người dùng yêu cầu commit/push lên `feature/AI2-M2_ai_service_docker`.
 Commit bao gồm source/tests/protocol của bốn lỗi và thư mục hồ sơ AI-2; không có
 `.env`, dữ liệu/model hoặc runtime artifacts. SHA và kết quả push tra Git/remote;
 phần này ghi bước chuẩn bị, không tự xác nhận push/CI/approval thành công.
+
+## 01/11/2026 — Strict follow-up R05/R09/R14 và CI R17
+
+Người dùng yêu cầu lập plan rồi thực hiện sau khi phân tích feedback ngày 29/10.
+Baseline source: `404248e1810cf5d83f1f91e3f4f222f441a3321c`, feature branch AI2.
+[Plan và execution ledger](2026-11-01-strict-followup-plan.md) lưu criteria,
+implementation decisions, draft PR body và owner/acceptance của integration gates.
+
+- **R05:** atomic slot ownership reserved/running/reclaimed/done dưới lock. Cancel
+  trước worker-start thu hồi slot; late worker không chạy pipeline. Worker đang chạy
+  giữ slot đến cleanup. RED 2 failures/1 control pass → GREEN, có real AnyIO limiter,
+  native multipart endpoint và BoundedSemaphore; không claim TCP hoặc hard-stop GPU.
+- **R09:** iterative JSON preflight, finite numbers/UTF-8 strict/string keys/built-in
+  types, depth 32 và encoded-byte cap 2 MiB trước schema traversal. Controlled
+  OUTPUT_INVALID, không raw output log/coercion. RED 6 failures/10 controls pass →
+  GREEN; deadline vẫn bao validation/encoding, Unicode/C0/bidi hợp lệ giữ nguyên.
+- **R14:** deepcopy metadata cho pipeline; service dùng ingress baseline độc lập.
+  RED 6 schema-valid mutated outputs trả 200 → GREEN OUTPUT_INVALID và recovery.
+- **R17 code:** Ubuntu Python 3.12 job isolated `.[serve,test]`, pip check, runner
+  inventory/skip policy/JUnit, ci-gate + release needs bắt buộc ai success. Docker
+  test stage dùng runner chung, scripts chỉ COPY vào test stage. Real pytest probes
+  kiểm assertion fail, missing/empty tests, skip/xfail, collect-only/deselection;
+  summary tách test và subtest counts. Hosted CI/strict-fail probe chưa chạy.
+
+Commands dùng từ repository root, với AI venv riêng:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.ci.ai --allow-windows-symlink-skip --junitxml=test-results/ai-followup-windows.xml
+.\.venv\Scripts\python.exe -m scripts.ci.checks tests contracts
+.\.venv\Scripts\python.exe -m scripts.ci.checks tests ci
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m scripts.ci.lint
+docker build --progress plain -f infra/ai-service.Dockerfile --target test -t vietdoc-ai-service:strict-followup-test .
+```
+
+API focused sau thêm error/timeout capacity controls: **72 passed**. AI runner cuối:
+Windows Python 3.13.5 **349 passed, 1 skipped, 58 subtests passed**; Linux Docker
+Python 3.12.15 **350 passed, không skip, 58 subtests passed**. Cả hai collect 350,
+không policy failures. Windows skip đúng symlink thiếu quyền; Linux chạy ca này.
+JUnit local ở `test-results/ai-followup-windows.xml` và `test-results/ai-followup-linux.xml`
+(ignored). Docker build exit 0; image digest trong ledger, không dùng làm hosted proof.
+Shared schema runner: **9/9**, CI unittest runner: **12/12**; pip check pass;
+actionlint/zizmor pinned: exit 0, no findings.
+
+Bare `pytest` toàn repo đã thử và dừng tại collection của
+`tests/unit/test_data_integration.py`: `ModuleNotFoundError: No module named 'PIL'`.
+AI env không cài Data extras; không trộn environments để ép xanh. Không claim toàn
+repo/Data/package matrix pass. Không sửa Data tests/dependencies hoặc shared schemas.
+
+Docker engine đã chạy sẵn; chỉ build test image, không bật service, training,
+model/dataset downloads, deploy hoặc GitHub settings. Không commit/push/đăng PR body
+trong lượt này. R17 cần actual hosted evidence; R01/R06/R13/R15, R11/R12 và model
+milestones vẫn mở theo owner/gate trong plan. Review cuối là self-review, không có
+independent peer/Lead approval.

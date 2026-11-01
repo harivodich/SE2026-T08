@@ -4,14 +4,18 @@ Pipelines used here are test doubles that return the shared fictional fixture; t
 exercise wiring only and say nothing about OCR/model quality.
 """
 
+import asyncio
 import hashlib
 import errno
 import json
 import threading
+import time
+import uuid
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import anyio
 from fastapi.testclient import TestClient
 from starlette.datastructures import UploadFile
 from starlette.exceptions import HTTPException
@@ -68,7 +72,7 @@ class StubPipeline:
 def make_client(tmp_path):
     clients = []
 
-    def build(pipeline=None, token=TOKEN, release=True, max_input_bytes=1024):
+    def build(pipeline=None, token=TOKEN, release=True, max_input_bytes=1024, raise_server_exceptions=True):
         if release:
             write_release(tmp_path / "models")
         settings = Settings(
@@ -78,7 +82,7 @@ def make_client(tmp_path):
             contracts_dir=default_contracts_dir(),
             max_input_bytes=max_input_bytes,
         )
-        client = TestClient(create_app(settings, pipeline))
+        client = TestClient(create_app(settings, pipeline), raise_server_exceptions=raise_server_exceptions)
         client.__enter__()
         clients.append(client)
         return client
@@ -103,7 +107,7 @@ def post(client, meta, document=DOCUMENT, token=TOKEN):
 
 
 def assert_error(response, status, code, retryable=None):
-    assert response.status_code == status, response.text
+    assert response.status_code == status, response.text[:500]
     body = response.json()
     CONTRACTS.validate(ERROR_SCHEMA, body)
     assert body["code"] == code
@@ -357,7 +361,7 @@ def test_deadline_covers_entire_request_and_recovers(make_client, monkeypatch, s
     original_form = Request.form
     original_thread = app_module.run_in_threadpool
     original_validate = ComputeContracts.check_response
-    original_render = app_module.JSONResponse.render
+    original_encode = app_module.encode_output
     async def delayed_form(*args, **kwargs):
         result = await original_form(*args, **kwargs)
         clock.advance()
@@ -370,10 +374,9 @@ def test_deadline_covers_entire_request_and_recovers(make_client, monkeypatch, s
         result = original_validate(*args, **kwargs)
         clock.advance()
         return result
-    def delayed_render(response, body):
-        result = original_render(response, body)
-        if isinstance(body, dict) and "result" in body:
-            clock.advance()
+    def delayed_encode(body):
+        result = original_encode(body)
+        clock.advance()
         return result
     with monkeypatch.context() as patch:
         patch.setattr(app_module.log, "info", lambda event, **kwargs: events.append(event))
@@ -384,7 +387,7 @@ def test_deadline_covers_entire_request_and_recovers(make_client, monkeypatch, s
         elif stage == "validation":
             patch.setattr(ComputeContracts, "check_response", delayed_validate)
         elif stage == "serialization":
-            patch.setattr(app_module.JSONResponse, "render", delayed_render)
+            patch.setattr(app_module, "encode_output", delayed_encode)
         response = post(client, request_meta(remaining_budget_ms=100))
     assert_error(response, 504, "COMPUTE_TIMEOUT", False)
     assert "compute_succeeded" not in events
@@ -432,3 +435,265 @@ def test_malformed_multipart_keeps_input_classification(make_client):
         'Authorization': f'Bearer {TOKEN}', 'Content-Type': 'multipart/form-data',
     })
     assert_error(response, 422, "INPUT_INVALID", False)
+
+
+def response_for(meta):
+    output = fixture("compute-response.json")
+    old_job = output["result"]["job_id"]
+    old_attempt = output["attempt_id"]
+    output["attempt_id"] = meta["attempt_id"]
+    for key in ("run_id", "job_id"):
+        output["result"][key] = meta[key]
+    pages = [output["canonical_page"], *output["artifacts"]]
+    for page in pages:
+        page["asset_key"] = page["asset_key"].replace(old_job, meta["job_id"]).replace(old_attempt, meta["attempt_id"])
+    return output
+
+
+def native_request(meta):
+    """Real Starlette multipart parser, without HTTP middleware/TCP."""
+    body = (
+        b'--native\r\nContent-Disposition: form-data; name="request"\r\n\r\n'
+        + json.dumps(meta).encode()
+        + b'\r\n--native\r\nContent-Disposition: form-data; name="file"; filename="page.png"\r\n'
+        + b'Content-Type: image/png\r\n\r\n' + DOCUMENT + b'\r\n--native--\r\n'
+    )
+    async def receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+    return Request({
+        "type": "http", "method": "POST", "path": "/internal/v1/compute",
+        "headers": [(b"authorization", f"Bearer {TOKEN}".encode()),
+                    (b"content-type", b"multipart/form-data; boundary=native")],
+        app_module.ARRIVAL_KEY: time.monotonic(),
+    }, receive)
+
+
+async def wait_until(predicate):
+    with anyio.fail_after(5):
+        while not predicate():
+            await anyio.sleep(0.001)
+
+
+@pytest.mark.parametrize("stage", ["dispatch", "limiter"])
+def test_cancel_before_worker_start_reclaims_slot(make_client, monkeypatch, stage):
+    state = app_module.ServiceState(slot=threading.BoundedSemaphore(1))
+    monkeypatch.setattr(app_module, "ServiceState", lambda: state)
+    pipeline = StubPipeline()
+    client = make_client(pipeline=pipeline)
+    endpoint = next(route.endpoint for route in client.app.routes if route.path == "/internal/v1/compute")
+    original_threadpool = app_module.run_in_threadpool
+    late_workers = []
+
+    async def cancel_dispatch(func, *args, **kwargs):
+        if func.__name__ == "run":
+            late_workers.append(func)
+            raise asyncio.CancelledError
+        return await original_threadpool(func, *args, **kwargs)
+
+    async def scenario():
+        limiter = anyio.to_thread.current_default_thread_limiter()
+        original_tokens = limiter.total_tokens
+        if stage == "limiter":
+            limiter.total_tokens = 1
+            await limiter.acquire()
+        try:
+            with monkeypatch.context() as patch:
+                if stage == "dispatch":
+                    patch.setattr(app_module, "run_in_threadpool", cancel_dispatch)
+                task = asyncio.create_task(endpoint(native_request(request_meta())))
+                if stage == "limiter":
+                    await wait_until(lambda: limiter.statistics().tasks_waiting == 1)
+                    assert not pipeline.entered.is_set()
+                    task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await task
+        finally:
+            if stage == "limiter":
+                limiter.release()
+                limiter.total_tokens = original_tokens
+        assert not pipeline.entered.is_set()
+        # A worker submitted before cancellation may arrive after reservation reclaim.
+        for worker in late_workers:
+            try:
+                worker()
+            except Exception:
+                pass
+            assert not pipeline.entered.is_set()
+        other = request_meta(attempt_id=str(uuid.uuid4()))
+        pipeline.response = response_for(other)
+        response = await endpoint(native_request(other))
+        assert response.status_code == 200, response.body
+        assert pipeline.entered.is_set()
+        assert state.slot.acquire(blocking=False)
+        state.slot.release()
+
+    client.portal.call(scenario)
+
+
+def test_cancel_running_worker_keeps_slot_until_cleanup(make_client, monkeypatch):
+    state = app_module.ServiceState(slot=threading.BoundedSemaphore(1))
+    monkeypatch.setattr(app_module, "ServiceState", lambda: state)
+    gate = threading.Event()
+    pipeline = StubPipeline(gate=gate)
+    client = make_client(pipeline=pipeline)
+    endpoint = next(route.endpoint for route in client.app.routes if route.path == "/internal/v1/compute")
+
+    async def scenario():
+        task = asyncio.create_task(endpoint(native_request(request_meta())))
+        try:
+            await wait_until(pipeline.entered.is_set)
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+            other = request_meta(attempt_id=str(uuid.uuid4()))
+            response = await endpoint(native_request(other))
+            assert response.status_code == 503
+            assert json.loads(response.body)["code"] == "AI_BUSY"
+        finally:
+            gate.set()
+        # Observe the real worker finally releasing capacity, without releasing it ourselves.
+        def released():
+            if state.slot.acquire(blocking=False):
+                state.slot.release()
+                return True
+            return False
+        await wait_until(released)
+        pipeline.response = response_for(other)
+        response = await endpoint(native_request(other))
+        assert response.status_code == 200, response.body
+
+    client.portal.call(scenario)
+
+
+@pytest.mark.parametrize(("error", "status", "code"), [
+    (RuntimeError("fixture failure"), 500, "INTERNAL_ERROR"),
+    (app_module._BudgetExpired(), 504, "COMPUTE_TIMEOUT"),
+])
+def test_worker_error_returns_capacity_once(make_client, monkeypatch, error, status, code):
+    state = app_module.ServiceState(slot=threading.BoundedSemaphore(1))
+    monkeypatch.setattr(app_module, "ServiceState", lambda: state)
+    pipeline = StubPipeline(error=error)
+    client = make_client(pipeline=pipeline)
+    assert_error(post(client, request_meta()), status, code, False)
+    other = request_meta(attempt_id=str(uuid.uuid4()))
+    pipeline.error = None
+    pipeline.response = response_for(other)
+    assert post(client, other).status_code == 200
+    assert state.slot.acquire(blocking=False)
+    state.slot.release()
+
+
+@pytest.mark.parametrize("location", ["ocr_score", "confidence", "coordinate"])
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+def test_output_nonfinite_numbers_are_typed_and_recover(make_client, location, value):
+    output = fixture("compute-response.json")
+    metadata = {
+        "path": "/total_amount", "raw_value": "45000", "value_origin": "prediction",
+        "source_regions": [{"page": 0, "quad": [[0, 0], [1, 0], [1, 1], [0, 1]], "ocr_block_ids": []}],
+        "ocr_score": None, "confidence": None, "confidence_method": None, "review_flags": [],
+    }
+    if location == "coordinate":
+        metadata["source_regions"][0]["quad"][0][0] = value
+    else:
+        metadata[location] = value
+    output["result"]["field_metadata"] = [metadata]
+    pipeline = StubPipeline(response=output)
+    client = make_client(pipeline=pipeline, raise_server_exceptions=False)
+    assert_error(post(client, request_meta()), 422, "OUTPUT_INVALID", False)
+    other = request_meta(attempt_id=str(uuid.uuid4()))
+    pipeline.response = response_for(other)
+    assert post(client, other).status_code == 200
+
+
+@pytest.mark.parametrize("kind", ["surrogate", "key_surrogate", "unsupported", "cycle", "deep", "large"])
+def test_output_json_safety_limits_are_typed_without_success_log(make_client, monkeypatch, kind):
+    output = fixture("compute-response.json")
+    if kind == "surrogate":
+        output["result"]["payload"]["merchant_name"] = "\ud800"
+    elif kind == "key_surrogate":
+        output["\ud800"] = None
+    elif kind == "unsupported":
+        output["result"]["payload"]["merchant_name"] = {1, 2}
+    elif kind == "cycle":
+        output["result"]["issues"].append(output)
+    elif kind == "deep":
+        nested = []
+        for _ in range(5000):
+            nested = [nested]
+        output["result"]["issues"] = nested
+    else:
+        output["result"]["issues"] = [{
+            "id": "fixture", "code": "FIXTURE", "severity": "info", "paths": [],
+            "message": "x" * (2 * 1024 * 1024),
+        }]
+    pipeline = StubPipeline(response=output)
+    client = make_client(pipeline=pipeline, raise_server_exceptions=False)
+    events = []
+    monkeypatch.setattr(app_module.log, "info", lambda event, **kwargs: events.append(event))
+    assert_error(post(client, request_meta()), 422, "OUTPUT_INVALID", False)
+    assert "compute_succeeded" not in events
+    other = request_meta(attempt_id=str(uuid.uuid4()))
+    pipeline.response = response_for(other)
+    assert post(client, other).status_code == 200
+
+
+def test_output_preserves_valid_unicode_and_control_characters(make_client):
+    output = fixture("compute-response.json")
+    output["result"]["payload"]["merchant_name"] = 'Cà phê "Việt"\n\t\u0000\u202e 😀'
+    response = post(make_client(pipeline=StubPipeline(response=output)), request_meta())
+    assert response.status_code == 200
+    assert response.json() == output
+
+
+def test_output_encoder_enforces_exact_byte_and_container_limits():
+    from vietdoc.entrypoints.api.output import encode_output
+    # The two quotes count toward the 2 MiB wire budget.
+    assert len(encode_output("x" * (2 * 1024 * 1024 - 2))) == 2 * 1024 * 1024
+    with pytest.raises(ValueError):
+        encode_output("x" * (2 * 1024 * 1024 - 1))
+    with pytest.raises(ValueError):
+        encode_output("\u0000" * (400 * 1024))  # escaping expands to six bytes
+    nested = None
+    for _ in range(32):
+        nested = [nested]
+    assert json.loads(encode_output(nested)) == nested
+    with pytest.raises(ValueError):
+        encode_output([nested])
+    with pytest.raises(ValueError):
+        encode_output({1: "non-string key"})
+    with pytest.raises(ValueError):
+        encode_output((1, 2))
+
+
+@pytest.mark.parametrize("key", ["run_id", "job_id", "attempt_id", "pipeline_manifest_id", "document_type", "schema_version"])
+def test_pipeline_cannot_mutate_ingress_correlation_baseline(make_client, key):
+    class MutatingPipeline(StubPipeline):
+        def run(self, job):
+            if not self.entered.is_set():
+                if key in ("document_type", "schema_version"):
+                    job.request["document_type"] = "invoice"
+                    job.request["schema_version"] = "invoice.v1"
+                else:
+                    job.request[key] = "mutated.v1" if key == "pipeline_manifest_id" else str(uuid.uuid4())
+                output = response_for(job.request)
+                output["result"]["provenance"]["pipeline_manifest_id"] = job.request["pipeline_manifest_id"]
+                if key in ("document_type", "schema_version"):
+                    output["result"]["document_type"] = "invoice"
+                    output["result"]["schema_version"] = "invoice.v1"
+                    output["result"]["payload"] = {
+                        "invoice_number": None, "issue_date": None, "seller_name": None, "buyer_name": None,
+                        "subtotal": None, "tax_amount": None, "discount_amount": None, "total_amount": None, "items": [],
+                    }
+                # A schema-valid output must still fail correlation with original ingress.
+                CONTRACTS.validate("urn:vietdoc:compute-response:v1", output)
+                self.entered.set()
+                return output
+            return self.response
+
+    pipeline = MutatingPipeline()
+    client = make_client(pipeline=pipeline)
+    meta = request_meta()
+    assert_error(post(client, meta), 422, "OUTPUT_INVALID", False)
+    other = request_meta(attempt_id=str(uuid.uuid4()))
+    pipeline.response = response_for(other)
+    assert post(client, other).status_code == 200

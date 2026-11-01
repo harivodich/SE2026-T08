@@ -5,6 +5,10 @@
 !src/
 !specs/contracts/
 !tests/
+# CI runner code only, used by the Linux test target (not the runtime stage).
+!scripts/
+scripts/*
+!scripts/ci/
 # Tiny fictional JSON examples consumed by the shared-schema tests only.
 !docs/design/v1/examples/
 **/__pycache__

@@ -15,12 +15,13 @@ import threading
 import time
 import uuid
 from contextlib import asynccontextmanager
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import FormData, UploadFile
 from starlette.exceptions import HTTPException
@@ -29,6 +30,7 @@ from starlette.formparsers import MultiPartException
 from vietdoc.contracts.compute import REQUEST_SCHEMA, ComputeContracts, ContractError
 from vietdoc.entrypoints.api.settings import Settings
 from vietdoc.entrypoints.api.metadata import decode_metadata
+from vietdoc.entrypoints.api.output import encode_output
 from vietdoc.infrastructure.logging import configure_logging
 from vietdoc.ml.release_manifest import Release, discover_releases
 from vietdoc.pipeline.service import ComputeInput, ComputePipeline
@@ -96,6 +98,34 @@ class ServiceState:
     release_errors: dict[str, str] = field(default_factory=dict)
     attempts_writable: bool = False
     slot: threading.Semaphore = field(default_factory=lambda: threading.Semaphore(1))
+
+
+class _SlotReservation:
+    """Transfer an acquired slot to a worker, or reclaim it before worker-start."""
+
+    def __init__(self, slot: threading.Semaphore) -> None:
+        self._slot = slot
+        self._lock = threading.Lock()
+        self._state = "reserved"
+
+    def start(self) -> bool:
+        with self._lock:
+            if self._state != "reserved":
+                return False
+            self._state = "running"
+            return True
+
+    def reclaim(self) -> None:
+        with self._lock:
+            if self._state == "reserved":
+                self._state = "reclaimed"
+                self._slot.release()
+
+    def finish(self) -> None:
+        with self._lock:
+            if self._state == "running":
+                self._state = "done"
+                self._slot.release()
 
 
 def _writable(directory: Path) -> bool:
@@ -231,7 +261,7 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
         return JSONResponse(body, status_code=503 if reasons else 200)
 
     @app.post("/internal/v1/compute")
-    async def compute(request: Request) -> JSONResponse:
+    async def compute(request: Request) -> Response:
         arrival = request.scope[ARRIVAL_KEY]
         if not _authorized(request.headers.get("authorization"), settings.service_token):
             return fail(401, "SERVICE_AUTH_FAILED", "Service credential is missing or invalid", False)
@@ -317,15 +347,19 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
         if time.monotonic() >= deadline:
             state.slot.release()
             return timeout_response()
-        job = ComputeInput(meta, document, release, attempt_dir, deadline)
+        # Pipeline code must never share the service's ingress validation baseline.
+        job = ComputeInput(deepcopy(meta), document, release, attempt_dir, deadline)
+        reservation = _SlotReservation(state.slot)
 
         def run() -> dict[str, Any]:
+            if not reservation.start():
+                raise RuntimeError("Compute reservation was reclaimed before worker-start")
             try:
                 if time.monotonic() >= deadline:
                     raise _BudgetExpired
                 return pipeline.run(job)
             finally:
-                state.slot.release()  # slot frees only when compute really ends
+                reservation.finish()  # running workers own their slot until cleanup
 
         try:
             response = await run_in_threadpool(run)
@@ -334,16 +368,24 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
         except Exception:
             log.exception("compute_failed", extra=ids)
             return fail(500, "INTERNAL_ERROR", "Compute failed", False, attempt_id)
+        finally:
+            # Cancellation while waiting for AnyIO capacity must not leak a reservation.
+            # Once running, only the worker finally may release it.
+            reservation.reclaim()
         if time.monotonic() >= deadline:
             return timeout_response()
         try:
+            encoded = encode_output(response)
+            if time.monotonic() >= deadline:
+                return timeout_response()
             contracts.check_response(meta, response)
-        except ContractError as error:
-            log.warning("output_invalid", extra={**ids, "path": error.path})
+        except (ValueError, TypeError, RecursionError, OverflowError):
+            # Output is untrusted. Never log it or decoder/schema exception text.
+            log.warning("output_invalid", extra=ids)
             return fail(422, "OUTPUT_INVALID", "Pipeline output failed contract validation", False, attempt_id)
         if time.monotonic() >= deadline:
             return timeout_response()
-        success_response = JSONResponse(response)
+        success_response = Response(encoded, media_type="application/json")
         if time.monotonic() >= deadline:
             return timeout_response()
         log.info(
