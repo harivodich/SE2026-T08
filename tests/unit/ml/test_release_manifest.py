@@ -94,3 +94,36 @@ def test_discover_reports_good_and_bad_releases(tmp_path):
 def test_discover_reports_unmounted_directory(tmp_path):
     releases, errors = discover_releases(tmp_path / "absent")
     assert releases == {} and errors
+
+
+@pytest.mark.parametrize("raw", [
+    '{"manifest_version":' + '9' * 5000 + '}',
+    '[' * 5000 + '0' + ']' * 5000,
+], ids=["numeric-limit", "deep-json"])
+def test_decoder_limit_failure_isolated_from_good_release(tmp_path, raw):
+    write_release(tmp_path, "good.v1")
+    root, _ = write_release(tmp_path, "bad.v1")
+    (root / "manifest.json").write_text(raw, encoding="utf-8")
+    releases, errors = discover_releases(tmp_path)
+    assert set(releases) == {"good.v1"}
+    assert set(errors) == {"bad.v1"}
+    with pytest.raises(ReleaseError):
+        load_release(tmp_path, "bad.v1")
+
+
+def test_drive_relative_or_colon_path_rejected_before_read(tmp_path):
+    root, entry = write_release(tmp_path)
+    if tmp_path.drive:
+        # Controlled outside-release file, still inside this test's temp directory.
+        target = tmp_path / "outside.data"
+        raw = f"{tmp_path.drive}../outside.data"
+    else:
+        raw = "adapter:weights.data"
+        target = root / raw
+    target.write_bytes(CONTENT)
+    (root / "manifest.json").write_text(json.dumps({
+        "manifest_version": 1, "pipeline_manifest_id": "rules.v1",
+        "files": [{**entry, "path": raw}],
+    }), encoding="utf-8")
+    with pytest.raises(ReleaseError):
+        load_release(tmp_path, "rules.v1")

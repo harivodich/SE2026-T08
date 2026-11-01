@@ -207,3 +207,31 @@ model/dataset downloads, deploy hoặc GitHub settings. Không commit/push/đăn
 trong lượt này. R17 cần actual hosted evidence; R01/R06/R13/R15, R11/R12 và model
 milestones vẫn mở theo owner/gate trong plan. Review cuối là self-review, không có
 independent peer/Lead approval.
+
+## 01/11/2026 — M-N1/M-N2/M-N3 tiếp theo sau 3a2b701
+
+User yêu cầu plan rồi implement các việc trong `next-ai2-2026-10-30.md` sau khi
+được phân tích. [Plan](2026-11-01-baseline-export-feasibility-plan.md),
+[handoff/evidence](2026-11-01-baseline-handoff.md),
+[constraints](2026-11-01-model-constraints.md) giữ phạm vi và kết quả của increment này.
+
+- R11/R12: RED 3 cases → GREEN release/API 89 passed, 1 Windows symlink skipped.
+  Decoder-limit failures isolate release hỏng; reject colon/drive/link/reparse/
+  resolved escape. Native junction/cross-drive matrix chưa chạy, không tự đóng model gate.
+- M-N2: implement OCR snapshot consumer + label/header baseline + table grouping,
+  reuse vi-VND.v2, no runtime IDs/gold lookup, required metadata/null confidence.
+  RED missing behavior rồi GREEN, thêm adversarial regressions cho label-looking
+  descriptions, footer tokenization, reading order, malformed producer inputs và
+  multiple tables. Baseline/export focused cuối 51 passed.
+- Producer CLI xuất `vietdoc.predictions.v1`, exact manifest/source/schema/version
+  hashes và failures; explicit simulated renderer mode hoặc hash-pinned OCR input
+  artifacts, no overwrite. Tiny fixture final output: 2 ok, 0 failed.
+- AI1 types/geometry/matcher nguyên bản `3712c65` và Data D3.2 evaluator
+  `a0d71b2` chạy consumer smokes trong ignored overlays, không merge branches.
+  Preliminary two-fixture observations: 12/12 scalar slots, 30/30 table cells,
+  6/6 rows; default CLI evidence 0/42 vì chưa bind matcher. Không native quality claim.
+- M-N3: đo Windows/CPU/RAM/GPU/disk; train image có sẵn CUDA readiness pass,
+  torch 2.14.1+cu126 và device 8188 MiB. Chỉ đọc public metadata cho candidate
+  proposals, không model/tokenizer/dataset downloads. G0 BLOCKED chờ approval và artifacts.
+- R17 hosted run/peer acceptance, actual OCR composition và training vẫn pending;
+  không sửa CI writer files hoặc GitHub trong increment này. Không commit/push.

@@ -17,6 +17,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import stat
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -48,7 +49,7 @@ class Release:
     def file(self, relative: str) -> Path:
         for item in self.files:
             if item.path == relative:
-                return self.root / PurePosixPath(item.path)
+                return _contained_file(self.root, item.path)
         raise ReleaseError(f"{relative} is not part of release {self.manifest_id}")
 
 
@@ -60,6 +61,31 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _reject_link(path: Path) -> None:
+    try:
+        attributes = getattr(path.lstat(), "st_file_attributes", 0)
+    except FileNotFoundError as error:
+        raise ReleaseError("release path missing") from error
+    if path.is_symlink() or attributes & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
+        raise ReleaseError("release paths must not contain symlinks or reparse points")
+
+
+def _contained_file(root: Path, raw_path: str) -> Path:
+    relative = PurePosixPath(raw_path)
+    if (relative.is_absolute() or "\\" in raw_path or ":" in raw_path
+            or any(part in ("", ".", "..") for part in raw_path.split("/"))):
+        raise ReleaseError("path must be relative inside the release")
+    _reject_link(root)
+    target = root.joinpath(*relative.parts)
+    if not target.resolve().is_relative_to(root.resolve()):
+        raise ReleaseError("path resolves outside the release")
+    current = root
+    for part in relative.parts:
+        current = current / part
+        _reject_link(current)
+    return target
+
+
 def _file_entry(root: Path, entry: object) -> ReleaseFile:
     if not isinstance(entry, dict) or set(entry) != {"path", "sha256", "size_bytes"}:
         raise ReleaseError("file entry needs exactly path, sha256, size_bytes")
@@ -68,15 +94,7 @@ def _file_entry(root: Path, entry: object) -> ReleaseFile:
         raise ReleaseError("file entry has invalid path or sha256")
     if not isinstance(size, int) or isinstance(size, bool) or size < 0:
         raise ReleaseError(f"{raw_path}: invalid size_bytes")
-    relative = PurePosixPath(raw_path)
-    if relative.is_absolute() or "\\" in raw_path or any(part in ("", ".", "..") for part in raw_path.split("/")):
-        raise ReleaseError(f"{raw_path}: path must be relative inside the release")
-    target = root.joinpath(*relative.parts)
-    current = root
-    for part in relative.parts:
-        current = current / part
-        if current.is_symlink():
-            raise ReleaseError(f"{raw_path}: symlinks are not allowed")
+    target = _contained_file(root, raw_path)
     if not target.is_file():
         raise ReleaseError(f"{raw_path}: missing")
     if target.stat().st_size != size:
@@ -92,14 +110,16 @@ def load_release(models_dir: Path, manifest_id: str) -> Release:
     root = models_dir / manifest_id
     if root.is_symlink() or not root.is_dir():
         raise ReleaseError("release folder missing")
+    _reject_link(root)
     manifest_path = root / MANIFEST_NAME
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise ReleaseError("manifest.json missing")
+    _reject_link(manifest_path)
     if manifest_path.stat().st_size > MAX_MANIFEST_BYTES:
         raise ReleaseError("manifest.json too large")
     try:
         data = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+    except (UnicodeDecodeError, ValueError, RecursionError) as error:
         raise ReleaseError("manifest.json is not valid JSON") from error
     if not isinstance(data, dict) or set(data) != {"manifest_version", "pipeline_manifest_id", "files"}:
         raise ReleaseError("manifest needs exactly manifest_version, pipeline_manifest_id, files")

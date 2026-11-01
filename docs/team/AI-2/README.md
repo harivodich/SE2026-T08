@@ -10,6 +10,9 @@ nhánh `feature/AI2-M2_ai_service_docker`.
 | [Batch A: R04/R07/R08/R10](batch-a-r04-r07-r08-r10.md) | Giải thích bốn lỗi, đường đi gây lỗi, hướng sửa đề xuất và regression cases cần có |
 | [Plan sửa bốn lỗi](2026-10-29-four-fixes-plan.md) | Các bước implementation, RED/GREEN và giới hạn kiểm chứng ngày 29/10 |
 | [Strict follow-up plan](2026-11-01-strict-followup-plan.md) | R05/R09/R14, CI R17 và ledger kiểm chứng local ngày 01/11 |
+| [Baseline/export plan](2026-11-01-baseline-export-feasibility-plan.md) | Increment M-N1/M-N2/M-N3, execution ledger và verification |
+| [Baseline handoff](2026-11-01-baseline-handoff.md) | Source/tests, CLI predictions, AI1/Data consumer smokes và gates chưa đóng |
+| [Model constraints](2026-11-01-model-constraints.md) | Hardware/runtime đo thật, candidate metadata và G0 provisioning blockers |
 | [SPEC.md](SPEC.md) | Ownership, boundaries và checks của thư mục |
 
 Đọc [kế hoạch vai trò](../ai-2-extraction.md), [workflow/gates](../workflow.md) và
