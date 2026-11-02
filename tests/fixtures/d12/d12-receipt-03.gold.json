@@ -1,0 +1,30 @@
+{
+  "merchant_name": "Cửa hàng Hư Cấu Mây Tím",
+  "merchant_address": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+  "transaction_date": "2026-10-03",
+  "transaction_time": "10:05",
+  "total_amount": "178000",
+  "items": [
+    {
+      "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu",
+      "quantity": "0.5",
+      "unit": "kg",
+      "unit_price": "80000",
+      "line_total": "40000"
+    },
+    {
+      "description": "Vải màu hư cấu",
+      "quantity": "1.5",
+      "unit": "mét",
+      "unit_price": "32000",
+      "line_total": "48000"
+    },
+    {
+      "description": "Trà sen hư cấu",
+      "quantity": "2",
+      "unit": "hộp",
+      "unit_price": "45000",
+      "line_total": "90000"
+    }
+  ]
+}

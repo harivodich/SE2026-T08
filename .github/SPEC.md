@@ -6,7 +6,7 @@ Quy ước PR và CI. Owner: Backend, Lead review.
 
 ## Đặt gì ở đây?
 
-PULL_REQUEST_TEMPLATE.md hiện có; workflows/CODEOWNERS thêm khi checks/identities thực có.
+PULL_REQUEST_TEMPLATE.md; [workflows](workflows/SPEC.md) kiểm increment thật; ci-constraints.txt và contract-requirements.txt tách Data renderer/schema validator. CODEOWNERS chỉ thêm khi có yêu cầu policy phù hợp.
 
 ## Ranh giới và dữ liệu
 
@@ -22,6 +22,6 @@ Không secrets trong workflow/template; không coi branch protection đã bật 
 ## Folder liên quan
 
 [Folder cha](../SPEC.md). [Scope](../specs/scope.md).
-Folder này không có subfolder làm việc cần spec riêng.
+- [workflows](workflows/SPEC.md). Lệnh, quyền và bootstrap settings: [CI/CD](../docs/cicd.md).
 
 SPEC.md là hướng dẫn local, không chứng minh app/model/CI đang chạy. .git/verification tooling/caches và immutable design snapshot không phải folders để team viết application code.

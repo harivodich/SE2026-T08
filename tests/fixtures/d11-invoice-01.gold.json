@@ -1,0 +1,33 @@
+{
+  "invoice_number": "GIẢ-LẬP-1101-01",
+  "issue_date": "2026-04-10",
+  "seller_name": "Xưởng Hư Cấu Cánh Diều",
+  "buyer_name": "Đơn vị Hư Cấu Mầm Nhỏ",
+  "subtotal": "167500",
+  "tax_amount": "0",
+  "discount_amount": "0",
+  "total_amount": "167500",
+  "items": [
+    {
+      "description": "Giấy gói hư cấu",
+      "quantity": "3",
+      "unit": "tập",
+      "unit_price": "12500",
+      "line_total": "37500"
+    },
+    {
+      "description": "Nến thơm hư cấu",
+      "quantity": "0.5",
+      "unit": "kg",
+      "unit_price": "80000",
+      "line_total": "40000"
+    },
+    {
+      "description": "Trà sen hư cấu",
+      "quantity": "2",
+      "unit": "hộp",
+      "unit_price": "45000",
+      "line_total": "90000"
+    }
+  ]
+}

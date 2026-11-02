@@ -1,0 +1,129 @@
+name: VietDoc CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vietdoc-ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  workflow:
+    name: workflow-validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Validate workflow syntax and security
+        run: python3 -m scripts.ci.lint
+
+  contracts:
+    name: schemas-and-gate-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install the independent schema validator environment
+        run: python -m pip install -r .github/contract-requirements.txt
+      - name: Validate shared schemas with positive and negative cases
+        run: python -m scripts.ci.checks tests contracts
+      - name: Verify gate failure, cancellation and skip policy
+        run: python -m scripts.ci.checks tests ci
+
+  data:
+    name: data-${{ matrix.os }}-py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install build tools
+        run: python -m pip install -c .github/ci-constraints.txt setuptools wheel
+      - name: Fresh install the declared Data extra
+        run: python -m pip install --no-build-isolation -c .github/ci-constraints.txt ".[data]"
+      - name: Run portable Data regression tests
+        run: python -m scripts.ci.checks tests data
+      - name: Generate and verify twenty fictional samples
+        run: python -m scripts.ci.checks integration
+      - name: Check tracked fixtures were not changed
+        run: git diff --exit-code
+
+  package:
+    name: data-package-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: python -m pip install -c .github/ci-constraints.txt setuptools wheel
+      - name: Build and test an installed wheel outside the source checkout
+        run: python -m scripts.ci.checks package
+      - name: Upload the tested Data wheel and its provenance
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: data-wheel-${{ github.sha }}
+          path: |
+            dist/*.whl
+            dist/data-package.json
+          if-no-files-found: error
+          retention-days: 7
+
+  release-readiness:
+    name: release-readiness
+    needs: [workflow, contracts, data, package]
+    if: >-
+      ${{ always() &&
+      (github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Require real application release checks
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 -m scripts.ci.gate release
+
+  ci-gate:
+    name: ci-gate
+    needs: [workflow, contracts, data, package, release-readiness]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Fail closed on missing, failed, skipped or cancelled required jobs
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 -m scripts.ci.gate ci

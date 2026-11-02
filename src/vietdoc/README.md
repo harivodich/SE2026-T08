@@ -1,6 +1,6 @@
 # Python AI/Data source
 
-Có OCR/page types, loader, geometry/evidence và adapter Paddle detector + Tesseract `vie`, theo [proposal AI-1](../../docs/ocr-input-proposal.md) chờ Backend/AI-2 review. Entrypoint `pipeline.ocr.recognize_document` chạy preprocess→OCR với một deadline và quản lý lifetime ảnh. Chưa extraction/training/server implementation trên branch này. Python chỉ computation và offline Data/ML; Java quản lý business state.
+C? Data generator/fixtures v? OCR/page types, loader, geometry/evidence, Paddle detector + Tesseract `vie` theo [proposal AI-1](../../docs/ocr-input-proposal.md). Entrypoint `recognize_document` chia s? deadline v? qu?n l? lifetime ?nh. Ch?a actual extraction/service composition tr?n branch n?y. Python ch? Data/compute; Java qu?n l? business state.
 
 | Vùng active | Owner và output |
 |---|---|
