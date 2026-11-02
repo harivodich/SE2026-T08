@@ -7,7 +7,7 @@ import struct
 from pathlib import Path
 import unittest
 
-from vietdoc.contracts.ocr import ImageInfo, OcrBlock, OcrPage, PreparedPage
+from vietdoc.contracts.ocr import ImageInfo, OcrBlock, OcrPage, PreparedPage, UnreadableRegion
 
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "ocr-page-proposal.json"
@@ -33,6 +33,19 @@ class OcrContractsTest(unittest.TestCase):
         self.assertEqual(self.page.to_dict(), self.fixture["ocr_page"])
         self.assertEqual([b.text for b in self.page.blocks], ["Tổng tiền", "45.000"])
         self.assertEqual(json.loads(json.dumps(self.page.to_dict())), self.fixture["ocr_page"])
+
+    def test_d1_native_handoff_parses_two_types_and_retains_missing_denominator(self):
+        bundle = json.loads((FIXTURE.parent / "ocr-d1-native-handoff.json").read_text(encoding="utf-8"))
+        self.assertEqual(bundle["run_summary"]["counts"], {"requested": 20, "native_attempted": 2, "ok": 2, "failed": 0, "not_run": 18})
+        self.assertEqual({s["document_type"] for s in bundle["samples"]}, {"receipt", "invoice"})
+        ids = [s["sample_id"] for s in bundle["samples"] + bundle["unavailable_inputs"]]
+        self.assertEqual(len(set(ids)), 20)
+        for sample in bundle["samples"]:
+            page = OcrPage.from_dict(sample["ocr"])
+            page.validate_against(PreparedPage.from_dict(sample["prepared"]))
+            self.assertEqual((page.width, page.height), (1500, 2600))
+            self.assertEqual(page.to_dict(), sample["ocr"])
+            self.assertEqual(len(page.blocks), sample["block_count"])
 
     def test_fixture_explains_processed_to_canonical_direction(self):
         matrix = self.prepared.inverse_transform
@@ -206,6 +219,60 @@ class OcrContractsTest(unittest.TestCase):
         output = parsed.to_dict()
         output["blocks"][0]["quad"][0][0] = 0.9
         self.assertEqual(parsed.blocks[0].quad[0][0], 0.1)
+
+    def test_v2_consumer_golden_outcomes_and_round_trip(self):
+        fixture = json.loads((FIXTURE.parent / "ocr-artifact-v2.json").read_text(encoding="utf-8"))
+        prepared = PreparedPage.from_dict(fixture["prepared_page"])
+        for case in fixture["cases"]:
+            with self.subTest(case=case["case_id"]):
+                page = OcrPage.from_dict(case["expected"])
+                page.validate_against(prepared)
+                self.assertEqual(page.to_dict(), case["expected"])
+                self.assertEqual(page.recognition_status, case["expected"]["recognition_status"])
+                self.assertTrue(all(block.text.strip() for block in page.blocks))
+
+    def test_legacy_migration_is_explicit_and_never_drops_unreadable_regions(self):
+        migrated = replace(self.page, artifact_version=2)
+        self.assertEqual(migrated.blocks, self.page.blocks)
+        self.assertEqual(migrated.recognition_status, "complete")
+        self.assertEqual(OcrPage.from_dict(migrated.to_dict()), migrated)
+        self.assertNotIn("artifact_version", self.page.to_dict())
+        region = UnreadableRegion("unread", self.page.blocks[0].quad, 0, None)
+        partial = replace(migrated, unreadable_regions=(region,))
+        with self.assertRaises(ValueError):
+            replace(partial, artifact_version=1)
+
+    def test_v2_status_flags_versions_and_keys_are_validated(self):
+        valid = replace(self.page, artifact_version=2).to_dict()
+        changes = ({"artifact_version": True}, {"artifact_version": 3}, {"artifact_version": 1},
+                   {"recognition_status": "partial"}, {"review_flags": ["OCR_UNREADABLE_REGIONS"]},
+                   {"unreadable_regions": None}, {"unexpected": 1})
+        for change in changes:
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                OcrPage.from_dict({**valid, **change})
+        for key in ("artifact_version", "unreadable_regions", "recognition_status", "review_flags"):
+            invalid = dict(valid)
+            del invalid[key]
+            with self.subTest(missing=key), self.assertRaises(ValueError):
+                OcrPage.from_dict(invalid)
+
+    def test_unreadable_ids_geometry_score_reason_and_immutability(self):
+        region = UnreadableRegion("unread", self.page.blocks[0].quad, None, None)
+        for change in ({"region_id": " "}, {"score": float("nan")}, {"score": True},
+                       {"score": 1.1}, {"reason": "PROVIDER_CRASH"}, {"quad": None},
+                       {"geometry_reason": "unexpected"}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                replace(region, **change)
+        with self.assertRaises(ValueError):
+            replace(self.page, artifact_version=2, unreadable_regions=(replace(region, region_id=self.page.blocks[0].block_id),))
+        unavailable = replace(region, quad=None, geometry_reason="NO_MAPPING")
+        partial = replace(self.page, artifact_version=2, unreadable_regions=(unavailable,))
+        self.assertEqual(partial.recognition_status, "partial")
+        with self.assertRaises(FrozenInstanceError):
+            unavailable.reason = "changed"
+        missing = replace(self.prepared, geometry_status="unavailable", inverse_transform=None, geometry_reason="NO_MAPPING")
+        with self.assertRaises(ValueError):
+            replace(self.page, blocks=(), artifact_version=2, unreadable_regions=(region,)).validate_against(missing)
 
 
 if __name__ == "__main__":

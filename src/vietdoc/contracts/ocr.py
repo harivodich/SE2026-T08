@@ -100,6 +100,24 @@ def validated_transform(value: object) -> tuple[Matrix3x3, Matrix3x3]:
     return matrix, normalized
 
 
+def _region_geometry(quad, reason):
+    if quad is None:
+        _text(reason, "geometry_reason")
+        return None
+    if reason is not None:
+        raise ValueError("Located region must not have an unavailable reason")
+    return _quad(quad)
+
+
+def _engine_score(value):
+    if value is None:
+        return None
+    score = _number(value, "score")
+    if not 0 <= score <= 1:
+        raise ValueError("OCR score must be in [0, 1] or null")
+    return score
+
+
 @dataclass(frozen=True, slots=True)
 class ImageInfo:
     """Decoded image descriptor; uint8 values are in [0, 255]. No pixels or paths."""
@@ -183,21 +201,34 @@ class OcrBlock:
     def __post_init__(self) -> None:
         _text(self.block_id, "block_id")
         _text(self.text, "text")
-        if self.quad is None:
-            _text(self.geometry_reason, "geometry_reason")
-        else:
-            if self.geometry_reason is not None:
-                raise ValueError("Located block must not have an unavailable reason")
-            object.__setattr__(self, "quad", _quad(self.quad))
-        if self.score is not None:
-            score = _number(self.score, "score")
-            if not 0 <= score <= 1:
-                raise ValueError("OCR score must be in [0, 1] or null")
-            object.__setattr__(self, "score", score)
+        object.__setattr__(self, "quad", _region_geometry(self.quad, self.geometry_reason))
+        object.__setattr__(self, "score", _engine_score(self.score))
 
     @classmethod
     def from_dict(cls, value: object) -> "OcrBlock":
         return cls(**_record(value, {"block_id", "text", "quad", "score", "geometry_reason"}))
+
+
+@dataclass(frozen=True, slots=True)
+class UnreadableRegion:
+    """A real detected region with no recognized text; never a fabricated block."""
+
+    region_id: str
+    quad: Quad | None
+    score: float | None
+    geometry_reason: str | None
+    reason: Literal["EMPTY_RECOGNITION"] = "EMPTY_RECOGNITION"
+
+    def __post_init__(self):
+        _text(self.region_id, "region_id")
+        if self.reason != "EMPTY_RECOGNITION":
+            raise ValueError("Unknown unreadable recognition reason")
+        object.__setattr__(self, "quad", _region_geometry(self.quad, self.geometry_reason))
+        object.__setattr__(self, "score", _engine_score(self.score))
+
+    @classmethod
+    def from_dict(cls, value: object) -> "UnreadableRegion":
+        return cls(**_record(value, {"region_id", "quad", "score", "geometry_reason", "reason"}))
 
 
 @dataclass(frozen=True, slots=True)
@@ -209,6 +240,8 @@ class OcrPage:
     height: int
     ocr_version: str
     blocks: tuple[OcrBlock, ...]
+    artifact_version: Literal[1, 2] = 1
+    unreadable_regions: tuple[UnreadableRegion, ...] = ()
 
     def __post_init__(self) -> None:
         _page(self.page)
@@ -217,23 +250,57 @@ class OcrPage:
         blocks = _sequence(self.blocks, "blocks")
         if any(not isinstance(block, OcrBlock) for block in blocks):
             raise ValueError("blocks must contain OcrBlock values")
-        ids = [block.block_id for block in blocks]
+        if type(self.artifact_version) is not int or self.artifact_version not in (1, 2):
+            raise ValueError("Unknown OCR artifact version")
+        unreadable = _sequence(self.unreadable_regions, "unreadable_regions")
+        if any(not isinstance(region, UnreadableRegion) for region in unreadable):
+            raise ValueError("unreadable_regions must contain UnreadableRegion values")
+        if self.artifact_version == 1 and unreadable:
+            raise ValueError("Legacy OCR cannot silently discard unreadable detections")
+        ids = [block.block_id for block in blocks] + [region.region_id for region in unreadable]
         if len(ids) != len(set(ids)):
             raise ValueError("Duplicate block_id on page")
         object.__setattr__(self, "blocks", blocks)
+        object.__setattr__(self, "unreadable_regions", unreadable)
+
+    @property
+    def recognition_status(self) -> str:
+        return ("partial" if self.blocks else "unreadable") if self.unreadable_regions else "complete"
+
+    @property
+    def review_flags(self) -> tuple[str, ...]:
+        return ("OCR_UNREADABLE_REGIONS",) if self.unreadable_regions else ()
 
     @classmethod
     def from_dict(cls, value: object) -> "OcrPage":
-        data = dict(_record(value, {"page", "width", "height", "ocr_version", "blocks"}))
+        keys = {"page", "width", "height", "ocr_version", "blocks"}
+        versioned = isinstance(value, dict) and "artifact_version" in value
+        if versioned:
+            keys |= {"artifact_version", "unreadable_regions", "recognition_status", "review_flags"}
+        data = dict(_record(value, keys))
+        if versioned:
+            if type(data["artifact_version"]) is not int or data["artifact_version"] != 2:
+                raise ValueError("Only explicit OCR artifact v2 is supported")
+            status, flags = data.pop("recognition_status"), _sequence(data.pop("review_flags"), "review_flags")
+            data["unreadable_regions"] = tuple(UnreadableRegion.from_dict(region)
+                for region in _sequence(data["unreadable_regions"], "unreadable_regions"))
         data["blocks"] = tuple(OcrBlock.from_dict(block) for block in _sequence(data["blocks"], "blocks"))
-        return cls(**data)
+        page = cls(**data)
+        if versioned and (status != page.recognition_status or flags != page.review_flags):
+            raise ValueError("OCR recognition status/flags contradict detected regions")
+        return page
 
     def to_dict(self) -> dict:
-        data = asdict(self)
+        data = {name: getattr(self, name) for name in ("page", "width", "height", "ocr_version")}
         data["blocks"] = [
             {**asdict(block), "quad": None if block.quad is None else [list(point) for point in block.quad]}
             for block in self.blocks
         ]
+        if self.artifact_version == 2:
+            data.update(artifact_version=2, recognition_status=self.recognition_status,
+                        review_flags=list(self.review_flags), unreadable_regions=[
+                            {**asdict(region), "quad": None if region.quad is None else [list(p) for p in region.quad]}
+                            for region in self.unreadable_regions])
         return data
 
     def validate_against(self, prepared: PreparedPage) -> None:
@@ -242,5 +309,5 @@ class OcrPage:
             raise ValueError("Expected PreparedPage")
         if (self.page, self.width, self.height) != (prepared.page, prepared.canonical.width, prepared.canonical.height):
             raise ValueError("OCR page must describe the matching canonical image")
-        if prepared.geometry_status == "unavailable" and any(block.quad is not None for block in self.blocks):
+        if prepared.geometry_status == "unavailable" and any(region.quad is not None for region in (*self.blocks, *self.unreadable_regions)):
             raise ValueError("Unavailable mapping cannot produce canonical quads")

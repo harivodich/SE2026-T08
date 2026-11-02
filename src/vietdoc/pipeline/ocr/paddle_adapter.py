@@ -18,7 +18,7 @@ from urllib.request import urlopen
 import numpy as np
 from PIL import Image, ImageDraw
 
-from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage
+from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage, UnreadableRegion
 from vietdoc.pipeline.geometry import GEOMETRY_VERSION, canonical_quad, pixel_quad, reading_order
 from vietdoc.pipeline.preprocess import LoadedPage
 from vietdoc.pipeline.ocr import OCR_STAGE_VERSION, OcrError, recognize_document
@@ -49,7 +49,7 @@ MODELS = {
 MODEL_SET_ID = "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d"
 OCR_VERSION = (
     MODEL_SET_ID + ";paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;"
-    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v3;"
+    "tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v4;"
     + GEOMETRY_VERSION
 )
 MAX_BLOCKS = 1000
@@ -142,21 +142,27 @@ def _sort_polygons(polygons):
     return [polygons[index] for index in reading_order([np.asarray(polygon).tolist() for polygon in polygons])]
 
 
-def _to_page(result, metadata: PreparedPage) -> OcrPage:
+def _to_page(result, metadata: PreparedPage, *, artifact_version: int = 1) -> OcrPage:
     texts, polygons, scores = (result[key] for key in ("rec_texts", "rec_polys", "rec_scores"))
     if not len(texts) == len(polygons) == len(scores) or len(texts) > MAX_BLOCKS:
         raise ValueError("Unaligned or oversized OCR output")
     if any(not isinstance(text, str) for text in texts) or sum(map(len, texts)) > MAX_TEXT_CHARS:
         raise ValueError("Invalid or oversized OCR text")
-    blocks = []
+    blocks, unreadable = [], []
     for index, (text, polygon, score) in enumerate(zip(texts, polygons, scores), start=1):
         if score is not None:
             if isinstance(score, (bool, np.bool_)) or not isinstance(score, (int, float, np.integer, np.floating)):
                 raise ValueError("Invalid recognition score")
             score = float(score)
         quad = _canonical_quad(polygon, metadata)
-        blocks.append(OcrBlock(f"p0-b{index:04d}", text, quad, score, metadata.geometry_reason if quad is None else None))
-    page = OcrPage(0, metadata.canonical.width, metadata.canonical.height, OCR_VERSION, tuple(blocks))
+        region_id = f"p0-b{index:04d}"
+        reason = metadata.geometry_reason if quad is None else None
+        if artifact_version == 2 and not text.strip():
+            unreadable.append(UnreadableRegion(region_id, quad, score, reason))
+        else:
+            blocks.append(OcrBlock(region_id, text, quad, score, reason))
+    page = OcrPage(0, metadata.canonical.width, metadata.canonical.height, OCR_VERSION, tuple(blocks),
+                   artifact_version=artifact_version, unreadable_regions=tuple(unreadable))
     page.validate_against(metadata)
     return page
 
@@ -240,7 +246,11 @@ class VietnameseOcrEngine:
     cooperative between native calls/regions; this is not hard cancellation.
     """
 
-    def __init__(self, model_root: Path):
+    def __init__(self, model_root: Path, *, artifact_version: int = 1):
+        # v2 is an explicit consumer opt-in until the fixture migration is accepted.
+        if type(artifact_version) is not int or artifact_version not in (1, 2):
+            raise ValueError("Unsupported OCR artifact version")
+        self.artifact_version = artifact_version
         self.model_root = Path(model_root).resolve()
         self._predictor = None
         self._slot = Lock()
@@ -307,7 +317,7 @@ class VietnameseOcrEngine:
             finally:
                 self.last_inference_seconds = time.monotonic() - started
             try:
-                page = _to_page(result, metadata)
+                page = _to_page(result, metadata, artifact_version=self.artifact_version)
             except (ValueError, KeyError, TypeError, OverflowError) as exc:
                 raise OcrError("OUTPUT_INVALID", "OCR output violates the page contract") from exc
             _check_deadline(deadline)
@@ -334,14 +344,16 @@ def draw_overlay(canonical: Image.Image, page: OcrPage) -> Image.Image:
         raise ValueError("Overlay must use the matching canonical RGB image")
     image = canonical.copy()
     draw = ImageDraw.Draw(image)
-    for block in page.blocks:
+    for block in (*page.blocks, *page.unreadable_regions):
         if block.quad is None:
             continue
         points = [(x * page.width, y * page.height) for x, y in block.quad]
-        draw.line(points + [points[0]], fill="red", width=2)
-        label = block.block_id + ("" if block.score is None else f" {block.score:.2f}")
+        unreadable = isinstance(block, UnreadableRegion)
+        color = "darkorange" if unreadable else "red"
+        draw.line(points + [points[0]], fill=color, width=2)
+        label = (block.region_id + " unreadable" if unreadable else block.block_id) + ("" if block.score is None else f" {block.score:.2f}")
         x, y = min(points, key=lambda point: (point[1], point[0]))
-        draw.text((x, max(0, y - 14)), label, fill="red")
+        draw.text((x, max(0, y - 14)), label, fill=color)
     return image
 
 
@@ -356,9 +368,11 @@ def main() -> int:
     parser.add_argument("--download", action="store_true", help="Explicitly provision pinned pretrained weights")
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/evaluation/ocr-smoke"))
     parser.add_argument("--processed-long-edge", type=int, default=2000)
+    parser.add_argument("--artifact-version", type=int, choices=(1, 2), default=1,
+                        help="Explicit opt-in to proposed v2 partial/unreadable artifacts")
     parser.add_argument("--transcript", type=Path, help="Optional UTF-8 reference; never used by OCR")
     args = parser.parse_args()
-    engine = VietnameseOcrEngine(args.model_root)
+    engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
     try:
         if args.download:
             provision_models(args.model_root)
@@ -391,6 +405,8 @@ def main() -> int:
                 "inference_seconds": engine.last_inference_seconds,
                 "score_method": "Tesseract MeanTextConf (0..100) / 100; not field correctness",
                 "block_count": len(page.blocks),
+                "artifact_version": page.artifact_version, "recognition_status": page.recognition_status,
+                "unreadable_count": len(page.unreadable_regions), "review_flags": list(page.review_flags),
             }
             if reference is not None:
                 # Whitespace only; do not strip Vietnamese accents or change prediction.

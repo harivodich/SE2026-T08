@@ -472,7 +472,8 @@ isolation, OS memory quota hay service recovery đã có. Những phần đó v�
 
 ### R04 — đề xuất partial/unreadable để AI-2 và Backend duyệt
 
-**Chưa implemented/accepted.** Không đổi `OcrBlock.text` để chứa chuỗi rỗng, không
+**Trạng thái tại review 25/10: chưa implemented/accepted.** Xem increment 02/11 ở cuối
+file cho implementation opt-in v2; consumer acceptance vẫn pending. Không đổi `OcrBlock.text` để chứa chuỗi rỗng, không
 thêm fields vào shared result schema hoặc tự coi policy đã được duyệt.
 
 Đề xuất mở rộng **OCR artifact nội bộ** ở version mới:
@@ -535,3 +536,74 @@ git diff --check
 Đã recheck remote: feature head vẫn26bd4e1; develop đã lên4ed7302. Triple-dot diff
 với feature HEAD vẫn165 paths kế thừa/increment như review snapshot; Lead tiếp tục
 xử lý base. Không tự rebase/merge, commit/push hoặc chuyển Draft→Ready ở lượt fix này.
+
+## Bàn giao O-N — 2026-11-02
+
+Increment theo `next-ai1-2026-10-30.md`, làm trên `feature/AI1_preprocess_ocr`.
+Đã sync develop `729be6f` bằng merge `862ce5a`; kiểm tra và xử lý 17 conflicts
+theo từng phần, giữ Data extra/package-data/CI và AI-1 pins riêng. Không push
+main/develop. Các số liệu và trạng thái phía trên là lịch sử, không kết quả lượt này.
+
+| Mục | Kết quả và gate còn lại |
+|---|---|
+| O-N1/R01 | Guard v5 quét token occurrence qua block boundaries và currency attached; numeric separators/digits giữ nguyên. Unresolved occurrence chỉ gây abstention, không tạo substring box. Không đếm chính exact wrapped span lần nữa; explicit item scope giữ page order. Có regression IDs/flags cho cả hai repro Lead nêu. |
+| O-N1/R04 | Internal artifact v2, adapter opt-in, preview/overlay/evidence propagation và golden migration cases đã có. Default v1 giữ behavior cũ đến khi AI-2/Backend nhận version/semantics; R04 **chưa đóng**. Invalid shape/geometry/score/native exception/OOM/timeout vẫn typed error. |
+| O-N2 | Native receipt03/invoice04 đều chạy, parse local, có canonical/overlay/hash/PreparedPage/OcrPage. Helper offline export trong `with`, caller giữ lifecycle; không ghi production attempt storage. Actual consumer acceptance chờ AI-2. |
+| O-N3 | Independent PNG identity oracle `d1-png-identity-pixel-edge.v1`, kiểm decoded RGB pixels/dimensions và sidecar hashes; tests map mọi renderer ink rect qua resize thực1154×2000 về canonical1500×2600. Fixture có matched/ambiguous/unavailable; không biến renderer box thành OCR gold hoặc neutral schema authority. |
+| O-N4 | Chưa có accepted D3 evaluator/scope-order để chạy baseline; chưa tune preprocessing hoặc công bố CER/WER. |
+| O-N5 | Đo native repeated-call smoke và D1 latency/RSS, giữ cap20MP/CPU4/deadline/Clear/slot. Native hang/isolation/restart, admission toàn pipeline và actual encrypted-PDF E2E vẫn chưa kiểm; thuộc integration với AI-2. |
+
+### Consumer semantics của internal artifact v2
+
+`blocks` vẫn nonblank, không sửa OCR text bằng transcript. `unreadable_regions`
+giữ detection ID chung sequence, quad canonical hoặc null + geometry_reason, score
+engine nullable, reason `EMPTY_RECOGNITION`. Mixed → `partial`, toàn detection rỗng
+→ `unreadable`, không detection → `complete` với hai arrays rỗng. Có unreadable thì
+`OCR_UNREADABLE_REGIONS`; evidence thêm `SOURCE_OCR_INCOMPLETE`. Unscoped unique
+recognized candidate trên partial page cũng abstain; explicit scope có thể chọn
+recognized source nhưng vẫn truyền flags. Missing/null là prediction thiếu evidence,
+không là `absent`, không tự điền value/bbox/confidence. Backend vẫn phải enforce
+blocker khi required field thiếu; chưa có actual consumer wiring chứng minh gate đó.
+
+v1 deserialize/serialize giữ đúng shape cũ; v2 validate status/flags theo arrays,
+reject metadata mâu thuẫn và trùng IDs. Migrate complete v1 bằng
+`dataclasses.replace(page, artifact_version=2)`; không downgrade v2 partial về v1
+và bỏ diagnostic. `OcrBlock.text`/shared JSON schemas/Java DTO không đổi. Fixture
+`tests/fixtures/ocr-artifact-v2.json` là golden consumer proposal, không native gold.
+
+### Native D1 và geometry provenance
+
+Observed bundle tracked: `tests/fixtures/ocr-d1-native-handoff.json` (~60KB, chỉ dữ
+liệu hư cấu Data đã cung cấp). Có native blocks/score/quads của hai type, SHA-256
+input/canonical encoded PNG/canonical RGB pixels/source/model files, versions,
+profile, latency/RSS, 18 unavailable IDs và evidence examples. Canonical PNG được
+re-encode bằng Pillow12 nên encoded hash khác input; decoded pixels/dimensions
+giống ảnh renderer đã được kiểm độc lập. Renderer-local rectangles dùng oracle
+identity có version, không sửa theo OCR. Runtime files/model/env đều ignored.
+
+Manifest D1.2.v2 gồm20 IDs: **2 native attempted, 2 ok, 0 failed, 18 not_run**
+`INPUT_ARTIFACT_UNAVAILABLE`. Fallback tiny chỉ bật tường minh và vẫn kiểm exact
+manifest hash; 18 missing không được gọi là native attempts. Data cần bàn giao
+18 PNG còn lại trước khi claim OCR đủ20. Không chạy generator bằng env AI-1 thay Data.
+
+Receipt giữ các số tiền và dấu chính, nhưng `hộp → nộp`, `SL → sL`; invoice có
+`SL → SsL`. Cả hai wrapped descriptions có continuation sau cells số, khác transcript
+Data; giữ raw output/order. Invoice lặp `90.000 đ`/`45.000 đ` cần explicit item scope.
+Totals lặp trong merged label/value blocks không có substring box. Overlay receipt
+đã xem trực tiếp; boxes phủ dòng chữ nhưng có margins. Không coi đây là tight-box
+quality acceptance, field correctness hoặc baseline CER/WER.
+
+Cold engine load ở lượt manifest20:2.20s; inference/memory chi tiết từng mẫu trong
+bundle, đo Windows11/Python3.13.7/CPU4, processed long edge2000. Format smoke18 lượt
+OCR thành công từ một trang synthetic có median0.079s/max0.103s, peak RSS~549MiB,
+private~930MiB trong process test cuối. Không là OS quota hoặc cấu hình capacity production.
+AI-1 env/model bền trên D `artifacts/models/.venv-ai1` và `artifacts/models/ocr-v1`;
+10 direct dependency pins được kiểm riêng, transitive freeze lưu local ignored.
+
+D2 PDF MediaBox1500×2600pt ở200DPI vượt20MP: đã reproduce qua actual loader và
+test `PROFILE_EXCEEDED`; chưa rasterize hoặc tăng cap/đổi DPI để lách. Data/Lead
+cần chốt render profile có version trước PDF handoff; PNG tiếp tục dùng được.
+
+Commands/helper ở [Python README](../src/vietdoc/README.md#chạy-ocr-ai-1), checks ở
+[tests README](../tests/README.md). Local parser/golden tests không thay actual
+AI-2 parse result, Backend approval/viewer, Java E2E hoặc shared wire acceptance.

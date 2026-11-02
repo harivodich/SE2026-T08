@@ -4,6 +4,7 @@ from copy import deepcopy
 from dataclasses import replace
 from hashlib import sha256
 from pathlib import Path
+import json
 import os
 import time
 from tempfile import TemporaryDirectory
@@ -165,6 +166,58 @@ class PaddleAdapterTest(unittest.TestCase):
         error = self.assert_error("INTERNAL_ERROR", lambda: self.engine.recognize(self.loaded))
         self.assertNotIn("private raw payload", str(error))
 
+    def test_v2_conversion_matches_consumer_golden_cases(self):
+        fixture = json.loads((Path(__file__).resolve().parents[2] / "fixtures/ocr-artifact-v2.json").read_text(encoding="utf-8"))
+        prepared = PreparedPage.from_dict(fixture["prepared_page"])
+        with patch("vietdoc.pipeline.ocr.paddle_adapter.OCR_VERSION", "fictional.ocr.v2"):
+            for case in fixture["cases"]:
+                with self.subTest(case=case["case_id"]):
+                    actual = _to_page(case["provider"], prepared, artifact_version=2)
+                    self.assertEqual(actual.to_dict(), case["expected"])
+                    self.assertEqual(OcrPage.from_dict(actual.to_dict()), actual)
+
+    def test_partial_is_explicit_opt_in_and_does_not_renumber_detections(self):
+        self.result["rec_texts"] = ["", "80.000"]
+        self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
+        engine = VietnameseOcrEngine("unused", artifact_version=2)
+        engine._predictor = self.predictor
+        page = engine.recognize(self.loaded)
+        self.assertEqual(page.recognition_status, "partial")
+        self.assertEqual([b.block_id for b in page.blocks], ["p0-b0002"])
+        self.assertEqual([r.region_id for r in page.unreadable_regions], ["p0-b0001"])
+        self.assertEqual(page.blocks[0].text, "80.000")
+        self.assertEqual(page.unreadable_regions[0].reason, "EMPTY_RECOGNITION")
+
+    def test_empty_regions_do_not_hide_invalid_score_or_geometry(self):
+        self.engine.artifact_version = 2
+        self.result["rec_texts"][0] = ""
+        for score in (float("nan"), float("inf"), -1, 1.1, True, "0"):
+            with self.subTest(score=score):
+                self.result["rec_scores"] = [score, .9]
+                self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
+        self.result["rec_scores"] = [0, .9]
+        self.result["rec_polys"][0,0] = [-1, 10]
+        self.assert_error("OUTPUT_INVALID", lambda: self.engine.recognize(self.loaded))
+
+    def test_v2_unavailable_geometry_keeps_unreadable_identity_and_reason(self):
+        metadata = replace(self.metadata, geometry_status="unavailable", inverse_transform=None, geometry_reason="NO_MAPPING")
+        self.result["rec_texts"][0] = " \t "
+        page = _to_page(self.result, metadata, artifact_version=2)
+        self.assertIsNone(page.unreadable_regions[0].quad)
+        self.assertEqual(page.unreadable_regions[0].geometry_reason, "NO_MAPPING")
+        self.assertEqual(page.unreadable_regions[0].region_id, "p0-b0001")
+        self.assertIsNone(page.blocks[0].quad)
+
+    def test_v2_provider_exception_oom_and_timeout_remain_typed_errors(self):
+        self.engine.artifact_version = 2
+        for failure, code in ((RuntimeError("private"), "INTERNAL_ERROR"), (MemoryError(), "MODEL_OOM")):
+            self.predictor.predict.side_effect = failure
+            with self.subTest(code=code):
+                self.assert_error(code, lambda: self.engine.recognize(self.loaded))
+        self.assert_error("COMPUTE_TIMEOUT", lambda: self.engine.recognize(self.loaded, remaining_budget_ms=0))
+        self.assertTrue(self.engine._slot.acquire(blocking=False))
+        self.engine._slot.release()
+
     def test_input_dimensions_and_mode_must_match_metadata(self):
         mismatched = replace(self.loaded, metadata=replace(self.metadata, processed=ImageInfo(99, 50, "RGB", "uint8")))
         self.assert_error("INPUT_INVALID", lambda: self.engine.recognize(mismatched))
@@ -197,8 +250,8 @@ class PaddleAdapterTest(unittest.TestCase):
 
     def test_deadline_is_not_reset_before_canonical_publication(self):
         clock = [0.0]
-        def slow_conversion(result, metadata):
-            page = _to_page(result, metadata)
+        def slow_conversion(result, metadata, **kwargs):
+            page = _to_page(result, metadata, **kwargs)
             clock[0] = .05
             return page
         module = "vietdoc.pipeline.ocr.paddle_adapter."

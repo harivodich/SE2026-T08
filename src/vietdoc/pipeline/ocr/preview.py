@@ -45,13 +45,14 @@ button:focus-visible{outline:3px solid #427dff}button:hover{background:#edf3ff}
 .page img{display:block;width:100%;height:auto}.page svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 polygon{fill:#ed34251a;stroke:#c83226;stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
 polygon.selected{fill:#1675ff26;stroke:#065bd6;stroke-width:3}polygon:focus{outline:none;stroke:#065bd6;stroke-width:4}
+polygon.unreadable{fill:#f59e0b26;stroke:#a65c00}.warning{color:#7d4700;font-weight:600}
 #blocks{display:flex;flex-direction:column;gap:7px;max-height:58vh;overflow:auto;margin:12px 0}
 .block{text-align:left;padding:9px 11px}.block strong{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
 .block[aria-pressed=true]{border-color:#065bd6;background:#edf3ff}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 ui-monospace,monospace}
 details{margin-top:14px}summary{cursor:pointer;font-weight:600}#details{min-height:88px}.empty{padding:16px;background:#f3f5f8;border-radius:6px}
 @media(max-width:850px){main{grid-template-columns:1fr;padding:10px}header{padding:14px}#blocks{max-height:320px}}
 </style>
-<header><h1>Kiểm tra OCR</h1><p id="summary"></p><p class="muted">Chọn vùng chữ trên ảnh hoặc trong danh sách để kiểm vị trí. Score là điểm của OCR engine.</p></header>
+<header><h1>Kiểm tra OCR</h1><p id="summary"></p><p id="warnings" class="warning" role="status"></p><p class="muted">Chọn vùng chữ trên ảnh hoặc trong danh sách để kiểm vị trí. Score là điểm của OCR engine.</p></header>
 <main>
 <section class="card" aria-label="Ảnh canonical và highlight">
 <div class="toolbar"><button id="all" type="button">Hiện tất cả vùng</button><label><input id="visible" type="checkbox" checked> Hiện highlight</label><span id="selection" role="status" aria-live="polite">Tất cả vùng OCR</span></div>
@@ -67,31 +68,34 @@ details{margin-top:14px}summary{cursor:pointer;font-weight:600}#details{min-heig
 <script>
 'use strict';
 const data=JSON.parse(document.getElementById('ocr-data').textContent), page=data.ocr;
+const regions=[...page.blocks,...(page.unreadable_regions||[]).map(r=>({...r,block_id:r.region_id,text:null,unreadable:true}))];
 const el=id=>document.getElementById(id), ns='http://www.w3.org/2000/svg', shapes=[], buttons=[];
-el('summary').textContent=`${page.width} × ${page.height} px · Trang ${page.page+1} · ${page.blocks.length} vùng chữ`;
+el('summary').textContent=`${page.width} × ${page.height} px · Trang ${page.page+1} · ${page.blocks.length} vùng đọc được · ${(page.unreadable_regions||[]).length} vùng chưa đọc được`;
+el('warnings').textContent=(page.review_flags||[]).length?`${page.recognition_status}: ${page.review_flags.join(', ')}. Thiếu chữ không chứng minh trường vắng mặt; cần đối chiếu nguồn.`:'';
 el('overlay').setAttribute('viewBox',`0 0 ${page.width} ${page.height}`);
-el('text').textContent=page.blocks.map(b=>b.text).join('\n') || 'Không phát hiện vùng chữ.';
+el('text').textContent=page.blocks.map(b=>b.text).join('\n') || (regions.length?'Không có text đọc được; xem các vùng chưa đọc được.':'Không phát hiện vùng chữ.');
 el('version').textContent=page.ocr_version;
 function choose(index){
- const block=page.blocks[index];
+ const block=regions[index];
  shapes.forEach((shape,i)=>{if(shape){shape.style.display=i===index?'':'none';shape.classList.toggle('selected',i===index);}});
  buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));
  el('selection').textContent=block.quad?`Đang chọn ${block.block_id}`:`${block.block_id}: không có tọa độ`;
  const pixels=block.quad?block.quad.map(([x,y])=>[+(x*page.width).toFixed(2),+(y*page.height).toFixed(2)]):null;
- el('details').textContent=JSON.stringify({block_id:block.block_id,text:block.text,quad_pixels:pixels,quad_normalized:block.quad,ocr_score:block.score,geometry_reason:block.geometry_reason},null,2);
+ el('details').textContent=JSON.stringify({region_id:block.block_id,text:block.text,quad_pixels:pixels,quad_normalized:block.quad,ocr_score:block.score,geometry_reason:block.geometry_reason,reason:block.reason||null},null,2);
 }
-page.blocks.forEach((block,index)=>{
+regions.forEach((block,index)=>{
  const button=document.createElement('button');button.type='button';button.className='block';button.setAttribute('aria-pressed','false');
- const title=document.createElement('strong');title.textContent=block.text;button.append(title);
+ const title=document.createElement('strong');title.textContent=block.unreadable?'Chưa đọc được · EMPTY_RECOGNITION':block.text;button.append(title);
  const caption=document.createElement('span');caption.className='muted';caption.textContent=`${block.block_id} · score ${block.score===null?'chưa có':block.score.toFixed(2)}${block.quad?'':' · không có tọa độ'}`;button.append(caption);
  button.addEventListener('click',()=>choose(index));el('blocks').append(button);buttons.push(button);
  let polygon=null;
  if(block.quad){polygon=document.createElementNS(ns,'polygon');polygon.setAttribute('points',block.quad.map(([x,y])=>`${x*page.width},${y*page.height}`).join(' '));polygon.setAttribute('tabindex','0');polygon.setAttribute('role','button');polygon.setAttribute('aria-label',`${block.block_id}: ${block.text}`);
+  if(block.unreadable){polygon.classList.add('unreadable');polygon.setAttribute('aria-label',`${block.block_id}: chưa đọc được`);}
   const tooltip=document.createElementNS(ns,'title');tooltip.textContent=block.text;polygon.append(tooltip);
   polygon.addEventListener('click',()=>choose(index));polygon.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();choose(index);}});el('overlay').append(polygon);}
  shapes.push(polygon);
 });
-if(!page.blocks.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Không phát hiện vùng chữ.';el('blocks').append(empty);}
+if(!regions.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Không phát hiện vùng chữ.';el('blocks').append(empty);}
 el('all').addEventListener('click',()=>{shapes.forEach(shape=>{if(shape){shape.style.display='';shape.classList.remove('selected');}});buttons.forEach(button=>button.setAttribute('aria-pressed','false'));el('selection').textContent='Tất cả vùng OCR';el('details').textContent='Chọn một vùng để xem tọa độ.';});
 el('visible').addEventListener('change',event=>{el('overlay').style.visibility=event.target.checked?'visible':'hidden';});
 if(data.transcript===null){el('reference').hidden=true;}else{el('reference').open=true;el('transcript').textContent=data.transcript;const normalize=text=>text.trim().split(/\s+/u).join(' ');el('comparison').textContent=normalize(data.transcript)===normalize(page.blocks.map(b=>b.text).join(' '))?'Trùng transcript sau chuẩn hóa khoảng trắng.':'Có khác biệt với transcript. Prediction OCR được giữ nguyên.';}

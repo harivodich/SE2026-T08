@@ -119,7 +119,34 @@ item/field; thứ tự IDs trong hint không thay page reading order. `label_tex
 luôn yêu cầu `prepared`, kể cả có explicit IDs hoặc chỉ một exact candidate.
 Occurrence trong block ghép có thể chặn false uniqueness nhưng không tạo
 substring bbox; khi chưa xác định được nguồn, trả empty regions + SOURCE_* flag.
-R04 partial/unreadable OCR outcome đang chờ AI-2/Backend duyệt; hiện crop text
-rỗng vẫn trả OUTPUT_INVALID cho trang. Đề xuất cụ thể nằm trong report bên dưới.
-D1/D3 và preprocess improvement dựa trên baseline được người dùng hoãn tới khi
-Data bàn giao. Xem [report/limits](../../docs/ocr-input-proposal.md).
+Artifact OCR nội bộ v2 đã có implementation/golden cases, bật riêng bằng
+`VietnameseOcrEngine(model_root, artifact_version=2)`: giữ recognized blocks nonblank,
+unreadable detections giữ ID/quad/reason/score; có status và review flags. Mặc định
+v1 vẫn fail trang khi text rỗng, chờ AI-2/Backend nhận version/semantics. Không đưa
+v2 lên shared wire schema hoặc coi warning là đủ để approve thiếu required fields.
+Xem [hướng dẫn handoff và giới hạn](../../docs/ocr-input-proposal.md#bàn-giao-o-n--2026-11-02).
+
+Offline D1 helper dùng engine do caller load một lần, export ảnh trong context và
+hash encoded canonical bytes; ghi cả typed failure và missing input. CLI dùng
+manifest đã hash, không truyền transcript/gold vào OCR:
+
+```powershell
+$env:PYTHONPATH='src'
+$env:PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK='True'
+$env:PADDLE_PDX_CACHE_HOME="$PWD/artifacts/models/.cache"
+$env:PADDLE_HOME="$PWD/artifacts/models/.cache/paddle"
+$env:HF_HOME="$PWD/artifacts/models/.cache/huggingface"
+$env:HF_HUB_OFFLINE='1'
+& artifacts/models/.venv-ai1/Scripts/python.exe -B -m vietdoc.pipeline.ocr.handoff `
+  --manifest tests/fixtures/d12/manifest.json --model-root artifacts/models/ocr-v1 `
+  --output-dir artifacts/evaluation/d1-new-review --artifact-version 2
+```
+
+Output directory phải mới; `ocr.json`, `prepared.json`, `canonical.png`, `processed.png`,
+`overlay.png`, `preview.html`, `run.json` theo sample ID và report tổng. Browser mở
+preview local để xem hình/IDs/score; HTML chưa là Java viewer acceptance. Với manifest
+20 mẫu `datasets/manifests/d12-integration-v2.json`, chỉ dùng `--fixture-fallback` khi
+muốn lấy hai PNG tiny đã có cùng SHA-256; 18 input thiếu vẫn `not_run`, không native
+failure. Env AI-1 nằm trên D trong ignored artifacts, tách Data Pillow10.2.0 và
+AI-2 training. Không đưa weights/env/runtime outputs vào Git; fixture native hư cấu
+an toàn cho consumer review ở `tests/fixtures/ocr-d1-native-handoff.json`.

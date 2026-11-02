@@ -220,6 +220,14 @@ class PreprocessTest(unittest.TestCase):
             with self.subTest(field=field, value=value), self.assertRaises(ValueError):
                 replace(PreprocessLimits(), **{field: value})
 
+    def test_d2_point_size_pdf_exceeds_current_profile_before_rasterization(self):
+        # Data MediaBox is in points, not pixels. 200 DPI exceeds 20 MP.
+        limits = PreprocessLimits()
+        self.assertEqual(limits.pdf_dpi, 200)
+        self.assertEqual(limits.max_pixels, 20_000_000)
+        self.assertGreater((1500 * 200 / 72) * (2600 * 200 / 72), limits.max_pixels)
+        self.assert_error("PROFILE_EXCEEDED", pdf_bytes(width=1500, height=2600), limits=limits)
+
 
 if __name__ == "__main__":
     unittest.main()

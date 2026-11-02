@@ -13,9 +13,9 @@ from vietdoc.contracts.ocr import OcrBlock, OcrPage, PreparedPage
 from vietdoc.pipeline.geometry import processed_quad
 
 
-EVIDENCE_VERSION = "exact-raw-scoped-spans-occurrence-guard.v4"
+EVIDENCE_VERSION = "exact-raw-cross-block-occurrence-guard.v5"
 MAX_SPAN_BLOCKS = 4
-_TOKENS = re.compile(r"\w+(?:[.,]\w+)*|[^\w\s]")
+_TOKENS = re.compile(r"\d+(?:[.,]\d+)*|[^\W\d]+|[^\w\s]")
 
 
 def _text(value: str) -> str:
@@ -24,16 +24,34 @@ def _text(value: str) -> str:
     return " ".join(unicodedata.normalize("NFC", value).split()).casefold()
 
 
-def _contains_occurrence(text: str, target_tokens: tuple[str, ...]) -> bool:
-    """Detect unresolved whole-token occurrences, never derive substring quads.
+def _unresolved_occurrences(blocks, target_tokens, exact_ids):
+    """Return minimal block spans covering unresolved token occurrences.
 
-    Keep dotted/comma-separated numbers as tokens: 5.000 must not match 45.000
-    or 5.000.000. Delimiters such as ':' or parentheses remain separate tokens.
-    This guard can withhold evidence, but cannot select or correct source text.
+    Numeric tokens retain all separators/digits, but attached currency/letters
+    are separate tokens for abstention only. Positive matching still compares
+    exact raw text. Track the actual token range rather than every enclosing
+    span, so an exact scoped wrap is not counted again with a neighboring label.
+    No substring coordinates or item/row association are inferred here.
     """
-    tokens = tuple(_TOKENS.findall(_text(text)))
+    flattened = tuple((token, index) for index, block in enumerate(blocks)
+                      for token in _TOKENS.findall(_text(block.text)))
+    tokens = tuple(token for token, _ in flattened)
     count = len(target_tokens)
-    return any(tokens[start:start + count] == target_tokens for start in range(len(tokens) - count + 1))
+    unresolved, seen = [], set(exact_ids)
+    for start in range(len(tokens) - count + 1):
+        if tokens[start:start + count] != target_tokens:
+            continue
+        first, last = flattened[start][1], flattened[start + count - 1][1]
+        # Unsupported long spans alone still have no publishable candidate.
+        # They must nevertheless invalidate an otherwise false exact unique.
+        if last - first + 1 > MAX_SPAN_BLOCKS and not exact_ids:
+            continue
+        span = blocks[first:last + 1]
+        ids = tuple(block.block_id for block in span)
+        if ids not in seen:
+            seen.add(ids)
+            unresolved.append(span)
+    return tuple(unresolved)
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,7 +140,9 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
     blocks = tuple(block for block in page.blocks if not scope or block.block_id in scope)
 
     def outcome(status, flag=None, selected=(), candidates=()):
-        return EvidenceMatch(request.path, request.raw_value, status, tuple(selected), tuple(candidates), (flag,) if flag else ())
+        flags = tuple(dict.fromkeys(((flag,) if flag else ()) + page.review_flags +
+                      (("SOURCE_OCR_INCOMPLETE",) if page.unreadable_regions else ())))
+        return EvidenceMatch(request.path, request.raw_value, status, tuple(selected), tuple(candidates), flags)
 
     if request.raw_value is None:
         return outcome("value_unavailable", "SOURCE_VALUE_UNAVAILABLE")
@@ -143,14 +163,17 @@ def match_evidence(page: OcrPage, request: EvidenceRequest, *, prepared: Prepare
                 candidates.append(span)
             if len(candidate) >= len(target):
                 break
-    embedded = tuple(block for block in blocks if _text(block.text) != target and _contains_occurrence(block.text, target_tokens))
-    candidate_ids = tuple(tuple(block.block_id for block in span) for span in candidates) + tuple((block.block_id,) for block in embedded)
+    exact_ids = tuple(tuple(block.block_id for block in span) for span in candidates)
+    unresolved = _unresolved_occurrences(blocks, target_tokens, exact_ids)
+    candidate_ids = exact_ids + tuple(tuple(block.block_id for block in span) for span in unresolved)
     if request.label_text is not None and prepared is None:
         return outcome("ambiguous", "SOURCE_CONTEXT_GEOMETRY_UNAVAILABLE", candidates=candidate_ids)
-    if embedded:
+    if unresolved:
         return outcome("ambiguous", "SOURCE_OCCURRENCE_UNRESOLVED", candidates=candidate_ids)
     if not candidates:
         return outcome("not_found", "SOURCE_NOT_FOUND")
+    if page.unreadable_regions and not scope:
+        return outcome("ambiguous", "SOURCE_OCR_INCOMPLETE", candidates=candidate_ids)
     selected = candidates[0]
     if prepared is not None and request.label_text is not None:
         label_quad = processed_quad(labels[0].quad, prepared)

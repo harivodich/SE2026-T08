@@ -3,12 +3,13 @@
 from base64 import b64decode
 from html.parser import HTMLParser
 from io import BytesIO
+from dataclasses import replace
 import json
 import unittest
 
 from PIL import Image
 
-from vietdoc.contracts.ocr import OcrBlock, OcrPage
+from vietdoc.contracts.ocr import OcrBlock, OcrPage, UnreadableRegion
 from vietdoc.pipeline.ocr.preview import render_preview
 
 
@@ -81,6 +82,20 @@ class OcrPreviewTest(unittest.TestCase):
                 render_preview(image, self.page)
         with self.assertRaises(ValueError):
             render_preview(self.image, self.page, transcript=123)
+
+    def test_partial_and_all_unreadable_preview_preserve_diagnostics_and_flags(self):
+        region = UnreadableRegion("unread</script>", self.block.quad, None, None)
+        for blocks in ((self.block,), ()):
+            page = replace(self.page, artifact_version=2, blocks=blocks, unreadable_regions=(region,))
+            html = render_preview(self.image, page)
+            parsed = PreviewParser(html)
+            data = json.loads(parsed.payload)
+            self.assertEqual(data["ocr"], page.to_dict())
+            self.assertEqual(data["ocr"]["review_flags"], ["OCR_UNREADABLE_REGIONS"])
+            self.assertEqual(len(parsed.scripts), 2)
+            self.assertNotIn("unread</script>", html)
+            self.assertNotIn("innerHTML", html)
+            self.assertIn('id="warnings"', html)
 
 
 if __name__ == "__main__":

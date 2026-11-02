@@ -6,7 +6,7 @@ from pathlib import Path
 import unittest
 import unicodedata
 
-from vietdoc.contracts.ocr import ImageInfo, OcrBlock, OcrPage, PreparedPage
+from vietdoc.contracts.ocr import ImageInfo, OcrBlock, OcrPage, PreparedPage, UnreadableRegion
 from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
 
 
@@ -66,6 +66,76 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(result.status, "matched")
         self.assertEqual(result.blocks, (page.blocks[0],))
         self.assertEqual(result.review_flags, ())
+
+    def test_cross_block_prefix_or_suffix_cannot_hide_another_description(self):
+        for fragments in (("Tên hàng: Cà phê", "sữa"), ("Cà phê", "sữa (hàng mới)")):
+            page = replace(self.page, blocks=(block("other-item", "Cà phê sữa", .1),
+                block("target-prefix", fragments[0], .6), block("target-wrap", fragments[1], .66)))
+            with self.subTest(fragments=fragments):
+                result = match_evidence(page, EvidenceRequest("/items/1/description", "Cà phê sữa"), prepared=self.prepared)
+                self.assertEqual(result.status, "ambiguous")
+                self.assertEqual(result.candidate_block_ids, (("other-item",), ("target-prefix", "target-wrap")))
+                self.assertIn("SOURCE_OCCURRENCE_UNRESOLVED", result.review_flags)
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_currency_suffixes_cannot_hide_a_repeated_amount(self):
+        for amount in ("45.000đ", "45.000VND", "45.000VNĐ", "45.000đ/VND", "45.000 đ", "45.000 VND", "45.000₫"):
+            page = replace(self.page, blocks=(self.page.blocks[1], block("merged", "Tổng tiền: " + amount, .7)))
+            with self.subTest(amount=amount):
+                result = match_evidence(page, EvidenceRequest("/total_amount", "45.000"))
+                self.assertEqual(result.status, "ambiguous")
+                self.assertEqual(result.candidate_block_ids, (("line-amount",), ("merged",)))
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_currency_raw_exact_match_is_preserved_without_normalization(self):
+        for amount in ("45.000đ", "45.000 VND", "45.000VNĐ", "45.000 đ"):
+            page = replace(self.page, blocks=(block("actual", amount, .7),))
+            with self.subTest(amount=amount):
+                result = match_evidence(page, EvidenceRequest("/total_amount", amount))
+                self.assertEqual(result.status, "matched")
+                self.assertEqual(result.blocks, page.blocks)
+                self.assertEqual(result.raw_value, amount)
+                self.assertEqual(result.review_flags, ())
+        result = match_evidence(page, EvidenceRequest("/total_amount", "45000"))
+        self.assertNotEqual(result.status, "matched")
+
+    def test_currency_across_blocks_and_delimiter_attached_amount_remain_uncertain(self):
+        for fragments in (("Tổng tiền: 45.000", "VND"), ("Tổng tiền45.000đ", "")):
+            blocks = (self.page.blocks[1], block("prefix", fragments[0], .6))
+            if fragments[1]:
+                blocks += (block("unit", fragments[1], .66),)
+            page = replace(self.page, blocks=blocks)
+            with self.subTest(fragments=fragments):
+                result = match_evidence(page, EvidenceRequest("/total_amount", "45.000"))
+                self.assertNotEqual(result.status, "matched")
+                self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_guard_does_not_count_super_spans_around_a_valid_scoped_wrap(self):
+        page = replace(self.page, blocks=(block("label", "Tên hàng:", .1),
+            block("prefix", "Cà phê", .2), block("wrap", "sữa", .26)))
+        result = match_evidence(page, EvidenceRequest("/items/0/description", "Cà phê sữa", ("wrap", "label", "prefix")))
+        self.assertEqual(result.status, "matched")
+        self.assertEqual(result.candidate_block_ids, (("prefix", "wrap"),))
+        self.assertEqual([b.block_id for b in result.blocks], ["prefix", "wrap"])
+        self.assertEqual(result.review_flags, ())
+
+    def test_long_unpublishable_occurrence_still_blocks_false_exact_uniqueness(self):
+        words = ("một", "hai", "ba", "bốn", "năm")
+        page = replace(self.page, blocks=(block("other", " ".join(words), .1),) +
+                       tuple(block(str(i), word, .2 + .1*i) for i, word in enumerate(words)))
+        result = match_evidence(page, EvidenceRequest("/items/1/description", " ".join(words)))
+        self.assertEqual(result.status, "ambiguous")
+        self.assertEqual(result.to_field_metadata()["source_regions"], [])
+
+    def test_item_scope_resolves_repeated_wrapped_description_without_guessing_rows(self):
+        page = replace(self.page, blocks=(block("other", "Cà phê sữa", .1),
+            block("prefix", "Cà phê", .6), block("wrap", "sữa", .9)))
+        request = EvidenceRequest("/items/1/description", "Cà phê sữa")
+        self.assertEqual(match_evidence(page, request).status, "ambiguous")
+        result = match_evidence(page, replace(request, context_block_ids=("wrap", "prefix")))
+        self.assertEqual(result.status, "matched")
+        self.assertEqual([b.block_id for b in result.blocks], ["prefix", "wrap"])
+        self.assertEqual(len(result.to_field_metadata()["source_regions"]), 2)
 
     def test_spatial_label_does_not_silently_discard_an_embedded_occurrence(self):
         page = replace(self.page, blocks=(block("merged", "Đã trả 45.000", .1), *self.page.blocks[-2:]))
@@ -242,6 +312,30 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(metadata["value_origin"], "prediction")
         self.assertEqual(metadata["source_regions"], [])
         self.assertIsNone(metadata["ocr_score"])
+
+    def test_partial_missing_or_null_value_is_never_absent(self):
+        page = replace(self.page, artifact_version=2, unreadable_regions=(UnreadableRegion("unread", self.page.blocks[0].quad, 0, None),))
+        for raw in (None, "80.000"):
+            with self.subTest(raw=raw):
+                result = match_evidence(page, EvidenceRequest("/total_amount", raw))
+                metadata = result.to_field_metadata()
+                self.assertEqual(metadata["value_origin"], "prediction")
+                self.assertEqual(metadata["source_regions"], [])
+                self.assertIn("OCR_UNREADABLE_REGIONS", metadata["review_flags"])
+                self.assertIn("SOURCE_OCR_INCOMPLETE", metadata["review_flags"])
+                self.assertIsNone(metadata["confidence"])
+
+    def test_partial_unique_value_requires_consumer_scope_and_propagates_flags(self):
+        page = replace(self.page, blocks=(self.page.blocks[0],), artifact_version=2,
+                       unreadable_regions=(UnreadableRegion("unread", self.page.blocks[1].quad, 0, None),))
+        request = EvidenceRequest("/items/0/description", "Bánh mì")
+        uncertain = match_evidence(page, request)
+        self.assertEqual(uncertain.status, "ambiguous")
+        self.assertEqual(uncertain.to_field_metadata()["source_regions"], [])
+        scoped = match_evidence(page, replace(request, context_block_ids=("description",)))
+        self.assertEqual(scoped.status, "matched")
+        self.assertIn("OCR_UNREADABLE_REGIONS", scoped.review_flags)
+        self.assertIn("SOURCE_OCR_INCOMPLETE", scoped.review_flags)
 
     def test_missing_geometry_keeps_candidate_id_but_never_publishes_null_quad(self):
         unavailable = replace(self.page.blocks[0], quad=None, geometry_reason="NO_MAPPING")

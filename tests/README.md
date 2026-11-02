@@ -1,5 +1,34 @@
 # Tests ownership
 
+AI-1 increment 02/11/2026: **137 pipeline tests** (native bật, không skip) và
+**24 OCR contract tests** qua trên Python3.13.7/Windows11. Schema9 và CI-gate11
+tests qua riêng bằng validator local jsonschema4.25.1; không thay CI pin4.26.0.
+Env đang dùng trên D: `artifacts/models/.venv-ai1/Scripts/python.exe`, models
+`artifacts/models/ocr-v1`; giữ tách Data extra. Các lệnh `.venv` bên dưới là đường
+dẫn cũ, cần thay bằng env riêng này. Không gộp `.[data,ai1-ocr]`.
+
+```powershell
+$env:PYTHONPATH='src'
+$env:PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK='True'
+$env:PADDLE_PDX_CACHE_HOME="$PWD/artifacts/models/.cache"
+$env:PADDLE_HOME="$PWD/artifacts/models/.cache/paddle"
+$env:HF_HOME="$PWD/artifacts/models/.cache/huggingface"
+$env:HF_HUB_OFFLINE='1'
+$env:VIETDOC_OCR_MODEL_ROOT="$PWD/artifacts/models/ocr-v1"
+$env:VIETDOC_OCR_TEST_FONT='C:/Windows/Fonts/arial.ttf'
+& artifacts/models/.venv-ai1/Scripts/python.exe -B -m unittest discover -s tests/unit/pipeline -p 'test_*.py' -q
+& artifacts/models/.venv-ai1/Scripts/python.exe -B -m unittest discover -s tests/contract -p test_ocr_contracts.py -q
+& artifacts/models/.venv-ai1/Scripts/python.exe -B -m pip check
+```
+
+New coverage: cross-block/currency occurrence guard, exact scoped wrap, partial
+v2/nonblank IDs/strict migration/diagnostics, native failures remain typed,
+missing-not-absent, local preview payload escaping, handoff lifetime/hash/error
+denominator, independent renderer PNG identity/resize oracle, actual D2-size PDF
+cap rejection. Native observed D1 fixture is review output, not OCR gold. Actual
+AI-2/Backend consumer/approval/viewer acceptance, browser and encrypted-PDF E2E,
+D3 metrics/native hang recovery vẫn pending; xem [report](../docs/ocr-input-proposal.md#bàn-giao-o-n--2026-11-02).
+
 Có OCR/page contracts, loader PNG/JPEG/PDF và OCR boundary tests. Native smoke gọi
 model thật khi bật env; chưa có actual-provider app E2E, Java parity hoặc viewer integration.
 
