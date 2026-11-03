@@ -1,0 +1,142 @@
+{
+  "backend": {
+    "INSTRUCTION": {
+      "covered": 6186,
+      "missed": 1436
+    },
+    "BRANCH": {
+      "covered": 450,
+      "missed": 260
+    },
+    "LINE": {
+      "covered": 1162,
+      "missed": 279
+    },
+    "COMPLEXITY": {
+      "covered": 319,
+      "missed": 259
+    },
+    "METHOD": {
+      "covered": 176,
+      "missed": 43
+    },
+    "CLASS": {
+      "covered": 50,
+      "missed": 3
+    }
+  },
+  "classes": {
+    "vn/vietdoc/job/JobService": {
+      "INSTRUCTION": {
+        "covered": 699,
+        "missed": 88
+      },
+      "BRANCH": {
+        "covered": 40,
+        "missed": 22
+      },
+      "LINE": {
+        "covered": 143,
+        "missed": 19
+      },
+      "COMPLEXITY": {
+        "covered": 20,
+        "missed": 23
+      },
+      "METHOD": {
+        "covered": 10,
+        "missed": 2
+      },
+      "CLASS": {
+        "covered": 1,
+        "missed": 0
+      }
+    },
+    "vn/vietdoc/document/DocumentController": {
+      "INSTRUCTION": {
+        "covered": 49,
+        "missed": 138
+      },
+      "LINE": {
+        "covered": 12,
+        "missed": 22
+      },
+      "COMPLEXITY": {
+        "covered": 4,
+        "missed": 15
+      },
+      "METHOD": {
+        "covered": 4,
+        "missed": 15
+      },
+      "CLASS": {
+        "covered": 1,
+        "missed": 0
+      }
+    },
+    "vn/vietdoc/document/DocumentService": {
+      "INSTRUCTION": {
+        "covered": 617,
+        "missed": 158
+      },
+      "BRANCH": {
+        "covered": 32,
+        "missed": 30
+      },
+      "LINE": {
+        "covered": 121,
+        "missed": 30
+      },
+      "COMPLEXITY": {
+        "covered": 29,
+        "missed": 23
+      },
+      "METHOD": {
+        "covered": 19,
+        "missed": 1
+      },
+      "CLASS": {
+        "covered": 1,
+        "missed": 0
+      }
+    }
+  },
+  "methods": {
+    "vn/vietdoc/document/DocumentController.createJob": {
+      "INSTRUCTION": {
+        "covered": 18,
+        "missed": 0
+      },
+      "LINE": {
+        "covered": 4,
+        "missed": 0
+      },
+      "COMPLEXITY": {
+        "covered": 1,
+        "missed": 0
+      },
+      "METHOD": {
+        "covered": 1,
+        "missed": 0
+      }
+    },
+    "vn/vietdoc/document/DocumentService.jobView": {
+      "INSTRUCTION": {
+        "covered": 28,
+        "missed": 0
+      },
+      "LINE": {
+        "covered": 1,
+        "missed": 0
+      },
+      "COMPLEXITY": {
+        "covered": 1,
+        "missed": 0
+      },
+      "METHOD": {
+        "covered": 1,
+        "missed": 0
+      }
+    }
+  }
+}

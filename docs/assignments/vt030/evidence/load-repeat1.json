@@ -1,0 +1,26 @@
+{
+  "name": "load-repeat1",
+  "started_at_utc": "2026-11-03T19:21:34.074900+00:00",
+  "elapsed_seconds": 17.037398500018753,
+  "exit_code": 0,
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "mvnw",
+    "-B",
+    "-ntp",
+    "-s",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-gs",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "-o",
+    "-Dtest=Vt030LoadTest",
+    "test"
+  ],
+  "cwd": "backend",
+  "jdk": "D:\\SE\\tmp\\qa-gates-20261028\\jdk17\\jdk-17.0.20.1+1",
+  "reports": [
+    "load-repeat1-TEST-vn.vietdoc.Vt030LoadTest.xml"
+  ],
+  "logs": "load-repeat1.txt"
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "D:\\SE\\tmp\\qa-gates-20261028\\jdk17\\jdk-17.0.20.1+1\\bin\\java.exe",
+    "-jar",
+    "D:\\SE\\tmp\\bt3-vt030\\worktree\\backend\\target\\vietdoc-backend-1.0.0.jar",
+    "--spring.profiles.active=demo",
+    "--server.port=18830",
+    "--server.address=127.0.0.1",
+    "--spring.datasource.url=jdbc:h2:mem:vt030browser;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH",
+    "--vietdoc.storage=D:\\SE\\tmp\\bt3-vt030\\browser-storage",
+    "--vietdoc.worker-enabled=false"
+  ],
+  "port": 18830,
+  "exit_code": 0,
+  "owned_jvm_stopped": true
+}

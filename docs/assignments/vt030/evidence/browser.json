@@ -1,0 +1,20 @@
+{
+  "scope": "Chrome + real TCP + packaged Spring/H2/demo; worker disabled; no native OCR/model",
+  "tests": [
+    {
+      "id": "E2E01",
+      "status": "PASS",
+      "observed": "login/upload202/Location/persisted QUEUED shown and polled through real UI"
+    },
+    {
+      "id": "E2E02",
+      "status": "PASS",
+      "observed": "same browser session/key retry reuses job; no duplicated active operation"
+    },
+    {
+      "id": "E2E03",
+      "status": "PASS",
+      "observed": "real cancelled job stops active-progress UI after polling"
+    }
+  ]
+}

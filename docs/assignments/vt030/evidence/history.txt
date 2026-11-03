@@ -1,0 +1,41 @@
+729be6fe493dc00e1d7cb87e7db94b94c79a0816 2026-10-30T02:39:18+07:00 feat: implement full-stack document workflow (#2)
+2d34f4c10cc4b8a692982be93ac0b4d6c6643d28 2026-11-04T02:08:44+07:00 test(VT-030): specify async monitoring and retry invariants before patch
+e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d 2026-11-04T02:23:17+07:00 feat(VT-030): expose async monitor and verify retry boundaries
+a1055c300f2321ba64f0f46582348f63b258a542 2026-11-04T02:42:48+07:00 test(VT-030): strengthen quota replay and verify mutation XML
+
+DIFF 729be6fe493dc00e1d7cb87e7db94b94c79a0816..2d34f4c10cc4b8a692982be93ac0b4d6c6643d28
+.../java/vn/vietdoc/Vt030AsyncContractTest.java    | 252 +++++++++++++++++++++
+ .../src/test/java/vn/vietdoc/Vt030LoadTest.java    | 137 +++++++++++
+ .../src/test/java/vn/vietdoc/Vt030MappingTest.java |  37 +++
+ docs/assignments/vt030/SPEC.md                     |  39 ++++
+ 4 files changed, 465 insertions(+)
+A	backend/src/test/java/vn/vietdoc/Vt030AsyncContractTest.java
+A	backend/src/test/java/vn/vietdoc/Vt030LoadTest.java
+A	backend/src/test/java/vn/vietdoc/Vt030MappingTest.java
+A	docs/assignments/vt030/SPEC.md
+
+DIFF 2d34f4c10cc4b8a692982be93ac0b4d6c6643d28..e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d
+.../vn/vietdoc/document/DocumentController.java    |  9 ++-
+ backend/src/main/resources/openapi.json            |  9 +++
+ .../java/vn/vietdoc/Vt030AsyncContractTest.java    | 39 +++++++++++++
+ .../src/test/java/vn/vietdoc/Vt030LoadTest.java    | 19 ++++++-
+ docs/assignments/vt030/SPEC.md                     |  6 +-
+ docs/assignments/vt030/test-matrix.md              | 44 +++++++++++++++
+ scripts/vt030_browser.cjs                          | 64 ++++++++++++++++++++++
+ scripts/vt030_mutation.py                          | 55 +++++++++++++++++++
+ 8 files changed, 240 insertions(+), 5 deletions(-)
+M	backend/src/main/java/vn/vietdoc/document/DocumentController.java
+M	backend/src/main/resources/openapi.json
+M	backend/src/test/java/vn/vietdoc/Vt030AsyncContractTest.java
+M	backend/src/test/java/vn/vietdoc/Vt030LoadTest.java
+M	docs/assignments/vt030/SPEC.md
+A	docs/assignments/vt030/test-matrix.md
+A	scripts/vt030_browser.cjs
+A	scripts/vt030_mutation.py
+
+DIFF e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d..a1055c300f2321ba64f0f46582348f63b258a542
+.../test/java/vn/vietdoc/Vt030AsyncContractTest.java |  9 +++++++--
+ scripts/vt030_mutation.py                            | 20 +++++++++++++++++---
+ 2 files changed, 24 insertions(+), 5 deletions(-)
+M	backend/src/test/java/vn/vietdoc/Vt030AsyncContractTest.java
+M	scripts/vt030_mutation.py

@@ -1,0 +1,25 @@
+{
+  "mutation": "JobView.document_id <- Job.id instead of Job.documentId",
+  "source": "backend\\src\\main\\java\\vn\\vietdoc\\document\\DocumentService.java",
+  "started_at_utc": "2026-11-03T19:16:42.121575+00:00",
+  "before_sha256": "d99f5201a40e8229c9edc314c1b034082ff5e1fb8e6d456efa327b9f6d76f60f",
+  "mutant_sha256": "b2a1519faa6fe063cb11291f020d1195313a6e405fecf41bc34c033ff78d6370",
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "mvnw",
+    "-B",
+    "-ntp",
+    "-s",
+    "D:/SE/tmp/bt3-vt030/empty-settings.xml",
+    "-gs",
+    "D:/SE/tmp/bt3-vt030/empty-settings.xml",
+    "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "-o",
+    "-Dtest=Vt030MappingTest,Vt030AsyncContractTest#tc01AcceptedResponseProvidesCorrectMonitorAndIdentity",
+    "test"
+  ],
+  "exit_code": 1,
+  "killed": true,
+  "restored_sha256": "d99f5201a40e8229c9edc314c1b034082ff5e1fb8e6d456efa327b9f6d76f60f",
+  "restored_exact_bytes": true
+}

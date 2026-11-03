@@ -1,0 +1,59 @@
+{
+  "red-reviewed": {
+    "tests": 21,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "green": {
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "full-coverage": {
+    "tests": 50,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "final-full-coverage": {
+    "tests": 50,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "final-order-seed17": {
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "final-order-seed83": {
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "load-repeat1-200-independent-users": {
+    "p95_ms_recomputed": 2252.1336,
+    "outcomes": 200,
+    "errors": 0
+  },
+  "load-repeat1-200-same-key-retries": {
+    "p95_ms_recomputed": 205.3972,
+    "outcomes": 200,
+    "errors": 0
+  },
+  "load-repeat2-200-independent-users": {
+    "p95_ms_recomputed": 2244.7318,
+    "outcomes": 200,
+    "errors": 0
+  },
+  "load-repeat2-200-same-key-retries": {
+    "p95_ms_recomputed": 222.9568,
+    "outcomes": 200,
+    "errors": 0
+  },
+  "secret_scan": "no matches in explicit token/key patterns; not a universal guarantee"
+}

@@ -1,0 +1,52 @@
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-11-04T02:22:32.097+07:00  INFO 35480 --- [           main] vn.vietdoc.VietDocApplication            : Starting VietDocApplication v1.0.0 using Java 17.0.20.1 with PID 35480 (D:\SE\tmp\bt3-vt030\worktree\backend\target\vietdoc-backend-1.0.0.jar started by Admin in D:\SE\tmp\bt3-vt030\worktree\backend)
+2026-11-04T02:22:32.100+07:00  INFO 35480 --- [           main] vn.vietdoc.VietDocApplication            : The following 1 profile is active: "demo"
+2026-11-04T02:22:33.315+07:00  INFO 35480 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-04T02:22:33.342+07:00  INFO 35480 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 18 ms. Found 0 JPA repository interfaces.
+2026-11-04T02:22:34.233+07:00  INFO 35480 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 18830 (http)
+2026-11-04T02:22:34.268+07:00  INFO 35480 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-04T02:22:34.268+07:00  INFO 35480 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-11-04T02:22:34.355+07:00  INFO 35480 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-11-04T02:22:34.357+07:00  INFO 35480 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2203 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-11-04T02:22:34.936+07:00  INFO 35480 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-04T02:22:35.086+07:00  INFO 35480 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:vt030browser user=SA
+2026-11-04T02:22:35.087+07:00  INFO 35480 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-04T02:22:35.131+07:00  INFO 35480 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:vt030browser (H2 2.3)
+2026-11-04T02:22:35.158+07:00  INFO 35480 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-11-04T02:22:35.160+07:00  INFO 35480 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.012s)
+2026-11-04T02:22:35.169+07:00  INFO 35480 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-11-04T02:22:35.219+07:00  INFO 35480 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-11-04T02:22:35.233+07:00  INFO 35480 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - application"
+2026-11-04T02:22:35.292+07:00  INFO 35480 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v1 (execution time 00:00.028s)
+2026-11-04T02:22:35.552+07:00  INFO 35480 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-04T02:22:35.654+07:00  INFO 35480 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+2026-11-04T02:22:35.756+07:00  INFO 35480 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-04T02:22:36.048+07:00  INFO 35480 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-04T02:22:36.097+07:00  INFO 35480 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-04T02:22:36.770+07:00  INFO 35480 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-04T02:22:36.794+07:00  INFO 35480 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-04T02:22:37.602+07:00  INFO 35480 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-11-04T02:22:37.868+07:00  INFO 35480 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-04T02:22:38.460+07:00  INFO 35480 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 18830 (http) with context path '/'
+2026-11-04T02:22:38.470+07:00  INFO 35480 --- [           main] vn.vietdoc.VietDocApplication            : Started VietDocApplication in 7.0 seconds (process running for 7.446)
+2026-11-04T02:22:38.702+07:00  INFO 35480 --- [.1-18830-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-04T02:22:38.702+07:00  INFO 35480 --- [.1-18830-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-04T02:22:38.702+07:00  INFO 35480 --- [.1-18830-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms

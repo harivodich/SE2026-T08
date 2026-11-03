@@ -1,0 +1,15 @@
+{
+  "command": [
+    ".\\mvnw.cmd",
+    "-Dtest=Vt030AsyncContractTest,Vt030MappingTest",
+    "test"
+  ],
+  "environment": {
+    "MAVEN_OPTS": "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "MAVEN_USER_HOME": "D:\\SE\\tmp\\qa-gates-20261028\\maven-home",
+    "JAVA_HOME": "D:\\SE\\tmp\\qa-gates-20261028\\jdk17\\jdk-17.0.20.1+1"
+  },
+  "cwd": "backend",
+  "started_at_utc": "2026-11-03T19:39:48.4745509Z",
+  "exit_code": 0
+}

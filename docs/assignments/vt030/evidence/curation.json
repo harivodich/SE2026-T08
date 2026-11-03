@@ -1,0 +1,65 @@
+{
+  "raw_preserved_outside_repository": "tmp/bt3-vt030/raw-evidence (not submitted)",
+  "excluded_stale_reports": [
+    {
+      "file": "load-baseline-TEST-vn.vietdoc.Vt030AsyncContractTest.xml",
+      "sha256": "be38fa7572d99f26c70ed6e2c80b2f8257c964d9107c7f779aa2c1f45548cb29",
+      "reason": "old reports copied by first runner; not executed in load-only run"
+    },
+    {
+      "file": "load-baseline-TEST-vn.vietdoc.Vt030MappingTest.xml",
+      "sha256": "b3d14d3508f2f56134b78000e7871627d801b487c89b62ca074b25c694232a7a",
+      "reason": "old reports copied by first runner; not executed in load-only run"
+    }
+  ],
+  "redactions": [
+    {
+      "file": "mutation-branch.txt",
+      "replacements": 1,
+      "raw_sha256": "4d9a258b2c9c434f37c30df684c34588a3fdbf0aae6989b01f1ab2bb49f4e473",
+      "published_sha256": "78b12d335d63773056dffc0325c554912f7749fc9e019e402c9a7088eb10f670"
+    },
+    {
+      "file": "mutation.txt",
+      "replacements": 1,
+      "raw_sha256": "2fd2f510862f80ed791f6620097bb9edceb048edaf33f45f4cd331ea87f5ae8f",
+      "published_sha256": "f6cd8f38cd690628f6d71d2fb54ab8d8453eb8523e21d1ae7a14fdee81728832"
+    },
+    {
+      "file": "red-native-TEST-vn.vietdoc.Vt030AsyncContractTest.xml",
+      "replacements": 3,
+      "raw_sha256": "d4a3f3c8135b68aa540a2af16c1a5f12c316f018b994ae48f9805e4b8dc6d6d7",
+      "published_sha256": "b1348baaaefc89c3337a1689b2929a4b707cdb3ae30793e4600639c62298acd5"
+    },
+    {
+      "file": "red-native.txt",
+      "replacements": 3,
+      "raw_sha256": "659461f68265d52bbb7020292e041e4dc3718246a0d9d652267d0ec05736096f",
+      "published_sha256": "bcd84af852058015b5685c0d91bced6283c6244b8974741c59cf2b59297a7ed3"
+    },
+    {
+      "file": "red-reviewed-TEST-vn.vietdoc.Vt030AsyncContractTest.xml",
+      "replacements": 1,
+      "raw_sha256": "be38fa7572d99f26c70ed6e2c80b2f8257c964d9107c7f779aa2c1f45548cb29",
+      "published_sha256": "926fc584fd6c5f878536382eeee9d2b93407f8f49bcee95f6d78174299c32e52"
+    },
+    {
+      "file": "red-reviewed.txt",
+      "replacements": 1,
+      "raw_sha256": "4633a426c72f3418b865c0af303ae34e70e7370cec7ed9d2887beaaf21a1dd19",
+      "published_sha256": "8014b7ded48c5e5bbc73f69a5777aa06de59f185144e7a2c9afe7e0f5763570a"
+    },
+    {
+      "file": "windows-mutation-TEST-vn.vietdoc.Vt030AsyncContractTest.xml",
+      "replacements": 1,
+      "raw_sha256": "4192725571e742f83352693e76719838bab5cfd5271f5a27ff0f51aafd83019b",
+      "published_sha256": "bf42448b9781c1149804a543ee043b52a51355689dc87042d022f76b8fc04c20"
+    },
+    {
+      "file": "windows-mutation.txt",
+      "replacements": 1,
+      "raw_sha256": "3b969427f87c23e69410766cb77705cb31ac342dec4891d3f7ad26c1fbd8b572",
+      "published_sha256": "4d7caf9f93b8d845c7562c8af9dbc7e6ffe4667b91bbb678cc30850de83e8c08"
+    }
+  ]
+}

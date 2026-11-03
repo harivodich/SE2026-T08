@@ -1,0 +1,31 @@
+{
+  "baseline": "729be6fe493dc00e1d7cb87e7db94b94c79a0816",
+  "test_first_commit": "2d34f4c10cc4b8a692982be93ac0b4d6c6643d28",
+  "production_blob_comparison": [
+    {
+      "file": "backend/src/main/java/vn/vietdoc/document/DocumentController.java",
+      "baseline_blob": "97481cbb60a3abbfce37769a92a4514f64ec44a7",
+      "test_first_blob": "97481cbb60a3abbfce37769a92a4514f64ec44a7",
+      "equal": true
+    },
+    {
+      "file": "backend/src/main/java/vn/vietdoc/document/DocumentService.java",
+      "baseline_blob": "2fb2fe58c00644ad51f939b60ab1a3cb41ae3b25",
+      "test_first_blob": "2fb2fe58c00644ad51f939b60ab1a3cb41ae3b25",
+      "equal": true
+    },
+    {
+      "file": "backend/src/main/java/vn/vietdoc/job/JobService.java",
+      "baseline_blob": "e20f5370cbd3e928438cb8529d48d96ac1fe8e97",
+      "test_first_blob": "e20f5370cbd3e928438cb8529d48d96ac1fe8e97",
+      "equal": true
+    },
+    {
+      "file": "backend/src/main/resources/openapi.json",
+      "baseline_blob": "b5c49250ed41561449d3d894bd5d60bb0a4f7ce4",
+      "test_first_blob": "b5c49250ed41561449d3d894bd5d60bb0a4f7ce4",
+      "equal": true
+    }
+  ],
+  "limitation": "Historical run metadata did not capture git SHA. This is a retrospective blob/timestamp check, not a claimed captured working-tree hash."
+}

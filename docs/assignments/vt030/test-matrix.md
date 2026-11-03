@@ -24,7 +24,7 @@ Mọi case dưới đây là test cá nhân mới, không dùng số pass của 
 | TC18 | AC2/AC5/retry storm | Concurrent API harness |200 same-key clients, one owner/doc |200 responses same ID;1Job/CREATE_JOB; errors0 | P1 |
 | TC19 | AC2/valid-key class | API/DB | Key lengths1 và100, valid ASCII | Accepted;1Job per isolated doc | P2 |
 | TC20 | AC4/invalid-length class | API/DB negative | Key length101 |400 và0Job | P2 |
-| TC21 | AC2/resource admission | API/DB | Owner có5active jobs, submit thứ6; replay key cũ | New429 không insert; replay cũ vẫn202 | P1 |
+| TC21 | AC2/resource admission | API/DB | Owner có5active jobs, submit thứ6; replay key cũ | New429 không insert; replay cũ202, cùng job/run ID, sau replay vẫn1Job/CREATE_JOB | P1 |
 | E2E01 | AC1/progress UX | Browser/TCP | Login/upload synthetic receipt, worker disabled |202+Location, UI QUEUED, actual poll correct | P1 |
 | E2E02 | AC2/response replay | Browser session/API | Reuse key/cookie từ submit qua browser | Same job ID persisted in document detail | P1 |
 | E2E03 | AC3/status termination | Browser/TCP | Cancel queued job bằng CSRF session thật | CANCELLED và active progress biến mất sau polling | P2 |

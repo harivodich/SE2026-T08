@@ -1,0 +1,25 @@
+{
+  "started_at_utc": "2026-11-03T19:23:47.157266+00:00",
+  "base_commit": "e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d",
+  "temporary_branch": "codex/bt3-vt030-mapping-mutant",
+  "mutant_commit": "09cd8a2169eade641bca2a4a426411736d37c029",
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "mvnw",
+    "-B",
+    "-ntp",
+    "-s",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-gs",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "-o",
+    "-Dtest=Vt030MappingTest,Vt030AsyncContractTest#tc01AcceptedResponseProvidesCorrectMonitorAndIdentity",
+    "test"
+  ],
+  "exit_code": 1,
+  "killed": true,
+  "submission_source_unchanged": true,
+  "submission_mapper_sha256": "d99f5201a40e8229c9edc314c1b034082ff5e1fb8e6d456efa327b9f6d76f60f",
+  "mutation_scope": "only JobView.document_id mapping; temporary branch remains local, not submitted or merged"
+}

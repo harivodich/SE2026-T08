@@ -1,0 +1,24 @@
+commit 09cd8a2169eade641bca2a4a426411736d37c029
+Author:     harivodich <harivodich@gmail.com>
+AuthorDate: Wed Nov 4 02:23:47 2026 +0700
+Commit:     harivodich <harivodich@gmail.com>
+CommitDate: Wed Nov 4 02:23:47 2026 +0700
+
+    test(VT-030): temporary response mapping mutant, do not merge
+---
+ backend/src/main/java/vn/vietdoc/document/DocumentService.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/backend/src/main/java/vn/vietdoc/document/DocumentService.java b/backend/src/main/java/vn/vietdoc/document/DocumentService.java
+index 2fb2fe5..62fdb86 100644
+--- a/backend/src/main/java/vn/vietdoc/document/DocumentService.java
++++ b/backend/src/main/java/vn/vietdoc/document/DocumentService.java
+@@ -310,7 +310,7 @@ public class DocumentService {
+   public JobView jobView(Job j) {
+     return new JobView(
+         j.id,
+-        j.documentId,
++        j.id,
+         j.state,
+         j.stage,
+         j.errorCode,

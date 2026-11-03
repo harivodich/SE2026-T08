@@ -1,0 +1,203 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< vn.vietdoc:vietdoc-backend >---------------------
+[INFO] Building vietdoc-backend 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ vietdoc-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 12 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ vietdoc-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 24 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ vietdoc-backend ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ vietdoc-backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ vietdoc-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running vn.vietdoc.Vt030AsyncContractTest
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+02:04:35.310 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [vn.vietdoc.Vt030AsyncContractTest]: Vt030AsyncContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+02:04:35.441 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration vn.vietdoc.VietDocApplication for test class vn.vietdoc.Vt030AsyncContractTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+
+MockHttpServletRequest:
+      HTTP Method = POST
+      Request URI = /api/v1/documents/bb7da8c7-0c94-49d5-95e3-d02a5572d7da/jobs
+       Parameters = {_csrf=[6kSPhFLrcxdHueXCMzJlgEgkgNzhNoK0bWEztAywQ3Worbmg3HG3sjeIESBqj4OjBR9RtXoUreTSAuCZDAAB0GjWdBGcnouQ]}
+          Headers = [Idempotency-Key:"poll-01"]
+             Body = null
+    Session Attrs = {vietdoc-token=[REDACTED_SYNTHETIC], SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=7c02416e-8891-45d2-ae33-0d3804891adf, username=vt030-a768a1f0-5ecd-4ad6-b445-bb58fe92d20f], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#createJob(String, Identity, String)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 202
+    Error message = null
+          Headers = [X-Request-Id:"6bb928df-520b-407c-adf5-4dafc51e6196", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"id":"c2eb0b0e-b1d8-4e08-8531-dd9f72551196","document_id":"bb7da8c7-0c94-49d5-95e3-d02a5572d7da","state":"QUEUED","stage":"WAITING","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-11-03T19:04:46.078181500Z","updated_at":"2026-11-03T19:04:46.078181500Z","result_run_id":"dddf240c-3d1f-42a8-8a32-6d8b985b5f87","pipeline_manifest":"fictional-fixtures.v1","mode":"demo"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/jobs/c2eb0b0e-b1d8-4e08-8531-dd9f72551196
+       Parameters = {}
+          Headers = []
+             Body = null
+    Session Attrs = {vietdoc-token=[REDACTED_SYNTHETIC], SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=7c02416e-8891-45d2-ae33-0d3804891adf, username=vt030-a768a1f0-5ecd-4ad6-b445-bb58fe92d20f], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#job(String, Identity)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"b8841e33-d9cc-4c50-afe3-14274ac4af47", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"id":"c2eb0b0e-b1d8-4e08-8531-dd9f72551196","document_id":"bb7da8c7-0c94-49d5-95e3-d02a5572d7da","state":"QUEUED","stage":"WAITING","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-11-03T19:04:46.078182Z","updated_at":"2026-11-03T19:04:46.078182Z","result_run_id":"dddf240c-3d1f-42a8-8a32-6d8b985b5f87","pipeline_manifest":"fictional-fixtures.v1","mode":"demo"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = POST
+      Request URI = /api/v1/documents/14adec6a-ccf1-4dc6-8e18-584fb90b885c/jobs
+       Parameters = {_csrf=[A2_xaCv2Rmk2rn2S4tMaYRwKQOJ1UgkX3taYJt1KQ3hQzBmUZwrACRrCdAobmEmqg_4uUC1ubdtCYDg66--pE74pJ0hgrinx]}
+          Headers = [Idempotency-Key:"lost-response-01"]
+             Body = null
+    Session Attrs = {vietdoc-token=[REDACTED_SYNTHETIC], SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=d0acccf9-6b3e-4558-9f53-5bf0bb4a2c52, username=vt030-fe8159bb-94aa-415f-9834-3b2b0ef4c571], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#createJob(String, Identity, String)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 202
+    Error message = null
+          Headers = [X-Request-Id:"d31f1928-39ee-471f-b591-abe3aee63a0e", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"id":"b7c7ce07-e3ea-4c54-bd27-a0e02d9e4df3","document_id":"14adec6a-ccf1-4dc6-8e18-584fb90b885c","state":"QUEUED","stage":"WAITING","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-11-03T19:04:54.863832700Z","updated_at":"2026-11-03T19:04:54.863832700Z","result_run_id":"c9474498-6bcb-4788-8d2f-59818c4c7632","pipeline_manifest":"fictional-fixtures.v1","mode":"demo"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+[ERROR] Tests run: 15, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 24.04 s <<< FAILURE! -- in vn.vietdoc.Vt030AsyncContractTest
+[ERROR] vn.vietdoc.Vt030AsyncContractTest.tc02PollingUsesNoStoreAndMatchesPersistedProgress -- Time elapsed: 2.517 s <<< FAILURE!
+java.lang.AssertionError: Response header 'Cache-Control' expected:<no-store> but was:<no-cache, no-store, max-age=0, must-revalidate>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+	at org.springframework.test.web.servlet.result.HeaderResultMatchers.lambda$string$2(HeaderResultMatchers.java:79)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at vn.vietdoc.Vt030AsyncContractTest.tc02PollingUsesNoStoreAndMatchesPersistedProgress(Vt030AsyncContractTest.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] vn.vietdoc.Vt030AsyncContractTest.tc01AcceptedResponseProvidesCorrectMonitorAndIdentity -- Time elapsed: 0.838 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: monitor must address job, not document ==> expected: </api/v1/jobs/b7c7ce07-e3ea-4c54-bd27-a0e02d9e4df3> but was: <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at vn.vietdoc.Vt030AsyncContractTest.tc01AcceptedResponseProvidesCorrectMonitorAndIdentity(Vt030AsyncContractTest.java:94)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   Vt030AsyncContractTest.tc01AcceptedResponseProvidesCorrectMonitorAndIdentity:94 monitor must address job, not document ==> expected: </api/v1/jobs/b7c7ce07-e3ea-4c54-bd27-a0e02d9e4df3> but was: <null>
+[ERROR]   Vt030AsyncContractTest.tc02PollingUsesNoStoreAndMatchesPersistedProgress:103 Response header 'Cache-Control' expected:<no-store> but was:<no-cache, no-store, max-age=0, must-revalidate>
+[INFO] 
+[ERROR] Tests run: 15, Failures: 2, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  31.460 s
+[INFO] Finished at: 2026-11-04T02:04:59+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project vietdoc-backend: There are test failures.
+[ERROR] 
+[ERROR] See D:\SE\tmp\bt3-vt030\worktree\backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

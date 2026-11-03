@@ -1,0 +1,394 @@
+{
+  "algorithm": "SHA-256",
+  "scope": "files under evidence except manifest itself; after curation",
+  "files": {
+    "ai-final-prompt.md": {
+      "sha256": "167eef76d905151d3154ca8d382e645d5193ad095ac3a472515fca8754db8539",
+      "bytes": 1999
+    },
+    "ai-final-receipt.json": {
+      "sha256": "ee7e656d3e7098ee0073ee8330cff6332727ab31ba6a9b44d9df7c461a382826",
+      "bytes": 581
+    },
+    "ai-final-review.md": {
+      "sha256": "15962c0f8f91b96eae987050f6a68a61be2d36b03034cff231ead5e73ca879fe",
+      "bytes": 8380
+    },
+    "ai-plan-prompt.md": {
+      "sha256": "96734e44a8406832e82975af4057cff1a0e93dd6cb6e382f6ea77b4f98c7bbf3",
+      "bytes": 3448
+    },
+    "ai-plan-receipt.json": {
+      "sha256": "dca3e3457a3082524cb8ab64b305b3d94d136c47b567cd357499b83dd4336e76",
+      "bytes": 497
+    },
+    "ai-plan-response.md": {
+      "sha256": "7edb06834deb251581cedc782c1f07f1392f8c6e823c4cc6a11e31207dfe1f2c",
+      "bytes": 25660
+    },
+    "browser-after-cancel.png": {
+      "sha256": "0e0995a1158236b4d7019b73fe1f706dd8e47a7e9e921985755a6507c12d5ca4",
+      "bytes": 104966
+    },
+    "browser-queued.png": {
+      "sha256": "d5906d4684de1c954addb4d9c494edf457b02d4bed7bbf6a8c8fd3b72dc8f055",
+      "bytes": 107728
+    },
+    "browser-run.txt": {
+      "sha256": "74801530dfd424708c2a62fcf398c2113f80d325b91c8b25fca8a040409ee5c2",
+      "bytes": 443
+    },
+    "browser-runtime.json": {
+      "sha256": "7cb2ea4b78b07188d38ae60b2264297ffa1fe92f3eec67ae8a960d809b07ac18",
+      "bytes": 596
+    },
+    "browser-server.txt": {
+      "sha256": "8da3d568aee8d90ecb849c9a2bf9c012c842dba23e6351b3965b95b2f245c63a",
+      "bytes": 6431
+    },
+    "browser.json": {
+      "sha256": "9a95a01a10941403fe388dbe33c43e57673eb0fb966bed1c00f86b61ceb31ee9",
+      "bytes": 556
+    },
+    "coverage-summary.json": {
+      "sha256": "a78740d5fe68ed7623168c19dcbfb3719670eb488b74d54174231a4c3e017ec2",
+      "bytes": 2653
+    },
+    "curation.json": {
+      "sha256": "3e47e52c9c6f154de6840c2b77ca0dca45151e865d6bfbef77e57ed26731a7b9",
+      "bytes": 2854
+    },
+    "final-full-coverage-TEST-vn.vietdoc.contracts.BusinessContractTest.xml": {
+      "sha256": "fa8c8ecc0595c221bb42f73cda7e90314cd2b3d80c7120e462fc3d43a242e495",
+      "bytes": 33301
+    },
+    "final-full-coverage-TEST-vn.vietdoc.DemoConfigurationTest.xml": {
+      "sha256": "e1a11545e68f866602d289eb7e3ee1a6bba2a0326e3bc5523122fea4b5253ebc",
+      "bytes": 33470
+    },
+    "final-full-coverage-TEST-vn.vietdoc.StorageReconcilerTest.xml": {
+      "sha256": "c6cb5dc395120aaf2fa1ad4c04ef9be844e76be25e189b0b9fb84d4e7e40c00c",
+      "bytes": 33122
+    },
+    "final-full-coverage-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "33398044eaa68b3ff7c5443e1910998435607829a8cca50dcb8146ef3774f5ec",
+      "bytes": 36643
+    },
+    "final-full-coverage-TEST-vn.vietdoc.Vt030LoadTest.xml": {
+      "sha256": "39d5d37dc21647e2ec7291dd4bd6f482dbb0b3bef9d65b5910948bd2fd8fcb32",
+      "bytes": 33981
+    },
+    "final-full-coverage-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "f2b5f6166987acf46ec2475b6bb4d388387ce510e11ffe621d52af1a82fdc30d",
+      "bytes": 34208
+    },
+    "final-full-coverage-TEST-vn.vietdoc.WorkflowIntegrationTest.xml": {
+      "sha256": "4e05b7167ba7a4dbfac69636c6954ed1e28b6a753da94725df8255d28f2e39f7",
+      "bytes": 36102
+    },
+    "final-full-coverage.json": {
+      "sha256": "2c4d1f86688eeb996d0dfed37bac06c50cba2ea84014f5abd65ae1ea39299f1e",
+      "bytes": 1262
+    },
+    "final-full-coverage.txt": {
+      "sha256": "fb7be4b1ec10df9f0c434dbe4fda84ba0ad69f5cac266ce543ec8474b8f4d685",
+      "bytes": 5792
+    },
+    "final-jacoco.xml": {
+      "sha256": "01b0b852a97a4d0a4f1c7984a07efb7289259056e001bfd2c6957ba3c2df6ed9",
+      "bytes": 168377
+    },
+    "final-order-seed17-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "837f853f1bf4f62384501c9cb758612fe5bcdf2e9b50bb24ad30e864116f614d",
+      "bytes": 36967
+    },
+    "final-order-seed17-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "b6e3e03bab89b0e0086b5d4bc27b468d8b317f7b4b6d31556b55130b62040a1e",
+      "bytes": 34375
+    },
+    "final-order-seed17.json": {
+      "sha256": "75cb24201860bdfa2d34295de9fd68dd2bfc10f3a49c974994016c5dadafa0f8",
+      "bytes": 986
+    },
+    "final-order-seed17.txt": {
+      "sha256": "a4f4f2336fa3186f124daed8dd8034b445fa9ee5784ae557329072fc76632e8a",
+      "bytes": 3170
+    },
+    "final-order-seed83-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "8cb2ae4b3d4ea21ce322f9f8a1759901f7c94f05c6b92c2ef7b29408ac65b831",
+      "bytes": 36816
+    },
+    "final-order-seed83-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "b665fef22e85a6b42d55bce2195a116d3172b20dd809d28f13ca3947e3d51959",
+      "bytes": 34162
+    },
+    "final-order-seed83.json": {
+      "sha256": "d238c69d529e15f2d1e47a98cf5880af0d05f952804f2b19f7ec29c703c48667",
+      "bytes": 987
+    },
+    "final-order-seed83.txt": {
+      "sha256": "2d618fd1f25c339f7ef7292fc41b41d58466408802593857f5c7aa700ecc2896",
+      "bytes": 3170
+    },
+    "full-coverage-TEST-vn.vietdoc.contracts.BusinessContractTest.xml": {
+      "sha256": "1b635e257123f9275930c23e3233e8f49c9ea52555a8ae99961c776b1ce822d7",
+      "bytes": 33244
+    },
+    "full-coverage-TEST-vn.vietdoc.DemoConfigurationTest.xml": {
+      "sha256": "98993384500f16ff0790c73b8e7a6a99b2e7b9e53f05bcb4b12a8ac8fd8d0d3a",
+      "bytes": 33415
+    },
+    "full-coverage-TEST-vn.vietdoc.StorageReconcilerTest.xml": {
+      "sha256": "815c2868fb0495b0fbec9106da2ae4dbd4d7e1c5d8a9f2bea7180fb67ecc66b0",
+      "bytes": 33070
+    },
+    "full-coverage-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "183ee6170f7ec6987e8c8a1a5f102df91cb7415f8ee1bf10cb0aa5ceebd7a397",
+      "bytes": 36592
+    },
+    "full-coverage-TEST-vn.vietdoc.Vt030LoadTest.xml": {
+      "sha256": "c037f475fa91b5bd0644e7171cb5f6e7211407c5600048ac842017923ffa11cb",
+      "bytes": 33926
+    },
+    "full-coverage-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "4984bd517cd5c21a7662b5a2f76c6597eb14332b20ca48abea7a62813a3eeedc",
+      "bytes": 34154
+    },
+    "full-coverage-TEST-vn.vietdoc.WorkflowIntegrationTest.xml": {
+      "sha256": "34f72953f326f42609a0c4ef8c6b4504422aa9511a3cfe9e80b939ebdb60a8b4",
+      "bytes": 36049
+    },
+    "full-coverage.json": {
+      "sha256": "f81781a8f7df522434cf6599aac6b732a89684231f56eb8d539b84cf57ae6956",
+      "bytes": 1208
+    },
+    "full-coverage.txt": {
+      "sha256": "d6ae75b596fb4e17d5e47e8678271c038cd6d8f72499c70d1d09d2e29503d313",
+      "bytes": 5792
+    },
+    "green-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "8e06444d8adf29c41474fdacf767cc5513d7080e96cc4526831d9a3a5287c8de",
+      "bytes": 36717
+    },
+    "green-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "97b80d4cc96d47503b7fd9349811fbf0712aabd9cc710fce4021e27bef0c8306",
+      "bytes": 34123
+    },
+    "green.json": {
+      "sha256": "1af8f8837fa5174e3ed94b909393fd53f94e884ab5d665e3c4e4bc282edbd865",
+      "bytes": 753
+    },
+    "green.txt": {
+      "sha256": "9ebc24433a6599e806bb12daa9dc0841905ea623a33fe68b8ae488ae380450ee",
+      "bytes": 3252
+    },
+    "hardware.json": {
+      "sha256": "32a86d9fa7d05365a3cc1379e9c1f764da36c6acb55d1dc8830c3d6509ea693d",
+      "bytes": 314
+    },
+    "history.txt": {
+      "sha256": "bec0f32b461056f94fee65d6d47821c5c03e1768cb71804478e9da00230b5746",
+      "bytes": 2584
+    },
+    "jacoco.xml": {
+      "sha256": "62c71689b2b3af82fd4583fb2424650d3e4ab4070ec0a882c09e3fa7242b7c01",
+      "bytes": 168377
+    },
+    "load-baseline-TEST-vn.vietdoc.Vt030LoadTest.xml": {
+      "sha256": "840286b14274e43b257b7d887044325ba74f6621b693436a5046e377bb127239",
+      "bytes": 34542
+    },
+    "load-baseline.json": {
+      "sha256": "617c2ded3ae125eb3938619ccad14f8970221de6dd6db6adfc9bdb37ac75a250",
+      "bytes": 813
+    },
+    "load-baseline.txt": {
+      "sha256": "e04ecd52ea4d405ae0ae7ab4df791d657946bce134fe88b1acccf6262e171699",
+      "bytes": 2846
+    },
+    "load-instrumented-200-independent-users.json": {
+      "sha256": "8123d43da55fc1804c01c422335d8feefd955425b260720f6718c87cfea709ac",
+      "bytes": 22059
+    },
+    "load-instrumented-200-same-key-retries.json": {
+      "sha256": "beea41dae51921dbeeed6af83db12029bb8916d2e3fabefd7926d2a2098b156c",
+      "bytes": 22009
+    },
+    "load-repeat1-200-independent-users.json": {
+      "sha256": "e1b8ee46610cd5bc455486a4a3e1d48a5f11cef2ce20747b6fccff702903f3ea",
+      "bytes": 22324
+    },
+    "load-repeat1-200-same-key-retries.json": {
+      "sha256": "8b3af545be74ba2bcea461db2a443bacf28c2430af17ef19af61f2aaf4e4a34c",
+      "bytes": 22056
+    },
+    "load-repeat1-TEST-vn.vietdoc.Vt030LoadTest.xml": {
+      "sha256": "c42d5a4362aae148913d5e355121c5ac2e01bbdca45d3f0bd9eac3eb71b5c277",
+      "bytes": 34541
+    },
+    "load-repeat1.json": {
+      "sha256": "b2dc07e28282df8825ea099332b7ea43168894417e820f1a5896537429cd0c19",
+      "bytes": 688
+    },
+    "load-repeat1.txt": {
+      "sha256": "69473b73225bd7fc007efc87d9e66d9d04deb5e873739891dde48df5dab3889f",
+      "bytes": 2846
+    },
+    "load-repeat2-200-independent-users.json": {
+      "sha256": "7bd9cdbdf41911abcbb97de662688b197eafc7fed50089c0e58e2bc9393195ec",
+      "bytes": 22324
+    },
+    "load-repeat2-200-same-key-retries.json": {
+      "sha256": "a20ace28d65d74bc8099b71129c2ba3033ba907115841c253a2b186c032415e2",
+      "bytes": 22068
+    },
+    "load-repeat2-TEST-vn.vietdoc.Vt030LoadTest.xml": {
+      "sha256": "e9a59688b663b9c64c2e776d75c5b6814860539af636ee239c40775219464502",
+      "bytes": 34541
+    },
+    "load-repeat2.json": {
+      "sha256": "08f8eb39c51070dad3aaa5c64e545d7fc1223ce0cba0ee760b036b45f8244d10",
+      "bytes": 688
+    },
+    "load-repeat2.txt": {
+      "sha256": "189d13bd3e954234653ad7a5e4ef4f009b0daef50f5e809cfa58e13fe6018dec",
+      "bytes": 2846
+    },
+    "mutation-branch.json": {
+      "sha256": "e0f0129415adebba227949bcf6a939d96462d43cfc8d794bf831fda284db597d",
+      "bytes": 958
+    },
+    "mutation-branch.patch": {
+      "sha256": "00a50eba5b2e091da571f080e5ee2533de9f34caa972c9be32e5f1b22f94b69b",
+      "bytes": 967
+    },
+    "mutation-branch.txt": {
+      "sha256": "78b12d335d63773056dffc0325c554912f7749fc9e019e402c9a7088eb10f670",
+      "bytes": 31999
+    },
+    "mutation.json": {
+      "sha256": "7f00efa3a01afc8f24f4cea7ba86783db1582f8ede8ceec2a2b73020f3579988",
+      "bytes": 973
+    },
+    "mutation.txt": {
+      "sha256": "f6cd8f38cd690628f6d71d2fb54ab8d8453eb8523e21d1ae7a14fdee81728832",
+      "bytes": 32009
+    },
+    "order-comparison.json": {
+      "sha256": "673b4ae4bdc8c8e739b233780f09627e5f84e2bb73a04c25230f6bd87c6e0a36",
+      "bytes": 5590
+    },
+    "order-seed17-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "42b4021e1a46758d437a8f47e2019433aea3e527850b014c7b047f3f0696e470",
+      "bytes": 36967
+    },
+    "order-seed17-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "23d20397accc4e91ef4621f451830602afd522f0cbd5af9a30ac8ccd3c486ac8",
+      "bytes": 34375
+    },
+    "order-seed17.json": {
+      "sha256": "a41776c84271cc35719b7821c7c456488e01bab024d82c247bcc9b5cd93c3e5a",
+      "bytes": 963
+    },
+    "order-seed17.txt": {
+      "sha256": "a916a7bc96ea54a9e5c88ed033c443c154928804071277178f09033cb66e096a",
+      "bytes": 3170
+    },
+    "order-seed83-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "17446ef89fce2d5cfa7465b0e0ab25c98528e832b90799576baaf6f7de981e41",
+      "bytes": 36966
+    },
+    "order-seed83-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "8558900494737c628c54f070e06cc238b7683d57a84c9ade2377f8da4f5bd8aa",
+      "bytes": 34373
+    },
+    "order-seed83.json": {
+      "sha256": "b854bbec14f05588d7f2c522bfb8fbbd77a7cf1850a5040c2d58d5117f4484b7",
+      "bytes": 963
+    },
+    "order-seed83.txt": {
+      "sha256": "67b9436fcb5b4d14067892fe3415e82b2011f8a2aad67422aabcec4f8c6876b6",
+      "bytes": 3170
+    },
+    "pdf-layout.json": {
+      "sha256": "19b6b17b1eb8fdc763a96ee2974d2a2c031c38152238c7cdf6e4aab96522f036",
+      "bytes": 3964
+    },
+    "pdf-qa.json": {
+      "sha256": "4af850d3853cf046611d70bb3f315b0c50cc899a282175162aebc64fd420d87f",
+      "bytes": 829
+    },
+    "pdf-typography.json": {
+      "sha256": "36afda41833f7129853965034c8ab854f3b7cfe251f2bc788b16afdb129f73ef",
+      "bytes": 3720
+    },
+    "red-native-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "b1348baaaefc89c3337a1689b2929a4b707cdb3ae30793e4600639c62298acd5",
+      "bytes": 44251
+    },
+    "red-native.json": {
+      "sha256": "53e7c01572d2c51abe37882a2b75aa3d95581c091beba0c3d242e89dd9064749",
+      "bytes": 700
+    },
+    "red-native.txt": {
+      "sha256": "bcd84af852058015b5685c0d91bced6283c6244b8974741c59cf2b59297a7ed3",
+      "bytes": 12121
+    },
+    "red-reviewed-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "926fc584fd6c5f878536382eeee9d2b93407f8f49bcee95f6d78174299c32e52",
+      "bytes": 39422
+    },
+    "red-reviewed-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "b3d14d3508f2f56134b78000e7871627d801b487c89b62ca074b25c694232a7a",
+      "bytes": 34138
+    },
+    "red-reviewed.json": {
+      "sha256": "2a2d1009b34325f9af255e8c41c6a4b3f8384d7fe786f2144889ab226de61821",
+      "bytes": 780
+    },
+    "red-reviewed.txt": {
+      "sha256": "8014b7ded48c5e5bbc73f69a5777aa06de59f185144e7a2c9afe7e0f5763570a",
+      "bytes": 7206
+    },
+    "red.json": {
+      "sha256": "ef363edaaebdcec3eb5bb88c2e4ed05797690fcf83ce888bdbd6f92158cd2ff3",
+      "bytes": 629
+    },
+    "red.txt": {
+      "sha256": "f37bc6d403ca800212414da81a57aa88e5994209cf52e1e3d605d7e13f7dca34",
+      "bytes": 175
+    },
+    "source-baseline-proof.json": {
+      "sha256": "30a89437c92a19d075e9135d441537d9642286f8b590660b13d4aa7f640233c4",
+      "bytes": 1317
+    },
+    "verification-summary.json": {
+      "sha256": "7ad64eec270ca9f3ae2f30649cf74e5d289fe544cd3950190a2a30d0bd71ff76",
+      "bytes": 1208
+    },
+    "windows-mutation-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
+      "sha256": "bf42448b9781c1149804a543ee043b52a51355689dc87042d022f76b8fc04c20",
+      "bytes": 37679
+    },
+    "windows-mutation-TEST-vn.vietdoc.Vt030MappingTest.xml": {
+      "sha256": "11a29558c605d00b4bcabc3f037bff276cbc7076c70ea76c54f58ebd821346f7",
+      "bytes": 57949
+    },
+    "windows-mutation.json": {
+      "sha256": "5797220301b1160315347e5b380404e9da2a3edba87812df3a29a415232322d6",
+      "bytes": 1253
+    },
+    "windows-mutation.txt": {
+      "sha256": "4d7caf9f93b8d845c7562c8af9dbc7e6ffe4667b91bbb678cc30850de83e8c08",
+      "bytes": 32005
+    },
+    "windows-wrapper.json": {
+      "sha256": "2eb38371446961e2ddfb9c9e5239acd7f73ac5721a98aa649bc843a01213010d",
+      "bytes": 458
+    },
+    "windows-wrapper.txt": {
+      "sha256": "f7ccf84e660a564bafa84495a05aaca79d2ecaef945b5dfe570ec0b77f8ca25d",
+      "bytes": 3160
+    }
+  }
+}

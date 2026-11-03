@@ -1,0 +1,24 @@
+{
+  "name": "red",
+  "started_at_utc": "2026-11-03T19:04:06.982398+00:00",
+  "elapsed_seconds": 0.365268100053072,
+  "exit_code": 3221225794,
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "mvnw",
+    "-B",
+    "-ntp",
+    "-s",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-gs",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "-o",
+    "-Dtest=Vt030AsyncContractTest",
+    "test"
+  ],
+  "cwd": "backend",
+  "jdk": "D:\\SE\\tmp\\qa-gates-20261028\\jdk17\\jdk-17.0.20.1+1",
+  "reports": [],
+  "logs": "red.txt"
+}

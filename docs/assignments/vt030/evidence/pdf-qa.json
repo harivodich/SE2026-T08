@@ -1,0 +1,14 @@
+{
+  "filename": "BT3_23001870_VT-030.pdf",
+  "sha256": "682a36ebc3f1f2530d6cc57c5288b3d651d9bb5e85b125af2d7b5cece01ac456",
+  "bytes": 236568,
+  "pages": 11,
+  "main_pages": 8,
+  "appendix_pages": 3,
+  "reflection_words": 306,
+  "ordinary_text": "Times New Roman 12pt, black; headings14/15, footer/caption10",
+  "tables": "white, 0.5pt black grid; header cells normal weight",
+  "visual_review": "11 pages rendered at110dpi, entire contact sheet inspected; dense tables/landscape footer checked enlarged; figure caption below, small and centered",
+  "automated_checks": "all extracted text black/Times; zero characters beyond bounds; main8/appendix starts9; no missing explicit page anchors",
+  "limitation": "No assessment grade or human acceptance implied; raster UI screenshot retains its application typography"
+}

@@ -1,0 +1,30 @@
+{
+  "name": "order-seed83",
+  "started_at_utc": "2026-11-03T19:23:20.048966+00:00",
+  "elapsed_seconds": 24.175343699986115,
+  "exit_code": 0,
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "mvnw",
+    "-B",
+    "-ntp",
+    "-s",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-gs",
+    "D:\\SE\\tmp\\bt3-vt030\\empty-settings.xml",
+    "-Dmaven.repo.local=D:/SE/tmp/qa-gates-20261028/maven-repo",
+    "-o",
+    "-Dtest=Vt030AsyncContractTest,Vt030MappingTest",
+    "-Dsurefire.runOrder=random",
+    "-Djunit.jupiter.testmethod.order.default=org.junit.jupiter.api.MethodOrderer$Random",
+    "-Djunit.jupiter.execution.order.random.seed=83",
+    "test"
+  ],
+  "cwd": "backend",
+  "jdk": "D:\\SE\\tmp\\qa-gates-20261028\\jdk17\\jdk-17.0.20.1+1",
+  "reports": [
+    "order-seed83-TEST-vn.vietdoc.Vt030AsyncContractTest.xml",
+    "order-seed83-TEST-vn.vietdoc.Vt030MappingTest.xml"
+  ],
+  "logs": "order-seed83.txt"
+}
