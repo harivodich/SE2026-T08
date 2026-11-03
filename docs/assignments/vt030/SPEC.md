@@ -24,7 +24,7 @@ Invariant chính: retry cùng `(document_id, request_key)` không làm tăng s�
 
 1. Đọc controller/services/OpenAPI và contract; giữ baseline và branch riêng.
 2. AI viết tests trước; chạy baseline và xem assertion fail đúng lý do. Nếu lỗi test/harness thì lưu lại, sửa oracle rồi chạy red lại trước patch.
-3. Patch nhỏ `DocumentController`: ResponseEntity202+Location+no-store, GET status no-store; thêm OpenAPI header docs. Không viết lại `JobService`, queue, scheduler hoặc React.
+3. Patch nhỏ `DocumentController`: ResponseEntity202+Location; giữ nguyên Security no-store headers và GET body; thêm OpenAPI header docs. Không viết lại `JobService`, queue, scheduler hoặc React.
 4. Chạy tests; deliberate mapping `document_id <- job.id` trong mapper tạm thời, chạy tests bắt lỗi rồi restore bytes. Không giữ bug trong nhánh nộp.
 5. Coverage, flakiness order/time,200-client harness và HTTP/browser evidence nếu môi trường cho phép. Ghi limitations theo từng layer.
 6. Inspect diff/secrets; README, traceability, AI Usage Log, reflection và PDF<=8main pages; link branch. Nhóm review trước merge.
@@ -37,3 +37,7 @@ Invariant chính: retry cùng `(document_id, request_key)` không làm tăng s�
 - Sửa test cache quá chặt: SecurityConfig đã có `no-cache, no-store, max-age=0, must-revalidate`; assertion phải kiểm directive `no-store`, không ép nguyên chuỗi đúng một giá trị.
 
 Các review trên là quyết định triển khai từ source; không là lời đảm bảo mọi behavior đã pass. Evidence từng lần chạy được lưu cùng lệnh, thời gian và JUnit report.
+
+## Claude plan và quyết định sau đối chiếu
+
+Claude Opus5.5/xhigh trả plan read-only trước production patch (receipt35f9c8d...). Nhận: chỉ sửa createJob+OpenAPI, no-store test là retained regression; không thêm explicit CacheControl vì có thể làm mất Pragma/Expires của Security. Không nhận gợi ý tự thêm runner/queue. UI api.js hiện tạo key mới cho mỗi createJob; tests server không chứng minh UI tự retry cùng key, giữ đây là residual risk và không sửa Web backlog trong increment này. Khẳng định worker200jobs mất ít nhất một khoảng cụ thể là suy luận config, không benchmark; không dùng làm số đo p95.

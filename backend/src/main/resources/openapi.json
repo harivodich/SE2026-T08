@@ -370,6 +370,15 @@
                   "$ref": "#/components/schemas/Job"
                 }
               }
+            },
+            "headers": {
+              "Location": {
+                "description": "Relative URL for the admitted or replayed job monitor. Requires the owning user session; it is not a bearer capability.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^/api/v1/jobs/[^/]+$"
+                }
+              }
             }
           },
           "default": {

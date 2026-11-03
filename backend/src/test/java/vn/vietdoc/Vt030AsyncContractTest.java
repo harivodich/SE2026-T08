@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,6 +81,12 @@ class Vt030AsyncContractTest {
         .setParameter("d", doc).getSingleResult());
   }
 
+  long auditCount(String action) {
+    return new TransactionTemplate(transactionManager).execute(status -> store.em()
+        .createQuery("select count(a) from AuditEvent a where a.documentId=:d and a.action=:a", Long.class)
+        .setParameter("d", documentId).setParameter("a", action).getSingleResult());
+  }
+
   @Test
   void tc01AcceptedResponseProvidesCorrectMonitorAndIdentity() throws Exception {
     var result = mvc.perform(post("/api/v1/documents/{id}/jobs", documentId)
@@ -114,6 +122,7 @@ class Vt030AsyncContractTest {
     assertEquals(first.path("result_run_id"), retry.path("result_run_id"));
     assertEquals(1, count("Job", documentId));
     assertEquals(2, count("AuditEvent", documentId), "one upload audit and one CREATE_JOB audit only");
+    assertEquals(1, auditCount("CREATE_JOB"));
   }
 
   @Test
@@ -184,6 +193,7 @@ class Vt030AsyncContractTest {
     assertEquals(1, count("Job", documentId));
     assertEquals(1, count("ExtractionRun", documentId));
     assertEquals(audits, count("AuditEvent", documentId));
+    assertEquals(1, auditCount("JOB_COMPLETED"));
     mvc.perform(get("/api/v1/jobs/{id}", id).session(session))
         .andExpect(jsonPath("$.state").value("SUCCEEDED"));
   }
@@ -248,5 +258,34 @@ class Vt030AsyncContractTest {
     assertEquals("FAILED", retried.path("state").asText());
     assertEquals(1, count("Job", documentId));
     assertEquals(0, count("ExtractionRun", documentId));
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {1, 100})
+  void tc19ValidKeyLengthPartitions(int length) throws Exception {
+    assertEquals("QUEUED", submit("a".repeat(length)).path("state").asText());
+    assertEquals(1, count("Job", documentId));
+  }
+
+  @Test
+  void tc20OverlongKeyRejectedWithoutWrite() throws Exception {
+    mvc.perform(post("/api/v1/documents/{id}/jobs", documentId).session(session).with(csrf())
+        .header("Idempotency-Key", "a".repeat(101)))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("INVALID_IDEMPOTENCY_KEY"));
+    assertEquals(0, count("Job", documentId));
+  }
+
+  @Test
+  void tc21OwnerAdmissionLimitRejectsSixthDistinctJob() throws Exception {
+    submit("limit-zero");
+    for (int i = 0; i < 4; i++) jobs.create(upload("receipt"), owner.id(), "limit-" + i);
+    String sixth = upload("receipt");
+    mvc.perform(post("/api/v1/documents/{id}/jobs", sixth).session(session).with(csrf())
+        .header("Idempotency-Key", "limit-sixth"))
+        .andExpect(status().isTooManyRequests()).andExpect(jsonPath("$.error.code").value("JOB_LIMIT"));
+    assertEquals(0, count("Job", sixth));
+    // A replay must still be admitted even when the owner's new-job quota is exhausted.
+    assertEquals(1, count("Job", documentId));
+    assertEquals("QUEUED", submit("limit-zero").path("state").asText());
   }
 }

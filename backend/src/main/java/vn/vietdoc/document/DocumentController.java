@@ -1,6 +1,7 @@
 package vn.vietdoc.document;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -64,12 +65,14 @@ public class DocumentController {
   }
 
   @PostMapping("/documents/{id}/jobs")
-  @ResponseStatus(HttpStatus.ACCEPTED)
-  public DocumentService.JobView createJob(
+  public ResponseEntity<DocumentService.JobView> createJob(
       @PathVariable String id,
       @AuthenticationPrincipal Identity user,
       @RequestHeader(value = "Idempotency-Key", required = false) String key) {
-    return jobs.create(id, user.id(), key);
+    DocumentService.JobView job = jobs.create(id, user.id(), key);
+    return ResponseEntity.accepted()
+        .location(URI.create("/api/v1/jobs/" + job.id()))
+        .body(job);
   }
 
   @GetMapping("/jobs/{id}")

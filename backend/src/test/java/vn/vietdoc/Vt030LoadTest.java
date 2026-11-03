@@ -8,6 +8,7 @@ import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -79,6 +80,8 @@ class Vt030LoadTest {
     List<Future<Outcome>> futures = new ArrayList<>();
     String prefix = Store.id();
     List<Outcome> results = new ArrayList<>();
+    AtomicInteger inflight = new AtomicInteger();
+    AtomicInteger peak = new AtomicInteger();
     try {
       for (int i = 0; i < count; i++) {
         final int index = i;
@@ -86,6 +89,8 @@ class Vt030LoadTest {
           ready.countDown();
           if (!start.await(30, TimeUnit.SECONDS)) return new Outcome(index, 0, 0, "", "start timeout");
           long begun = System.nanoTime();
+          int active = inflight.incrementAndGet();
+          peak.accumulateAndGet(active, Math::max);
           try {
             Fixture f = inputs.get(index);
             var response = mvc.perform(post("/api/v1/documents/{id}/jobs", f.documentId())
@@ -95,12 +100,23 @@ class Vt030LoadTest {
             return new Outcome(index, System.nanoTime() - begun, response.getStatus(), id, "");
           } catch (Exception e) {
             return new Outcome(index, System.nanoTime() - begun, 0, "", e.getClass().getSimpleName());
+          } finally {
+            inflight.decrementAndGet();
           }
         }));
       }
       assertTrue(ready.await(30, TimeUnit.SECONDS), "all 200 clients must be parked before release");
       start.countDown();
-      for (Future<Outcome> future : futures) results.add(future.get(60, TimeUnit.SECONDS));
+      long released = System.nanoTime();
+      long end = released + TimeUnit.SECONDS.toNanos(60);
+      for (int i = 0; i < futures.size(); i++) {
+        try {
+          results.add(futures.get(i).get(Math.max(1, end - System.nanoTime()), TimeUnit.NANOSECONDS));
+        } catch (TimeoutException | ExecutionException e) {
+          futures.get(i).cancel(true);
+          results.add(new Outcome(i, System.nanoTime() - released, 0, "", e.getClass().getSimpleName()));
+        }
+      }
     } finally {
       start.countDown(); pool.shutdownNow();
       assertTrue(pool.awaitTermination(15, TimeUnit.SECONDS));
@@ -123,6 +139,7 @@ class Vt030LoadTest {
     }
     Map<String,Object> report = new LinkedHashMap<>();
     report.put("scenario", name); report.put("clients", count); report.put("barrier_ready", count);
+    report.put("observed_peak_inflight", peak.get());
     report.put("p95_ms", p95Ms); report.put("p95_target_ms", 5000); report.put("errors", failures);
     report.put("unique_job_ids", jobIds.size()); report.put("persisted_jobs", actualJobs);
     report.put("create_audits", actualCreateAudits); report.put("expected_jobs", expected);
