@@ -277,7 +277,7 @@ class Vt030AsyncContractTest {
 
   @Test
   void tc21OwnerAdmissionLimitRejectsSixthDistinctJob() throws Exception {
-    submit("limit-zero");
+    JsonNode original = submit("limit-zero");
     for (int i = 0; i < 4; i++) jobs.create(upload("receipt"), owner.id(), "limit-" + i);
     String sixth = upload("receipt");
     mvc.perform(post("/api/v1/documents/{id}/jobs", sixth).session(session).with(csrf())
@@ -286,6 +286,11 @@ class Vt030AsyncContractTest {
     assertEquals(0, count("Job", sixth));
     // A replay must still be admitted even when the owner's new-job quota is exhausted.
     assertEquals(1, count("Job", documentId));
-    assertEquals("QUEUED", submit("limit-zero").path("state").asText());
+    JsonNode replay = submit("limit-zero");
+    assertEquals("QUEUED", replay.path("state").asText());
+    assertEquals(original.path("id").asText(), replay.path("id").asText());
+    assertEquals(original.path("result_run_id").asText(), replay.path("result_run_id").asText());
+    assertEquals(1, count("Job", documentId));
+    assertEquals(1, auditCount("CREATE_JOB"));
   }
 }

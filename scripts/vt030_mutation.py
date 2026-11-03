@@ -12,6 +12,8 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import time
+import xml.etree.ElementTree as ET
 
 ROOT=Path(__file__).resolve().parents[1]
 TARGET=ROOT/'backend/src/main/java/vn/vietdoc/document/DocumentService.java'
@@ -38,12 +40,24 @@ def main():
     result['command']=command
     try:
         TARGET.write_bytes(mutated)
+        started = time.time()
         with (evidence/'mutation.txt').open('wb') as log:
             ran=subprocess.run(command,cwd=ROOT/'backend',stdout=log,stderr=subprocess.STDOUT,timeout=240)
         result['exit_code']=ran.returncode
-        text=(evidence/'mutation.txt').read_text(encoding='utf-8',errors='replace')
-        # A compilation/setup failure is not a killed behavioral mutant.
-        result['killed']=ran.returncode!=0 and 'response field must map to owning document' in text and 'Vt030MappingTest' in text and 'Failures:' in text and 'COMPILATION ERROR' not in text
+        failures=[];reports=[]
+        # Only fresh test reports count; compiler/setup errors cannot kill a mutant.
+        for report in (ROOT/'backend/target/surefire-reports').glob('TEST-vn.vietdoc.Vt030*.xml'):
+            if report.stat().st_mtime < started:
+                continue
+            suite=ET.parse(report).getroot()
+            reports.append({k:suite.attrib.get(k) for k in ('name','tests','failures','errors','skipped')})
+            for case in suite.findall('testcase'):
+                for failure in case.findall('failure'):
+                    if 'response field must map to owning document' in failure.attrib.get('message',''):
+                        failures.append({'class':case.attrib.get('classname'),'test':case.attrib.get('name')})
+        result['junit_reports']=reports
+        result['mapping_failures']=failures
+        result['killed']=ran.returncode!=0 and bool(failures)
     finally:
         TARGET.write_bytes(original)
         result['restored_sha256']=hashlib.sha256(TARGET.read_bytes()).hexdigest()
