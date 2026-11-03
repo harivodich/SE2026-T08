@@ -1,0 +1,2 @@
+# Preserve exact captured bytes so SHA-256 evidence manifests survive Git checkout.
+* -text

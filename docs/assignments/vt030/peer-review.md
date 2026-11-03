@@ -27,3 +27,4 @@ Verdict của Claude: **acceptable with residuals**, không phát hiện confirm
 - PostgreSQL multi-runner/crash-after-effect, UI automatic retry reuse key, actual model/TCP load và notification delivery khi có module vẫn chưa kiểm. Bài công bố giới hạn đúng phạm vi executable harness mà đề cho phép.
 - Không tạo/merge PR hoặc nộp Classroom. Handoff ở `awaiting-human-review`; người nộp đọc lại nội dung và quyết định nộp.
 - Diff whitespace check đạt với source và tài liệu tự viết. Raw Maven logs giữ các dòng `[INFO] ` có trailing spaces; đây là output gốc được bảo toàn, được loại riêng khỏi check whitespace, không sửa log/assertion để đạt check.
+- Kiểm manifest trên committed blobs phát hiện Git normalize CRLF/LF. Thêm `.gitattributes` chỉ trong evidence để giữ exact bytes, regenerate manifest rồi kiểm lại Git blobs. Đây là sửa packaging evidence, không sửa counts/assertions hay production code.

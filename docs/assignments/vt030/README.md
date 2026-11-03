@@ -81,4 +81,6 @@ Chờ `/health/ready` trả200 trước browser. Dừng JVM bằng Ctrl+C sau te
 
 Các JSON `red-reviewed`, `green`, `full-coverage`, `order-seed*`, `load-repeat*` lưu command/timestamp/exit code. `curation.json` đánh dấu raw giữ ngoài repo, redaction token tổng hợp và loại XML stale. `manifest.json` là SHA-256 tập file cuối. Không giữ dataset, model binaries, real documents/PII hoặc credentials trong nhánh.
 
+`evidence/.gitattributes` tắt chuyển CRLF/LF trong riêng snapshot này để Git giữ exact bytes và manifest tái kiểm được sau clone. Hash đã được đối chiếu cả working files và committed Git blobs; không chỉ kiểm trên ổ đĩa trước staging. Policy source của dự án ngoài thư mục evidence được giữ nguyên.
+
 Residual work: PostgreSQL multi-runner/crash-after-effect, UI lost-response key reuse, model/provider E2E, TCP production load; notification delivery khi module có thật. Không nhận nhóm đã review, CI hosted đã pass hoặc code đã merge chỉ từ local tests.

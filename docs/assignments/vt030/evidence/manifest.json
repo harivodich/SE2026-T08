@@ -2,6 +2,10 @@
   "algorithm": "SHA-256",
   "scope": "files under evidence except manifest itself; after curation",
   "files": {
+    ".gitattributes": {
+      "sha256": "964c2038c4c2cf5fb2539c9eeaf836b068fe931db8e8e5ca11e5e864171eafac",
+      "bytes": 92
+    },
     "ai-final-prompt.md": {
       "sha256": "167eef76d905151d3154ca8d382e645d5193ad095ac3a472515fca8754db8539",
       "bytes": 1999
