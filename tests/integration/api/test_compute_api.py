@@ -138,6 +138,18 @@ def test_ready_with_pipeline_release_and_token(make_client):
     assert make_client(pipeline=StubPipeline()).get("/health/ready").status_code == 200
 
 
+def test_only_nul_release_is_not_ready_instead_of_crashing_startup(make_client, tmp_path):
+    write_release(tmp_path / "models")
+    manifest = tmp_path / "models" / MANIFEST_ID / "manifest.json"
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    data["files"][0]["path"] = "w\x00.bin"
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    response = make_client(pipeline=StubPipeline(), release=False).get("/health/ready")
+    assert response.status_code == 503
+    assert response.json()["releases"] == []
+    assert "no verified release under the models directory" in response.json()["reasons"]
+
+
 def test_public_docs_are_disabled(make_client):
     client = make_client()
     assert client.get("/docs").status_code == 404

@@ -71,6 +71,8 @@ def _reject_link(path: Path) -> None:
 
 
 def _contained_file(root: Path, raw_path: str) -> Path:
+    if any(ord(character) < 32 or ord(character) == 127 for character in raw_path):
+        raise ReleaseError("release path must not contain control characters")
     relative = PurePosixPath(raw_path)
     if (relative.is_absolute() or "\\" in raw_path or ":" in raw_path
             or any(part in ("", ".", "..") for part in raw_path.split("/"))):

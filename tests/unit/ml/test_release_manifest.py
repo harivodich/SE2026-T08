@@ -127,3 +127,18 @@ def test_drive_relative_or_colon_path_rejected_before_read(tmp_path):
     }), encoding="utf-8")
     with pytest.raises(ReleaseError):
         load_release(tmp_path, "rules.v1")
+
+
+@pytest.mark.parametrize("path", ["w\x00.bin", "w\n.bin", "w\x7f.bin"])
+def test_control_path_isolated_from_good_release(tmp_path, path):
+    write_release(tmp_path, "good.v1")
+    root, entry = write_release(tmp_path, "bad.v1")
+    (root / "manifest.json").write_text(json.dumps({
+        "manifest_version": 1, "pipeline_manifest_id": "bad.v1",
+        "files": [{**entry, "path": path}],
+    }), encoding="utf-8")
+    releases, errors = discover_releases(tmp_path)
+    assert set(releases) == {"good.v1"}
+    assert set(errors) == {"bad.v1"}
+    with pytest.raises(ReleaseError):
+        load_release(tmp_path, "bad.v1")
