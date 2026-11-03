@@ -1,0 +1,84 @@
+{
+  "7270f322376836f4d6c90f227f6405e1b97bbf2b7607f58e58dbdbaad511a230": {
+    "document_type": "receipt",
+    "payload": {
+      "merchant_name": "CỬA HÀNG MẪU",
+      "merchant_address": "12 Đường Ví Dụ, Hà Nội",
+      "transaction_date": "2026-10-06",
+      "transaction_time": "09:30",
+      "total_amount": "45000",
+      "items": [
+        {
+          "description": "Cà phê",
+          "quantity": "3",
+          "unit": "ly",
+          "unit_price": "15000",
+          "line_total": "45000"
+        }
+      ]
+    }
+  },
+  "37e2541658c723a95a0bd5524b834b2b816d4f03fdb8b1fe29175d2c62a88f5a": {
+    "document_type": "receipt",
+    "payload": {
+      "merchant_name": "CỬA HÀNG MẪU",
+      "merchant_address": "12 Đường Ví Dụ, Hà Nội",
+      "transaction_date": "2026-10-06",
+      "transaction_time": "09:30",
+      "total_amount": "45000",
+      "items": [
+        {
+          "description": "Cà phê",
+          "quantity": "3",
+          "unit": "ly",
+          "unit_price": "15000",
+          "line_total": "45000"
+        }
+      ]
+    }
+  },
+  "c596af340fbd2de73227fd87a1afd94c2a452665e13235e9d70386888bf5c923": {
+    "document_type": "invoice",
+    "payload": {
+      "invoice_number": "HD-MAU-001",
+      "issue_date": "2026-10-06",
+      "seller_name": "CÔNG TY MẪU A",
+      "buyer_name": "CÔNG TY MẪU B",
+      "subtotal": "100000",
+      "tax_amount": "10000",
+      "discount_amount": "0",
+      "total_amount": "110000",
+      "items": [
+        {
+          "description": "Dịch vụ minh họa",
+          "quantity": "1",
+          "unit": "lần",
+          "unit_price": "100000",
+          "line_total": "100000"
+        }
+      ]
+    }
+  },
+  "d2bcc68159956352b09c4a0cd5523d8219f6843d1d19ca0ac70c7b2f54cc11df": {
+    "document_type": "invoice",
+    "payload": {
+      "invoice_number": "HD-MAU-001",
+      "issue_date": "2026-10-06",
+      "seller_name": "CÔNG TY MẪU A",
+      "buyer_name": "CÔNG TY MẪU B",
+      "subtotal": "100000",
+      "tax_amount": "10000",
+      "discount_amount": "0",
+      "total_amount": "110000",
+      "items": [
+        {
+          "description": "Dịch vụ minh họa",
+          "quantity": "1",
+          "unit": "lần",
+          "unit_price": "100000",
+          "line_total": "100000"
+        }
+      ]
+    }
+  }
+}

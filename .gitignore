@@ -46,6 +46,10 @@ coverage/
 playwright-report/
 test-results/
 
+# Java build output and local runtime data
+/backend/target/
+/backend/runtime/
+
 # Dataset/model binaries and runtime artifacts (track manifests instead)
 /datasets/raw/*
 !/datasets/raw/.gitkeep

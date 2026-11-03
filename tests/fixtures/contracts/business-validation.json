@@ -1,0 +1,55 @@
+{
+  "description": "Synthetic shared business contract vectors for receipt.v1 and invoice.v1.",
+  "max_items": 30,
+  "required_fields": {
+    "receipt": ["merchant_name", "merchant_address", "transaction_date", "transaction_time", "total_amount", "items"],
+    "invoice": ["invoice_number", "issue_date", "seller_name", "buyer_name", "subtotal", "tax_amount", "discount_amount", "total_amount", "items"]
+  },
+  "required_item_fields": ["description", "quantity", "unit", "unit_price", "line_total"],
+  "unknown_key": "unexpected_contract_key",
+  "integer_json_number_fields": {
+    "receipt": ["/total_amount", "/items/0/quantity", "/items/0/unit_price", "/items/0/line_total"],
+    "invoice": ["/subtotal", "/tax_amount", "/discount_amount", "/total_amount", "/items/0/quantity", "/items/0/unit_price", "/items/0/line_total"]
+  },
+  "payloads": {
+    "receipt": {
+      "merchant_name": "CỬA HÀNG MẪU",
+      "merchant_address": "12 Đường Ví Dụ, Hà Nội",
+      "transaction_date": "2026-10-06",
+      "transaction_time": "09:30",
+      "total_amount": "45000",
+      "items": [
+        {"description": "Cà phê", "quantity": "3", "unit": "ly", "unit_price": "15000", "line_total": "45000"}
+      ]
+    },
+    "invoice": {
+      "invoice_number": "HD-MAU-001",
+      "issue_date": "2026-10-06",
+      "seller_name": "CÔNG TY MẪU A",
+      "buyer_name": "CÔNG TY MẪU B",
+      "subtotal": "100000",
+      "tax_amount": "10000",
+      "discount_amount": "0",
+      "total_amount": "110000",
+      "items": [
+        {"description": "Dịch vụ minh họa", "quantity": "1", "unit": "lần", "unit_price": "100000", "line_total": "100000"}
+      ]
+    }
+  },
+  "wrong_type_fields": {
+    "receipt": ["merchant_name", "merchant_address", "transaction_date", "transaction_time", "total_amount", "items"],
+    "invoice": ["invoice_number", "issue_date", "seller_name", "buyer_name", "subtotal", "tax_amount", "discount_amount", "total_amount", "items"]
+  },
+  "wrong_type_item_fields": ["description", "quantity", "unit", "unit_price", "line_total"],
+  "wrong_type_items": ["không phải object", 7, []],
+  "schema_version_cases": ["missing", "wrong"],
+  "versioned_envelopes": ["extraction", "export"],
+  "decimal_json_number_fields": {
+    "receipt": ["/total_amount", "/items/0/quantity", "/items/0/unit_price", "/items/0/line_total"],
+    "invoice": ["/subtotal", "/tax_amount", "/discount_amount", "/total_amount", "/items/0/quantity", "/items/0/unit_price", "/items/0/line_total"]
+  },
+  "invalid_calendar_dates": {
+    "receipt": {"path": "/transaction_date", "value": "2026-02-31"},
+    "invoice": {"path": "/issue_date", "value": "2026-02-31"}
+  }
+}
