@@ -54,7 +54,9 @@ def _label(text: str) -> tuple[str, str | None] | None:
 
 
 def _normalize(key, raw):
-    if not raw or norm(raw) in UNREADABLE:
+    if not raw:
+        return None, "unknown", "FIELD_VALUE_NOT_LOCATED"
+    if norm(raw) in UNREADABLE:
         return None, "unreadable", "FIELD_UNREADABLE"
     if norm(raw) in ABSENT:
         return None, "absent", "FIELD_EXPLICITLY_ABSENT"
@@ -131,11 +133,16 @@ def extract_baseline(page: Any, document_type: str, *, prepared: Any = None,
         issues.append({"id": f"{code}:{path}", "code": code, "severity": "warning", "paths": [path],
                        "message": "Baseline diagnostic; review source and unresolved values."})
 
+    if source.unreadable_regions:
+        issue("OCR_UNREADABLE_REGIONS", "/")
+
     for path, key, target in paths:
         choices = candidates[path]
         raw_candidates[path] = [{"raw_value": raw, "context_block_ids": [b.block_id for b in blocks]}
                                 for raw, blocks in choices]
         flags = ["CONFIDENCE_UNCALIBRATED"]
+        if source.unreadable_regions:
+            flags.extend((*source.review_flags, "SOURCE_OCR_INCOMPLETE"))
         raw, value, state, context = None, None, "unknown", ()
         if not choices:
             flags.append("FIELD_NOT_LOCATED")

@@ -38,6 +38,20 @@ source_regions rỗng + `SOURCE_MATCHER_UNAVAILABLE`. Repeated/conflicting candi
 không được chọn highlight tùy ý. Scalar label+value nằm chung block có thể bị
 matcher từ chối substring evidence; không tự chia box để tăng coverage.
 
+## OCR v2 consumer diagnostics
+
+AI2 nhận legacy v1 và explicit v2 theo provider snapshot `7d96e93`. V2 giữ
+unreadable detection IDs/quads/reasons/scores riêng với recognized blocks, validate
+status/flags theo arrays, không downgrade partial hoặc suy missing thành absent.
+Partial/unreadable truyền `OCR_UNREADABLE_REGIONS` và `SOURCE_OCR_INCOMPLETE` qua
+field flags; bare label chưa locate value là unknown, không phải unreadable gold.
+
+Exporter giữ shape `vietdoc.predictions.v1` và ghi thêm `ocr-diagnostics.json`
+(`vietdoc.ocr-diagnostics.v1`), chứa validated snapshots cho từng sample và lỗi
+input khi có. `predictions_sha256` liên kết companion với exact prediction bytes;
+dataset/OCR-input manifest hashes giữ provenance. Đây là internal/offline format,
+không phải shared wire schema hoặc approval/default-v2 acceptance của Backend.
+
 ## CLI đã implement
 
 Từ repo root, AI environment có `.[serve,test]` hoặc contracts dependencies:

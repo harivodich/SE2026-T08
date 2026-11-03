@@ -354,3 +354,39 @@ def test_numeric_continuation_before_footer_stays_a_table_row():
     assert len(result.payload["items"]) == 2
     assert result.payload["items"][1]["line_total"] == "5000"
     assert result.payload["total_amount"] == "80000"
+
+
+@pytest.mark.parametrize("case_index", [0, 1, 2])
+def test_missing_fields_on_v2_pages_stay_unknown_with_page_diagnostics(case_index):
+    import json
+    from pathlib import Path
+    golden = json.loads((Path(__file__).parents[2] / "fixtures/ocr-artifact-v2.json").read_text(encoding="utf-8"))
+    result = baseline(golden["cases"][case_index]["expected"])
+    assert result.payload["total_amount"] is None
+    assert result.field_states["/total_amount"] == "unknown"
+    field = metadata(result, "/total_amount")
+    assert field["value_origin"] == "prediction"
+    assert field["source_regions"] == [] and field["confidence"] is None
+    if case_index < 2:
+        assert "OCR_UNREADABLE_REGIONS" in field["review_flags"]
+        assert "SOURCE_OCR_INCOMPLETE" in field["review_flags"]
+        assert any(issue["code"] == "OCR_UNREADABLE_REGIONS" for issue in result.issues)
+    else:
+        assert "OCR_UNREADABLE_REGIONS" not in field["review_flags"]
+
+
+def test_bare_label_is_value_not_located_not_an_unreadable_gold_claim():
+    result = baseline(page(["Địa chỉ:"]))
+    assert result.field_states["/merchant_address"] == "unknown"
+    assert "FIELD_VALUE_NOT_LOCATED" in metadata(result, "/merchant_address")["review_flags"]
+
+
+def test_partial_page_keeps_explicit_absence_distinct_from_missing_prediction():
+    value = page(["Địa chỉ: Không có"])
+    value.update(artifact_version=2, recognition_status="partial", review_flags=["OCR_UNREADABLE_REGIONS"],
+                 unreadable_regions=[dict(region_id="u1", quad=None, score=None,
+                                          geometry_reason="unavailable", reason="EMPTY_RECOGNITION")])
+    result = baseline(value)
+    assert result.field_states["/merchant_address"] == "absent"
+    assert result.field_states["/total_amount"] == "unknown"
+    assert "OCR_UNREADABLE_REGIONS" in metadata(result, "/merchant_address")["review_flags"]

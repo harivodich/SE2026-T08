@@ -163,7 +163,7 @@ def export_predictions(root: Path, manifest_path: Path, output_dir: Path, *,
         if any(not isinstance(version, str) or not version.strip() for version in (ocr_version, preprocess_version)):
             raise BaselineError("OCR_INPUT_INVALID")
         input_hash = hashlib.sha256(input_bytes).hexdigest()
-    records = []
+    records, snapshots = [], {}
     for sid, sample in samples.items():
         kind = sample["document_type"]
         try:
@@ -181,6 +181,7 @@ def export_predictions(root: Path, manifest_path: Path, output_dir: Path, *,
             snapshot = snapshot_page(page, prepared)
             if (snapshot.ocr_version, snapshot.preprocess_version) != (ocr_version, preprocess_version):
                 raise BaselineError("PROVENANCE_MISMATCH")
+            snapshots[sid] = dict(page=0, **asdict(snapshot))
             result = extract_baseline(page, kind, prepared=prepared)
             record = dict(sample_id=sid, status="ok", document_type=kind, schema_version=f"{kind}.v1",
                           **asdict(result), ocr_text="\n".join(block.text for block in snapshot.blocks))
@@ -202,9 +203,23 @@ def export_predictions(root: Path, manifest_path: Path, output_dir: Path, *,
                     input_mode="renderer-fixture" if renderer_fixtures else "ocr-artifact",
                     actual_ocr=False if renderer_fixtures else None, ocr_inputs_sha256=input_hash,
                     source_sha256=source_hashes, predictions=records)
+    prediction_bytes = (json.dumps(artifact, ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8")
+    diagnostics = dict(artifact_version="vietdoc.ocr-diagnostics.v1",
+                       predictions_sha256=hashlib.sha256(prediction_bytes).hexdigest(),
+                       dataset_manifest_sha256=artifact["dataset_manifest_sha256"],
+                       ocr_inputs_sha256=input_hash,
+                       samples=[dict(sample_id=record["sample_id"], status=record["status"],
+                                     ocr=snapshots.get(record["sample_id"]),
+                                     **({"error": record["error"]} if record["status"] == "failed" else {}))
+                                for record in records])
+    diagnostic_bytes = (json.dumps(diagnostics, ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8")
+    # Keep predictions.v1 unchanged; companion diagnostics bind these exact bytes.
     # New output directories only; never overwrite a user's prediction artifact.
     output_dir.mkdir(parents=True, exist_ok=False)
     temporary = output_dir / "predictions.json.tmp"
-    temporary.write_text(json.dumps(artifact, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temporary.write_bytes(prediction_bytes)
     temporary.rename(output_dir / "predictions.json")
+    temporary = output_dir / "ocr-diagnostics.json.tmp"
+    temporary.write_bytes(diagnostic_bytes)
+    temporary.rename(output_dir / "ocr-diagnostics.json")
     return artifact

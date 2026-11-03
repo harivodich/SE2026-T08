@@ -186,3 +186,30 @@ def test_sample_ids_follow_data_consumer_grammar(dataset, tmp_path, sample_id):
     manifest.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(BaselineError):
         export(root, manifest, tmp_path / "out", renderer_fixtures=True)
+
+
+def test_ocr_diagnostics_companion_preserves_partial_detection_and_binds_prediction_bytes(dataset, tmp_path):
+    root, manifest = dataset
+    inputs, supplied = write_ocr_inputs(root, manifest)
+    entry = supplied["samples"][0]["ocr"]
+    path = root / entry["path"]
+    page = json.loads(path.read_text(encoding="utf-8"))
+    region = dict(region_id="unreadable-detection", quad=[[.1,.8],[.2,.8],[.2,.9],[.1,.9]],
+                  score=0, geometry_reason=None, reason="EMPTY_RECOGNITION")
+    page.update(artifact_version=2, unreadable_regions=[region], recognition_status="partial",
+                review_flags=["OCR_UNREADABLE_REGIONS"])
+    path.write_text(json.dumps(page), encoding="utf-8")
+    entry["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    inputs.write_text(json.dumps(supplied), encoding="utf-8")
+    out = tmp_path / "out"
+    result = export(root, manifest, out, ocr_inputs=inputs)
+    assert result["artifact_version"] == "vietdoc.predictions.v1"
+    assert "ocr_diagnostics" not in result
+    companion = json.loads((out / "ocr-diagnostics.json").read_text(encoding="utf-8"))
+    assert companion["predictions_sha256"] == hashlib.sha256((out / "predictions.json").read_bytes()).hexdigest()
+    ocr = companion["samples"][0]["ocr"]
+    assert ocr["artifact_version"] == 2
+    assert ocr["unreadable_regions"] == [region]
+    assert ocr["recognition_status"] == "partial"
+    assert ocr["blocks"][0]["block_id"] == page["blocks"][0]["block_id"]
+    assert "OCR_UNREADABLE_REGIONS" in result["predictions"][0]["field_metadata"][0]["review_flags"]
