@@ -46,6 +46,8 @@ jobs:
 
   ai:
     name: ai-fixture-tests
+    env:
+      VIETDOC_CONTRACTS_DIR: ${{ github.workspace }}/specs/contracts
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

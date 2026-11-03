@@ -40,7 +40,7 @@ Portable Data tests mặc định skip đúng một canonical-byte test. Runner 
 
 AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test]`. Runner
 `scripts.ci.ai` yêu cầu đủ mandatory files, mỗi test module được collect, inventory
-tối thiểu 297 tests, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
+tối thiểu 416 tests, bắt buộc cả baseline/export modules, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
 kể cả symlink case. Local Windows có thể dùng explicit
 `--allow-windows-symlink-skip` cho đúng ca symlink và đúng lý do thiếu quyền;
 không dùng cờ này trên hosted job. Summary tách top-level tests và subtests;
@@ -75,6 +75,7 @@ AI environment riêng (dùng directory mới thay vì ghi đè venv Data):
 python -m venv /tmp/vietdoc-ai-env
 /tmp/vietdoc-ai-env/bin/python -m pip install '.[serve,test]'
 /tmp/vietdoc-ai-env/bin/python -m pip check
+export VIETDOC_CONTRACTS_DIR="$PWD/specs/contracts"
 /tmp/vietdoc-ai-env/bin/python -m scripts.ci.ai --junitxml=test-results/ai.xml
 ```
 
@@ -82,6 +83,14 @@ Runner probes trong `tests/unit/test_ci_ai.py` chạy pytest thật với assert
 skip/xfail, empty/missing module; kết quả nonzero phải làm gate fail. Cần thêm
 hosted run/probe trên exact head trước khi đóng R17; local probes không chứng minh
 GitHub protection đã enforce.
+
+AI job đặt `VIETDOC_CONTRACTS_DIR` tuyệt đối theo checkout. Windows dùng
+`$env:VIETDOC_CONTRACTS_DIR = (Resolve-Path specs/contracts).Path`. Không dựa vào
+`PYTHONPATH=src` để chứng minh installed layout. AI runner còn build wheel local
+không tải dependency, cài noneditable vào temporary directory ngoài repo, rồi dùng
+Python `-I`, không PYTHONPATH: thiếu config phải fail rõ; config đúng validate cả
+request/response/error fixtures. Probe dùng dependencies của serve/test env hiện có,
+không phải fresh dependency-resolution hoặc actual-provider evidence.
 
 Integration tạo output/manifest trong temporary directory dưới `datasets/processed`, verify cùng manifest đủ 20 IDs/10 receipt/10 invoice rồi cleanup directory của chính lần chạy. Không đọc ignored output cũ và không sửa tracked reference manifest. `dist/` chứa đúng một wheel; dùng clean checkout/directory build để tránh nhiều versions. Artifact upload chỉ gồm `dist/*.whl` và `dist/data-package.json`, retention 7 ngày; không là GitHub Release hay bản deploy.
 

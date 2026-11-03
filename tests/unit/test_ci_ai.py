@@ -83,3 +83,26 @@ def test_ai_runner_requires_execution_without_deselection(tmp_path, options):
     path.write_text("def test_good(): assert True\n", encoding="utf-8")
     result = run_probe(path, pytest_addopts=options)
     assert result.returncode != 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("missing", ["test_baseline.py", "test_baseline_export.py"])
+def test_main_rejects_deleted_baseline_suite_before_running_tests(tmp_path, monkeypatch, capsys, missing):
+    from scripts.ci import ai
+    for name in ai.REQUIRED_FILES:
+        path = tmp_path / name
+        if path.name != missing:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("def test_exists(): pass\n", encoding="utf-8")
+    monkeypatch.setattr(ai, "ROOT", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["ai.py"])
+    monkeypatch.setattr(ai, "run_tests", lambda *a, **k: pytest.fail("mandatory file was not checked"))
+    assert ai.main() == 1
+    assert missing in capsys.readouterr().err
+
+
+def test_installed_compute_contracts_outside_checkout(tmp_path):
+    from scripts.ci.ai_installed import verify_installed
+    result = verify_installed(ROOT, tmp_path)
+    assert result["missing_config_rejected"] is True
+    assert result["configured_fixtures_valid"] == 3
+    assert not Path(result["installed_module"]).is_relative_to(ROOT)
