@@ -11,10 +11,10 @@ from typing import Any
 from vietdoc.contracts.compute import BUSINESS_SCHEMA, ComputeContracts
 from vietdoc.pipeline.normalization import normalize_date, normalize_money, normalize_quantity, normalize_text, normalize_time
 
-from .ocr_input import BaselineError, Block, norm, snapshot_page
-from .table import HEADERS, table_rows
+from .ocr_input import BaselineError, Block, horizontally_separate, norm, same_visual_row, snapshot_page
+from .table import HEADERS, NUMBER, table_rows
 
-BASELINE_VERSION = "vi-label-header-b0.v1"
+BASELINE_VERSION = "vi-label-header-b0.v2"
 LABELS = {
     "merchant_name": ("cửa hàng", "tên cửa hàng"),
     "merchant_address": ("địa chỉ", "địa chỉ cửa hàng"),
@@ -89,7 +89,7 @@ def extract_baseline(page: Any, document_type: str, *, prepared: Any = None,
     rows, located = table_rows(source, lambda text: _label(text) is not None)
     table_ids = {b.block_id for row in rows for blocks in row.values() for b in blocks}
     candidates = defaultdict(list)
-    for index, block in enumerate(source.blocks):
+    for block in source.blocks:
         if block.block_id in table_ids:
             continue
         found = _label(block.text)
@@ -97,11 +97,16 @@ def extract_baseline(page: Any, document_type: str, *, prepared: Any = None,
             continue
         key, raw = found
         context = [block]
-        if raw is None and index + 1 < len(source.blocks):
-            following = source.blocks[index + 1]
-            if _label(following.text) is None and norm(following.text) not in HEADERS:
-                raw = following.text
-                context.append(following)
+        if raw is None:
+            numeric = key.endswith("amount") or key == "subtotal"
+            paired = [other for other in source.blocks
+                      if other is not block and other.block_id not in table_ids
+                      and _label(other.text) is None and norm(other.text) not in HEADERS
+                      and same_visual_row(block, other) and horizontally_separate(block, other)
+                      and (not numeric or NUMBER.fullmatch(other.text.strip()))]
+            if paired:
+                candidates[f"/{key}"].extend((other.text, (block, other)) for other in paired)
+                continue
         candidates[f"/{key}"].append((raw or "", tuple(context)))
 
     payload = {key: None for key in scalar_fields}

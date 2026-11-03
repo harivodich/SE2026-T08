@@ -87,6 +87,22 @@ class Page:
     preprocess_version: str | None
 
 
+def same_visual_row(left: Block, right: Block) -> bool:
+    """Geometry filter only; callers must establish the semantic field scope."""
+    if left.quad is None or right.quad is None:
+        return False
+    top = max(min(p[1] for p in left.quad), min(p[1] for p in right.quad))
+    bottom = min(max(p[1] for p in left.quad), max(p[1] for p in right.quad))
+    return bottom - top >= .5 * min(left.height, right.height)
+
+
+def horizontally_separate(left: Block, right: Block) -> bool:
+    if left.quad is None or right.quad is None:
+        return False
+    return (max(p[0] for p in left.quad) <= min(p[0] for p in right.quad)
+            or max(p[0] for p in right.quad) <= min(p[0] for p in left.quad))
+
+
 def snapshot_page(page: Any, prepared: Any = None) -> Page:
     if type(get(page, "page")) is not int or get(page, "page") != 0:
         raise BaselineError("OCR_INPUT_INVALID")

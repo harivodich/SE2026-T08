@@ -7,7 +7,7 @@ import re
 from statistics import median
 from typing import Callable
 
-from .ocr_input import BaselineError, Block, Page, norm
+from .ocr_input import BaselineError, Block, Page, horizontally_separate, norm, same_visual_row
 
 HEADERS = {"tên hàng": "description", "hàng hóa": "description", "mô tả": "description",
            "sl": "quantity", "số lượng": "quantity", "đvt": "unit", "đơn vị": "unit",
@@ -120,6 +120,14 @@ def table_rows(page: Page, is_scalar: Callable[[str], bool]) -> tuple[list[dict]
             return True
         stop = next((i for i in range(end, len(blocks)) if boundary(i)), len(blocks))
         cells = list(blocks[end:stop])
+        if stop < len(blocks):
+            footer = blocks[stop]
+            # A scalar footer's same-line amount may precede its label in OCR
+            # order. Exclude only that semantic row, preserving numeric-only
+            # table continuations elsewhere and declining unsupported geometry.
+            cells = [block for block in cells if not (
+                NUMBER.fullmatch(block.text.strip()) and same_visual_row(block, footer)
+                and horizontally_separate(block, footer))]
         geometric = all(b.quad is not None for b in headers + cells)
         rows = _geometry_rows(headers, cells) if geometric else _ordered_rows(headers, cells)
         if len(rows) > 30:

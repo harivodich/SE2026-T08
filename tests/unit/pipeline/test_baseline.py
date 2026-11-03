@@ -289,3 +289,68 @@ def test_multiple_tables_fail_instead_of_silently_returning_first_table():
     value["blocks"] += second["blocks"]
     with pytest.raises(BaselineError, match="TABLE_LAYOUT_UNSUPPORTED"):
         baseline(value)
+
+
+def located(name, text, x, y, height=.01, width=.12):
+    return dict(block_id=name, text=text,
+                quad=[[x, y], [x+width, y], [x+width, y+height], [x, y+height]],
+                score=.9, geometry_reason=None)
+
+
+@pytest.mark.parametrize("value_first", [True, False])
+@pytest.mark.parametrize("label_height", [.01, .03])
+def test_footer_pairing_uses_visual_line_not_next_cash_amount(value_first, label_height):
+    value = table_page()
+    value["blocks"].pop()
+    amount = located("total-value", "80.000", .75, .9)
+    label = located("total-label", "Tổng tiền", .03, .9, height=label_height)
+    value["blocks"] += ([amount, label] if value_first else [label, amount]) + [
+        located("cash-value", "100.000", .75, .943),
+        located("cash-label", "Tiền khách đưa", .03, .945),
+        located("change-label", "Tiền thừa", .03, .97),
+        located("change-value", "20.000", .75, .97),
+    ]
+    result = baseline(value)
+    assert result.payload["total_amount"] == "80000"
+    assert len(result.payload["items"]) == 1
+    assert result.payload["items"][0]["line_total"] == "40000"
+    assert metadata(result, "/total_amount")["raw_value"] == "80.000"
+    assert metadata(result, "/total_amount")["confidence"] is None
+
+
+def test_scalar_only_value_before_label_is_paired_with_source_context():
+    value = page([])
+    value["blocks"] = [located("amount", "80.000", .7, .1),
+                       located("label", "Tổng tiền", .1, .1)]
+    result = baseline(value)
+    assert result.payload["total_amount"] == "80000"
+    assert result.raw_candidates["/total_amount"] == [
+        {"raw_value": "80.000", "context_block_ids": ["label", "amount"]}]
+
+
+def test_separate_label_without_geometry_does_not_take_next_cash_value():
+    result = baseline(page(["Tổng tiền", "100.000", "Tiền khách đưa"]))
+    assert result.payload["total_amount"] is None
+    assert result.issues
+
+
+def test_two_amounts_on_total_row_abstain_instead_of_picking_reading_order():
+    value = page([])
+    value["blocks"] = [located("label", "Tổng tiền", .1, .1),
+                       located("one", "80.000", .5, .1),
+                       located("two", "100.000", .75, .1)]
+    result = baseline(value)
+    assert result.payload["total_amount"] is None
+    assert "FIELD_AMBIGUOUS" in metadata(result, "/total_amount")["review_flags"]
+
+
+def test_numeric_continuation_before_footer_stays_a_table_row():
+    value = table_page()
+    value["blocks"].pop()
+    value["blocks"] += [located("continuation", "5.000", .75, .2),
+                        located("total-value", "80.000", .75, .9),
+                        located("total-label", "Tổng tiền", .03, .9)]
+    result = baseline(value)
+    assert len(result.payload["items"]) == 2
+    assert result.payload["items"][1]["line_total"] == "5000"
+    assert result.payload["total_amount"] == "80000"
