@@ -16,6 +16,7 @@ SUITES = (
     "tests/integration/api", "tests/unit/test_ci_gate.py", "tests/unit/test_ci_ai.py",
 )
 REQUIRED_FILES = (
+    "tests/unit/pipeline/test_ocr_input.py",
     "tests/unit/pipeline/test_baseline.py", "tests/unit/pipeline/test_baseline_export.py",
     "tests/unit/pipeline/test_normalization.py", "tests/unit/pipeline/test_output_parser.py",
     "tests/unit/ml/test_release_manifest.py", "tests/contract/test_schemas.py",

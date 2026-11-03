@@ -79,12 +79,25 @@ class Block:
 
 
 @dataclass(frozen=True)
+class Unreadable:
+    region_id: str
+    quad: tuple | None
+    score: float | None
+    geometry_reason: str | None
+    reason: str
+
+
+@dataclass(frozen=True)
 class Page:
     width: int
     height: int
     ocr_version: str
     blocks: tuple[Block, ...]
     preprocess_version: str | None
+    artifact_version: int = 1
+    unreadable_regions: tuple[Unreadable, ...] = ()
+    recognition_status: str = "complete"
+    review_flags: tuple[str, ...] = ()
 
 
 def same_visual_row(left: Block, right: Block) -> bool:
@@ -103,7 +116,43 @@ def horizontally_separate(left: Block, right: Block) -> bool:
             or max(p[0] for p in right.quad) <= min(p[0] for p in left.quad))
 
 
+def _region_geometry(item: Any) -> tuple:
+    score, quad, reason = get(item, "score"), get(item, "quad"), get(item, "geometry_reason")
+    if quad is None:
+        _text(reason)
+    else:
+        if reason is not None or not isinstance(quad, (tuple, list)) or len(quad) != 4:
+            raise BaselineError("OCR_INPUT_INVALID")
+        points = []
+        for point in quad:
+            if not isinstance(point, (tuple, list)) or len(point) != 2:
+                raise BaselineError("OCR_INPUT_INVALID")
+            points.append(tuple(_number(n) for n in point))
+        if points[0] != min(points, key=lambda p: (p[1], p[0])):
+            raise BaselineError("OCR_INPUT_INVALID")
+        for i in range(4):
+            a, b, c = (points[(i + j) % 4] for j in range(3))
+            if (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]) <= 0:
+                raise BaselineError("OCR_INPUT_INVALID")
+        quad = tuple(points)
+    return quad, None if score is None else _number(score), reason
+
+
 def snapshot_page(page: Any, prepared: Any = None) -> Page:
+    def optional(key, default):
+        return page.get(key, default) if isinstance(page, Mapping) else getattr(page, key, default)
+
+    artifact_version = optional("artifact_version", 1)
+    if type(artifact_version) is not int or artifact_version not in (1, 2):
+        raise BaselineError("OCR_INPUT_INVALID")
+    if isinstance(page, Mapping):
+        expected = {"page", "width", "height", "ocr_version", "blocks"}
+        if "artifact_version" in page:
+            if artifact_version != 2:
+                raise BaselineError("OCR_INPUT_INVALID")
+            expected |= {"artifact_version", "unreadable_regions", "recognition_status", "review_flags"}
+        if set(page) != expected:
+            raise BaselineError("OCR_INPUT_INVALID")
     if type(get(page, "page")) is not int or get(page, "page") != 0:
         raise BaselineError("OCR_INPUT_INVALID")
     width, height = get(page, "width"), get(page, "height")
@@ -115,7 +164,10 @@ def snapshot_page(page: Any, prepared: Any = None) -> Page:
     blocks = get(page, "blocks")
     if not isinstance(blocks, (list, tuple)):
         raise BaselineError("OCR_INPUT_INVALID")
-    if len(blocks) > MAX_BLOCKS:
+    regions = get(page, "unreadable_regions") if artifact_version == 2 else optional("unreadable_regions", ())
+    if not isinstance(regions, (list, tuple)) or artifact_version == 1 and regions:
+        raise BaselineError("OCR_INPUT_INVALID")
+    if len(blocks) + len(regions) > MAX_BLOCKS:
         raise BaselineError("PROFILE_EXCEEDED")
     result, ids, characters = [], set(), 0
     for item in blocks:
@@ -126,25 +178,23 @@ def snapshot_page(page: Any, prepared: Any = None) -> Page:
         if block_id in ids:
             raise BaselineError("OCR_INPUT_INVALID")
         ids.add(block_id)
-        score, quad, reason = get(item, "score"), get(item, "quad"), get(item, "geometry_reason")
-        if quad is None:
-            _text(reason)
-        else:
-            if reason is not None or not isinstance(quad, (tuple, list)) or len(quad) != 4:
-                raise BaselineError("OCR_INPUT_INVALID")
-            points = []
-            for point in quad:
-                if not isinstance(point, (tuple, list)) or len(point) != 2:
-                    raise BaselineError("OCR_INPUT_INVALID")
-                points.append(tuple(_number(n) for n in point))
-            if points[0] != min(points, key=lambda p: (p[1], p[0])):
-                raise BaselineError("OCR_INPUT_INVALID")
-            for i in range(4):
-                a, b, c = (points[(i + j) % 4] for j in range(3))
-                if (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]) <= 0:
-                    raise BaselineError("OCR_INPUT_INVALID")
-            quad = tuple(points)
-        result.append(Block(block_id, text, quad, None if score is None else _number(score), reason))
+        quad, score, reason = _region_geometry(item)
+        result.append(Block(block_id, text, quad, score, reason))
+    unreadable = []
+    for item in regions:
+        region_id = _text(get(item, "region_id"))
+        if region_id in ids or get(item, "reason") != "EMPTY_RECOGNITION":
+            raise BaselineError("OCR_INPUT_INVALID")
+        ids.add(region_id)
+        quad, score, reason = _region_geometry(item)
+        unreadable.append(Unreadable(region_id, quad, score, reason, "EMPTY_RECOGNITION"))
+    recognition_status = ("partial" if result else "unreadable") if unreadable else "complete"
+    review_flags = ("OCR_UNREADABLE_REGIONS",) if unreadable else ()
+    supplied_flags = get(page, "review_flags") if artifact_version == 2 else optional("review_flags", ())
+    supplied_status = get(page, "recognition_status") if artifact_version == 2 else optional("recognition_status", "complete")
+    if (not isinstance(supplied_flags, (list, tuple)) or tuple(supplied_flags) != review_flags
+            or supplied_status != recognition_status):
+        raise BaselineError("OCR_INPUT_INVALID")
     preprocess_version = None
     if prepared is not None:
         canonical = get(prepared, "canonical")
@@ -179,7 +229,8 @@ def snapshot_page(page: Any, prepared: Any = None) -> Page:
                 raise BaselineError("LAYOUT_TRANSFORM_UNSUPPORTED")
         elif matrix is not None or not isinstance(get(prepared, "geometry_reason"), str) or not get(prepared, "geometry_reason").strip():
             raise BaselineError("OCR_INPUT_INVALID")
-        if status == "unavailable" and any(block.quad is not None for block in result):
+        if status == "unavailable" and any(block.quad is not None for block in (*result, *unreadable)):
             raise BaselineError("OCR_INPUT_INVALID")
         preprocess_version = _text(get(prepared, "preprocess_version"))
-    return Page(width, height, version, tuple(result), preprocess_version)
+    return Page(width, height, version, tuple(result), preprocess_version,
+                artifact_version, tuple(unreadable), recognition_status, review_flags)

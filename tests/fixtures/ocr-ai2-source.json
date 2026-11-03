@@ -1,0 +1,9 @@
+{
+  "provider_sha": "7d96e93bf8315beb6fa33807231316e957671249",
+  "files": {
+    "tests/fixtures/ocr-artifact-v2.json": {
+      "git_blob": "9221f8c3c6429ddeb8a3d95f71887c370f867dd3",
+      "sha256": "3b40f3fffd5b8b31d42424c7c0a06425ae97c6beb55f44da63d0ab7edfb5bf9b"
+    }
+  }
+}
