@@ -10,6 +10,8 @@ Giữ offline Data render environment riêng với Python AI serving/train. Các
 pins trong `.[data]` (Pillow 10.2.0, jsonschema 4.10.3) là môi trường render D1/D2,
 không phải tuyên bố đã resolve chung với versions của AI-1/AI-2. D1.1 tests cũng cần
 jsonschema: cài extra `data` trước cả tests D1.1. Không cần model/API/DB/dataset tải về.
+Core package không kéo validator khác vào `.[data]`; compute dùng các extras
+`contracts`/`serve`/`train` trong môi trường riêng. Không cài gộp chúng với `data`.
 
 Canonical bytes được kiểm trên Linux, Python 3.12.3, Pillow 10.2.0, jsonschema
 4.10.3, FreeType 2.13.2/RAQM 0.10.1, zlib 1.3 và DejaVuSans.ttf SHA-256
