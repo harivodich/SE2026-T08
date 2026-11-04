@@ -18,15 +18,15 @@
     },
     {
       "logical_page": 3,
-      "orientation": "landscape",
-      "estimated_height": 522.4,
-      "available": 515.3
+      "orientation": "portrait",
+      "estimated_height": 622.4,
+      "available": 761.9
     },
     {
       "logical_page": 4,
-      "orientation": "landscape",
-      "estimated_height": 486.4,
-      "available": 515.3
+      "orientation": "portrait",
+      "estimated_height": 629.4,
+      "available": 761.9
     },
     {
       "logical_page": 5,

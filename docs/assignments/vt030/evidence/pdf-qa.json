@@ -1,14 +1,15 @@
 {
   "filename": "BT3_23001870_VT-030.pdf",
-  "sha256": "0bf348beba1452be5bcf88591e530f1a8cdd13c76105fe77d47abca1fd4e4a08",
-  "bytes": 237403,
+  "sha256": "d20c850c8a662c7dbd2c99fbe11a42ff3e9a2ecef53035523e4aef03cc9845ea",
+  "bytes": 237582,
   "pages": 11,
   "main_pages": 8,
   "appendix_pages": 3,
   "reflection_words": 306,
   "ordinary_text": "Times New Roman 12pt, black; headings14/15, footer/caption10",
   "tables": "white, 0.5pt black grid; header cells normal weight",
-  "visual_review": "11 pages rendered at110dpi, entire contact sheet inspected; dense tables/landscape footer checked enlarged; figure caption below, small and centered",
+  "visual_review": "11portrait pages rendered at110dpi and contact sheet inspected; tables on pages3/4 checked enlarged, E2E IDs unbroken, no mixed-page fit-width shrink; caption below figure and centered footer",
   "automated_checks": "all extracted text black/Times; zero characters beyond bounds; main8/appendix starts9; no missing explicit page anchors",
-  "limitation": "No assessment grade or human acceptance implied; raster UI screenshot retains its application typography"
+  "limitation": "No assessment grade or human acceptance implied; raster UI screenshot retains its application typography",
+  "page_geometry": "All11 pages A4 portrait,595.2756 x841.8898pt; ordinary text12pt throughout"
 }

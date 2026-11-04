@@ -1,0 +1,80 @@
+{
+  "issue": "mixed A4 portrait/landscape caused different scale when viewer fitted pages to common screen width",
+  "original_body_font_pt": 12,
+  "original_fit_width_relative_scale": 0.7070706878738762,
+  "fix": "all11 pages A4 portrait, ordinary text12pt; tables reflowed, no font reduction",
+  "main_pages": 8,
+  "appendices": 3,
+  "reflection_words": 306,
+  "pages": [
+    {
+      "page": 1,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 2,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 3,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 4,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 5,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 6,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 7,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 8,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 9,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 10,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    },
+    {
+      "page": 11,
+      "width_pt": 595.2756,
+      "height_pt": 841.8898,
+      "content_unchanged_ignoring_line_wrap": true
+    }
+  ],
+  "runtime_evidence_unchanged": true,
+  "delivery_pdf": "D:\\SE\\output\\bt3-vt030\\uniform-a4\\BT3_23001870_VT-030.pdf",
+  "pdf_sha256": "d20c850c8a662c7dbd2c99fbe11a42ff3e9a2ecef53035523e4aef03cc9845ea"
+}

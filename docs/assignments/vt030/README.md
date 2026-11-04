@@ -2,6 +2,8 @@
 
 Increment bổ sung HTTP `Location` cho async job monitor; giữ nguyên response body, worker, DB schema và UI. Tests xác minh các invariant retry có sẵn. Không merge nhánh bài tập trước review nhóm.
 
+Bản PDF hiện dùng A4 dọc cho toàn bộ 11 trang (8 trang chính, 3 phụ lục), chữ thường và bảng 12 pt. Hai bảng test case được dàn lại trên trang dọc để tránh trình đọc thu nhỏ riêng các trang ngang khi dùng chế độ vừa chiều rộng. Nội dung, số liệu và evidence thực thi được giữ nguyên; kiểm chứng bố cục ở `evidence/visual-scale-verification.json`.
+
 - Baseline: `729be6fe493dc00e1d7cb87e7db94b94c79a0816` (`develop`).
 - Test-first: `2d34f4c10cc4b8a692982be93ac0b4d6c6643d28` (21 tests, 1 failure Location sau khi sửa oracle cache).
 - Patch/boundaries: `e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d`.

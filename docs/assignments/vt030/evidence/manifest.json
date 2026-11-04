@@ -63,7 +63,7 @@
       "bytes": 2854
     },
     "editorial-verification.json": {
-      "sha256": "1aa66bf933f726c02dc0620816749b7f205c04119b9e0118892d3c3def37e66b",
+      "sha256": "6148c9c8b4cca4be0d1da1754b9d88dfb9326cbe9f058cc25974bce83b93b299",
       "bytes": 946
     },
     "final-full-coverage-TEST-vn.vietdoc.contracts.BusinessContractTest.xml": {
@@ -319,15 +319,15 @@
       "bytes": 3170
     },
     "pdf-layout.json": {
-      "sha256": "951a868a0c2604ee1fb19697351abce875069088dc77cea19f22b5ed2539b96b",
-      "bytes": 3985
+      "sha256": "f0542f9156e008495a3a85c825529a6c7ce84c10b71afc56b61bc644f2f4e8d1",
+      "bytes": 3983
     },
     "pdf-qa.json": {
-      "sha256": "5e24df7b98bd0823871a54488ba949750855fdd226dd24a9fbee360fbb4cc248",
-      "bytes": 829
+      "sha256": "02def6c18da68b18a8b86c3e97319e629b7d2335dbd998f1014f5b12dde0ec9c",
+      "bytes": 970
     },
     "pdf-typography.json": {
-      "sha256": "2e1ca377f31b620e1d20334301c125c8430ff68b1db73358cea36c790c15f881",
+      "sha256": "c4860e98e9b5ed8b92499ee7b55b039b084b4ec318523de1dbc29ed2375201d6",
       "bytes": 3720
     },
     "red-native-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
@@ -373,6 +373,10 @@
     "verification-summary.json": {
       "sha256": "7ad64eec270ca9f3ae2f30649cf74e5d289fe544cd3950190a2a30d0bd71ff76",
       "bytes": 1208
+    },
+    "visual-scale-verification.json": {
+      "sha256": "de3e6c08e81ea7af0efa1f4c7e4326d3b929847ff344ad262198e62d9647705a",
+      "bytes": 2183
     },
     "windows-mutation-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {
       "sha256": "bf42448b9781c1149804a543ee043b52a51355689dc87042d022f76b8fc04c20",

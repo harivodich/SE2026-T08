@@ -14,7 +14,7 @@
   "full_test_class_names_in_legend": true,
   "real_prompt_excerpt_verified": true,
   "original_ui_image_unchanged": true,
-  "pdf_sha256": "0bf348beba1452be5bcf88591e530f1a8cdd13c76105fe77d47abca1fd4e4a08",
+  "pdf_sha256": "d20c850c8a662c7dbd2c99fbe11a42ff3e9a2ecef53035523e4aef03cc9845ea",
   "first_page_hyperlinks": [
     "https://github.com/harivodich/SE2026-T08",
     "https://github.com/harivodich/SE2026-T08/tree/feature/bt3-vt030-async-idempotency"
