@@ -120,7 +120,7 @@ def main() -> int:
             print(f"Missing mandatory test file: {name}", file=sys.stderr)
             return 1
     return run_tests([ROOT / name for name in SUITES], junitxml=args.junitxml,
-                     minimum_tests=416, allow_windows_symlink_skip=args.allow_windows_symlink_skip)
+                     minimum_tests=473, allow_windows_symlink_skip=args.allow_windows_symlink_skip)
 
 
 if __name__ == "__main__":

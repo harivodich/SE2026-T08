@@ -40,7 +40,7 @@ Portable Data tests mặc định skip đúng một canonical-byte test. Runner 
 
 AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test]`. Runner
 `scripts.ci.ai` yêu cầu đủ mandatory files, mỗi test module được collect, inventory
-tối thiểu 416 tests, bắt buộc cả baseline/export modules, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
+tối thiểu 473 tests, bắt buộc cả baseline/export/OCR-consumer modules, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
 kể cả symlink case. Local Windows có thể dùng explicit
 `--allow-windows-symlink-skip` cho đúng ca symlink và đúng lý do thiếu quyền;
 không dùng cờ này trên hosted job. Summary tách top-level tests và subtests;

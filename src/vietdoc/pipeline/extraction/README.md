@@ -23,6 +23,8 @@ schemas. Type do caller chọn: `receipt` hoặc `invoice`, Vietnamese, một tr
 - Tái dùng `vi-VND.v2`. Invalid/ambiguous raw -> null + diagnostics, không sửa từ
   gold hoặc tính lại tiền. Arithmetic chỉ tạo warning khi đủ operands.
 - Không tìm được field = `unknown`; label có nhưng không đọc được = `unreadable`.
+  Bare label chưa tìm được value là `unknown` + `FIELD_VALUE_NOT_LOCATED`;
+  chỉ recognized unreadable marker mới dùng field state `unreadable`.
   Chỉ wording explicit `Không có`/`Không áp dụng`/`N/A` mới là `absent` trong B0
   policy proposal này. Không nhìn Data annotation để quyết định field_states.
 
@@ -53,6 +55,22 @@ dataset/OCR-input manifest hashes giữ provenance. Đây là internal/offline f
 không phải shared wire schema hoặc approval/default-v2 acceptance của Backend.
 
 ## CLI đã implement
+
+OCR consumer replay (source checkout có serve/test env, không cần OCR/model):
+
+```powershell
+$env:VIETDOC_CONTRACTS_DIR = (Resolve-Path specs/contracts).Path
+python -m vietdoc.entrypoints.cli.ocr_consumer --provider-root <AI1-worktree-at-7d96e93> --output <new-output-directory>
+```
+
+Provider phải đúng pinned commit và các imported source files chưa đổi. Python
+subprocess tách package AI1/AI2; không merge/copy provider code vào consumer.
+CLI kiểm source fixture hashes với pinned Git blobs, chạy golden partial diagnostics,
+actual evidence bridge và B0 trên hai native observed JSON. `consumer-report.json`
+ghi source/dependency/fixture versions, metadata, coverage/abstain, input hash checks
+và limitations; không đọc gold/labels/transcript để infer. Native replay không là
+native OCR run mới. `--fixtures` chỉ định thư mục fixtures khi không dùng default.
+Output directory phải mới; quality gaps của B0 được báo riêng, không sửa bằng gold.
 
 Từ repo root, AI environment có `.[serve,test]` hoặc contracts dependencies:
 

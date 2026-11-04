@@ -6,10 +6,12 @@ Does not load an OCR engine, copy provider implementation, or open HTTP/DB ports
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import asdict
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -182,3 +184,71 @@ def evidence_checks(provider: ProviderEvidence, golden: dict) -> list[dict]:
     reports.append(dict(case_id="baseline-callback-scoped-partial", result="PASS" if passed else "FAIL",
                         payload=result.payload, field_metadata=field))
     return reports
+
+
+def consume_native(bundle: dict, provider: ProviderEvidence | None = None,
+                   fixtures: Path | None = None) -> list[dict]:
+    """Infer only from observed OCR/prepared metadata; never open annotation files."""
+    records = []
+    for sample in bundle["samples"]:
+        sid = sample["sample_id"]
+        try:
+            source = snapshot_page(sample["ocr"], sample["prepared"])
+            if (not isinstance(sid, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", sid)
+                    or sample["input_sha256"] != sample["expected_input_sha256"]
+                    or (source.width, source.height) != (sample["canonical"]["width"], sample["canonical"]["height"])
+                    or source.artifact_version != sample["artifact_version"]
+                    or source.recognition_status != sample["recognition_status"]
+                    or len(source.blocks) != sample["block_count"]
+                    or len(source.unreadable_regions) != sample["unreadable_count"]):
+                raise BaselineError("PROVENANCE_MISMATCH")
+            input_check = "NOT_RUN: input bytes not supplied"
+            if fixtures is not None:
+                image = fixtures / "d12" / f"{sid}.png"
+                if hashlib.sha256(image.read_bytes()).hexdigest() != sample["input_sha256"]:
+                    raise BaselineError("PROVENANCE_MISMATCH")
+                input_check = "PASS: encoded input PNG SHA-256"
+            matcher = provider.matcher(sample["ocr"], sample["prepared"]) if provider else None
+            result = extract_baseline(sample["ocr"], sample["document_type"],
+                                      prepared=sample["prepared"], evidence_matcher=matcher)
+            record = dict(sample_id=sid, status="ok", document_type=sample["document_type"],
+                          **asdict(result), ocr_diagnostics=dict(page=0, **asdict(source)),
+                          canonical=sample["canonical"], input_sha256=sample["input_sha256"],
+                          input_asset_verification=input_check,
+                          canonical_asset_verification="NOT_RUN: encoded canonical PNG not supplied",
+                          evidence_execution="PASS" if provider else "NOT_RUN",
+                          provider_observations=sample["observations"])
+            record["coverage"] = dict(fields=len(result.field_metadata),
+                                       filled=sum(value is not None for value in _field_values(result.payload)),
+                                       fields_with_source=sum(bool(f["source_regions"]) for f in result.field_metadata),
+                                       table_rows=len(result.payload["items"]))
+            checks = []
+            if provider:
+                for example in sample["evidence_examples"]:
+                    page, prepared = sample["ocr"], sample["prepared"]
+                    if example["kind"].startswith("injected unavailable mapping"):
+                        page, prepared = deepcopy(page), deepcopy(prepared)
+                        for block in page["blocks"]:
+                            block.update(quad=None, geometry_reason="injected unavailable mapping")
+                        prepared.update(geometry_status="unavailable", inverse_transform=None,
+                                        geometry_reason="injected unavailable mapping")
+                    actual = provider.match(page, prepared, [example["request"]])[0]
+                    checks.append(dict(expected_status=example["status"],
+                                       result="PASS" if actual["status"] == example["status"] else "FAIL", **actual))
+            record["native_evidence_checks"] = checks
+            records.append(record)
+        except BaselineError as error:
+            records.append(dict(sample_id=sid, status="failed", error=error.code))
+        except (KeyError, TypeError, ValueError):
+            records.append(dict(sample_id=sid, status="failed", error="OCR_INPUT_INVALID"))
+        except OSError:
+            records.append(dict(sample_id=sid, status="failed", error="INPUT_STORAGE_UNAVAILABLE"))
+    return records
+
+
+def _field_values(payload: dict):
+    for key, value in payload.items():
+        if key != "items":
+            yield value
+    for item in payload["items"]:
+        yield from item.values()
