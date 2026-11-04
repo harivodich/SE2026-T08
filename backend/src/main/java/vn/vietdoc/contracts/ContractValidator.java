@@ -9,7 +9,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import vn.vietdoc.common.*;
 
-/** Validates the vocabulary used by the four versioned schemas; no network ref resolution. */
+/** Validates the locally bundled shared schemas and owning business rules; no network refs. */
 @Component
 public class ContractValidator {
   private final Json json;
@@ -17,7 +17,8 @@ public class ContractValidator {
 
   public ContractValidator(Json json) throws Exception {
     this.json = json;
-    for (String name : List.of("business", "extraction-result", "export", "job-message")) {
+    for (String name : List.of("business", "extraction-result", "export", "job-message",
+        "compute-request", "compute-response", "compute-error")) {
       JsonNode schema =
           json.mapper.readTree(
               new ClassPathResource("contracts/" + name + ".schema.json").getInputStream());
@@ -87,6 +88,70 @@ public class ContractValidator {
   public void export(JsonNode envelope) {
     JsonNode root = schemas.get("urn:vietdoc:export:v1");
     check(envelope, root, root, "", 0);
+  }
+
+  public void computeRequest(JsonNode request) {
+    JsonNode root = schemas.get("urn:vietdoc:compute-request:v1");
+    check(request, root, root, "", 0);
+  }
+
+  public void computeResponse(JsonNode request, JsonNode response) {
+    computeRequest(request);
+    JsonNode root = schemas.get("urn:vietdoc:compute-response:v1");
+    check(response, root, root, "", 0);
+    String jobId = request.path("job_id").asText();
+    String attemptId = request.path("attempt_id").asText();
+    if (!attemptId.equals(response.path("attempt_id").asText()))
+      invalid("/attempt_id", "Compute trả sai attempt ID.");
+    JsonNode result = response.path("result");
+    extraction(request.path("document_type").asText(), request.path("run_id").asText(),
+        jobId, request.path("pipeline_manifest_id").asText(), result);
+    if (!request.path("schema_version").asText().equals(result.path("schema_version").asText())
+        || !request.path("language").asText().equals(result.path("language").asText()))
+      invalid("/result", "Compute trả sai schema hoặc ngôn ngữ.");
+
+    JsonNode canonical = response.path("canonical_page");
+    if ((long) canonical.path("width").asInt() * canonical.path("height").asInt() > 20_000_000)
+      invalid("/canonical_page", "Trang canonical vượt giới hạn pixel.");
+    String canonicalKey = canonical.path("asset_key").asText();
+    Set<String> keys = new HashSet<>();
+    int canonicalCount = 0;
+    int ocrCount = 0;
+    for (JsonNode artifact : response.path("artifacts")) {
+      String key = artifact.path("asset_key").asText();
+      attemptKey(key, jobId, attemptId);
+      if (!keys.add(key)) invalid("/artifacts", "Artifact key bị trùng.");
+      String kind = artifact.path("kind").asText();
+      if (kind.equals("canonical_page")) {
+        canonicalCount++;
+        if (!canonicalKey.equals(key)
+            || !canonical.path("sha256").asText().equals(artifact.path("sha256").asText())
+            || !artifact.path("media_type").asText().startsWith("image/"))
+          invalid("/canonical_page", "Canonical page không khớp artifact.");
+      }
+      if (kind.equals("ocr")) ocrCount++;
+    }
+    attemptKey(canonicalKey, jobId, attemptId);
+    if (canonicalCount != 1 || ocrCount != 1)
+      invalid("/artifacts", "Cần đúng một canonical page và một OCR artifact.");
+  }
+
+  public void computeError(JsonNode request, JsonNode error) {
+    computeRequest(request);
+    JsonNode root = schemas.get("urn:vietdoc:compute-error:v1");
+    check(error, root, root, "", 0);
+    if (!error.path("attempt_id").isNull()
+        && !request.path("attempt_id").asText().equals(error.path("attempt_id").asText()))
+      invalid("/attempt_id", "Compute error trả sai attempt ID.");
+  }
+
+  private void attemptKey(String key, String jobId, String attemptId) {
+    String prefix = "attempts/" + jobId + "/" + attemptId + "/";
+    if (!key.startsWith(prefix) || key.length() == prefix.length())
+      invalid("/artifacts/asset_key", "Artifact không thuộc attempt hiện hành.");
+    for (String segment : key.substring(prefix.length()).split("/", -1))
+      if (segment.isEmpty() || segment.equals(".") || segment.equals(".."))
+        invalid("/artifacts/asset_key", "Artifact key có path segment không hợp lệ.");
   }
 
   public void rowIds(JsonNode payload, List<String> ids) {
