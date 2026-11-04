@@ -6,7 +6,7 @@
     "font_sizes": {
       "10.0": 1,
       "15.0": 22,
-      "12.0": 1756,
+      "12.0": 1761,
       "14.0": 30
     },
     "fonts": [
@@ -25,7 +25,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 35,
-      "12.0": 1927
+      "12.0": 2009
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -43,7 +43,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 41,
-      "12.0": 1796
+      "12.0": 1493
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -61,7 +61,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 30,
-      "12.0": 1522
+      "12.0": 1647
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -79,7 +79,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 28,
-      "12.0": 1830
+      "12.0": 1833
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -97,7 +97,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 27,
-      "12.0": 1972
+      "12.0": 1965
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -115,7 +115,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 40,
-      "12.0": 1931
+      "12.0": 2174
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -133,7 +133,7 @@
     "font_sizes": {
       "10.0": 1,
       "14.0": 12,
-      "12.0": 1764
+      "12.0": 1770
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -150,8 +150,8 @@
     "height": 841.8898,
     "font_sizes": {
       "10.0": 1,
-      "14.0": 41,
-      "12.0": 1967
+      "14.0": 36,
+      "12.0": 1915
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",
@@ -169,7 +169,7 @@
     "font_sizes": {
       "10.0": 2,
       "14.0": 28,
-      "12.0": 1950
+      "12.0": 2147
     },
     "fonts": [
       "TimesNewRomanPS-BoldMT",

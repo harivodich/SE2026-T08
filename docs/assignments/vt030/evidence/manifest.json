@@ -62,6 +62,10 @@
       "sha256": "3e47e52c9c6f154de6840c2b77ca0dca45151e865d6bfbef77e57ed26731a7b9",
       "bytes": 2854
     },
+    "editorial-verification.json": {
+      "sha256": "1aa66bf933f726c02dc0620816749b7f205c04119b9e0118892d3c3def37e66b",
+      "bytes": 946
+    },
     "final-full-coverage-TEST-vn.vietdoc.contracts.BusinessContractTest.xml": {
       "sha256": "fa8c8ecc0595c221bb42f73cda7e90314cd2b3d80c7120e462fc3d43a242e495",
       "bytes": 33301
@@ -315,15 +319,15 @@
       "bytes": 3170
     },
     "pdf-layout.json": {
-      "sha256": "19b6b17b1eb8fdc763a96ee2974d2a2c031c38152238c7cdf6e4aab96522f036",
-      "bytes": 3964
+      "sha256": "951a868a0c2604ee1fb19697351abce875069088dc77cea19f22b5ed2539b96b",
+      "bytes": 3985
     },
     "pdf-qa.json": {
-      "sha256": "4af850d3853cf046611d70bb3f315b0c50cc899a282175162aebc64fd420d87f",
+      "sha256": "5e24df7b98bd0823871a54488ba949750855fdd226dd24a9fbee360fbb4cc248",
       "bytes": 829
     },
     "pdf-typography.json": {
-      "sha256": "36afda41833f7129853965034c8ab854f3b7cfe251f2bc788b16afdb129f73ef",
+      "sha256": "2e1ca377f31b620e1d20334301c125c8430ff68b1db73358cea36c790c15f881",
       "bytes": 3720
     },
     "red-native-TEST-vn.vietdoc.Vt030AsyncContractTest.xml": {

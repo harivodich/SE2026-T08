@@ -1,6 +1,6 @@
 # BT3 VT-030 - scope và test-first plan
 
-Sinh viên: Nguyễn Hoàng Hải, MSSV 23001870, SE2026-T08, Lead. Baseline develop `729be6fe493dc00e1d7cb87e7db94b94c79a0816`. Nhánh `codex/bt3-vt030-async-idempotency`. URL đề cũ SE2026.AI-02.1 đã đổi thành SE2026-T08; giữ mapping để đối chiếu. Đây là increment cá nhân, không merge khi nhóm chưa review.
+Sinh viên: Nguyễn Hoàng Hải, MSSV 23001870, SE2026-T08, Lead. Baseline develop `729be6fe493dc00e1d7cb87e7db94b94c79a0816`. Nhánh `feature/bt3-vt030-async-idempotency`. URL đề cũ SE2026.AI-02.1 đã đổi thành SE2026-T08; giữ mapping để đối chiếu. Đây là increment cá nhân, không merge khi nhóm chưa review.
 
 ## Problem
 

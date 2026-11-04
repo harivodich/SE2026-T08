@@ -13,37 +13,37 @@
     {
       "logical_page": 2,
       "orientation": "portrait",
-      "estimated_height": 600.3,
+      "estimated_height": 628.7,
       "available": 761.9
     },
     {
       "logical_page": 3,
       "orientation": "landscape",
-      "estimated_height": 457.2,
+      "estimated_height": 522.4,
       "available": 515.3
     },
     {
       "logical_page": 4,
       "orientation": "landscape",
-      "estimated_height": 451.6,
+      "estimated_height": 486.4,
       "available": 515.3
     },
     {
       "logical_page": 5,
       "orientation": "portrait",
-      "estimated_height": 552.3,
+      "estimated_height": 566.5,
       "available": 761.9
     },
     {
       "logical_page": 6,
       "orientation": "portrait",
-      "estimated_height": 605.3,
+      "estimated_height": 625.5,
       "available": 761.9
     },
     {
       "logical_page": 7,
       "orientation": "portrait",
-      "estimated_height": 625.4,
+      "estimated_height": 700.0,
       "available": 761.9
     },
     {
@@ -55,13 +55,13 @@
     {
       "logical_page": 9,
       "orientation": "portrait",
-      "estimated_height": 592.2,
+      "estimated_height": 615.0,
       "available": 761.9
     },
     {
       "logical_page": 10,
       "orientation": "portrait",
-      "estimated_height": 567.0,
+      "estimated_height": 666.3,
       "available": 761.9
     },
     {
@@ -74,57 +74,57 @@
   "page_anchors": [
     {
       "page": 1,
-      "chars": 2167,
+      "chars": 2172,
       "first": "1 BT cá nhân 3 - AI-02 - VT-030 Nguyễn Hoàng Hải - MSSV 23001870 - Vai trò: Nhóm trưởng. Team: SE2026-T08. Đề tài: "
     },
     {
       "page": 2,
-      "chars": 2354,
-      "first": "2 2 - AI-assisted plan và review bằng source Em dùng Codex để tổ chức increment, viết tests trước và chạy kiểm chứn"
+      "chars": 2461,
+      "first": "2 2 - AI-assisted plan và review bằng source Em sử dụng Codex để hỗ trợ lập kế hoạch, soạn kiểm thử trước khi sửa c"
     },
     {
       "page": 3,
-      "chars": 2151,
-      "first": "3 3 - Risk strategy, partitions và test cases (1/2) Unit bảo vệ semantic mapping với job/document/run IDs khác nhau"
+      "chars": 1855,
+      "first": "3 3 - Risk strategy, partitions và test cases (1/2) Unit kiểm mapping giữa ba ID khác nhau. Integration/API kiểm Se"
     },
     {
       "page": 4,
-      "chars": 1855,
-      "first": "4 3 - Risk strategy và test cases (2/2) ID AC/risk; level Precondition/input Expected result Pri. TC11 AC3/transien"
+      "chars": 2004,
+      "first": "4 3 - Risk strategy và test cases (2/2) ID AC/risk; level Precondition/input Expected result Pri. TC10 AC3/duplicat"
     },
     {
       "page": 5,
-      "chars": 2183,
+      "chars": 2186,
       "first": "5 4 - Test-first: fail → patch → pass Baseline 729be6f đã có async worker và progress UI. Phần mới cần chứng minh l"
     },
     {
       "page": 6,
-      "chars": 2410,
+      "chars": 2427,
       "first": "6 5 - Coverage và thử tải 200 client JaCoCo 0.8.14 đo trong lượt final-full-coverage gồm 50 tests trên source đúng;"
     },
     {
       "page": 7,
-      "chars": 2357,
-      "first": "7 6 - Traceability, flaky review và residual risk A/M/L là ba Vt030*Test trong backend/src/test/java/vn/vietdoc/; B"
+      "chars": 2633,
+      "first": "7 6 - Traceability, flaky review và residual risk Các lớp test nằm trong backend/src/test/java/vn/vietdoc/: API/ser"
     },
     {
       "page": 8,
-      "chars": 2198,
+      "chars": 2204,
       "first": "8 7 - Reflection Qua bài này, confidence của em tăng khi cùng một contract được kiểm ở nhiều ranh giới. Test đầu ti"
     },
     {
       "page": 9,
-      "chars": 2395,
-      "first": "9 Phụ lục A - AI Usage Log và các quyết định kiểm chứng Công cụ/lượt Prompt hoặc yêu cầu thực tế Output dùng; sửa/b"
+      "chars": 2372,
+      "first": "9 Phụ lục A - Sử dụng AI và quyết định kiểm chứng Em sử dụng Codex và Claude để hỗ trợ các bước lập kế hoạch, soạn "
     },
     {
       "page": 10,
-      "chars": 2344,
+      "chars": 2562,
       "first": "10 Phụ lục B - Evidence có thể chạy lại Thư mục docs/assignments/vt030/evidence chứa raw logs, command metadata, JU"
     },
     {
       "page": 11,
-      "chars": 1271,
+      "chars": 1266,
       "first": "11 Phụ lục C - Kiểm UI trên trình duyệt thật Worker được tắt có chủ đích để QUEUED đủ lâu cho UI polling kiểm ổn đị"
     }
   ],

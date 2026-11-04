@@ -1,0 +1,22 @@
+{
+  "revision": "editorial update following student feedback",
+  "branch_url": "https://github.com/harivodich/SE2026-T08/tree/feature/bt3-vt030-async-idempotency",
+  "runtime_source_unchanged": true,
+  "runtime_checks_not_rerun": "only report, documentation and branch naming changed; existing runtime evidence retained",
+  "main_pages": 8,
+  "appendices": 3,
+  "reflection_words": 306,
+  "body_font_size_pt": 12,
+  "bullet_marker_indent_mm": 4.94,
+  "plan_wrapped_text_x_pt": 70,
+  "partition_mapping_table": true,
+  "method_name_not_split": true,
+  "full_test_class_names_in_legend": true,
+  "real_prompt_excerpt_verified": true,
+  "original_ui_image_unchanged": true,
+  "pdf_sha256": "0bf348beba1452be5bcf88591e530f1a8cdd13c76105fe77d47abca1fd4e4a08",
+  "first_page_hyperlinks": [
+    "https://github.com/harivodich/SE2026-T08",
+    "https://github.com/harivodich/SE2026-T08/tree/feature/bt3-vt030-async-idempotency"
+  ]
+}

@@ -6,7 +6,7 @@ Increment bổ sung HTTP `Location` cho async job monitor; giữ nguyên respons
 - Test-first: `2d34f4c10cc4b8a692982be93ac0b4d6c6643d28` (21 tests, 1 failure Location sau khi sửa oracle cache).
 - Patch/boundaries: `e3b3850000fa0a8f8f499bbc7ae7a88f06fdbc3d`.
 - Review-strengthening: `a1055c300f2321ba64f0f46582348f63b258a542` (TC21 kiểm same id/reserved run và count sau replay; mutation parser dùng fresh JUnit XML).
-- [Nhánh nộp](https://github.com/harivodich/SE2026-T08/tree/codex/bt3-vt030-async-idempotency).
+- [Nhánh nộp](https://github.com/harivodich/SE2026-T08/tree/feature/bt3-vt030-async-idempotency).
 - [Spec/plan](SPEC.md), [test matrix](test-matrix.md), [báo cáo](report.md), [evidence](evidence/).
 
 ## 1 - Prerequisites và focused tests
