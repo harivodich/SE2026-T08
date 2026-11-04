@@ -10,8 +10,9 @@ Lead approval hoặc trạng thái nghiệm thu. Chưa push, chưa comment GitHu
 - Provider/fixtures: PR4 `7d96e93bf8315beb6fa33807231316e957671249`, theo
   [Issue #23](https://github.com/harivodich/SE2026-T08/issues/23).
 - Candidate local: `bug/SE-23_ai2_review_consumer`, worktree riêng
-  `E:/OCR_SE/.verification/ai2-review-candidate`. Checkout PR3 gốc và 10 docs dirty
-  có sẵn được giữ nguyên; không đưa chúng vào các commit này.
+  `E:/OCR_SE/.verification/ai2-review-candidate`. Ngày 04/11, source đã đưa về
+  checkout IDE `E:/OCR_SE` trên branch gốc `feature/AI2-M2_ai_service_docker` bằng
+  fast-forward. Giữ đủ 10 docs dirty có sẵn; không đưa chúng vào các commit này.
 - B0 `vi-label-header-b0.v2`; normalizer `vi-VND.v2`; neutral schemas giữ nguyên.
 - Hoãn hardware/model/training, runtime composition/HTTP và Java-provider/browser E2E.
 
@@ -39,6 +40,7 @@ Python3.13.5/Windows, serve/test env có sẵn; thêm đúng setuptools75.8.0/wh
 | Command/check | Kết quả | Giới hạn |
 |---|---|---|
 | `python -m scripts.ci.ai --allow-windows-symlink-skip --junitxml=test-results/ai-final.xml` | 472 passed, 1 skipped, 58 subtests; 473 collected; policy failures rỗng | Chỉ skip symlink do Windows thiếu quyền; Linux CI không được skip |
+| `docker build -f infra/ai-service.Dockerfile --target test -t vietdoc-ai-service:ai2-review-09d5d0a-test .` | 473 passed, 58 subtests; 0 skips, policy failures rỗng; pip check PASS | Linux/Python3.12, source `09d5d0a`; fixture gate, không model inference |
 | `python -m pytest tests/unit/pipeline/test_ocr_consumer.py tests/unit/pipeline/test_baseline.py tests/unit/pipeline/test_baseline_export.py -q` | 81 passed | Native JSON replay, không chạy OCR mới |
 | `python -m scripts.ci.lint` | PASS, no findings (3 suppressions theo tooling) | Local Windows, không thay hosted checks |
 | `node --test` tại `backend/src/test/js` | 29 passed | Web asset tests, không browser E2E |
@@ -46,7 +48,8 @@ Python3.13.5/Windows, serve/test env có sẵn; thêm đúng setuptools75.8.0/wh
 | Installed-wheel probe trong AI gate | PASS: build local không network, noneditable install ngoài checkout; thiếu config fail, có config validate 3 fixtures | Dùng dependencies của serve/test env hiện có, không fresh dependency-resolution |
 | Actual evidence bridge | 12/12 PASS; native examples 5/5 PASS | Dependency-free types/geometry/evidence từ provider SHA pin |
 | `python -m pip check` | No broken requirements found | Local env |
-| Docker builds/smokes | NOT_RUN | Docker daemon không hoạt động; không tự khởi động/cài dịch vụ |
+| AI runtime Docker build + HTTP smoke | PASS: live200, ready503, unauthenticated compute401; user app/rootfs read-only | Empty models/pipeline nên not-ready là expected; không actual-provider E2E |
+| `docker build -f backend/Dockerfile -t vietdoc-web:ai2-review-09d5d0a .` + Web smoke | PASS: Thymeleaf root200 + CSRF meta; app.js/api.js/domain.js/styles.css200; auth/me401 | Demo mode/worker disabled, user app, không browser/PG/provider E2E |
 | Hosted candidate AI/Data/Web checks, negative hosted fail-closed probe | PENDING | Chưa được yêu cầu push; R17/merge gate còn mở |
 
 Logs/JUnit/report nằm trong `.verification/` và `test-results/` ignored. Report
@@ -83,6 +86,31 @@ Resume ngày 04/11/2026: xác nhận source hashes khớp report trước gián 
 AI gate đạt 472 passed, 1 permitted skip, 58 subtests; `pip check`, UTF-8/local links,
 diff và secret-pattern scan đạt. Rà soát diff do chính implementer thực hiện vì
 project không cho tự spawn agents; chưa thay peer review/Lead approval.
+
+### Hoàn tất Docker và checkout PR3 — 04/11/2026
+
+Docker Desktop đã có sẵn được khởi động để kiểm chứng; không cài thêm dịch vụ.
+AI test/runtime và Web images đều build từ root context đã resolve ở `09d5d0a`.
+Maven go-offline lần đầu mất292.6s; kết thúc thành công, không đổi pins hoặc dùng
+host cache thay fresh container build. Docker smoke containers chỉ mở loopback,
+đã dừng sau khi kiểm; không chạy train/GPU/model hoặc dùng business DB thật.
+
+Evidence local ignored: `.verification/ai2-docker-test-09d5d0a.log`,
+`ai2-docker-linux-09d5d0a.xml`, `ai2-docker-runtime-09d5d0a.log`,
+`ai2-docker-web-09d5d0a.log`, `ai2-runtime-smoke-result.json`,
+`ai2-web-smoke-result.json`. JUnit có473 top-level tests và58 subtests, không skip.
+
+Trước khi chuyển source về IDE, lưu byte backups của10 docs cùng Git state trong
+`.verification/ai2-transfer-20261104/`. Chỉ `docs/adr/README.md` giao nhau: merge
+ba chiều trên bản sao đã sạch, kết quả checkout khớp preview và giữ dòng model
+người dùng sửa cùng ADR0010/0011 từ develop. Chín file còn lại giữ nguyên hashes;
+generated plan gốc có backup. Không stash/reset hoặc commit local edits của người dùng.
+
+Consumer chạy trực tiếp từ `E:/OCR_SE` sau fast-forward:12/12 evidence checks,
+2/2 native records và5/5 native evidence checks PASS; source hashes khớp candidate
+đã kiểm. Report `.verification/ai2-rootcheckout-report-20261104/consumer-report.json`.
+Commit theo sau chỉ cập nhật handoff Docker/local integration; executable source
+và build inputs giữ đúng code snapshot `09d5d0a`.
 
 ## Kết quả native và giới hạn chất lượng
 
@@ -122,7 +150,7 @@ R04 AI1 tiếp tục pending default/migration policy + Backend acceptance và r
 blocker semantics; không đổi provider default hoặc shared schemas/DTO. R04 AI2 về
 deadline là finding khác, không mở lại limiter/cancel/output/trusted-ingress fixes.
 
-A1 candidate local đã tích hợp nhưng Docker/hosted gate chưa được chứng minh;
+A1 candidate local và Docker tests/smokes đã kiểm; hosted gate vẫn chưa được chứng minh,
 R17 chưa đóng. Cần Backend/Lead review shared CI patch, actual hosted checks đúng
 candidate, canonical promotion/approval gates và smoke develop sau merge. Không tự
 merge PR, bật HTTP provider hoặc chuyển Issue Done chỉ bằng report này.
