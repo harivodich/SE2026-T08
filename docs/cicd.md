@@ -2,11 +2,11 @@
 
 ## Phạm vi đang chạy
 
-Workflow `VietDoc CI` kiểm increment Data/contracts có thật trên branch CI. Nó không chứng minh backend, Python serving, PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
+Workflow `VietDoc CI` kiểm Data/contracts và Web/Java/package/assets/Docker smoke trên cùng run. Nó chưa chứng minh Python serving, PostgreSQL hoặc luồng actual-provider đã hoàn tất. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
 
 ```text
-PR → develop: workflow + schemas/gate tests + Data matrix + Data wheel → ci-gate
-PR → main:    các kiểm tra trên + application release checks             → ci-gate
+PR → develop: workflow + schemas/gate tests + Data matrix + Data wheel + Web/Java/package/assets + Docker smoke → ci-gate
+PR → main:    các kiểm tra trên + application release checks                                       → ci-gate
 ```
 
 PR vào `develop`/`main`, push lên hai branch và manual dispatch đều được xử lý. Không paths filter, nên docs-only PR vẫn có required check. Push lên feature branch không chạy thêm một bản trùng với PR. Manual dispatch chỉ chẩn đoán, không thay check PR. Workflow dispatch cần workflow trên default branch mới được GitHub cho gọi; không tự merge lên main để kích hoạt nút này.
@@ -19,12 +19,14 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | contracts | schemas-and-gate-tests | 7 schemas Draft 2020-12, fixtures positive/negative, registry local không tải refs; regression gate |
 | data | data-OS-pyVERSION | Ubuntu 24.04/Windows 2025 × Python 3.11/3.12, fresh Data install, tests và 20 samples |
 | package | data-package-smoke | Build wheel, kiểm fictional dictionary được package, cài wheel ngoài checkout, sinh 4 samples, ghi hash/source SHA |
+| test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
+| docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
-Không có runtime Java/AI job giả. `release-readiness` hiện báo thiếu `backend`, `postgres`, `ai`, `parity`, `e2e`, `application-artifact` khi chạy với target main. Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng vào `needs` và có kết quả success.
+`ci-gate` nhận kết quả `test` và `docker-smoke` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một trong hai đều chặn develop. Không có runtime AI/DB job giả. `release-readiness` hiện báo thiếu `backend`, `postgres`, `ai`, `parity`, `e2e`, `application-artifact` khi chạy với target main. Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng vào `needs` và có kết quả success.
 
-Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
+Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Docker smoke phụ thuộc `test`; nếu `test` lỗi khiến Docker bị skip, gate báo cả hai trạng thái. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
 
 Data dùng pins Pillow 10.2.0/jsonschema 4.10.3 trong `pyproject.toml`; `.github/ci-constraints.txt` pin transitive/build tools cho CI. Schema/gate tests dùng environment riêng với `.github/contract-requirements.txt`, jsonschema 4.26.0 + referencing local registry. Validator 4.10.3 đã tái hiện lỗi nested URN `$ref` giữa các shared schemas; không đổi renderer dependency để xử lý lỗi đó.
 
