@@ -7,6 +7,12 @@ schemas. Type do caller chọn: `receipt` hoặc `invoice`, Vietnamese, một tr
 
 ## Logic và profile
 
+B0 hiện tại là `vi-label-header-b0.v3`. Phiên bản v3 giữ hàng tổng có cả số lượng
+ngoài items, kể cả numeric cells đứng trước label. Khi cùng hàng có nhiều numeric
+candidates chưa phân biệt được role, scalar trả null + `FIELD_AMBIGUOUS`; không chọn
+số lớn nhất. Label có suffix `:` rỗng dùng cùng visual-row pairing với label trần.
+Mô tả sản phẩm như `Tổng tiền: bộ quà hư cấu` vẫn là description, kể cả thiếu cells.
+
 - Scalar dùng label/context: cửa hàng, ngày/giờ, seller/buyer, subtotal/tax/discount/total.
   Không dùng số lớn nhất, sample ID/filename hoặc gold/pointers để chọn giá trị.
 - Table dùng role từ headers và canonical cell geometry; nhóm cells rồi giữ reading

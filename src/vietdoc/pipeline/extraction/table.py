@@ -102,23 +102,9 @@ def table_rows(page: Page, is_scalar: Callable[[str], bool]) -> tuple[list[dict]
         roles = [HEADERS[norm(b.text)] for b in headers]
         if len(set(roles)) != len(roles):
             raise BaselineError("TABLE_LAYOUT_UNSUPPORTED")
-        def boundary(index):
-            block = blocks[index]
-            if not is_scalar(block.text):
-                return False
-            description = next(h for h in headers if HEADERS[norm(h.text)] == "description")
-            if block.quad is not None and description.quad is not None:
-                others = [other for other in blocks[end:] if other is not block and other.quad is not None
-                          and abs(other.y - block.y) <= max(other.height, block.height) * .75]
-                located_headers = [header for header in headers if header.quad is not None]
-                other_roles = {HEADERS[norm(min(located_headers, key=lambda h: abs(h.x - other.x)).text)]
-                               for other in others} - {"description"}
-                # A label-looking product description with several cells on its row
-                # belongs to the table, not to the scalar footer.
-                if abs(block.x - description.x) <= block.height and len(other_roles) >= 2:
-                    return False
-            return True
-        stop = next((i for i in range(end, len(blocks)) if boundary(i)), len(blocks))
+        # The caller distinguishes scalar labels from label-like descriptions.
+        # Extra numeric cells cannot turn a summary/footer into a product row.
+        stop = next((i for i in range(end, len(blocks)) if is_scalar(blocks[i].text)), len(blocks))
         cells = list(blocks[end:stop])
         if stop < len(blocks):
             footer = blocks[stop]

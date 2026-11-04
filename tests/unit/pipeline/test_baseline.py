@@ -390,3 +390,64 @@ def test_partial_page_keeps_explicit_absence_distinct_from_missing_prediction():
     assert result.field_states["/merchant_address"] == "absent"
     assert result.field_states["/total_amount"] == "unknown"
     assert "OCR_UNREADABLE_REGIONS" in metadata(result, "/merchant_address")["review_flags"]
+
+
+@pytest.mark.parametrize("document_type", ["receipt", "invoice"])
+@pytest.mark.parametrize("label", ["Tổng cộng", "Tổng cộng:"])
+@pytest.mark.parametrize("numbers_first", [False, True])
+@pytest.mark.parametrize("with_cash", [False, True])
+def test_summary_quantity_never_creates_product_rows(document_type, label, numbers_first, with_cash):
+    value = table_page()
+    value["blocks"].pop()
+    footer = located("summary-label", label, .03, .9)
+    numbers = [located("summary-quantity", "2", .21, .9),
+               located("summary-amount", "80.000", .75, .9)]
+    value["blocks"] += numbers + [footer] if numbers_first else [footer] + numbers
+    if with_cash:
+        value["blocks"] += [located("cash-label", "Tiền khách đưa", .03, .94),
+                            located("cash-amount", "100.000", .75, .94)]
+    result = baseline(value, document_type)
+    assert result.payload["items"] == [{"description": "Cà phê", "quantity": "2", "unit": "ly",
+                                        "unit_price": "20000", "line_total": "40000"}]
+    # Quantity and amount are both possible numeric candidates on this row.
+    # Decline the scalar instead of inferring its role from number size/order.
+    assert result.payload["total_amount"] is None
+    assert "FIELD_AMBIGUOUS" in metadata(result, "/total_amount")["review_flags"]
+
+
+@pytest.mark.parametrize("value_first", [False, True])
+@pytest.mark.parametrize("suffix", [":", ":   "])
+def test_empty_colon_suffix_pairs_same_row_scalar(value_first, suffix):
+    label = located("label", "Tổng tiền" + suffix, .1, .1)
+    amount = located("amount", "80.000", .7, .1)
+    value = page([])
+    value["blocks"] = [amount, label] if value_first else [label, amount]
+    result = baseline(value)
+    assert result.payload["total_amount"] == "80000"
+    assert metadata(result, "/total_amount")["raw_value"] == "80.000"
+
+
+def test_colon_pairing_still_declines_multiple_amounts_or_missing_geometry():
+    value = page([])
+    value["blocks"] = [located("label", "Tổng tiền:", .1, .1),
+                       located("one", "80.000", .5, .1),
+                       located("two", "100.000", .75, .1)]
+    result = baseline(value)
+    assert result.payload["total_amount"] is None
+    assert "FIELD_AMBIGUOUS" in metadata(result, "/total_amount")["review_flags"]
+    result = baseline(page(["Tổng tiền:", "80.000"]))
+    assert result.payload["total_amount"] is None
+    assert result.field_states["/total_amount"] == "unknown"
+
+
+@pytest.mark.parametrize("description", ["Tổng tiền: bộ quà hư cấu", "Tổng cộng: bộ giấy hư cấu"])
+def test_label_like_product_description_survives_sparse_table(description):
+    value = table_page()
+    next(block for block in value["blocks"] if block["block_id"] == "r0-description")["text"] = description
+    value["blocks"] = [block for block in value["blocks"] if block["block_id"] not in
+                       {"r0-quantity", "r0-unit", "r0-unit_price"}]
+    result = baseline(value)
+    assert len(result.payload["items"]) == 1
+    assert result.payload["items"][0]["description"] == description
+    assert result.payload["items"][0]["line_total"] == "40000"
+    assert result.payload["total_amount"] == "80000"

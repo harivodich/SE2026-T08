@@ -14,7 +14,7 @@ from vietdoc.pipeline.normalization import normalize_date, normalize_money, norm
 from .ocr_input import BaselineError, Block, horizontally_separate, norm, same_visual_row, snapshot_page
 from .table import HEADERS, NUMBER, table_rows
 
-BASELINE_VERSION = "vi-label-header-b0.v2"
+BASELINE_VERSION = "vi-label-header-b0.v3"
 LABELS = {
     "merchant_name": ("cửa hàng", "tên cửa hàng"),
     "merchant_address": ("địa chỉ", "địa chỉ cửa hàng"),
@@ -53,6 +53,18 @@ def _label(text: str) -> tuple[str, str | None] | None:
     return key, raw.strip() if separator else None
 
 
+def _table_scalar(text: str) -> bool:
+    found = _label(text)
+    if found is None:
+        return False
+    key, raw = found
+    # A descriptive suffix on an amount label can be a product name. A bare
+    # summary label remains a boundary even when the row also has a quantity.
+    if (key.endswith("amount") or key == "subtotal") and raw:
+        return bool(NUMBER.fullmatch(raw)) or norm(raw) in ABSENT | UNREADABLE
+    return True
+
+
 def _normalize(key, raw):
     if not raw:
         return None, "unknown", "FIELD_VALUE_NOT_LOCATED"
@@ -88,7 +100,7 @@ def extract_baseline(page: Any, document_type: str, *, prepared: Any = None,
     source = snapshot_page(page, prepared)
     contracts = ComputeContracts()
     scalar_fields, item_fields = contracts.business_fields(document_type)
-    rows, located = table_rows(source, lambda text: _label(text) is not None)
+    rows, located = table_rows(source, _table_scalar)
     table_ids = {b.block_id for row in rows for blocks in row.values() for b in blocks}
     candidates = defaultdict(list)
     for block in source.blocks:
@@ -99,7 +111,7 @@ def extract_baseline(page: Any, document_type: str, *, prepared: Any = None,
             continue
         key, raw = found
         context = [block]
-        if raw is None:
+        if not raw:
             numeric = key.endswith("amount") or key == "subtotal"
             paired = [other for other in source.blocks
                       if other is not block and other.block_id not in table_ids
