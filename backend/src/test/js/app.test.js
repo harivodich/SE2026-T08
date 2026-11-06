@@ -21,6 +21,8 @@ function deferred() {
 
 async function harness(routes = {}) {
   const listeners = new Map();
+  const timers = new Map();
+  let now = 0, nextTimer = 1;
   const controls = {
     '[data-action="save"]': { disabled: true },
     '[data-action="rerun"]': { disabled: false },
@@ -65,7 +67,13 @@ async function harness(routes = {}) {
     window: { confirm: routes.confirm ?? (() => true) },
     URL: { createObjectURL: blob => blob.url, revokeObjectURL() {} },
     crypto: { randomUUID: () => "00000000-0000-4000-8000-000000000001" },
-    structuredClone, AbortController, setInterval: () => 1, clearInterval() {}, setTimeout,
+    structuredClone, AbortController, setInterval: () => 1, clearInterval() {},
+    setTimeout(callback, delay) {
+      const id = nextTimer++;
+      timers.set(id, { callback, due: now + delay });
+      return id;
+    },
+    clearTimeout(id) { timers.delete(id); },
     Intl, Date, console,
   };
   runInNewContext(source, context, { filename: "app.js" });
@@ -73,6 +81,19 @@ async function harness(routes = {}) {
   context.hooks.state.user = { id: "u", username: "operator" };
   return {
     ...context.hooks, root, document, controls,
+    async advance(ms) {
+      const end = now + ms;
+      while (true) {
+        const due = [...timers].filter(([, timer]) => timer.due <= end)
+          .sort((a, b) => a[1].due - b[1].due)[0];
+        if (!due) break;
+        now = due[1].due;
+        timers.delete(due[0]);
+        due[1].callback();
+      }
+      now = end;
+      await new Promise(setImmediate);
+    },
     async emit(type, target) {
       for (const listener of listeners.get(type) || [])
         await listener({ target, preventDefault() {} });
@@ -359,6 +380,99 @@ test("field change before a Save click keeps the button node and sends one reque
   await app.saveReview();
   assert.equal(saves, 1);
   assert.equal(sent.payload.total_amount, "200");
+});
+
+test("VT-031 autosave debounces a review edit and sends the current CAS base", async () => {
+  const original = doc("A", 1);
+  const calls = [];
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async (_, body) => { calls.push(body); return doc("A", 2, body.payload.total_amount); },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "2" });
+  await app.advance(400);
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.advance(699);
+  assert.equal(calls.length, 0);
+  await app.advance(1);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].base_revision_id, "A-r1");
+  assert.equal(calls[0].expected_document_version, 1);
+  assert.equal(calls[0].payload.total_amount, "200");
+});
+
+test("VT-031 newer edit survives an older autosave response and is saved from the new base", async () => {
+  const original = doc("A", 1), first = deferred();
+  const calls = [];
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: (_, body) => { calls.push(body); return calls.length === 1 ? first.promise : Promise.resolve(doc("A", 3, "300")); },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.advance(700);
+  assert.equal(calls.length, 1);
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "300" });
+  first.resolve(doc("A", 2, "200"));
+  await new Promise(setImmediate);
+  assert.equal(app.state.payload.total_amount, "300");
+  await app.advance(700);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].base_revision_id, "A-r2");
+  assert.equal(calls[1].expected_document_version, 2);
+  assert.equal(calls[1].payload.total_amount, "300");
+});
+
+test("VT-031 a stale autosave keeps the local draft and does not retry without a new edit", async () => {
+  const original = doc("A", 1);
+  let calls = 0;
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async () => { calls++; throw new ApiError(409, "REVISION_CONFLICT"); },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.advance(700);
+  assert.equal(app.state.payload.total_amount, "200");
+  assert.equal(app.state.editorBase.version, 1);
+  await app.advance(10000);
+  assert.equal(calls, 1);
+});
+
+test("VT-031 manual save cancels a queued autosave", async () => {
+  const original = doc("A", 1);
+  const calls = [];
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async (_, body) => { calls.push(body); return doc("A", 2, "200"); },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.saveReview();
+  await app.advance(1000);
+  assert.equal(calls.length, 1);
+  assert.equal(app.state.editorBase.version, 2);
+});
+
+test("VT-031 navigating to another document cancels its queued autosave", async () => {
+  const a = doc("A", 1), b = doc("B", 1);
+  let saves = 0;
+  const app = await harness({
+    document: async id => id === "A" ? a : b,
+    listDocuments: async () => ({ items: [a, b] }),
+    save: async () => { saves++; return doc("A", 2, "200"); },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.openDocument("B");
+  await app.advance(1000);
+  assert.equal(saves, 0);
+  assert.equal(app.state.selectedId, "B");
 });
 
 test("stale upload finally cannot unlock a newer document open", async () => {

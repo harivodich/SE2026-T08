@@ -48,6 +48,11 @@ let listGeneration = 0;
 let navigationAbort;
 let busyGeneration = 0;
 let busyOwner = 0;
+let autosaveTimer;
+let autosaveFlight = null;
+let editGeneration = 0;
+let autosaveBlocked = false;
+const AUTOSAVE_DELAY_MS = 700;
 const api = () => new ApiClient();
 async function refreshCsrf() {
   const result = await api().csrf();
@@ -61,6 +66,8 @@ const remoteChanged = () => !!(state.remoteDocument && state.editorBase &&
    state.remoteDocument.version !== state.editorBase.version));
 
 function setEditorDocument(document) {
+  cancelAutosave();
+  autosaveBlocked = false;
   state.document = document;
   state.editorBase = document.head ? {
     id: document.head_revision_id, version: document.version,
@@ -73,6 +80,90 @@ function setEditorDocument(document) {
   state.changedItemFields.clear();
   state.acknowledged.clear();
   state.reviewed = false;
+}
+
+function cancelAutosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = undefined;
+}
+
+function scheduleAutosave() {
+  editGeneration++;
+  cancelAutosave();
+  if (!state.document?.head || state.busy || remoteChanged() || autosaveBlocked) return;
+  autosaveTimer = setTimeout(() => {
+    autosaveTimer = undefined;
+    if (!autosaveFlight) void autosaveReview();
+  }, AUTOSAVE_DELAY_MS);
+}
+
+function reviewSaveBody() {
+  const payload = toBusinessPayload(state.document.document_type, currentPayload());
+  const reviewedPaths = [...state.changedPaths];
+  for (const [rowId, fields] of state.changedItemFields) {
+    const index = state.rowIds.indexOf(rowId);
+    if (index >= 0) for (const field of fields) reviewedPaths.push(`/items/${index}/${field}`);
+  }
+  const rowIds = [...state.rowIds];
+  while (rowIds.length < payload.items.length) rowIds.push(crypto.randomUUID());
+  rowIds.length = payload.items.length;
+  return {
+    base_revision_id: state.editorBase.id,
+    expected_document_version: state.editorBase.version,
+    payload,
+    reason: state.reviewReason.trim() || "Đã chỉnh sửa sau khi đối chiếu ảnh nguồn",
+    row_ids: rowIds,
+    reviewed_paths: [...new Set(reviewedPaths)],
+  };
+}
+
+async function autosaveReview() {
+  if (!state.document?.head || !hasUnsavedReview() || state.busy || autosaveFlight ||
+      remoteChanged() || autosaveBlocked) return;
+  const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
+  const generation = editGeneration;
+  const flight = {};
+  autosaveFlight = flight;
+  const body = reviewSaveBody();
+  syncDraftControls();
+  try {
+    const updated = await api().save(id, body);
+    if (!currentView(session, navigation, id) || autosaveFlight !== flight) return;
+    if (generation === editGeneration) {
+      setEditorDocument(updated);
+      state.message = { text: "Bản nháp đã được lưu tự động.", kind: "success" };
+    } else {
+      // Keep a newer local edit while advancing the compare-and-swap base.
+      state.document = updated;
+      state.editorBase = {
+        id: updated.head_revision_id, version: updated.version,
+        payload: copy(updated.head.payload),
+      };
+      state.remoteDocument = null;
+    }
+    render({ passive: true });
+    void api().revisions(id).then((revisions) => {
+      if (currentView(session, navigation, id) && state.editorBase?.version === updated.version) {
+        state.revisions = revisions.items || [];
+        render({ passive: true });
+      }
+    }).catch(() => { /* The saved revision remains valid if history refresh fails. */ });
+  } catch (error) {
+    if (!currentView(session, navigation, id) || autosaveFlight !== flight) return;
+    if (error instanceof ApiError && error.status === 409) {
+      autosaveBlocked = true;
+      cancelAutosave();
+      state.message = { text: "Bản nháp trên máy chưa được lưu vì chứng từ đã thay đổi ở nơi khác. Hãy đối chiếu và tải lại trước khi sửa tiếp.", kind: "error" };
+      render();
+    } else apiFailure(error);
+  } finally {
+    if (autosaveFlight === flight) {
+      autosaveFlight = null;
+      syncDraftControls();
+      if (currentView(session, navigation, id) && generation !== editGeneration &&
+          !autosaveTimer && !autosaveBlocked && hasUnsavedReview()) scheduleAutosave();
+    }
+  }
 }
 
 function escapeHtml(value) {
@@ -127,6 +218,9 @@ function releaseBusy(owner) {
 }
 
 function clearSession() {
+  cancelAutosave();
+  autosaveFlight = null;
+  autosaveBlocked = false;
   busyOwner = 0;
   busyGeneration++;
   sessionGeneration++;
@@ -256,6 +350,8 @@ async function openDocument(id, { force = false, transferFrom = null } = {}) {
       !window.confirm("Bạn có thay đổi chưa lưu. Mở chứng từ khác sẽ bỏ các thay đổi này. Tiếp tục?")) return;
   const session = sessionGeneration;
   const navigation = ++navigationGeneration;
+  cancelAutosave();
+  autosaveFlight = null;
   navigationAbort?.abort();
   navigationAbort = new AbortController();
   const signal = navigationAbort.signal;
@@ -354,7 +450,7 @@ async function uploadAndProcess(event) {
 }
 
 async function rerun() {
-  if (!state.document || state.busy || remoteChanged()) return;
+  if (!state.document || state.busy || autosaveFlight || remoteChanged()) return;
   if (hasUnsavedReview())
     return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi chạy xử lý lại.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
@@ -371,29 +467,15 @@ async function rerun() {
 
 async function saveReview() {
   const document = state.document;
-  if (!document?.head || state.busy || remoteChanged() ||
+  if (!document?.head || state.busy || autosaveFlight || remoteChanged() || autosaveBlocked ||
       (!isDirty() && !state.changedPaths.size && !state.changedItemFields.size)) return;
   const session = sessionGeneration, navigation = navigationGeneration;
   const id = document.id;
-  const payload = toBusinessPayload(document.document_type, currentPayload());
-  const reviewedPaths = [...state.changedPaths];
-  for (const [rowId, fields] of state.changedItemFields) {
-    const index = state.rowIds.indexOf(rowId);
-    if (index >= 0) for (const field of fields) reviewedPaths.push(`/items/${index}/${field}`);
-  }
+  cancelAutosave();
+  const body = reviewSaveBody();
   const owner = beginBusy("save");
   try {
-    const rowIds = [...state.rowIds];
-    while (rowIds.length < payload.items.length) rowIds.push(crypto.randomUUID());
-    rowIds.length = payload.items.length;
-    const updated = await api().save(document.id, {
-      base_revision_id: state.editorBase.id,
-      expected_document_version: state.editorBase.version,
-      payload,
-      reason: state.reviewReason.trim() || "Đã chỉnh sửa sau khi đối chiếu ảnh nguồn",
-      row_ids: rowIds,
-      reviewed_paths: [...new Set(reviewedPaths)],
-    });
+    const updated = await api().save(document.id, body);
     if (!currentView(session, navigation, id)) return;
     setEditorDocument(updated);
     state.message = { text: "Đã lưu thành revision mới. Prediction và các revision trước vẫn được giữ nguyên.", kind: "success" };
@@ -408,7 +490,7 @@ async function saveReview() {
 async function adoptCandidate(runId) {
   const document = state.document;
   if (!document?.head) return;
-  if (state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size)
+  if (state.busy || autosaveFlight || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size)
     return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi áp dụng candidate.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const owner = beginBusy("adopt");
@@ -432,7 +514,7 @@ async function adoptCandidate(runId) {
 
 async function approve() {
   const document = state.document;
-  if (!document?.head || state.busy || remoteChanged() || isDirty() ||
+  if (!document?.head || state.busy || autosaveFlight || remoteChanged() || isDirty() ||
       state.changedPaths.size || state.changedItemFields.size) return;
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const owner = beginBusy("approve");
@@ -514,20 +596,24 @@ function updateBoundValue(target) {
   const stateLabel = root.querySelector("[data-save-state]");
   if (stateLabel) stateLabel.textContent = isDirty() ? "Có thay đổi chưa lưu" : "Đã khớp bản đang mở";
   syncDraftControls();
+  scheduleAutosave();
 }
 
 function syncDraftControls() {
   const pending = hasUnsavedReview();
   const remote = remoteChanged();
+  const status = root.querySelector("[data-save-state]");
+  if (status) status.textContent = autosaveBlocked ? "Chưa lưu: có xung đột" :
+    autosaveFlight ? "Đang lưu bản nháp…" : pending ? "Có thay đổi chưa lưu" : "Đã lưu bản nháp";
   const saveButton = root.querySelector('[data-action="save"]');
-  if (saveButton) saveButton.disabled = !pending || remote || state.busy;
+  if (saveButton) saveButton.disabled = !pending || remote || state.busy || !!autosaveFlight || autosaveBlocked;
   const approveButton = root.querySelector('[data-action="approve"]');
-  if (approveButton && (pending || remote || state.busy)) approveButton.disabled = true;
+  if (approveButton && (pending || remote || state.busy || autosaveFlight)) approveButton.disabled = true;
   const rerunButton = root.querySelector('[data-action="rerun"]');
   if (rerunButton) rerunButton.disabled = pending || remote ||
-    isActiveJob(state.document?.job) || state.busy;
+    isActiveJob(state.document?.job) || state.busy || !!autosaveFlight;
   for (const button of root.querySelectorAll("[data-adopt-run]"))
-    if (pending || remote || state.busy) button.disabled = true;
+    if (pending || remote || state.busy || autosaveFlight) button.disabled = true;
 }
 
 function render({ passive = false } = {}) {
@@ -711,8 +797,8 @@ function renderIssues(issues) {
 function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
   const dirty = isDirty();
   const pending = dirty || state.changedPaths.size || state.changedItemFields.size;
-  const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy;
-  const disabledSave = !pending || remoteChanged() || state.busy || !document.head;
+  const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy && !autosaveFlight;
+  const disabledSave = !pending || remoteChanged() || state.busy || !!autosaveFlight || autosaveBlocked || !document.head;
   return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" ${state.busy ? "disabled" : ""} /></div>
     <label class="approval-check"><input type="checkbox" data-reviewed ${state.reviewed ? "checked" : ""} ${state.busy ? "disabled" : ""} /><span>Tôi đã đối chiếu dữ liệu với ảnh nguồn và xác nhận mức độ đầy đủ của chứng từ.</span></label>
     ${pending ? '<div class="notice">Có thay đổi hoặc xác nhận field chưa lưu. Hãy lưu thành revision mới trước khi duyệt hoặc chạy xử lý lại.</div>' : ""}
@@ -720,7 +806,7 @@ function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
     ${warnings.length && !allWarningsChecked ? '<div class="notice">Hãy xác nhận từng cảnh báo để tiếp tục duyệt.</div>' : ""}
     <div class="action-row"><button class="btn btn-secondary" data-action="save" ${disabledSave ? "disabled" : ""}>${state.busyAction === "save" ? '<span class="spinner"></span>' : "Lưu bản sửa"}</button>
       <button class="btn btn-primary" data-action="approve" ${canApprove ? "" : "disabled"}>${state.busyAction === "approve" ? '<span class="spinner"></span>' : "Duyệt revision này"}</button>
-      <button class="btn btn-secondary" data-action="rerun" ${isActiveJob(document.job) || pending || remoteChanged() || state.busy ? "disabled" : ""}>${state.busyAction === "rerun" ? '<span class="spinner"></span>' : "Chạy xử lý lại"}</button></div>`;
+      <button class="btn btn-secondary" data-action="rerun" ${isActiveJob(document.job) || pending || remoteChanged() || state.busy || autosaveFlight ? "disabled" : ""}>${state.busyAction === "rerun" ? '<span class="spinner"></span>' : "Chạy xử lý lại"}</button></div>`;
 }
 
 function renderJobProgress(job) {
@@ -729,7 +815,7 @@ function renderJobProgress(job) {
 }
 
 function renderCandidates(runs) {
-  return `<div class="section-heading"><h3>Kết quả xử lý khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
+  return `<div class="section-heading"><h3>Kết quả xử lý khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || autosaveFlight || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
 }
 
 function renderExport(document, approved, selectedId) {
@@ -782,6 +868,7 @@ root.addEventListener("click", (event) => {
   const reviewedField = event.target.closest("[data-review-field]");
   if (reviewedField) {
     state.changedPaths.add(`/${reviewedField.dataset.reviewField}`);
+    scheduleAutosave();
     return render();
   }
   const remove = event.target.closest("[data-remove-item]");
@@ -791,6 +878,7 @@ root.addEventListener("click", (event) => {
     state.payload.items.splice(index, 1);
     state.rowIds.splice(index, 1);
     state.changedPaths.add("/items");
+    scheduleAutosave();
     return render();
   }
   const adopt = event.target.closest("[data-adopt-run]");
@@ -810,6 +898,7 @@ root.addEventListener("click", (event) => {
     state.payload.items.push(emptyItem());
     state.rowIds.push(crypto.randomUUID());
     state.changedPaths.add("/items");
+    scheduleAutosave();
     render();
   }
 });
