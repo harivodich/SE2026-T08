@@ -1,6 +1,26 @@
 # Tests ownership
 
-AI-1 increment 02/11/2026: **137 pipeline tests** (native bật, không skip) và
+PR4 candidate B (07/11/2026): native tests đã tách khỏi fixture discovery. Giữ nguyên
+AST của `NativeGeometrySmokeTest` (2 methods/12 transforms) và `NativeOcrSmokeTest`
+(1 method/20 format/error cases từ một trang synthetic) trong `tests/native/ocr/`.
+Không import TestCase trở lại fixture; tên module native khác fixture modules.
+
+Fixture env riêng: `pip install '.[serve,test,ai1]' numpy==2.2.6`, `pip check`, đặt
+`VIETDOC_CONTRACTS_DIR` tới `specs/contracts`, rồi `python -m scripts.ci.ai`.
+Windows không có quyền symlink chỉ dùng flag `--allow-windows-symlink-skip` đã có.
+Candidate B thực chạy **667 passed,350 subtests,1 allowed symlink skip**, collect668;
+gate exit0, không native skip. Collection toàn `tests/`685 tests không import
+mismatch; collection không là execution. Backend còn phải bổ sung 7 required
+paths/minimum theo count candidate cuối và hosted Linux evidence, chưa coi473 đủ.
+
+Native env riêng đã có pinned runtime/models/font, cài `pytest==9.1.1`, đặt
+`VIETDOC_OCR_MODEL_ROOT`, `VIETDOC_OCR_TEST_FONT` tới paths thật rồi chạy
+`python -m pytest -q tests/native/ocr`. Candidate B: **3 passed,32 subtests,
+0 skipped**; JUnit/inventory local ignored ở `artifacts/evaluation/ai1-pr4-20261107/`.
+Không cài native/model vào fixture env để chữa collection. H1/H2 và Backend CI
+vẫn phải tích hợp vào head PR #4; kết quả top candidate không thay checks PR #4.
+
+Snapshot lịch sử 02/11/2026: **137 pipeline tests** (native bật, không skip) và
 **24 OCR contract tests** qua trên Python3.13.7/Windows11. Schema9 và CI-gate11
 tests qua riêng bằng validator local jsonschema4.25.1; không thay CI pin4.26.0.
 Env đang dùng trên D: `artifacts/models/.venv-ai1/Scripts/python.exe`, models

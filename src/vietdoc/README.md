@@ -25,6 +25,13 @@ Core package không cài dependencies. Chọn extra trong môi trường mới, 
 
 Data và AI dùng môi trường riêng; không cài gộp `data` với `contracts`/`serve`/`train` vì pins validator/Pillow khác nhau. `test` chỉ cung cấp test runner/client, cần đi cùng extra của suite. Validator pins được khai báo trực tiếp trong `contracts`/`serve`/`train` để Docker cài dependency layer khi chưa có application source.
 
+Fixture CI kết hợp AI1/AI2 dùng env riêng: `pip install '.[serve,test,ai1]' numpy==2.2.6`,
+`pip check`, đặt `VIETDOC_CONTRACTS_DIR` tới `specs/contracts`, rồi
+`python -m scripts.ci.ai`. Native smoke ở `tests/native/ocr/`, không thuộc fixture
+gate; dùng env `ai1-ocr` đã provision model/font + `pytest==9.1.1` để chạy
+`python -m pytest -q tests/native/ocr`. Không có model/font thì native NOT_RUN,
+không coi opt-in skips hoặc collect-only là native PASS. Xem [tests](../../tests/README.md).
+
 Normalizer v2 giữ chính xác các chữ số, không phụ thuộc decimal precision context. Chuỗi số nguồn tối đa 64 Ki ký tự; độ dài canonical (kể cả dấu chấm và zeros) tối đa 32 ký tự được kiểm trước khi mở rộng exponent. Giá trị ngoài bounds trả null + invalid outcome; zero chuẩn hóa thành `"0"`. Quy tắc locale tiền/quantity/ngày/giờ giữ nguyên. Output cũ mang version v1 giữ nguyên provenance; báo cáo/model manifest mới phải ghi v2, không so kết quả khác normalizer như cùng policy.
 
 
