@@ -61,6 +61,18 @@ class HandoffTest(unittest.TestCase):
         for name in (handoff.ARCHIVE, 'inventory.json', 'SHA256SUMS'):
             self.assertEqual((self.bundle/name).read_bytes(), (other/name).read_bytes())
 
+    def test_inventory_resolves_root_and_manifest_aliases(self):
+        # asset_path resolves its result. Its root must use the same canonical
+        # spelling before relative_to (Windows TEMP may contain RUNNER~1).
+        root_alias = ROOT/'tests'/'..'
+        manifest_alias = ROOT/'tests/fixtures/d12/..'/'d12/manifest.json'
+        for root, manifest in ((root_alias, MANIFEST), (ROOT, manifest_alias),
+                               (root_alias, manifest_alias)):
+            with self.subTest(root=root, manifest=manifest):
+                actual = handoff.inventory(root, manifest, tiny=True)
+                for key, value in actual.items():
+                    self.assertEqual(self.inventory[key], value)
+
     def test_archive_checksum_corruption_does_not_create_output(self):
         with (self.bundle/handoff.ARCHIVE).open('ab') as stream:
             stream.write(b'drift')

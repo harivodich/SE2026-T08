@@ -31,6 +31,8 @@ def member_name(name):
 
 def inventory(root, manifest, *, tiny=False):
     """Validate existing artifacts, retaining their exact root-relative paths."""
+    root, manifest = Path(root).resolve(), Path(manifest).resolve()
+    require(manifest.is_relative_to(root), 'manifest escapes root')
     rows = list(integration.load_artifacts(root, manifest, full_set=not tiny))
     require(not tiny or {m['sample_id'] for m, _ in rows} == TINY_IDS, 'tiny requires receipt-03 and invoice-04')
     name = manifest.relative_to(root).as_posix()
