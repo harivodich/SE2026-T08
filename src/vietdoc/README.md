@@ -1,6 +1,32 @@
 # Python AI/Data source
 
-C? Data generator/fixtures v? OCR/page types, loader, geometry/evidence, Paddle detector + Tesseract `vie` theo [proposal AI-1](../../docs/ocr-input-proposal.md). Entrypoint `recognize_document` chia s? deadline v? qu?n l? lifetime ?nh. Ch?a actual extraction/service composition tr?n branch n?y. Python ch? Data/compute; Java qu?n l? business state.
+Đã có Data generator/fixtures; AI-1 loader/preprocess, geometry/evidence và Paddle
+detector + Tesseract `vie`, OCR artifact v1/v2 opt-in theo
+[proposal AI-1](../../docs/ocr-input-proposal.md). Entrypoint `recognize_document`
+chia sẻ deadline và quản lý lifetime ảnh.
+
+AI-2 đã có compute contracts (`contracts/compute.py`), release verifier
+(`ml/release_manifest.py`), normalizer `vi-VND.v2`, strict output parser,
+B0 `vi-label-header-b0.v3` cùng N1/N2 regressions, JSON logging, private FastAPI
+service shell và env report CLI. Native OCR → extraction → compute response chưa
+được compose vào service; default vẫn `AI_NOT_READY`. Python chỉ computation và
+offline Data/ML; Java quản lý business state. Docker: [infra](../../infra/README.md).
+
+Core package không cài dependencies. Chọn extra trong môi trường mới, từ repo root:
+
+| Mục đích | Lệnh cài | Validator |
+|---|---|---|
+| Data renderer | `python -m pip install '.[data]'` | jsonschema 4.10.3; giữ Pillow 10.2.0 và fingerprint cũ |
+| Compute contracts độc lập | `python -m pip install '.[contracts]'` | jsonschema 4.26.0 + referencing 0.37.0 |
+| AI-1 loader | `python -m pip install '.[ai1]'` | Pillow12.0.0, pypdfium2_5.14.0; không load model |
+| AI-1 native OCR | `python -m pip install '.[ai1-ocr]'` | 10 runtime pins, model provision riêng |
+| Serving và AI tests | `python -m pip install '.[serve,test]'` | cùng validator hiện đại |
+| Training | `python -m pip install '.[train]'` | cùng validator hiện đại; torch theo wheel index phù hợp |
+
+Data và AI dùng môi trường riêng; không cài gộp `data` với `contracts`/`serve`/`train` vì pins validator/Pillow khác nhau. `test` chỉ cung cấp test runner/client, cần đi cùng extra của suite. Validator pins được khai báo trực tiếp trong `contracts`/`serve`/`train` để Docker cài dependency layer khi chưa có application source.
+
+Normalizer v2 giữ chính xác các chữ số, không phụ thuộc decimal precision context. Chuỗi số nguồn tối đa 64 Ki ký tự; độ dài canonical (kể cả dấu chấm và zeros) tối đa 32 ký tự được kiểm trước khi mở rộng exponent. Giá trị ngoài bounds trả null + invalid outcome; zero chuẩn hóa thành `"0"`. Quy tắc locale tiền/quantity/ngày/giờ giữ nguyên. Output cũ mang version v1 giữ nguyên provenance; báo cáo/model manifest mới phải ghi v2, không so kết quả khác normalizer như cùng policy.
+
 
 | Vùng active | Owner và output |
 |---|---|

@@ -1,6 +1,6 @@
 # Private compute API v1: Java ↔ Python
 
-Thiết kế đích, chưa endpoint implementation. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
+Reference protocol v1. Python đã có endpoint boundary/fixtures, chưa pipeline OCR/extraction thật hoặc Java↔Python actual-provider acceptance. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
 
 ## Transport và endpoints
 
@@ -18,6 +18,19 @@ Metadata theo [compute request schema](compute-request.schema.json): contract_ve
 
 Java gửi remaining budget theo total job deadline DB; Python deadline bằng monotonic clock khi nhận, không reset budget giữa stages. HTTP connection/read/body limits có margin đo được; khi budget≤0 Java không gọi. AI service kiểm bytes20MiB/page1/pixels20MP/token/decode/output caps, cùng profile version sau G0. Python không dùng ngôn ngữ khác tự chuyển fallback.
 
+Python boundary ghi arrival trước đọc body; thời gian đọc/parse/hash, chờ worker và
+validate/serialize response dùng cùng budget. Hết hạn trước worker-start thì không
+gọi pipeline; hết hạn trong output preparation thì trả 504, không success log.
+Đây là deadline accounting, không hard-stop native/GPU compute; ingress hard timeout
+và resource isolation cần cấu hình/verification riêng khi tích hợp.
+
+Metadata part hiện có cap 16 KiB; Python producer cap nesting 8 object/array containers,
+reject duplicate keys và malformed/decoder-limit errors bằng 422 INPUT_INVALID.
+Metadata v1 là flat object; Backend cần review policy producer này khi nối client.
+Storage I/O failures ở parse/read/cleanup được phân biệt với input invalid: 503
+AI_NOT_READY, retryable theo budget hiện có. Cleanup error không che primary input
+error đã xác định; unexpected programming failures vẫn INTERNAL_ERROR, không retry giả.
+
 ## Success response
 
 [Compute response schema](compute-response.schema.json) chứa contract_version, attempt_id, result ([extraction result](extraction-result.schema.json)), canonical_page và artifacts. Envelope IDs echo request, provenance khớp pinned manifest, business schema theo type. Result model chỉ payload; runtime envelope được service tạo.
@@ -27,6 +40,18 @@ Canonical page: page0, width/height positive, asset_key, sha256; dimensions và 
 Java đọc attempt assets qua storage adapter, kiểm containment/prefix và stream-copy sang vùng committed Java-only. Hash/size tính từ bytes copy, canonical decode kiểm bản copy; atomic publish private promoted keys trước DB commit, không tin declaration hoặc mở lại mutable file sau hash check. DB/viewer chỉ dùng promoted keys, không serve attempt path trực tiếp. Stale/cancelled/failed completion có thể có orphan promoted assets, trace và cleanup bounded theo manifest. Orphan assets không là approved data; cleanup dry-run theo manifest/retention được duyệt. Private attempt volume không mount originals/exports writable vào Python.
 
 Java phải kiểm: request/response job/run/attempt/type/schema match, provenance, metadata paths tồn tại trong payload, region finite/quad order/page, no duplicate artifact keys, canonical metadata matches exactly one artifact, state/current token/unexpired lease/deadline/cancel. JSON Schema chỉ cấu trúc; không chứng minh các rules này pass.
+
+Python producer output policy: tối đa **2 MiB JSON UTF-8**, nesting tối đa **32
+object/array containers** (root container tính là 1). Boundary kiểm trước schema
+traversal và giới hạn bytes khi serialize; chỉ nhận built-in JSON types, string
+keys, finite floats và UTF-8 strict strings. Unsupported types, cycles, non-finite,
+lone surrogates hoặc vượt caps trả **422 OUTPUT_INVALID**, không coercion, không
+log raw output. Unicode hợp lệ, C0 được JSON escape và bidi không bị blacklist.
+Đây là producer policy cần Backend review khi tích hợp; neutral schemas không đổi.
+
+Service giữ ingress correlation baseline riêng với metadata giao pipeline; pipeline
+mutation không thay expected IDs/type/schema/manifest. Java vẫn kiểm độc lập với
+request gốc. Deadline accounting bao gồm cả bounded encoding và schema validation.
 
 ## Errors và retry
 
@@ -52,6 +77,10 @@ Retry cùng job dùng attempt_id/run_id mới, immutable pinned manifest giữ n
 Trong một AI process không cho hai request cùng attempt chạy/overwrite; duplicate active attempt reject typed AI_BUSY. Restart có thể có orphan partial outputs: attempt directory không overwrite, create temp + atomic final publication, caller retry dùng attempt mới. Không coi file tồn tại là completed result.
 
 Cancel ở Java atomically invalidate lease/fence; Python có thể vẫn compute đến deadline. GPU slot vẫn busy cho tới cleanup thực, không tuyên bố cancellation đã free GPU. Kill/restart recovery phải kiểm ở M2.3/B3.3.
+
+Python bàn giao slot từ coroutine sang worker dưới lock. Cancel trước worker-start
+thu hồi reservation; worker tới muộn sau reclaim không gọi pipeline. Khi worker
+đã chạy, cancellation của coroutine không trả slot; worker trả slot sau cleanup.
 
 ## Cross-language acceptance
 

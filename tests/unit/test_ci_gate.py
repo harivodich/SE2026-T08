@@ -62,6 +62,18 @@ class CiGateTest(unittest.TestCase):
         del self.develop['release-readiness']
         self.assertTrue(evaluate('ci', 'develop', self.develop))
 
+    def test_ai_success_is_required_on_develop_and_main(self):
+        for branch in ('develop', 'main'):
+            baseline = dict(self.develop, **{'release-readiness': {
+                'result': 'skipped' if branch == 'develop' else 'success'}})
+            for status in (None, 'failure', 'cancelled', 'skipped'):
+                broken = copy.deepcopy(baseline)
+                if status is None:
+                    broken.pop('ai', None)
+                else:
+                    broken['ai'] = {'result': status}
+                self.assertTrue(evaluate('ci', branch, broken), (branch, status))
+
     def test_pr_base_is_authority_even_if_head_is_named_main(self):
         event = {'pull_request': {'base': {'ref': 'develop'}, 'head': {'ref': 'main'}}}
         self.assertEqual(target_branch('pull_request', 'refs/pull/17/merge', event), 'develop')
