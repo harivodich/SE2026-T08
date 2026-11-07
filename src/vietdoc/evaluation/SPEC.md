@@ -8,6 +8,21 @@ Independent evaluator Owner: Data; hai AI/Lead review.
 
 Fields/rows/OCR/geometry/evidence/reports; đọc frozen artifacts không production API
 
+D3.1 implementation: `scalar_ocr.py`, `policy.py`, CLI `python -m vietdoc.evaluation`.
+Input envelope/definitions/version/review points ở [README](README.md).
+Policy `d31-canonical-nfc-v1-proposed` chưa được AI-1/AI-2 duyệt; không thay production normalization.
+D3.2 implementation: `matching.py`, `tables.py`, `evidence.py`, `extended.py`;
+CLI thêm `--candidate NAME=PATH`. Policy/protocol/freeze vẫn Proposed, xem [D32](D32.md).
+Known-score tests: `tests/unit/test_evaluation.py`, `tests/unit/test_evaluation_tables.py`.
+V3 file entrypoints share `gold_validation.py`: renderer consumer semantic checks
+in the Data environment, explicit annotated mode marked unvalidated otherwise.
+Scoring core remains stdlib-only; `test_evaluation_boundary.py` covers both CLI/API
+paths and normal/-O. Gold validation metadata does not certify pixels or approval.
+V4 D3.2 adds metric support/exclusions, excluded-status cell diagnostics,
+split/partition accounting and optional hash-bound AI2 OCR diagnostics via
+`diagnostics.py`. Tests in `test_evaluation_diagnostics.py` preserve partial/failure
+records without changing scores. Policies/eligibility remain Proposed.
+
 ## Ranh giới và dữ liệu
 
 Không tune final test, bỏ failures hoặc dùng unlabeled như absent Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.

@@ -7,6 +7,9 @@ Raw evaluation artifacts Owner: Data và hai AI.
 ## Đặt gì ở đây?
 
 Prediction/error/overlay/performance outputs theo dataset/model/evaluator version.
+D3.2 `--candidate` tạo comparison/freeze-record và per-candidate report/errors/
+correctness-labels; xem [policy/commands](../../src/vietdoc/evaluation/D32.md).
+Known-score fixture outputs không là model performance; freeze record prepared không là quyết định freeze.
 
 ## Ranh giới và dữ liệu
 

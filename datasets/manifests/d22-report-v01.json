@@ -1,0 +1,2471 @@
+{
+  "counts": {
+    "base_documents": {
+      "total": 20,
+      "document_type": {
+        "invoice": 10,
+        "receipt": 10
+      },
+      "family_id": {
+        "invoice-f00": 1,
+        "invoice-f01": 1,
+        "invoice-f02": 1,
+        "invoice-f03": 1,
+        "invoice-f04": 1,
+        "invoice-f05": 1,
+        "invoice-f06": 1,
+        "invoice-f07": 1,
+        "invoice-f08": 1,
+        "invoice-f09": 1,
+        "receipt-f00": 1,
+        "receipt-f01": 1,
+        "receipt-f02": 1,
+        "receipt-f03": 1,
+        "receipt-f04": 1,
+        "receipt-f05": 1,
+        "receipt-f06": 1,
+        "receipt-f07": 1,
+        "receipt-f08": 1,
+        "receipt-f09": 1
+      },
+      "source_group": {
+        "synthetic-invoice-f00": 1,
+        "synthetic-invoice-f01": 1,
+        "synthetic-invoice-f02": 1,
+        "synthetic-invoice-f03": 1,
+        "synthetic-invoice-f04": 1,
+        "synthetic-invoice-f05": 1,
+        "synthetic-invoice-f06": 1,
+        "synthetic-invoice-f07": 1,
+        "synthetic-invoice-f08": 1,
+        "synthetic-invoice-f09": 1,
+        "synthetic-receipt-f00": 1,
+        "synthetic-receipt-f01": 1,
+        "synthetic-receipt-f02": 1,
+        "synthetic-receipt-f03": 1,
+        "synthetic-receipt-f04": 1,
+        "synthetic-receipt-f05": 1,
+        "synthetic-receipt-f06": 1,
+        "synthetic-receipt-f07": 1,
+        "synthetic-receipt-f08": 1,
+        "synthetic-receipt-f09": 1
+      },
+      "split": {
+        "dev": 4,
+        "final": 4,
+        "train": 12
+      },
+      "quality": {
+        "clean": 20
+      },
+      "row_count": {
+        "0": 4,
+        "1": 4,
+        "12": 4,
+        "3": 4,
+        "30": 4
+      },
+      "dev_partition": {
+        "None": 20
+      },
+      "label_statuses": {
+        "present": 1042,
+        "absent": 8
+      }
+    },
+    "images_including_variants": {
+      "total": 80,
+      "document_type": {
+        "invoice": 40,
+        "receipt": 40
+      },
+      "family_id": {
+        "invoice-f00": 4,
+        "invoice-f01": 4,
+        "invoice-f02": 4,
+        "invoice-f03": 4,
+        "invoice-f04": 4,
+        "invoice-f05": 4,
+        "invoice-f06": 4,
+        "invoice-f07": 4,
+        "invoice-f08": 4,
+        "invoice-f09": 4,
+        "receipt-f00": 4,
+        "receipt-f01": 4,
+        "receipt-f02": 4,
+        "receipt-f03": 4,
+        "receipt-f04": 4,
+        "receipt-f05": 4,
+        "receipt-f06": 4,
+        "receipt-f07": 4,
+        "receipt-f08": 4,
+        "receipt-f09": 4
+      },
+      "source_group": {
+        "synthetic-invoice-f00": 4,
+        "synthetic-invoice-f01": 4,
+        "synthetic-invoice-f02": 4,
+        "synthetic-invoice-f03": 4,
+        "synthetic-invoice-f04": 4,
+        "synthetic-invoice-f05": 4,
+        "synthetic-invoice-f06": 4,
+        "synthetic-invoice-f07": 4,
+        "synthetic-invoice-f08": 4,
+        "synthetic-invoice-f09": 4,
+        "synthetic-receipt-f00": 4,
+        "synthetic-receipt-f01": 4,
+        "synthetic-receipt-f02": 4,
+        "synthetic-receipt-f03": 4,
+        "synthetic-receipt-f04": 4,
+        "synthetic-receipt-f05": 4,
+        "synthetic-receipt-f06": 4,
+        "synthetic-receipt-f07": 4,
+        "synthetic-receipt-f08": 4,
+        "synthetic-receipt-f09": 4
+      },
+      "split": {
+        "dev": 16,
+        "final": 16,
+        "train": 48
+      },
+      "quality": {
+        "bounded": 20,
+        "clean": 20,
+        "content-loss": 20,
+        "unreadable": 20
+      },
+      "row_count": {
+        "0": 16,
+        "1": 16,
+        "12": 16,
+        "3": 16,
+        "30": 16
+      },
+      "dev_partition": {
+        "None": 80
+      },
+      "label_statuses": {
+        "present": 2845,
+        "absent": 32,
+        "obscured": 1323
+      }
+    }
+  },
+  "bases": [
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f05",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f05",
+      "split": "train",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "clean_documents": 1,
+      "images": 4
+    },
+    {
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "clean_documents": 1,
+      "images": 4
+    }
+  ],
+  "cross_counts": [
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "quality": "clean",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f00",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "quality": "clean",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f01",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 23
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "quality": "clean",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 23
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 7
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 16
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f02",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 23
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 67
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "clean",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "clean",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 67
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 15
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 52
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f03",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 67
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 30,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 157
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "clean",
+      "rows": 30,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "clean",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 157
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 33
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 124
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 30,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f04",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 157
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f05",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f05",
+      "split": "train",
+      "quality": "clean",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f05",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f05",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 8
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 9
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f06",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 22
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 22
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 10
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 12
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f07",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 22
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 68
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "quality": "clean",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 68
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 20
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 48
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f08",
+      "split": "final",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 68
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "quality": "bounded",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 158
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "quality": "clean",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 158
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 38
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 120
+    },
+    {
+      "document_type": "invoice",
+      "family_id": "invoice-f09",
+      "split": "final",
+      "quality": "unreadable",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 158
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 0,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "clean",
+      "rows": 0,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "clean",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 3
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 0,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f00",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 1,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 9
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "clean",
+      "rows": 1,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "clean",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 9
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 1,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f01",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 9
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 20
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "quality": "clean",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 20
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 7
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 13
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f02",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 20
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "clean",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "clean",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 15
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 49
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f03",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 155
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "quality": "clean",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 155
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 34
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 121
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f04",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 155
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f05",
+      "split": "train",
+      "quality": "bounded",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f05",
+      "split": "train",
+      "quality": "clean",
+      "rows": 0,
+      "status": "present",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f05",
+      "split": "train",
+      "quality": "content-loss",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f05",
+      "split": "train",
+      "quality": "unreadable",
+      "rows": 0,
+      "status": "obscured",
+      "images": 1,
+      "fields": 5
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 10
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 10
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 6
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 1,
+      "status": "present",
+      "images": 1,
+      "fields": 4
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f06",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 1,
+      "status": "obscured",
+      "images": 1,
+      "fields": 10
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "bounded",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 19
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "clean",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 19
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 7
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "content-loss",
+      "rows": 3,
+      "status": "present",
+      "images": 1,
+      "fields": 12
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f07",
+      "split": "dev",
+      "quality": "unreadable",
+      "rows": 3,
+      "status": "obscured",
+      "images": 1,
+      "fields": 19
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "bounded",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "clean",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "clean",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 16
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 12,
+      "status": "present",
+      "images": 1,
+      "fields": 48
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "absent",
+      "images": 1,
+      "fields": 1
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f08",
+      "split": "final",
+      "quality": "unreadable",
+      "rows": 12,
+      "status": "obscured",
+      "images": 1,
+      "fields": 64
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "quality": "bounded",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 155
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "quality": "clean",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 155
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 35
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "quality": "content-loss",
+      "rows": 30,
+      "status": "present",
+      "images": 1,
+      "fields": 120
+    },
+    {
+      "document_type": "receipt",
+      "family_id": "receipt-f09",
+      "split": "final",
+      "quality": "unreadable",
+      "rows": 30,
+      "status": "obscured",
+      "images": 1,
+      "fields": 155
+    }
+  ],
+  "leakage": {
+    "exact_image_groups": [],
+    "exact_content_groups": [],
+    "ambiguous": [
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-receipt-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-receipt-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-receipt-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.125,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-receipt-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 3,
+        "content_jaccard": 0.1429,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 3,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 3,
+        "content_jaccard": 0.1429,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f00-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.05,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-receipt-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0417,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-receipt-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-receipt-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.1579,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.0625,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 1,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f01-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0417,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-receipt-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.1,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-receipt-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.1818,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 2,
+        "content_jaccard": 0.24,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.1875,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 5,
+        "content_jaccard": 0.1304,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f02-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0625,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f03-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 8,
+        "content_jaccard": 0.1591,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f03-b0000",
+          "v0-1-d22-smoke-receipt-f08-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 1,
+        "content_jaccard": 0.1833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f03-b0000",
+          "v0-1-d22-smoke-invoice-f03-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 1,
+        "content_jaccard": 0.2188,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f03-b0000",
+          "v0-1-d22-smoke-invoice-f08-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.2031,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f04-b0000",
+          "v0-1-d22-smoke-receipt-f09-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.1301,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f04-b0000",
+          "v0-1-d22-smoke-invoice-f04-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.0992,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f04-b0000",
+          "v0-1-d22-smoke-invoice-f09-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 2,
+        "content_jaccard": 0.1181,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-receipt-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 2,
+        "content_jaccard": 0.0769,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 5,
+        "content_jaccard": 0.1176,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.125,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0769,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 1,
+        "content_jaccard": 0.125,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0769,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f05-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0476,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-receipt-f07-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0952,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0714,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.2,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f06-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-receipt-f08-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.1429,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f00-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 8,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 8,
+        "content_jaccard": 0.0952,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0606,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.0,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 5,
+        "content_jaccard": 0.0455,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f07-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.069,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f08-b0000",
+          "v0-1-d22-smoke-invoice-f03-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 2,
+        "content_jaccard": 0.1538,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f08-b0000",
+          "v0-1-d22-smoke-invoice-f08-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.1562,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f09-b0000",
+          "v0-1-d22-smoke-invoice-f04-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.1349,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-receipt-f09-b0000",
+          "v0-1-d22-smoke-invoice-f09-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 3,
+        "content_jaccard": 0.1102,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f00-b0000",
+          "v0-1-d22-smoke-invoice-f01-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 2,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f00-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.0417,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f00-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.3333,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f00-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 5,
+        "content_jaccard": 0.1818,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f00-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.05,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f01-b0000",
+          "v0-1-d22-smoke-invoice-f02-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.1111,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f01-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 4,
+        "content_jaccard": 0.1818,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f01-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.125,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f01-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.2381,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f02-b0000",
+          "v0-1-d22-smoke-invoice-f05-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 6,
+        "content_jaccard": 0.087,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f02-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0714,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f02-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 6,
+        "content_jaccard": 0.1515,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f03-b0000",
+          "v0-1-d22-smoke-invoice-f08-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.2273,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f04-b0000",
+          "v0-1-d22-smoke-invoice-f09-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.1231,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f05-b0000",
+          "v0-1-d22-smoke-invoice-f06-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 3,
+        "content_jaccard": 0.0833,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f05-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 4,
+        "content_jaccard": 0.1053,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f06-b0000",
+          "v0-1-d22-smoke-invoice-f07-b0000"
+        ],
+        "cross_split": false,
+        "dhash_distance": 3,
+        "content_jaccard": 0.04,
+        "disposition": "pending human review; not proven duplicate"
+      },
+      {
+        "base_ids": [
+          "v0-1-d22-smoke-invoice-f07-b0000",
+          "v0-1-d22-smoke-invoice-f08-b0000"
+        ],
+        "cross_split": true,
+        "dhash_distance": 7,
+        "content_jaccard": 0.0962,
+        "disposition": "pending human review; not proven duplicate"
+      }
+    ],
+    "near_duplicate_policy": "clean bases only; dHash<=8 OR content token Jaccard>=0.85",
+    "reviewed": false
+  },
+  "dev_support": {
+    "clean_base_counts": {
+      "receipt": {
+        "dev-tuning": 0,
+        "dev-calibration": 0
+      },
+      "invoice": {
+        "dev-tuning": 0,
+        "dev-calibration": 0
+      }
+    },
+    "unpartitioned_dev_bases": {
+      "receipt": 2,
+      "invoice": 2
+    },
+    "configured_minimum_per_type": 100,
+    "partition_enabled": false,
+    "calibration_sufficiency": "not established; correctness labels, class/field coverage and Lead review still required"
+  },
+  "planning_targets": {
+    "families_per_type": 10,
+    "family_splits": "6 train / 2 dev / 2 final",
+    "clean_bases_total": [
+      3000,
+      6000
+    ],
+    "bases_per_family": [
+      150,
+      300
+    ],
+    "approved_capacity": false,
+    "final_frozen": false
+  },
+  "exclusions": [],
+  "readiness": "smoke/review only; ambiguous findings require review before pilot/freeze"
+}
