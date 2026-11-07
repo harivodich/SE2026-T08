@@ -185,7 +185,10 @@ def evaluate_evidence(sample, prediction, table):
 def evidence_metrics(counts):
     c = Counter(counts)
     def rate(n, d):
-        return dict(numerator=c[n], denominator=c[d], value=c[n]/c[d] if c[d] else None)
+        return dict(numerator=c[n], denominator=c[d], value=c[n]/c[d] if c[d] else None,
+                    support=c[d], exclusions={k: c[k] for k in
+                        ('excluded_gold_samples', 'excluded_declared_fields', 'excluded_declared_regions')},
+                    zero_denominator='null')
     return dict(counts=dict(c), coverage=rate('covered_fields', 'gold_annotated_fields'),
                 geometry_recall=rate('geometry_matched_regions', 'gold_annotated_regions'),
                 geometry_accuracy_on_available=rate('geometry_matched_regions', 'comparable_gold_regions'),

@@ -13,7 +13,7 @@ retains the D3.1 behavior documented below.
 AI normalizer/OCR consumer source exists separately; their presence does not
 establish agreement with this evaluator's proposed conventions.
 This evaluator changes no production normalization.
-Evaluator `d3.1.v3` and D3.2 `d3.2.v3` enforce renderer gold validation at the
+Evaluator `d3.1.v3` and D3.2 `d3.2.v4` enforce renderer gold validation at the
 file boundary. Metric policies remain Proposed. Rescore candidates together rather
 than comparing reports from different evaluator versions.
 
@@ -117,7 +117,10 @@ Manifest: D1.2 shape with nonempty `version`, unique `sample_id`, `document_type
 `labels.json`, optional `txt`. Each entry has `path` and `sha256`.
 D1.2 paths are relative to `--root`; D2.1/D2.2 paths are relative to the manifest's
 directory. Relocated D2 snapshots must retain their assets beside the manifest.
-Only evaluator-consumed assets are loaded and hash verified, never images/models.
+In renderer mode the semantic validator also decodes/checks the PNG and verifies
+all declared asset hashes, including assets not used directly by a metric. In
+annotated mode scalar loading checks gold/labels/transcript; D3.2 additionally
+checks PNG/regions. Neither mode loads inference models.
 Paths must stay under their declared base. Gold itself uses business scalar keys; labels
 are separate metadata. Versioned manifest pins gold/schema/transcript versions.
 

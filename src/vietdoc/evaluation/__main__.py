@@ -15,6 +15,8 @@ def main():
     parser.add_argument('--predictions', type=Path)
     parser.add_argument('--candidate', action='append', default=[], metavar='NAME=PATH',
                         help='D3.2 mode; repeat for B0/M0/M1 or fixture; cannot combine --predictions')
+    parser.add_argument('--diagnostics', action='append', default=[], metavar='NAME=PATH',
+                        help='optional AI2 OCR companion for a matching --candidate; retained as diagnostics only')
     parser.add_argument('--output', type=Path, required=True, help='new output directory; never overwritten')
     args = parser.parse_args()
     if args.candidate:
@@ -28,10 +30,19 @@ def main():
             candidates[name] = Path(path)
         if args.predictions:
             parser.error('use --candidate OR --predictions')
-        write_bundle(extended_files(args.root, args.manifest, candidates, gold_mode=args.gold_mode), args.output)
+        diagnostics = {}
+        for value in args.diagnostics:
+            name, sep, path = value.partition('=')
+            if not sep or name not in candidates or name in diagnostics:
+                parser.error('diagnostics must be unique NAME=PATH for an existing candidate')
+            diagnostics[name] = Path(path)
+        write_bundle(extended_files(args.root, args.manifest, candidates, gold_mode=args.gold_mode,
+                                    diagnostics_paths=diagnostics), args.output)
         return
     if args.predictions is None:
         parser.error('--predictions or --candidate required')
+    if args.diagnostics:
+        parser.error('--diagnostics requires --candidate')
     report = evaluate_files(args.root, args.manifest, args.predictions, gold_mode=args.gold_mode)
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2,

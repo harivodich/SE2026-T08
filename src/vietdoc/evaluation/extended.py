@@ -12,7 +12,7 @@ from .policy import FIELDS, VERSION as NORMALIZATION_VERSION
 from .tables import POLICY, cell, evaluate_table, table_metrics
 from .evidence import evaluate_evidence, evidence_metrics
 
-VERSION = 'd3.2.v3'
+VERSION = 'd3.2.v4'
 CALIBRATION_PROTOCOL = 'd32-correctness-v1-proposed'
 PINS = ('dataset_manifest_sha256', 'dataset_version', 'preprocess_version',
         'normalizer_version', 'ocr_version', 'schema_version')
@@ -55,7 +55,7 @@ def source_hash():
     return digest.hexdigest()
 
 
-def calibration_label(sample, artifact, entry, outcome):
+def calibration_label(sample, artifact, entry, outcome, *, source_sha256=None):
     reasons = []
     if sample.get('split') != 'dev' or sample.get('dev_partition') != 'dev-calibration':
         reasons.append('not_dev_calibration')
@@ -80,10 +80,11 @@ def calibration_label(sample, artifact, entry, outcome):
                 protocol_version=CALIBRATION_PROTOCOL, evaluator_version=VERSION,
                 policy_version=POLICY['version'], normalization_policy_version=NORMALIZATION_VERSION,
                 versions={k: artifact.get(k) for k in PINS},
-                evaluator_source_sha256=source_hash())
+                evaluator_source_sha256=source_sha256 or source_hash())
 
 
-def evaluate(samples, artifact):
+def evaluate(samples, artifact, *, source_sha256=None):
+    source_sha256 = source_sha256 or source_hash()
     report = scalar_ocr.evaluate(samples, artifact)
     report.update(evaluator_version=VERSION, table_evidence_policy=POLICY,
                   calibration_protocol=dict(version=CALIBRATION_PROTOCOL, status='proposed; consumer/Lead confirmation required; no fitting'))
@@ -114,14 +115,17 @@ def evaluate(samples, artifact):
                 report['errors'].append(dict(sample_id=sid, category='evidence_unavailable_or_mismatch', **e))
         entries = table['cells'] + [cell(sample, '/' + f, f, sample['gold'].get(f), payload.get(f),
                                         outcome['outcome'] == 'ok') for f in FIELDS[sample['document_type']]]
-        labels.extend(calibration_label(sample, artifact, e, outcome['outcome']) for e in entries)
+        labels.extend(calibration_label(sample, artifact, e, outcome['outcome'],
+                                        source_sha256=source_sha256) for e in entries)
         for j in table.get('unmatched_prediction', []):
             for f, value in payload['items'][j].items():
                 e = dict(field=f'/items/extra-{j}/{f}', prediction_field=f'/items/{j}/{f}', gold=None,
                          prediction=value, status='unlabeled', correct=None, available=True, ambiguous=True)
-                labels.append(calibration_label(sample, artifact, e, outcome['outcome']))
+                labels.append(calibration_label(sample, artifact, e, outcome['outcome'], source_sha256=source_sha256))
         keys = [('type', sample['document_type']), ('family', sample.get('family_id') or 'unknown'),
                 ('quality', sample.get('quality') or 'unknown'),
+                ('split', sample.get('split') or 'unspecified'),
+                ('dev_partition', sample.get('dev_partition') or 'unpartitioned'),
                 ('missing', 'has_absent' if any(v.get('status') == 'absent' for v in sample['labels'].values()) else 'no_absent'),
                 ('table', 'unlabeled' if 'items' not in sample['gold'] else str(len(sample['gold']['items'])))]
         for axis, value in keys:
@@ -132,6 +136,11 @@ def evaluate(samples, artifact):
                                      if 'exclusion' in d['evidence']]
     report['table_evidence_samples'] = details
     report['correctness_labels'] = labels
+    split_counts = dict(Counter(s.get('split') or 'unspecified' for s in samples))
+    report['population'] = dict(split_counts=split_counts,
+        dev_partition_counts=dict(Counter(s.get('dev_partition') or 'unpartitioned' for s in samples)),
+        mixed_splits=len(split_counts) > 1,
+        note='All supplied manifest IDs are scored; mixed splits are not a dev/final headline or authorization to open holdout.')
     report['calibration_coverage'] = dict(records=len(labels), eligible=sum(e['eligible'] for e in labels),
         exclusions=dict(Counter(r for e in labels for r in e['exclusion_reasons'])))
     report['slices'] = {}
@@ -162,10 +171,13 @@ def compare(artifacts):
                 note='Same evaluator and policy used for all supplied candidates; no full comparison unless all pins and B0/M0/M1 present.')
 
 
-def evaluate_files(root, manifest_path, prediction_paths, *, gold_mode='renderer'):
+def evaluate_files(root, manifest_path, prediction_paths, *, gold_mode='renderer', diagnostics_paths=None):
     manifest, samples, pins, validation = load_bundle(root, manifest_path, gold_mode=gold_mode)
     artifacts, reports = {}, {}
     manifest_hash = validation['manifest_sha256']
+    evaluator_hash = source_hash()
+    diagnostics_paths = diagnostics_paths or {}
+    require(set(diagnostics_paths) <= set(prediction_paths), 'diagnostics candidate has no predictions')
     for name, path in prediction_paths.items():
         require(isinstance(name, str) and re.fullmatch(r'[A-Za-z0-9_-]+', name), 'unsafe candidate name')
         artifact = read_json(path)
@@ -174,22 +186,29 @@ def evaluate_files(root, manifest_path, prediction_paths, *, gold_mode='renderer
         if artifact.get('dataset_version') is not None:
             require(artifact['dataset_version'] == scalar_ocr.dataset_version(manifest), 'dataset version mismatch')
         artifacts[name] = artifact
-        reports[name] = evaluate(samples, artifact)
+        reports[name] = evaluate(samples, artifact, source_sha256=evaluator_hash)
+        if name in diagnostics_paths:
+            from .diagnostics import load
+            reports[name]['ocr_diagnostics'] = load(diagnostics_paths[name], artifact, sha(path),
+                                                   {s['sample_id'] for s in samples})
         reports[name]['inputs'] = dict(manifest_sha256=manifest_hash, dataset_version=scalar_ocr.dataset_version(manifest),
             manifest_format_version=manifest['version'],
-            predictions_sha256=sha(path), assets=pins, evaluator_source_sha256=source_hash(),
+            predictions_sha256=sha(path), assets=pins, evaluator_source_sha256=evaluator_hash,
             manifest_helpers_sha256=sha(Path(__file__).parents[1] / 'data/manifest.py'),
             prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'},
             gold_validation=validation)
+        if name in diagnostics_paths:
+            reports[name]['inputs']['diagnostics_sha256'] = reports[name]['ocr_diagnostics']['companion_sha256']
         for label in reports[name]['correctness_labels']:
             label.update(candidate=name, predictions_sha256=sha(path), manifest_sha256=manifest_hash,
                          dataset_version=scalar_ocr.dataset_version(manifest), manifest_format_version=manifest['version'])
     freeze = dict(status='prepared_not_frozen', decision=None, evaluator_version=VERSION,
-                  evaluator_source_sha256=source_hash(), policy=POLICY, gold_validation=validation,
+                  evaluator_source_sha256=evaluator_hash, policy=POLICY, gold_validation=validation,
                   normalization_policy=scalar_ocr.POLICY, calibration_protocol=CALIBRATION_PROTOCOL,
                   manifest_sha256=manifest_hash, dataset_version=scalar_ocr.dataset_version(manifest),
                   manifest_format_version=manifest['version'],
                   candidates={k: sha(p) for k, p in prediction_paths.items()},
+                  diagnostics={k: sha(p) for k, p in diagnostics_paths.items()},
                   review_required=['AI-1 evidence geometry/association', 'AI-2 matching/normalization/calibration', 'Lead metrics/splits/freeze decision'],
                   changes='Metric definition changes require evaluator/policy version bump and all candidates rescored.')
     return dict(comparison=compare(artifacts), reports=reports, freeze_record=freeze)

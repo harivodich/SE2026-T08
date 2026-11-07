@@ -119,6 +119,14 @@ def evaluate_table(sample, payload):
             entry['prediction_field'] = f'/items/{m["prediction"]}/{f}' if m else None
             row_cells.append(entry)
             c[entry['status'] + '_cells'] += 1
+            if entry['status'] in ('obscured', 'unlabeled'):
+                filled = entry['prediction'] is not None and (
+                    not isinstance(entry['prediction'], str) or bool(entry['prediction'].strip()))
+                diagnostic = 'unavailable' if not entry['available'] else 'filled' if filled else 'abstained'
+                c[entry['status'] + '_' + diagnostic + '_cells'] += 1
+            else:
+                c[f + '_gold_cells'] += 1
+            c[f + '_' + entry['status'] + '_cells'] += 1
             if entry['correct'] is not None:
                 c['e2e_cells'] += 1
                 c['matched_cells'] += bool(m)
@@ -148,9 +156,15 @@ def evaluate_table(sample, payload):
 
 def table_metrics(counts):
     c = Counter(counts)
-    def rate(n, d):
-        return dict(numerator=c[n], denominator=c[d], value=c[n]/c[d] if c[d] else None)
-    return dict(counts=dict(c), matched_cell_accuracy=rate('correct_cells', 'matched_cells'),
-                e2e_cell_accuracy=rate('correct_cells', 'e2e_cells'),
-                exact_row_accuracy=rate('exact_rows', 'fully_labeled_rows'),
-                columns={f: rate(f + '_correct', f + '_cells') for f in COLUMNS})
+    def rate(n, d, support, exclusions):
+        return dict(numerator=c[n], denominator=c[d], value=c[n]/c[d] if c[d] else None,
+                    support=c[support], exclusions=exclusions, zero_denominator='null')
+    excluded = {k: c[k + '_cells'] for k in ('obscured', 'unlabeled')}
+    return dict(counts=dict(c), matched_cell_accuracy=rate('correct_cells', 'matched_cells', 'e2e_cells',
+                    dict(excluded, unmatched_labeled_cells=c['e2e_cells']-c['matched_cells'])),
+                e2e_cell_accuracy=rate('correct_cells', 'e2e_cells', 'e2e_cells', excluded),
+                exact_row_accuracy=rate('exact_rows', 'fully_labeled_rows', 'fully_labeled_rows',
+                                        {'partial_rows': c['partial_rows']}),
+                columns={f: rate(f + '_correct', f + '_cells', f + '_gold_cells',
+                    dict({k: c[f + '_' + k + '_cells'] for k in ('obscured', 'unlabeled')},
+                         unmatched_labeled_cells=c[f + '_gold_cells']-c[f + '_cells'])) for f in COLUMNS})

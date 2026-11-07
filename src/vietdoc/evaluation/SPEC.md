@@ -18,6 +18,10 @@ V3 file entrypoints share `gold_validation.py`: renderer consumer semantic check
 in the Data environment, explicit annotated mode marked unvalidated otherwise.
 Scoring core remains stdlib-only; `test_evaluation_boundary.py` covers both CLI/API
 paths and normal/-O. Gold validation metadata does not certify pixels or approval.
+V4 D3.2 adds metric support/exclusions, excluded-status cell diagnostics,
+split/partition accounting and optional hash-bound AI2 OCR diagnostics via
+`diagnostics.py`. Tests in `test_evaluation_diagnostics.py` preserve partial/failure
+records without changing scores. Policies/eligibility remain Proposed.
 
 ## Ranh giới và dữ liệu
 

@@ -3,6 +3,7 @@ from copy import deepcopy
 import itertools
 import json
 from pathlib import Path
+from unittest.mock import patch
 import subprocess
 import sys
 import tempfile
@@ -52,7 +53,8 @@ class TableEvaluationTest(unittest.TestCase):
         t = evaluate_table(s, {'items': p})
         self.assertEqual([(m['gold'], m['prediction']) for m in t['matches']], [(0, 1), (1, 0)])
         m = table_metrics(t['counts'])
-        self.assertEqual(m['matched_cell_accuracy'], dict(numerator=10, denominator=10, value=1))
+        self.assertEqual(m['matched_cell_accuracy'], dict(numerator=10, denominator=10, value=1,
+            support=10, exclusions=dict(obscured=0, unlabeled=0, unmatched_labeled_cells=0), zero_denominator='null'))
         self.assertEqual(m['exact_row_accuracy']['value'], 1)
 
     def test_duplicate_signatures_use_decimal_equality_and_typed_null(self):
@@ -116,6 +118,10 @@ class TableEvaluationTest(unittest.TestCase):
         self.assertIsNone(m['exact_row_accuracy']['value'])
         self.assertEqual(t['counts']['obscured_cells'], 1)
         self.assertEqual(t['counts']['unlabeled_cells'], 1)
+        self.assertEqual(t['counts']['obscured_filled_cells'], 1)
+        self.assertEqual(t['counts']['unlabeled_filled_cells'], 1)
+        self.assertEqual(m['e2e_cell_accuracy']['support'], 3)
+        self.assertEqual(m['e2e_cell_accuracy']['exclusions'], {'obscured': 1, 'unlabeled': 1})
         self.assertEqual(t['errors'][0]['category'], 'false_fill')
         s = table_sample([row()])
         t = evaluate_table(s, {'items': [row(quantity=2.0)]})
@@ -123,6 +129,23 @@ class TableEvaluationTest(unittest.TestCase):
         s['labels']['/items/0/quantity']['status'] = 'absent'
         with self.assertRaisesRegex(ValueError, 'inconsistent gold'):
             evaluate_table(s, {})
+
+    def test_unknown_cell_diagnostics_and_missing_row_support(self):
+        s = table_sample([row()])
+        s['labels']['/items/0/unit']['status'] = 'obscured'
+        for value, diagnostic in (('candidate', 'filled'), (None, 'abstained'), (' ', 'abstained')):
+            t = evaluate_table(s, {'items': [row(unit=value)]})
+            self.assertEqual(t['counts']['obscured_'+diagnostic+'_cells'], 1)
+            self.assertEqual(table_metrics(t['counts'])['e2e_cell_accuracy']['value'], 1)
+        t = evaluate_table(s, {})
+        self.assertEqual(t['counts']['obscured_unavailable_cells'], 1)
+        m = table_metrics(t['counts'])
+        self.assertEqual(m['matched_cell_accuracy']['support'], 4)
+        self.assertEqual(m['matched_cell_accuracy']['exclusions']['unmatched_labeled_cells'], 4)
+        self.assertIsNone(m['matched_cell_accuracy']['value'])
+        self.assertEqual(m['e2e_cell_accuracy']['value'], 0)
+        self.assertEqual(m['exact_row_accuracy']['exclusions']['partial_rows'], 1)
+        self.assertEqual(m['columns']['unit']['exclusions']['obscured'], 1)
 
     def test_split_wrap_rows_are_not_silently_merged(self):
         s = table_sample([row('Trà sen hư cấu')])
@@ -235,6 +258,26 @@ class EvidenceEvaluationTest(unittest.TestCase):
 
 
 class ComparisonCalibrationTest(unittest.TestCase):
+    def test_source_hash_once_per_bundle_and_population_slices(self):
+        manifest = ROOT / 'tests/fixtures/d12/manifest.json'
+        predictions = ROOT / 'tests/fixtures/d32-known-predictions.json'
+        with patch.object(extended, 'source_hash', wraps=extended.source_hash) as hashed:
+            bundle = extended.evaluate_files(ROOT, manifest, {'a': predictions, 'b': predictions})
+        self.assertEqual(hashed.call_count, 1)
+        digest = bundle['freeze_record']['evaluator_source_sha256']
+        for report in bundle['reports'].values():
+            self.assertEqual(report['inputs']['evaluator_source_sha256'], digest)
+            self.assertTrue(all(e['evaluator_source_sha256'] == digest for e in report['correctness_labels']))
+            self.assertEqual(report['population']['split_counts'], {'unspecified': 2})
+            self.assertEqual(report['slices']['split/unspecified']['samples'], 2)
+        train, dev = table_sample([row()]), table_sample([row()])
+        train.update(sample_id='train', split='train', dev_partition=None)
+        dev.update(sample_id='dev')
+        report = extended.evaluate([train, dev], artifact(prediction(train), prediction(dev)))
+        self.assertTrue(report['population']['mixed_splits'])
+        self.assertEqual(report['population']['split_counts'], {'train': 1, 'dev': 1})
+        self.assertEqual(report['slices']['dev_partition/dev-calibration']['samples'], 1)
+
     def test_comparison_missing_and_mismatched_pins(self):
         a = {k: 'v1' for k in extended.PINS}
         self.assertTrue(extended.compare(dict(B0=a, M0=a, M1=a))['fair'])

@@ -1,5 +1,9 @@
 # D1.2 bounded integration renderer — review fixes R01–R06
 
+Handoff hiện tại dùng CLI pack/verify tái chạy được, giữ nguyên manifest/assets:
+xem [kết quả và lệnh bàn giao 07/11](HANDOFF-2026-11-07.md). Các paths `/tmp`
+trong evidence #22 bên dưới là lịch sử, không phải nơi nhận bundle hiện tại.
+
 `integration.py` tạo 20 samples từ cùng business data object với ảnh/gold. D1.1
 `values.py` cung cấp dictionary fictional; không lấy OCR/model output làm gold.
 D1.2 chỉ annotate present/absent, không dùng loader này cho D1.1 obscured/unlabeled.
