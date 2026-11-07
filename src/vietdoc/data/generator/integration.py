@@ -218,6 +218,10 @@ def occurrences(regions, pointer, alternate=False):
 
 def check_sample(root, manifest, sample, data, schema):
     kind = check_metadata(sample, data, schema)
+    family = None
+    if data['version'] == 'd2.2.v1':
+        from .templates.families import catalog
+        family = next(f for f in catalog() if f['family_id'] == sample['family_id'])
     base = manifest.parent if data['version'].startswith('d2.') else root
     expected_assets = ASSETS if data['version'] in D1_VERSIONS else ASSETS | {'pdf'}
     require(isinstance(sample['assets'], dict) and set(sample['assets']) == expected_assets, 'missing/unknown asset')
@@ -265,15 +269,30 @@ def check_sample(root, manifest, sample, data, schema):
         require(label['raw'] == raw(pointer.rsplit('/', 1)[-1], value), f'label raw mismatch: {pointer}')
         require(label['reason'] is None if status == 'present' else isinstance(label['reason'], str) and bool(label['reason']),
                 f'label reason mismatch: {pointer}')
-        alternate = data['version'] == 'd2.2.v1' and int(sample['family_id'].rsplit('f', 1)[1]) >= 5
+        alternate = family is not None and family['vocabulary'] == 'alternate'
         hits = occurrences(regions, pointer, alternate)
         if value is None:
             require(not hits, f'null field has evidence: {pointer}')
         else:
             require(hits and all(hit == label['raw'] for hit in hits), f'exact occurrence mismatch: {pointer}')
-            if data['version'] in (*D1_VERSIONS, 'd2.1.v1'):
-                require(len(hits) == (2 if pointer == '/total_amount' else 1), f'occurrence count mismatch: {pointer}')
+            # D1/D2.1 repeat the total; every D2.2 family renders each scalar
+            # once, above or below the table. Wrapped cells remain one hit.
+            expected = 2 if family is None and pointer == '/total_amount' else 1
+            require(len(hits) == expected, f'occurrence count mismatch: {pointer}')
     require(sample['label_statuses'] == dict(Counter(v['status'] for v in labels.values())), 'label status counts mismatch')
+    if family is not None:
+        policy = sample['augmentation']  # Already validated against the config.
+        statuses = {label['status'] for label in labels.values()}
+        require('unlabeled' not in statuses, 'D2 variant has unlabeled fields')
+        if policy['unreadable']:
+            require(not regions and 'present' not in statuses, 'D2 unreadable variant has evidence')
+            quality = 'unreadable'
+        elif policy['name'] == 'clean':
+            require('obscured' not in statuses, 'D2 clean variant has obscured fields')
+            quality = 'clean'
+        else:
+            quality = 'content-loss' if 'obscured' in statuses else 'bounded'
+        require(sample.get('quality') == quality, 'D2 quality mismatch')
     return gold
 
 

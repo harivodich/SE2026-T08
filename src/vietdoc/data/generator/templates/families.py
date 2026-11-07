@@ -58,7 +58,7 @@ def render_family(payload, family, font_path):
         return len(lines) * 30
 
     i = family['index']
-    labels = ALTERNATE if i >= 5 else LABELS
+    labels = {'standard': LABELS, 'alternate': ALTERNATE}[family['vocabulary']]
     text(TITLES[family['document_type']], 45, 35)
     text('DỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH', 45, 75)
     y, column_y = 130, [130, 130]

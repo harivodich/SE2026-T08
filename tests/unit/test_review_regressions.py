@@ -102,7 +102,8 @@ class ReviewRegressionTest(unittest.TestCase):
         for original in (self.d21, self.d22):
             baseline = read_json(original)
             for case in ('valid', 'hash', 'duplicate', 'type', 'schema', 'version', 'rows', 'statuses', 'lineage',
-                         'wrong-total', 'wrong-repeat', 'wrong-line', 'transcript', 'bounds', 'path'):
+                         'wrong-total', 'wrong-repeat', 'missing-repeat', 'extra-repeat',
+                         'wrong-line', 'transcript', 'bounds', 'path'):
                 data = copy.deepcopy(baseline)
                 entry = next(e for e in data['samples'] if read_json(original.parent / e['assets']['gold.json']['path'])['total_amount'] not in ('0', None))
                 changed = {}
@@ -127,7 +128,7 @@ class ReviewRegressionTest(unittest.TestCase):
                     labels['/total_amount']['raw'] = '0 đ'
                     save('gold.json', gold)
                     save('labels.json', labels)
-                elif case in ('wrong-repeat', 'wrong-line', 'bounds'):
+                elif case in ('wrong-repeat', 'missing-repeat', 'extra-repeat', 'wrong-line', 'bounds'):
                     geometry = read_json(original.parent / entry['assets']['regions.json']['path'])
                     if case == 'bounds':
                         geometry['regions'][0]['bbox_px'][0] = -1
@@ -135,6 +136,10 @@ class ReviewRegressionTest(unittest.TestCase):
                         region = next(r for r in geometry['regions'] if r['pointer'] == '/total_amount')
                         if case == 'wrong-repeat':
                             geometry['regions'].append(dict(region, text='Số tiền ghi lại: 999 đ'))
+                        elif case == 'extra-repeat':
+                            geometry['regions'].append(dict(region))
+                        elif case == 'missing-repeat':
+                            geometry['regions'].remove(region)
                         else:
                             region['text'] = 'Tổng thanh toán: 999 đ'
                     save('regions.json', geometry)
@@ -159,6 +164,8 @@ class ReviewRegressionTest(unittest.TestCase):
                                     'rows': 'invalid row_count', 'statuses': 'label status counts mismatch',
                                     'lineage': 'lineage mismatch', 'wrong-total': 'exact occurrence mismatch',
                                     'wrong-repeat': 'exact occurrence mismatch',
+                                    'missing-repeat': 'occurrence count mismatch' if original == self.d21 else 'exact occurrence mismatch',
+                                    'extra-repeat': 'occurrence count mismatch',
                                     'wrong-line': 'exact occurrence mismatch', 'transcript': 'transcript drift',
                                     'bounds': 'bbox outside image', 'path': 'invalid relative path'}
                                 self.assertIn(reasons[case].encode(), run.stderr)
