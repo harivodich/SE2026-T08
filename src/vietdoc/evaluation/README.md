@@ -1,6 +1,6 @@
-# D3.1 — offline scalar/OCR evaluator v2
+# D3.1 — offline scalar/OCR evaluator v3
 
-Independent Data evaluator, stdlib only. Reads frozen artifacts; no inference, API,
+Independent Data scoring core, stdlib only. Reads frozen artifacts; no inference, API,
 production normalizer or final-test tuning.
 
 D3.2 adds table/evidence/comparison and correctness export through `--candidate`;
@@ -10,11 +10,33 @@ retains the D3.1 behavior documented below.
 ## Policy and review status
 
 `d31-canonical-nfc-v1-proposed` is **Proposed**, pending AI-1/AI-2 review.
-Checkout has no M2.2 normalizer/policy implementation and no O1.3 output contract
-implementation. Team task descriptions specify intent, not accepted conventions.
+AI normalizer/OCR consumer source exists separately; their presence does not
+establish agreement with this evaluator's proposed conventions.
 This evaluator changes no production normalization.
-Evaluator `d3.1.v2` adds the strict-review boundary/compatibility fixes; D3.2 uses
-`d3.2.v2`. Rescore candidates together rather than comparing old/new reports.
+Evaluator `d3.1.v3` and D3.2 `d3.2.v3` enforce renderer gold validation at the
+file boundary. Metric policies remain Proposed. Rescore candidates together rather
+than comparing reports from different evaluator versions.
+
+## Gold validation at the file boundary
+
+The default `--gold-mode renderer` (Python keyword `gold_mode='renderer'`) supports
+D1.2 v1/v2 and D2.1/D2.2 v1. It runs the existing Data consumer semantic validator
+once per manifest, before scoring any candidates. Coordinated gold/raw/hash edits
+must still agree with exact sidecar occurrences, schema/type and metadata. PNG,
+regions and other declared assets are checked even for scalar-only evaluation.
+Use the isolated Data environment with `.[data]` for this path; it loads Pillow
+and jsonschema only at the file boundary, without OCR/model/API dependencies.
+
+`inputs.gold_validation` records validator version, manifest/schema/asset pins,
+validator source hashes, runtime versions and scope. This is a result of executing
+the validator now, not an externally supplied reusable receipt. It does not certify
+pixel/text agreement, strict renderer replay, annotation truth or Lead approval.
+
+Other annotation formats require explicit `--gold-mode annotated` (same Python
+keyword). They retain integrity/label checks and report `status=unvalidated` for
+semantic gold certification. Known renderer formats cannot select this mode to
+bypass validation. Annotation mode and in-memory metric functions stay stdlib-only;
+in-memory inputs are caller-owned and do not certify file provenance.
 
 - NFC; preserve Vietnamese accents and case. Trim/collapse Unicode whitespace.
   Empty/whitespace-only scalar = missing. Pin Python Unicode database version.
@@ -64,6 +86,12 @@ EM = TP / present; precision = TP/(TP+FP); recall = TP/(TP+FN);
 F1 = 2TP/(2TP+FP+FN). F1 is value-level micro F1. Absent slots never add
 correct matches. Report `support` is present gold count; absent/excluded counts
 remain explicit. Receipt/invoice, each field, critical total/date slices reported.
+
+For excluded statuses, additional `<status>_filled`, `<status>_abstained` and
+`<status>_unavailable` counts expose prediction behavior without assigning
+correctness or false-fill gold. Failed/missing/duplicate/invalid outcomes are
+unavailable, not successful abstentions. These are diagnostics, not robustness
+metrics or calibration labels.
 Critical fields are also visible per type in the per-field groups.
 
 Every metric has numerator, denominator, support, exclusions and zero-denominator

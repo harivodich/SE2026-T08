@@ -12,14 +12,14 @@ from .policy import FIELDS, VERSION as NORMALIZATION_VERSION
 from .tables import POLICY, cell, evaluate_table, table_metrics
 from .evidence import evaluate_evidence, evidence_metrics
 
-VERSION = 'd3.2.v2'
+VERSION = 'd3.2.v3'
 CALIBRATION_PROTOCOL = 'd32-correctness-v1-proposed'
 PINS = ('dataset_manifest_sha256', 'dataset_version', 'preprocess_version',
         'normalizer_version', 'ocr_version', 'schema_version')
 
 
-def load_gold(root, manifest_path):
-    manifest, samples, pins = scalar_ocr.load_gold(root, manifest_path)
+def load_bundle(root, manifest_path, *, gold_mode='renderer'):
+    manifest, samples, pins, validation = scalar_ocr.load_bundle(root, manifest_path, gold_mode=gold_mode)
     base = Path(manifest_path).parent if manifest['version'] in {'d2.1.v1', 'd2.2.v1'} else Path(root)
     for sample, entry in zip(samples, manifest['samples']):
         for key in ('family_id', 'quality', 'split', 'dev_partition', 'base_id', 'row_count'):
@@ -40,7 +40,11 @@ def load_gold(root, manifest_path):
             require(sha(path) == asset['sha256'], f'hash mismatch: {sample["sample_id"]}/regions.json')
             sample['regions'] = read_json(path)
             pins.append(dict(sample_id=sample['sample_id'], asset='regions.json', **asset))
-    return manifest, samples, pins
+    return manifest, samples, pins, validation
+
+
+def load_gold(root, manifest_path, *, gold_mode='renderer'):
+    return load_bundle(root, manifest_path, gold_mode=gold_mode)[:3]
 
 
 def source_hash():
@@ -124,6 +128,8 @@ def evaluate(samples, artifact):
             slices[axis + '/' + value].append(sample)
     report['tables'] = table_metrics(table_counts)
     report['evidence'] = evidence_metrics(evidence_counts)
+    report['evidence_exclusions'] = [d['evidence']['exclusion'] for d in details
+                                     if 'exclusion' in d['evidence']]
     report['table_evidence_samples'] = details
     report['correctness_labels'] = labels
     report['calibration_coverage'] = dict(records=len(labels), eligible=sum(e['eligible'] for e in labels),
@@ -156,10 +162,10 @@ def compare(artifacts):
                 note='Same evaluator and policy used for all supplied candidates; no full comparison unless all pins and B0/M0/M1 present.')
 
 
-def evaluate_files(root, manifest_path, prediction_paths):
-    manifest, samples, pins = load_gold(root, manifest_path)
+def evaluate_files(root, manifest_path, prediction_paths, *, gold_mode='renderer'):
+    manifest, samples, pins, validation = load_bundle(root, manifest_path, gold_mode=gold_mode)
     artifacts, reports = {}, {}
-    manifest_hash = sha(manifest_path)
+    manifest_hash = validation['manifest_sha256']
     for name, path in prediction_paths.items():
         require(isinstance(name, str) and re.fullmatch(r'[A-Za-z0-9_-]+', name), 'unsafe candidate name')
         artifact = read_json(path)
@@ -173,12 +179,13 @@ def evaluate_files(root, manifest_path, prediction_paths):
             manifest_format_version=manifest['version'],
             predictions_sha256=sha(path), assets=pins, evaluator_source_sha256=source_hash(),
             manifest_helpers_sha256=sha(Path(__file__).parents[1] / 'data/manifest.py'),
-            prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'})
+            prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'},
+            gold_validation=validation)
         for label in reports[name]['correctness_labels']:
             label.update(candidate=name, predictions_sha256=sha(path), manifest_sha256=manifest_hash,
                          dataset_version=scalar_ocr.dataset_version(manifest), manifest_format_version=manifest['version'])
     freeze = dict(status='prepared_not_frozen', decision=None, evaluator_version=VERSION,
-                  evaluator_source_sha256=source_hash(), policy=POLICY,
+                  evaluator_source_sha256=source_hash(), policy=POLICY, gold_validation=validation,
                   normalization_policy=scalar_ocr.POLICY, calibration_protocol=CALIBRATION_PROTOCOL,
                   manifest_sha256=manifest_hash, dataset_version=scalar_ocr.dataset_version(manifest),
                   manifest_format_version=manifest['version'],

@@ -14,6 +14,10 @@ Policy `d31-canonical-nfc-v1-proposed` chưa được AI-1/AI-2 duyệt; không 
 D3.2 implementation: `matching.py`, `tables.py`, `evidence.py`, `extended.py`;
 CLI thêm `--candidate NAME=PATH`. Policy/protocol/freeze vẫn Proposed, xem [D32](D32.md).
 Known-score tests: `tests/unit/test_evaluation.py`, `tests/unit/test_evaluation_tables.py`.
+V3 file entrypoints share `gold_validation.py`: renderer consumer semantic checks
+in the Data environment, explicit annotated mode marked unvalidated otherwise.
+Scoring core remains stdlib-only; `test_evaluation_boundary.py` covers both CLI/API
+paths and normal/-O. Gold validation metadata does not certify pixels or approval.
 
 ## Ranh giới và dữ liệu
 

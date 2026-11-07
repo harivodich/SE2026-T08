@@ -99,7 +99,19 @@ def evaluate_evidence(sample, prediction, table):
     gold, reason = adapt_gold(sample)
     c, details = Counter(), []
     if gold is None:
-        return dict(counts={reason: 1}, details=[])
+        # Keep the excluded annotation support visible without treating invalid
+        # geometry as scoreable gold or inventing a new exclusion metric policy.
+        raw = sample.get('regions')
+        raw_regions = raw.get('regions', []) if isinstance(raw, dict) else []
+        if not isinstance(raw_regions, list):
+            raw_regions = []
+        declared = [r for r in raw_regions if isinstance(r, dict) and
+                    isinstance(r.get('pointer'), str) and status(sample, r['pointer']) == 'present']
+        fields = len({r['pointer'] for r in declared})
+        return dict(counts={reason: 1, 'excluded_gold_samples': 1,
+                           'excluded_declared_fields': fields, 'excluded_declared_regions': len(declared)},
+                    details=[], exclusion=dict(sample_id=sample['sample_id'], reason=reason,
+                        declared_fields=fields, declared_regions=len(declared)))
     row_map = {m['gold']: m for m in table['matches']}
     metadata = defaultdict(list)
     raw_metadata = prediction.get('field_metadata', [])

@@ -40,6 +40,19 @@ def artifact(*records):
 
 
 class EvaluationTest(unittest.TestCase):
+    def test_unknown_status_fill_diagnostics_are_not_correctness_gold(self):
+        for label in ('obscured', 'unlabeled'):
+            s = sample(statuses={'merchant_name': label})
+            for value, diagnostic in (('candidate', 'filled'), (None, 'abstained'), (' ', 'abstained')):
+                p = prediction(s)
+                p['payload']['merchant_name'] = value
+                counts = evaluate([s], artifact(p))['scalar']['all']['counts']
+                self.assertEqual(counts[label + '_' + diagnostic], 1)
+                self.assertEqual((counts['tp'], counts['fp'], counts['fn']), (1, 0, 0))
+            counts = evaluate([s], artifact())['scalar']['all']['counts']
+            self.assertEqual(counts[label + '_unavailable'], 1)
+            self.assertEqual(counts['false_fill'], 0)
+
     def test_all_correct_and_type_critical_slices(self):
         r = sample(values={'transaction_date': '2026-10-25', 'total_amount': '45000'})
         i = sample('i', 'invoice', {'issue_date': '2026-10-24', 'total_amount': '12000'})

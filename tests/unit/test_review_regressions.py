@@ -76,17 +76,23 @@ class ReviewRegressionTest(unittest.TestCase):
     def test_historical_scope_adapter_and_unknown_scope_exclusion(self):
         original = read_json(self.d1)
         for version in ('d1.2.v1', 'd1.2.v2', 'unknown-format'):
-            data = dict(original, version=version)
+            data = copy.deepcopy(original)
+            data['version'] = version
+            for entry in data['samples']:
+                entry['generator_version'] = version
+            if version == 'd1.2.v1':
+                data.pop('environment')
             data.pop('transcript_scope')
             data.pop('transcript_order')
             path = self.base / 'historical.json'
             path.write_bytes(encoded(data))
-            _, samples, _ = scalar_ocr.load_gold(ROOT, path)
+            _, samples, _ = scalar_ocr.load_gold(ROOT, path,
+                gold_mode='annotated' if version == 'unknown-format' else 'renderer')
             report = scalar_ocr.evaluate(samples, artifact())
             self.assertEqual(report['ocr']['all']['cer']['support'], 0 if version == 'unknown-format' else 2)
         data['transcript_scope'] = 'qa_answers'
         path.write_bytes(encoded(data))
-        _, samples, _ = scalar_ocr.load_gold(ROOT, path)
+        _, samples, _ = scalar_ocr.load_gold(ROOT, path, gold_mode='annotated')
         self.assertEqual(scalar_ocr.evaluate(samples, artifact())['ocr']['all']['cer']['support'], 0)
 
     def test_d2_consumer_corruptions_normal_and_optimized(self):
@@ -147,6 +153,15 @@ class ReviewRegressionTest(unittest.TestCase):
                             self.assertEqual(run.returncode == 0, case == 'valid', run.stderr.decode('utf-8'))
                             if case != 'valid':
                                 self.assertIn(entry['sample_id'].encode(), run.stderr)
+                                reasons = {'hash': 'hash mismatch', 'duplicate': 'duplicate sample_id',
+                                    'type': 'D2.1 lineage mismatch' if original == self.d21 else 'D2 family/type mismatch',
+                                    'schema': 'schema_id mismatch', 'version': 'generator version mismatch',
+                                    'rows': 'invalid row_count', 'statuses': 'label status counts mismatch',
+                                    'lineage': 'lineage mismatch', 'wrong-total': 'exact occurrence mismatch',
+                                    'wrong-repeat': 'exact occurrence mismatch',
+                                    'wrong-line': 'exact occurrence mismatch', 'transcript': 'transcript drift',
+                                    'bounds': 'bbox outside image', 'path': 'invalid relative path'}
+                                self.assertIn(reasons[case].encode(), run.stderr)
                 finally:
                     for path, value in changed.items():
                         path.write_bytes(value)
@@ -158,7 +173,9 @@ class ReviewRegressionTest(unittest.TestCase):
             s = sample()
             s['labels'] = labels
             for evaluator in (scalar_ocr.evaluate, extended.evaluate):
-                with self.subTest(labels=labels, evaluator=evaluator.__module__), self.assertRaisesRegex(ValueError, 'r:'):
+                reason = ('unsupported label pointer/format' if any(
+                    p not in ('/merchant_name',) for p in labels) else 'invalid label')
+                with self.subTest(labels=labels, evaluator=evaluator.__module__), self.assertRaisesRegex(ValueError, reason):
                     evaluator([s], artifact())
         s = sample()
         s['labels'] = {'/merchant_name': {'status': 'obscured'}}

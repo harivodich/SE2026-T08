@@ -1,4 +1,4 @@
-"""D3.1 frozen-artifact evaluator. Stdlib only, no API/inference dependencies."""
+"""D3.1 scoring core is stdlib-only; renderer file validation uses the Data extra."""
 from collections import Counter, defaultdict
 import hashlib
 import json
@@ -6,10 +6,10 @@ from pathlib import Path
 
 from vietdoc.data.manifest import asset_path, read_json, require, sample_id, sha
 from .policy import FIELDS, POLICY, normalize, text
+from .gold_validation import RENDERER_VERSIONS, validate as validate_gold
 
-VERSION = 'd3.1.v2'
+VERSION = 'd3.1.v3'
 ARTIFACT_VERSION = 'vietdoc.predictions.v1'
-RENDERER_VERSIONS = {'d1.2.v1', 'd1.2.v2', 'd2.1.v1', 'd2.2.v1'}
 TRANSCRIPT_ORDER = 'renderer-draw-call-v1'
 
 
@@ -17,6 +17,7 @@ def validate_labels(sample):
     """D1.2 flat/partial pointer map only; missing pointers remain unlabeled."""
     sid, kind = sample['sample_id'], sample['document_type']
     labels, gold = sample.get('labels'), sample['gold']
+    require(isinstance(gold, dict), f'{sid}: gold must be an object')
     require(isinstance(labels, dict), f'{sid}: labels must be a flat pointer map')
     allowed = {'/' + f for f in FIELDS[kind]}
     columns = ('description', 'quantity', 'unit', 'unit_price', 'line_total')
@@ -33,14 +34,19 @@ def dataset_version(manifest):
     return manifest.get('dataset_version', manifest['version'])
 
 
-def load_gold(root, manifest_path):
+def load_bundle(root, manifest_path, *, gold_mode='renderer'):
+    manifest_hash = sha(manifest_path)
     manifest = read_json(manifest_path)
+    require(isinstance(manifest, dict), 'manifest must be an object')
     require(isinstance(manifest.get('version'), str) and manifest['version'], 'manifest version required')
+    require(isinstance(manifest.get('samples'), list), 'manifest samples must be an array')
     # Historical producers have explicit, known path conventions; never guess by existence.
     base = Path(manifest_path).parent if manifest['version'] in {'d2.1.v1', 'd2.2.v1'} else Path(root)
     samples, pins, ids = [], [], set()
     for entry in manifest['samples']:
+        require(isinstance(entry, dict), 'manifest sample must be an object')
         sid = sample_id(entry['sample_id'])
+        require(isinstance(entry.get('assets'), dict), f'{sid}: assets must be an object')
         require(sid not in ids, f'duplicate gold ID: {sid}')
         ids.add(sid)
         kind = entry['document_type']
@@ -66,7 +72,14 @@ def load_gold(root, manifest_path):
         samples.append(dict(sample_id=sid, document_type=kind, gold=loaded['gold.json'],
                             labels=loaded['labels.json'], transcript=loaded.get('txt'),
                             transcript_scope=scope, transcript_order=order))
-    return manifest, samples, pins
+    validation = validate_gold(root, manifest_path, manifest, samples,
+                               mode=gold_mode, manifest_hash=manifest_hash)
+    return manifest, samples, pins, validation
+
+
+def load_gold(root, manifest_path, *, gold_mode='renderer'):
+    """Compatibility tuple; file-based consumers still enforce the same gold gate."""
+    return load_bundle(root, manifest_path, gold_mode=gold_mode)[:3]
 
 
 def metric(numerator, denominator, support, exclusions):
@@ -164,6 +177,11 @@ def evaluate(samples, artifact):
             for c in counters:
                 c[status] += 1
             if status in ('unlabeled', 'obscured'):
+                # Diagnostics only: there is no correctness gold for these slots.
+                filled = raw_pred is not None and (not isinstance(raw_pred, str) or bool(raw_pred.strip()))
+                diagnostic = ('unavailable' if outcome != 'ok' else 'filled' if filled else 'abstained')
+                for c in counters:
+                    c[status + '_' + diagnostic] += 1
                 continue
             gold = normalize(field, raw_gold)
             require((status == 'present' and gold is not None) or
@@ -232,12 +250,12 @@ def evaluate(samples, artifact):
                 ocr=ocr_report, issues=issues, samples=outcomes, errors=errors)
 
 
-def evaluate_files(root, manifest_path, predictions_path):
-    manifest, samples, pins = load_gold(root, manifest_path)
+def evaluate_files(root, manifest_path, predictions_path, *, gold_mode='renderer'):
+    manifest, samples, pins, validation = load_bundle(root, manifest_path, gold_mode=gold_mode)
     artifact = read_json(predictions_path)
     # Reject non-JSON constants even though Python's decoder accepts NaN/Infinity.
     json.dumps(artifact, allow_nan=False)
-    manifest_hash = sha(manifest_path)
+    manifest_hash = validation['manifest_sha256']
     require(artifact.get('dataset_manifest_sha256') == manifest_hash, 'prediction dataset pin mismatch')
     if artifact.get('dataset_version') is not None:
         require(artifact['dataset_version'] == dataset_version(manifest), 'dataset version mismatch')
@@ -250,7 +268,8 @@ def evaluate_files(root, manifest_path, predictions_path):
                            predictions_sha256=sha(predictions_path), assets=pins,
                            evaluator_source_sha256=source_hash.hexdigest(),
                            manifest_helpers_sha256=sha(Path(__file__).parents[1] / 'data/manifest.py'),
-                           prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'})
+                           prediction_metadata={k: v for k, v in artifact.items() if k != 'predictions'},
+                           gold_validation=validation)
     return report
 
 

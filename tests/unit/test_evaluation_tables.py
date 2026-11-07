@@ -145,6 +145,19 @@ class TableEvaluationTest(unittest.TestCase):
 
 
 class EvidenceEvaluationTest(unittest.TestCase):
+    def test_invalid_gold_keeps_excluded_support_and_sample_identity(self):
+        s, p = geometry_sample()
+        s['regions']['regions'].append(dict(pointer='/total_amount', text='45000',
+                                            page=0, bbox_px=[0, 0, 0, 10]))
+        result = extended.evaluate([s], artifact(p))
+        self.assertEqual(result['accounting']['outcomes'], {'ok': 1})
+        self.assertEqual(result['evidence']['counts']['invalid_gold_geometry'], 1)
+        self.assertEqual(result['evidence']['counts']['excluded_declared_fields'], 2)
+        self.assertEqual(result['evidence']['counts']['excluded_declared_regions'], 2)
+        self.assertEqual(result['evidence_exclusions'], [dict(sample_id=s['sample_id'],
+            reason='invalid_gold_geometry', declared_fields=2, declared_regions=2)])
+        self.assertIsNone(result['evidence']['geometry_recall']['value'])
+
     def test_exact_shifted_and_no_overlap(self):
         s, p = geometry_sample()
         for quad, expected in (([[0, 0], [.5, 0], [.5, .5], [0, .5]], 1),

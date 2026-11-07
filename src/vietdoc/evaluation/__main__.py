@@ -10,6 +10,8 @@ def main():
     parser = argparse.ArgumentParser(description='Offline scalar/OCR evaluator (no inference)')
     parser.add_argument('--root', type=Path, required=True, help='asset root (D1.2: repository root)')
     parser.add_argument('--manifest', type=Path, required=True)
+    parser.add_argument('--gold-mode', choices=('renderer', 'annotated'), default='renderer',
+                        help='renderer enforces semantic validation; annotated explicitly marks other sources unvalidated')
     parser.add_argument('--predictions', type=Path)
     parser.add_argument('--candidate', action='append', default=[], metavar='NAME=PATH',
                         help='D3.2 mode; repeat for B0/M0/M1 or fixture; cannot combine --predictions')
@@ -26,11 +28,11 @@ def main():
             candidates[name] = Path(path)
         if args.predictions:
             parser.error('use --candidate OR --predictions')
-        write_bundle(extended_files(args.root, args.manifest, candidates), args.output)
+        write_bundle(extended_files(args.root, args.manifest, candidates, gold_mode=args.gold_mode), args.output)
         return
     if args.predictions is None:
         parser.error('--predictions or --candidate required')
-    report = evaluate_files(args.root, args.manifest, args.predictions)
+    report = evaluate_files(args.root, args.manifest, args.predictions, gold_mode=args.gold_mode)
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2,
                                                      allow_nan=False) + '\n', encoding='utf-8', newline='\n')
