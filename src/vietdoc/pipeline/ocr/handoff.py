@@ -174,9 +174,12 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
 
         class ObservedEngine:
             def recognize(self, loaded, *, remaining_budget_ms):
-                case["native_attempted"] = True
                 case["stage"] = "ocr"
-                return engine.recognize(loaded, remaining_budget_ms=remaining_budget_ms)
+                recognize = engine.recognize
+                if not callable(recognize):
+                    raise TypeError("OCR engine does not provide a callable port")
+                case["native_attempted"] = True
+                return recognize(loaded, remaining_budget_ms=remaining_budget_ms)
 
         try:
             case["stage"] = "export"

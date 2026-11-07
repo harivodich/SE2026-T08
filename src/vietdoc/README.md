@@ -191,6 +191,8 @@ không bảo đảm mọi sample thành công: CLI chỉ exit0 khi tất cả ok
 vẫn thử sample sau; unexpected exception/bare MemoryError abort, sample còn lại
 `not_run/BATCH_ABORTED`, không gọi engine. Counts luôn giữ đủ requested IDs khi
 final report ghi được; `native_attempted` chỉ tăng tại engine call thật.
+Port thiếu/non-callable hoặc lookup lỗi giữ `native_attempted=false`; lỗi vẫn vào
+fatal accounting với stage OCR, không bị tính thành một inference attempt.
 
 Stage là `input`/`preprocess`/`ocr`/`export`, hoặc `not_started` sau abort. I/O errors
 giữ stage/code riêng; lỗi export từng sample vẫn vào accounting. Lỗi ghi `run.json`

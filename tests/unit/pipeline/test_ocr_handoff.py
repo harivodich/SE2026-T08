@@ -164,6 +164,27 @@ class HandoffTest(unittest.TestCase):
             self.assertNotIn(private, text)
             self.assertNotIn("Traceback", text)
 
+    def test_unusable_engine_dispatch_does_not_count_as_an_engine_call(self):
+        class NonCallableEngine:
+            recognize = None
+
+        class FailedLookupEngine:
+            @property
+            def recognize(self):
+                raise RuntimeError("PRIVATE_TOKEN D:/private/provider")
+
+        manifest = self.manifest([self.sample(name, self.data) for name in ("one", "later")])
+        for index, engine in enumerate((object(), NonCallableEngine(), FailedLookupEngine())):
+            with self.subTest(engine=type(engine).__name__):
+                report = review_manifest(self.root, manifest, self.root / f"dispatch-{index}", engine)
+                self.assertEqual(report["run_status"], "aborted")
+                self.assertEqual(report["counts"], {"requested":2,"native_attempted":0,"ok":0,"failed":1,"not_run":1})
+                self.assertEqual(report["samples"][0]["stage"], "ocr")
+                self.assertEqual(report["samples"][0]["error_code"], "UNEXPECTED_FAILURE")
+                self.assertFalse(report["samples"][0]["native_attempted"])
+                self.assertEqual(report["samples"][1]["error_code"], "BATCH_ABORTED")
+                self.assertNotIn("PRIVATE_TOKEN", json.dumps(report))
+
     def test_typed_failures_keep_later_samples_and_distinct_stages(self):
         bad = b"not an image"
         manifest = self.manifest([self.sample("missing"), self.sample("corrupt", bad, sha256(bad).hexdigest()),
