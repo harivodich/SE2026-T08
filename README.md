@@ -4,7 +4,7 @@ Trích xuất và kiểm duyệt receipt/invoice tiếng Việt một trang: ả
 
 ## Trạng thái và stack
 
-Repository đang ở bước thiết kế/khung. 25 file Python hiện chỉ docstring; chưa có Java app, OCR/model runtime, UI, migrations hay CI implementation. Thiết kế mới: Java/Spring Boot/MVC + Thymeleaf quản lý nghiệp vụ; Python FastAPI private compute cho AI. PostgreSQL durable jobs, JPA/Flyway; không dùng React/Celery/Redis/Alembic cho MVP mới.
+Repository c? Java/Spring Boot/Thymeleaf foundation manual/demo, Data generator/fixtures v? OCR pretrained ti?ng Vi?t c?a AI-1 theo [proposal](docs/ocr-input-proposal.md). Java qu?n l? business state; Python ??m nhi?m Data/compute. Actual Java?Python OCR/extraction v? canonical viewer v?n c?n consumer integration. PostgreSQL durable jobs, JPA/Flyway; kh?ng d?ng React/Celery/Redis/Alembic cho MVP m?i.
 
 UI Thymeleaf được người dùng chọn. Chi tiết job/transport/persistence được đề xuất trong [ADR-0009](docs/adr/0009-java-python-thymeleaf.md), cần Lead duyệt; không đổi Proposed thành Accepted vì đã có docs.
 
@@ -33,7 +33,7 @@ Receipt/invoice, chữ in, một trang, selected type,≤30rows; money/quantity 
 1. Clone `https://github.com/harivodich/SE2026-T08.git` và mở folder trong Codex.
 2. Mở doc vai trò + SPEC local; Lead giao một task đủ input/acceptance, không toàn bộ backlog và không folder tasks.
 3. Bootstrap khung có thể làm trên main khi Lead yêu cầu riêng. Khi team coding bắt đầu, Lead đồng bộ develop với main đã kiểm; feature/bug→PR develop→peer review→Lead duyệt. Không tự suy ra quyền commit/push.
-4. Tạo implementation khi nhận task; chưa có commands start/train của app đã chạy. `pyproject.toml` hiện Python≥3.11, dependencies rỗng; Java Maven project sẽ do B1.3 tạo và smoke.
+4. Python?3.11: extra `data` cho renderer, `ai1` cho loader, `ai1-ocr` cho OCR; d?ng environments ri?ng theo [Python README](src/vietdoc/README.md). Java Maven/Thymeleaf foundation v? commands ? [Backend README](backend/README.md).
 
 Working roots: `backend/` Java; `src/vietdoc/` AI/Data; `tests/` Python/shared/E2E; `infra/` deploy config. `web/`, `migrations/` và Python business scaffold cũ có SPEC legacy; không viết implementation mới tại đó. Giữ chúng để đối chiếu, chưa xóa.
 

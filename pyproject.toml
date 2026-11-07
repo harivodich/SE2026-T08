@@ -12,6 +12,12 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+ai1 = ["Pillow==12.0.0", "pypdfium2==5.14.0"]
+ai1-ocr = [
+    "Pillow==12.0.0", "pypdfium2==5.14.0", "numpy==2.2.6",
+    "paddleocr==3.3.2", "paddlex[ocr-core]==3.3.13", "paddlepaddle==3.3.1", "tesserocr==2.12.0",
+    "opencv-contrib-python==4.10.0.84", "shapely==2.2.0", "pyclipper==1.4.0",
+]
 # Keep these validator pins aligned in contracts/serve/train. Explicit lists
 # also work during the Docker dependency layer, before application source exists.
 contracts = [
