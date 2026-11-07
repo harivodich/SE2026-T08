@@ -110,6 +110,68 @@ for metadata, gold in load_artifacts(root, root / 'datasets/manifests/d12-recrea
     print(metadata['sample_id'], metadata['document_type'], len(gold['items']))
 ```
 
+## Bàn giao bundle D1.2 hiện có — #22 (07/11/2026)
+
+Nhận bundle đã copy nguyên bytes; **không generate lại** để lấy 18 ảnh còn lại.
+Bundle `vietdoc-d12-handoff-v2.tar.gz` chứa đúng 102 files, paths relative root
+giải nén (không có directory bao ngoài):
+
+```text
+datasets/manifests/d12-integration-v2.json
+datasets/processed/d12-review-fixed-v2/<sample_id>.png
+datasets/processed/d12-review-fixed-v2/<sample_id>.gold.json
+datasets/processed/d12-review-fixed-v2/<sample_id>.txt
+datasets/processed/d12-review-fixed-v2/<sample_id>.regions.json
+datasets/processed/d12-review-fixed-v2/<sample_id>.labels.json
+specs/contracts/business.schema.json
+```
+
+20 IDs là `d12-receipt-01`…`10` và `d12-invoice-01`…`10`. Hai tiny IDs
+`d12-receipt-03` và `d12-invoice-04` có toàn bộ 5 asset hashes khớp fixtures;
+18 IDs còn lại là phần cần AI1 replay, không phải ảnh cần render thêm.
+
+| Pin | SHA-256 |
+|---|---|
+| Archive local đã kiểm | `25cb312786f780755d7459f85bee83c949d0a8988936d3470da1fdb08cf7f305` |
+| Manifest `d1.2.v2` | `093b8f772d19e5357ee6209f3358f44d7a072f457aaef64507f38081c0e70e9a` |
+| Business schema | `0948307b0c274d565fbe89b25d69f1692d0d6a4241352939f424ce0eba6b3ded` |
+
+Archive checksum pin đúng file đã bàn giao local; đóng gói lại có thể đổi archive
+bytes dù hashes của manifest/assets không đổi. `SHA256SUMS` và
+`bundle-inventory.json` nằm cạnh archive, ngoài Git. Hiện artifacts chỉ ở
+`/tmp/vietdoc-batch-a-2026-11-07/22.2/` trên máy Data, chưa upload/chuyển cho consumer;
+`/tmp` có thể bị dọn. Cần chuyển archive và hai file kèm qua kênh được team chọn
+trước khi consumer khác máy dùng; không coi paths này là URL tải chung.
+
+### Verify bundle — Bash/Linux
+
+Dùng Python của **Data environment đã có** với `.[data]`; không cài gộp vào AI1.
+Source loader/config được cung cấp riêng từ checkout snapshot `961d0f7` (hoặc
+revision tương thích đã kiểm); archive không chứa source, dependencies hay model.
+Từ repository root, sau khi nhận archive/checksum vào một directory local, đặt
+`d12_bundle_dir` trỏ tới directory đó. Lệnh dưới dùng vị trí local đã kiểm:
+
+```sh
+d12_source_root="$PWD"
+d12_bundle_dir=/tmp/vietdoc-batch-a-2026-11-07/22.2
+(cd "$d12_bundle_dir" && sha256sum -c SHA256SUMS)
+d12_assets_root=$(mktemp -d /tmp/vietdoc-d12-relocated.XXXXXX)
+tar -xzf "$d12_bundle_dir/vietdoc-d12-handoff-v2.tar.gz" -C "$d12_assets_root"
+PYTHONPATH="$d12_source_root/src" python3 -m vietdoc.data.generator.integration --verify --full-set --root "$d12_assets_root" --manifest datasets/manifests/d12-integration-v2.json
+PYTHONPATH="$d12_source_root/src" python3 -O -m vietdoc.data.generator.integration --verify --full-set --root "$d12_assets_root" --manifest datasets/manifests/d12-integration-v2.json
+```
+
+Chỉ tiếp tục giải nén khi checksum PASS; chỉ dùng output khi cả hai verify trả
+exit 0, `samples=20`, `receipt=10`, `invoice=10`. Root phải là directory mới,
+không giải nén đè reference/checkout cũ. D1 paths resolve theo `--root`, không
+theo directory chứa manifest. Chưa kiểm lệnh bundle này trên Windows.
+
+AI1 dùng ảnh từ root giải nén với runtime/model riêng đã có; không chạy inference
+trong Data environment. Replay cần pin input manifest, source/runtime/model và
+ghi per-ID outcome/error: `requested=20`, `ok+failed+not_run=20`,
+`native_attempted` riêng. Verify Data PASS chưa là native OCR PASS hoặc consumer
+acceptance. Xem [QA và giới hạn](../../../../datasets/manifests/d12-QA.md#handoff-22--inventorybundle-relocation-07112026).
+
 ## Evidence và limitations
 
 Geometry là renderer-local-v1, page 0, top-left pixel ink boxes, chưa là shared

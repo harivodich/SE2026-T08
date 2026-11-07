@@ -36,6 +36,43 @@ PYTHONPATH=src python3 -O -m vietdoc.data.generator.integration --verify --full-
 
 Các mẫu tamper chỉ nằm trong temp directories của tests; fixtures/reference v1 không bị sửa. `git diff --check` sạch, assets v2 được xác nhận Git ignore. Các kết quả lịch sử này không thay peer/Lead approval hoặc gate consumer.
 
+## Handoff #22 — inventory/bundle relocation (07/11/2026)
+
+Evidence 22.1–22.3 pin source `961d0f7eea0b046ce05f8a88f789fdfd7bf9726b`;
+không render lại, không sửa manifest/assets lịch sử. Inventory đủ 20 IDs,
+10 receipt/10 invoice, 204 rows, 100 assets; không missing/hash mismatch.
+Hai tiny IDs receipt-03/invoice-04 khớp cả 10 asset hashes. Danh sách 18 IDs
+formerly-NOT_RUN được suy ra bằng cách trừ hai tiny IDs từ bộ 20 theo handoff
+03/11; chưa đối chiếu original per-ID AI1 report, chưa claim replay mới.
+
+Bundle có manifest + 100 assets + business schema (102 files), giữ structure D1.
+Hash từng bản copy, từng member trong archive và nguồn sau đóng gói đều khớp.
+Giải nén vào root mới rồi verify CLI normal, `-O` và loader API đều PASS 20/10/10;
+manifest/tiny pins không đổi. Trong cả ba lượt, audit hook chặn đọc inputs từ
+`datasets/`, `specs/`, `tests/` của checkout gốc và staging bundle cũ. Source Python
+vẫn import từ checkout riêng; bundle không phải standalone runtime.
+
+Evidence local ngoài Git ở `/tmp/vietdoc-batch-a-2026-11-07/`:
+
+- `22.1/inventory.json`, `22.1/full-set20.log`: asset/source hashes và render/verify env.
+- `22.2/vietdoc-d12-handoff-v2.tar.gz`, `SHA256SUMS`, `bundle-inventory.json`:
+  archive pin/inventory (hai file metadata cùng directory `22.2`).
+- `22.3/relocation-report.json`, `full-set-normal.log`, `full-set-optimized.log`,
+  `full-set-api.log`: root mới, blocked roots, hashes và kết quả từng lượt.
+
+Đây là vị trí trên máy Data, có thể bị dọn; chưa chuyển/upload artifacts hoặc
+đăng evidence lên Issue/PR. Layout, checksum và commands nhận bundle ở
+[runbook](../../src/vietdoc/data/generator/README.md#bàn-giao-bundle-d12-hiện-có--22-07112026).
+
+Verification dùng Python 3.12.3/Linux, Pillow 10.2.0/jsonschema 4.10.3 đã có;
+binary hashes `_imaging`, `_imagingft`, libpng và libz khác render fingerprint
+lịch sử lưu trong manifest. Loader chỉ kiểm structure/integrity/schema/sidecars;
+không so environment hiện tại để chứng nhận tái tạo canonical bytes. Không chạy
+canonical rendering, OCR/model, Windows bundle replay hoặc API/viewer ở increment
+này. Smoke không chứng minh pixel/text agreement, nguồn độc lập hay untouched
+holdout. **22.5 native20 và 22.6 Consumer/Lead acceptance còn chờ**, không có kết
+quả inference/approval mới từ việc đóng gói.
+
 ## Kiểm tra tại snapshot D1.2 ban đầu
 
 - Mở năm contact sheets bao phủ cả 20 PNG; mở riêng PNG receipt-09 và invoice-10 để xem kỹ mẫu 30 rows. Dấu tiếng Việt đọc được, không thấy clipping hoặc chồng hàng; description dài wrap thành hai dòng. Trang ngắn còn nhiều khoảng trắng có chủ ý.
