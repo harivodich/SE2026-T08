@@ -1,0 +1,33 @@
+# Shared root context for AI and Java/Web images; no data/models/runtime/secrets.
+**
+!pyproject.toml
+!src/
+!src/**
+!specs/
+!specs/contracts/
+!specs/contracts/**
+!tests/
+!tests/**
+# CI runner code only, used by the Linux test target (not the runtime stage).
+!scripts/
+!scripts/ci/
+!scripts/ci/**
+# Tiny fictional JSON examples consumed by the shared-schema tests only.
+!docs/
+!docs/design/
+!docs/design/v1/
+!docs/design/v1/examples/
+!docs/design/v1/examples/**
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
+# Spring Boot packages the current Thymeleaf templates and static assets.
+!backend/
+!backend/Dockerfile
+!backend/pom.xml
+!backend/src/
+!backend/src/**
+!web/
+!web/src/
+!web/src/**

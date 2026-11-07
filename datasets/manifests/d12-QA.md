@@ -13,11 +13,13 @@ Checkout hiện tại đã merge guidance từ main (commit b5a6ee9), có `docs/
 - R01: D1 reads dùng UTF-8 tường minh, D1.1 writer LF; D1.2 JSON/transcript ghi bytes UTF-8/LF. D1.1 tests pass với harness default cp1252; D1.2 có test cp1252. Chưa chạy native Windows.
 - R02: font test/CLI nhận `VIETDOC_DATA_FONT`/`--font`, có discovery và lỗi rõ nếu thiếu font/glyph. Portable test render với DejaVuSerif pass (chỉ skip canonical-only test). Test canonical bật `VIETDOC_CANONICAL_BYTES=1` pass với fingerprint được lưu ở tiny fixtures; không bỏ checks hash. Data render environment tách khỏi AI extras; chưa resolve chung với AI.
 - R03: adapter renderer-local-v1 strip label prefix chính xác, group wrap liên tiếp và so toàn bộ từng occurrence. Negative controls ảnh/text 37.500/gold 0, 180.000/gold 80.000 và một repeated occurrence sai đều bị từ chối sau cập nhật hashes. PNG/text/box agreement vẫn cần visual audit, không suy ra từ sidecar equality.
-- R04: manifest/sample shape/version, nhánh business theo type, schema ID, row/status counts, ID/lineage và asset set được kiểm. `--full-set` yêu cầu đủ 20 IDs/type/layout/row profiles; tiny loader vẫn hỗ trợ 2 mẫu. Seed/font/environment ghi provenance; generic loader không chứng minh nó thực sự là nguồn render. D2.2 adapter smoke giữ obscured/unlabeled; strict split/source checks thuộc `d22.validate`.
+- R04: manifest/sample shape/version, nhánh business theo type, schema ID, row/status counts, ID/lineage và asset set được kiểm. `--full-set` yêu cầu đủ 20 IDs/type/layout/row profiles; tiny loader vẫn hỗ trợ 2 mẫu. Seed/font/environment ghi provenance; generic loader không chứng minh nó thực sự là nguồn render. D2.2 adapter smoke giữ obscured/unlabeled; strict split/source checks thuộc `d22.validate`. D1.2 vẫn chỉ nhận present/absent; không nhận partial D1.1 để tránh biến null thành absent.
 - R05: README có Bash/PowerShell setup và generate/verify cùng manifest mới. Đã chạy trên bản sao source sạch không có assets ignored cũ, với dependencies sẵn có; chưa thử fresh dependency installation hoặc Windows shell thật. Chưa có consumer AI/Backend chạy độc lập.
 - R06: integrity dùng ValueError kèm sample ID thay cho asserts. Tests subprocess normal và -O đều từ chối hash/path/duplicate/transcript/bbox/missing file sai, input đúng pass.
 
 Output mới: `datasets/processed/d12-review-fixed-v2/` (ignored), safe manifest `datasets/manifests/d12-integration-v2.json` (version d1.2.v2, có environment). 20 samples 10/10, 100 asset hashes khớp toàn bộ reference v1 trong môi trường canonical; không đổi gold/ảnh cũ để làm test xanh. Tiny v1 vẫn load được, không thêm environment giả cho bản lịch sử.
+
+Checks trên branch PR #8: 6 D1.1 tests + 8 D1.2 tests, canonical bytes và portable font alternative; không gồm code/tests D2/D3. Native Windows và consumer AI/Backend handoff chưa chạy. Không claim CI hoặc API/model/browser pass.
 
 Checks bổ sung: 6 D1.1 tests pass; 8 D1.2 tests pass khi bật canonical; 32 D3 evaluator regressions pass. Full Data run đầu có 29 pass/1 error do adapter D2.2 đòi `seed` thay vì `value_seed`; đã sửa adapter và chạy lại `PYTHONPATH=src:tests/unit python3 -m unittest test_data_d22.DatasetTest.test_consumer_and_counts -v`: 1 test pass với 80 mẫu sinh mới. Không gọi lượt full-run lỗi ban đầu là xanh; focused rerun xác nhận lỗi đã sửa. Không claim CI hoặc API/model/browser pass.
 
@@ -32,7 +34,7 @@ PYTHONPATH=src:tests/unit python3 -m unittest test_data_d22.DatasetTest.test_con
 PYTHONPATH=src python3 -O -m vietdoc.data.generator.integration --verify --full-set --manifest datasets/manifests/d12-integration-v2.json
 ```
 
-Các mẫu tamper chỉ nằm trong temp directories của tests; fixtures/reference v1 không bị sửa. `git diff --check` sạch, assets v2 được xác nhận Git ignore. Chưa commit/push/đổi PR hoặc tuyên bố các gate team đã duyệt.
+Các mẫu tamper chỉ nằm trong temp directories của tests; fixtures/reference v1 không bị sửa. `git diff --check` sạch, assets v2 được xác nhận Git ignore. Các kết quả lịch sử này không thay peer/Lead approval hoặc gate consumer.
 
 ## Kiểm tra tại snapshot D1.2 ban đầu
 

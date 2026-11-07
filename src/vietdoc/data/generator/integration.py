@@ -9,7 +9,7 @@ import re
 from PIL import Image, ImageFont
 from jsonschema import Draft202012Validator
 
-from ..manifest import asset_path, encoded, read_json, require, sample_id, sha
+from .artifact_io import asset_path, encoded, read_json, require, sample_id, sha
 from .render_environment import environment
 from .rendering import FONT, render, raw
 from .templates import LABELS

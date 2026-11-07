@@ -12,6 +12,10 @@ Lead 6/Data 8/AI-1 8/AI-2 12/Backend 15 = 49 task cards; workflow handoffs/gates
 
 Không folder tasks hoặc duplicate roadmap file, IDs không GitHub issues đã tạo.
 
+`AI-2/` lưu nhật ký và ghi chú kỹ thuật theo yêu cầu người dùng ngày 29/10/2026.
+Không sao chép roadmap/task cards hoặc thay Issue/PR làm authority tiến độ/approval;
+phân biệt source đã có, kết quả kiểm lịch sử và đề xuất chưa triển khai.
+
 ## Workflow và kiểm tra
 
 Đọc [doc vai trò](lead.md), nhận một task có input/version/output/acceptance. Dependency proposals khác hard prerequisites; outputs/acceptance/evidence rõ, not done because week ended. Ghi actual commands/results và limitations, [Git Flow](../git-flow.md); không tự commit/push/deploy.

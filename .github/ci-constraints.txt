@@ -1,0 +1,6 @@
+# CI Data environment only. Business/AI runtime dependencies remain separate.
+# Data pins in pyproject.toml remain authoritative.
+attrs==26.1.0
+pyrsistent==0.20.0
+setuptools==75.8.0
+wheel==0.45.1

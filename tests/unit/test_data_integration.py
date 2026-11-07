@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from vietdoc.data.generator.integration import build, load_artifacts, samples, resolve_font, environment
-from vietdoc.data.manifest import encoded, read_json, sha
+from vietdoc.data.generator.artifact_io import encoded, read_json, sha
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / 'tests/fixtures/d12/manifest.json'

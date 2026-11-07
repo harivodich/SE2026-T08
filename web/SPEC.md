@@ -2,11 +2,11 @@
 
 ## Purpose và owner
 
-Legacy scaffold: không dùng để triển khai mới. Owner: Backend giữ reference.
+Legacy runtime/test scaffold; Backend giữ reference. Node tests hiện hành nằm ở `backend/src/test/js/`.
 
 ## Đặt gì ở đây?
 
-Không thêm runtime code/dependencies ở đây. Đích: backend/src/main/resources/templates và static.
+Không thêm runtime code/dependencies ở đây. Đích: `backend/src/main/resources/templates`, `backend/src/main/resources/static` và `backend/src/test/js`.
 
 ## Ranh giới
 

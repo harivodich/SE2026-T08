@@ -1,0 +1,72 @@
+name: Web and backend
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main, 'feature/**', 'bug/**', 'hotfix/**']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Web tests
+        run: node --test
+        working-directory: backend/src/test/js
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Java tests
+        run: bash mvnw -B test
+        working-directory: backend
+      - name: Package application
+        run: bash mvnw -B -DskipTests package
+        working-directory: backend
+      - name: Check packaged web assets
+        run: |
+          jar tf backend/target/vietdoc-backend-1.0.0.jar > jar-contents.txt
+          for asset in templates/index.html static/app.js static/api.js static/domain.js static/styles.css; do
+            grep -Fx "BOOT-INF/classes/$asset" jar-contents.txt
+          done
+
+  docker-smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build image from repository root
+        run: docker build -f backend/Dockerfile -t vietdoc-web-smoke .
+      - name: Start demo container
+        id: container
+        run: docker run -d --name vietdoc-web-smoke -p 18080:8080 -e SPRING_PROFILES_ACTIVE=demo -e WORKER_ENABLED=false vietdoc-web-smoke
+      - name: Check rendered page and static assets
+        run: |
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://localhost:18080/ -o index.html; then break; fi
+            if [ "$attempt" -eq 40 ]; then exit 1; fi
+            sleep 2
+          done
+          grep -q 'name="_csrf"' index.html
+          for asset in app.js api.js domain.js styles.css; do
+            curl -fsS "http://localhost:18080/$asset" -o /dev/null
+          done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/api/v1/auth/me)" = 401
+      - name: Container logs on failure
+        if: failure() && steps.container.outcome == 'success'
+        run: docker logs vietdoc-web-smoke
+      - name: Stop demo container
+        if: always()
+        run: docker rm -f vietdoc-web-smoke || true

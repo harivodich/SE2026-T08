@@ -7,7 +7,7 @@ import zlib
 
 from PIL import Image, ImageFont, features
 
-from ..manifest import sha
+from .artifact_io import sha
 
 
 def environment():
