@@ -21,6 +21,22 @@ from vietdoc.pipeline.ocr import OCR_STAGE_VERSION, OcrError, recognize_document
 from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits
 
 
+HANDOFF_REPORT_VERSION = "vietdoc.ocr-handoff.v2"
+
+
+class HandoffError(ValueError):
+    """Safe local CLI/storage error; never includes exception text or paths."""
+
+    def __init__(self, code, stage):
+        self.code, self.stage = code, stage
+        super().__init__(code)
+
+
+def _io_code(stage):
+    return {"input": "LOCAL_INPUT_IO_ERROR", "preprocess": "LOCAL_PREPROCESS_IO_ERROR",
+            "ocr": "LOCAL_OCR_IO_ERROR", "export": "LOCAL_EXPORT_FAILED"}[stage]
+
+
 def _json(path, data):
     with path.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(data, stream, ensure_ascii=False, indent=2)
@@ -79,8 +95,8 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
         assets = sample.get("assets")
         _asset(root, assets.get("png") if isinstance(assets, dict) else None)
     limits = PreprocessLimits() if limits is None else limits
-    output_dir.mkdir(parents=True, exist_ok=False)
     report = {"kind": "offline D1 OCR handoff; not evaluator or consumer acceptance",
+              "report_version": HANDOFF_REPORT_VERSION, "run_status": "completed", "abort_code": None,
               "manifest_version": manifest.get("version"), "manifest_sha256": sha256(manifest_path.read_bytes()).hexdigest(),
               "provider": type(engine).__name__, "python": platform.python_version(), "hardware": platform.platform(),
               "engine_load_seconds": getattr(engine, "load_seconds", None),
@@ -90,8 +106,8 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
               "profile": {"processed_long_edge": limits.processed_long_edge, "pdf_dpi": limits.pdf_dpi,
                           "max_pixels": limits.max_pixels, "budget_ms": remaining_budget_ms},
               "consumer_acceptance": "pending AI2/Backend; local parser check only", "samples": []}
+    plans = []
     for sample in selected:
-        started, stage = time.monotonic(), "input_handoff"
         sample_id, asset = sample["sample_id"], sample["assets"]["png"]
         path = _asset(root, asset)
         fallback = False
@@ -101,22 +117,36 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
             fallback = True
         case = {"sample_id": sample_id, "document_type": sample["document_type"],
                 "input_declared_path": asset["path"], "fixture_fallback": fallback,
-                "expected_input_sha256": asset["sha256"], "native_attempted": False}
-        target = output_dir / sample_id
-        target.mkdir()
+                "expected_input_sha256": asset["sha256"], "native_attempted": False,
+                "status": "not_run", "stage": "not_started", "error_code": "BATCH_ABORTED",
+                "duration_seconds": 0.0}
+        report["samples"].append(case)
+        plans.append((case, path))
+    try:
+        output_dir.mkdir(parents=True, exist_ok=False)
+    except OSError:
+        raise HandoffError("OUTPUT_DIRECTORY_UNAVAILABLE", "export") from None
+    for case, path in plans:
+        started = time.monotonic()
+        case.pop("error_code")
+        target = output_dir / case["sample_id"]
 
         class ObservedEngine:
             def recognize(self, loaded, *, remaining_budget_ms):
                 case["native_attempted"] = True
+                case["stage"] = "ocr"
                 return engine.recognize(loaded, remaining_budget_ms=remaining_budget_ms)
 
         try:
+            case["stage"] = "export"
+            target.mkdir()
+            case["stage"] = "input"
             with path.open("rb") as stream:
                 data = stream.read(limits.max_file_bytes + 1)
-            stage = "preprocess_ocr"
+            case["stage"] = "preprocess"
             with recognize_document(data, ObservedEngine(), limits=limits, remaining_budget_ms=remaining_budget_ms,
-                                    expected_sha256=asset["sha256"]) as result:
-                stage = "local_export"
+                                    expected_sha256=case["expected_input_sha256"]) as result:
+                case["stage"] = "export"
                 loaded, page = result.loaded, result.ocr
                 with BytesIO() as encoded:
                     loaded.canonical.save(encoded, format="PNG")
@@ -140,20 +170,35 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
                             ocr_seconds=getattr(engine, "last_inference_seconds", None), memory_bytes=_memory(),
                             local_consumer_parse="passed; not AI2/Backend acceptance")
         except FileNotFoundError:
-            case.update(status="not_run" if stage == "input_handoff" else "failed", stage=stage,
-                        error_code="INPUT_ARTIFACT_UNAVAILABLE" if stage == "input_handoff" else "LOCAL_EXPORT_FAILED")
+            missing_input = case["stage"] == "input"
+            case.update(status="not_run" if missing_input else "failed",
+                        error_code="INPUT_ARTIFACT_UNAVAILABLE" if missing_input else _io_code(case["stage"]))
         except (OcrError, PreprocessError) as exc:
-            case.update(status="failed", stage=stage, error_code=exc.code)
+            case.update(status="failed", error_code=exc.code)
         except OSError:
-            case.update(status="failed", stage=stage, error_code="LOCAL_IO_ERROR")
-        except MemoryError:
-            case.update(status="failed", stage=stage, error_code="LOCAL_MEMORY_EXHAUSTED")
+            case.update(status="failed", error_code=_io_code(case["stage"]))
+        except Exception as exc:
+            code = "LOCAL_MEMORY_EXHAUSTED" if isinstance(exc, MemoryError) else "UNEXPECTED_FAILURE"
+            case.update(status="failed", error_code=code)
+            report.update(run_status="aborted", abort_code=code)
         case["duration_seconds"] = time.monotonic() - started
-        report["samples"].append(case)
-        _json(target / "run.json", case)
+        try:
+            _json(target / "run.json", case)
+        except OSError:
+            case["record_write_error"] = "LOCAL_EXPORT_FAILED"
+            if case["status"] == "ok":
+                case.update(status="failed", stage="export", error_code="LOCAL_EXPORT_FAILED")
+        except Exception:
+            case.update(status="failed", stage="export", error_code="UNEXPECTED_FAILURE")
+            report.update(run_status="aborted", abort_code="UNEXPECTED_FAILURE")
+        if report["run_status"] == "aborted":
+            break
     report["counts"] = {"requested": len(selected), "native_attempted": sum(c["native_attempted"] for c in report["samples"]),
                         **{s: sum(c["status"] == s for c in report["samples"]) for s in ("ok", "failed", "not_run")}}
-    _json(output_dir / "report.json", report)
+    try:
+        _json(output_dir / "report.json", report)
+    except Exception:
+        raise HandoffError("LOCAL_REPORT_WRITE_FAILED", "export") from None
     return report
 
 
@@ -170,18 +215,34 @@ def main():
     parser.add_argument("--fixture-fallback", action="store_true")
     parser.add_argument("--artifact-version", type=int, choices=(1,2), default=1)
     args = parser.parse_args()
-    engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
+    engine, stage, report_written = None, "engine_load", False
     try:
+        engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
         engine.load()
+        stage = "input"
         report = review_manifest(args.root, args.manifest, args.output_dir, engine,
                                  sample_ids=args.sample_ids, fixture_fallback=args.fixture_fallback)
-        print(json.dumps(report["counts"]))
-        return 0 if report["counts"]["ok"] == report["counts"]["requested"] else 2
-    except OcrError as exc:
-        print(json.dumps({"code": exc.code, "stage": "engine_load"}))
-        return 2
+        report_written = True
+        payload = {"counts": report["counts"], "run_status": report["run_status"], "report_written": True}
+        status = 0 if report["run_status"] == "completed" and report["counts"]["ok"] == report["counts"]["requested"] else 2
+    except HandoffError as exc:
+        payload, status = {"code": exc.code, "stage": exc.stage, "report_written": False}, 2
+    except (OcrError, PreprocessError) as exc:
+        payload, status = {"code": exc.code, "stage": stage, "report_written": False}, 2
+    except ValueError:
+        payload, status = {"code": "MANIFEST_INVALID" if stage == "input" else "ENGINE_SETUP_FAILED",
+                           "stage": stage, "report_written": False}, 2
+    except Exception:
+        payload, status = {"code": "UNEXPECTED_FAILURE", "stage": stage, "report_written": False}, 2
     finally:
-        engine.close()
+        if engine is not None:
+            try:
+                engine.close()
+            except Exception:
+                payload, status = {"code": "ENGINE_CLOSE_FAILED", "stage": "engine_close",
+                                   "report_written": report_written}, 2
+    print(json.dumps(payload))
+    return status
 
 
 if __name__ == "__main__":

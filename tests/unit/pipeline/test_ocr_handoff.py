@@ -3,18 +3,20 @@
 from hashlib import sha256
 from copy import deepcopy
 from dataclasses import replace
-from io import BytesIO
+from contextlib import redirect_stdout
+from io import BytesIO, StringIO
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from PIL import Image
 
 from vietdoc.contracts.ocr import OcrPage, PreparedPage
 from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
 from vietdoc.pipeline.ocr import OcrError
+from vietdoc.pipeline.ocr import handoff
 from vietdoc.pipeline.ocr.handoff import review_manifest
 from vietdoc.pipeline.ocr.paddle_adapter import VietnameseOcrEngine, _to_page
 from vietdoc.pipeline.geometry import canonical_quad
@@ -52,6 +54,131 @@ class HandoffTest(unittest.TestCase):
         return {"sample_id": name, "document_type": "receipt", "assets": {
             "png": {"path": name + ".png", "sha256": digest or sha256(self.data).hexdigest()}}}
 
+    def run_cli(self, manifest, output):
+        stream = StringIO()
+        argv = ["ocr-handoff", "--root", str(self.root), "--manifest", str(manifest),
+                "--output-dir", str(output), "--model-root", "unused-local-models"]
+        with patch("sys.argv", argv), patch("vietdoc.pipeline.ocr.paddle_adapter.VietnameseOcrEngine", return_value=self.engine), redirect_stdout(stream):
+            status = handoff.main()
+        return status, json.loads(stream.getvalue())
+
+    def test_unexpected_engine_failure_aborts_with_complete_accounting_and_safe_cli(self):
+        private = "PRIVATE_TOKEN D:/private/document.png"
+        manifest = self.manifest([self.sample(name, self.data) for name in ("one", "two", "later")])
+        self.engine.recognize.side_effect = [OcrPage(0,60,40,"fictional.test",()), ValueError(private)]
+        output = self.root / "aborted"
+        status, payload = self.run_cli(manifest, output)
+        self.assertNotEqual(status, 0)
+        self.assertTrue(payload["report_written"])
+        report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["run_status"], "aborted")
+        self.assertEqual(report["report_version"], "vietdoc.ocr-handoff.v2")
+        self.assertEqual(report["counts"], {"requested":3,"native_attempted":2,"ok":1,"failed":1,"not_run":1})
+        self.assertEqual([s["sample_id"] for s in report["samples"]], ["one", "two", "later"])
+        self.assertEqual(report["samples"][1]["stage"], "ocr")
+        self.assertEqual(report["samples"][1]["error_code"], "UNEXPECTED_FAILURE")
+        self.assertEqual(report["samples"][2]["error_code"], "BATCH_ABORTED")
+        self.assertFalse(report["samples"][2]["native_attempted"])
+        self.assertEqual(self.engine.recognize.call_count, 2)
+        self.engine.close.assert_called_once()
+        for text in (json.dumps(payload), json.dumps(report)):
+            self.assertNotIn(private, text)
+            self.assertNotIn("Traceback", text)
+
+    def test_typed_failures_keep_later_samples_and_distinct_stages(self):
+        bad = b"not an image"
+        manifest = self.manifest([self.sample("missing"), self.sample("corrupt", bad, sha256(bad).hexdigest()),
+                                  self.sample("ocrbad", self.data), self.sample("exportbad", self.data), self.sample("last", self.data)])
+        self.engine.recognize.side_effect = [OcrError("MODEL_OOM", "safe"), OcrPage(0,60,40,"fictional.test",()), OcrPage(0,60,40,"fictional.test",())]
+        original = handoff._json
+        def write(path, data):
+            if path.parent.name == "exportbad" and path.name == "ocr.json":
+                raise PermissionError("PRIVATE_TOKEN D:/private/output")
+            return original(path, data)
+        with patch.object(handoff, "_json", side_effect=write):
+            report = review_manifest(self.root, manifest, self.root / "stages", self.engine)
+        self.assertEqual(report["run_status"], "completed")
+        self.assertEqual(report["counts"], {"requested":5,"native_attempted":3,"ok":1,"failed":3,"not_run":1})
+        self.assertEqual([s["stage"] for s in report["samples"]], ["input","preprocess","ocr","export","export"])
+        self.assertEqual([s.get("error_code") for s in report["samples"]], ["INPUT_ARTIFACT_UNAVAILABLE","INPUT_INVALID","MODEL_OOM","LOCAL_EXPORT_FAILED",None])
+
+    def test_per_sample_record_storage_failure_retains_final_accounting(self):
+        manifest = self.manifest([self.sample(name, self.data) for name in ("one", "later")])
+        original = handoff._json
+        def write(path, data):
+            if path.parent.name == "one" and path.name == "run.json":
+                raise OSError("PRIVATE_TOKEN D:/private/output")
+            return original(path, data)
+        output = self.root / "record-failure"
+        with patch.object(handoff, "_json", side_effect=write):
+            status, payload = self.run_cli(manifest, output)
+        self.assertNotEqual(status, 0)
+        self.assertTrue(payload["report_written"])
+        report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["counts"], {"requested":2,"native_attempted":2,"ok":1,"failed":1,"not_run":0})
+        self.assertEqual(report["samples"][0]["record_write_error"], "LOCAL_EXPORT_FAILED")
+        self.assertFalse((output / "one/run.json").exists())
+        self.assertEqual(report["samples"][1]["status"], "ok")
+        for image in self.images:
+            with self.assertRaises(ValueError): image.getpixel((0,0))
+
+    def test_final_report_storage_failure_exits_safely_without_claiming_written(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        original = handoff._json
+        def write(path, data):
+            if path.name == "report.json":
+                raise OSError("PRIVATE_TOKEN D:/private/output")
+            return original(path, data)
+        output = self.root / "report-failure"
+        with patch.object(handoff, "_json", side_effect=write):
+            status, payload = self.run_cli(manifest, output)
+        self.assertNotEqual(status, 0)
+        self.assertFalse(payload["report_written"])
+        self.assertEqual(payload["code"], "LOCAL_REPORT_WRITE_FAILED")
+        self.assertEqual(payload["stage"], "export")
+        self.assertNotIn("PRIVATE_TOKEN", json.dumps(payload))
+        self.assertFalse((output / "report.json").exists())
+
+    def test_output_directory_failure_is_safe_and_never_calls_engine(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        with patch.object(Path, "mkdir", side_effect=PermissionError("PRIVATE_TOKEN D:/private/output")):
+            status, payload = self.run_cli(manifest, self.root / "denied")
+        self.assertNotEqual(status, 0)
+        self.assertEqual(payload, {"code":"OUTPUT_DIRECTORY_UNAVAILABLE", "stage":"export", "report_written":False})
+        self.engine.recognize.assert_not_called()
+
+    def test_bare_memory_failure_aborts_and_close_failure_never_prints_traceback(self):
+        manifest = self.manifest([self.sample(name, self.data) for name in ("one", "later")])
+        self.engine.recognize.side_effect = MemoryError("PRIVATE_TOKEN D:/private/native")
+        output = self.root / "memory-fatal"
+        status, payload = self.run_cli(manifest, output)
+        self.assertNotEqual(status, 0)
+        report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["run_status"], "aborted")
+        self.assertEqual(report["abort_code"], "LOCAL_MEMORY_EXHAUSTED")
+        self.assertEqual(report["counts"], {"requested":2,"native_attempted":1,"ok":0,"failed":1,"not_run":1})
+        self.engine.close.side_effect = RuntimeError("PRIVATE_TOKEN D:/private/close")
+        status, payload = self.run_cli(manifest, self.root / "close-fatal")
+        self.assertNotEqual(status, 0)
+        self.assertEqual(payload, {"code":"ENGINE_CLOSE_FAILED", "stage":"engine_close", "report_written":True})
+
+    def test_input_and_ocr_os_errors_are_not_reported_as_export_errors(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        self.engine.recognize.side_effect = FileNotFoundError("PRIVATE_TOKEN D:/private/model")
+        report = review_manifest(self.root, manifest, self.root / "ocr-io", self.engine)
+        self.assertEqual(report["samples"][0]["stage"], "ocr")
+        self.assertEqual(report["samples"][0]["error_code"], "LOCAL_OCR_IO_ERROR")
+        original = Path.open
+        def open_file(path, *args, **kwargs):
+            if path == self.root / "tiny.png":
+                raise PermissionError("PRIVATE_TOKEN D:/private/input")
+            return original(path, *args, **kwargs)
+        with patch.object(Path, "open", open_file):
+            report = review_manifest(self.root, manifest, self.root / "input-io", self.engine)
+        self.assertEqual(report["samples"][0]["stage"], "input")
+        self.assertEqual(report["samples"][0]["error_code"], "LOCAL_INPUT_IO_ERROR")
+        self.assertEqual(report["counts"]["native_attempted"], 0)
+
     def test_success_and_missing_keep_denominator_and_engine_owned_by_caller(self):
         manifest = self.manifest([self.sample(data=self.data), self.sample("missing")])
         output = self.root / "review"
@@ -67,8 +194,12 @@ class HandoffTest(unittest.TestCase):
             self.images[0].getpixel((0, 0))
         self.engine.load.assert_not_called()
         self.engine.close.assert_not_called()
-        with self.assertRaises(FileExistsError):
+        before = (output / "report.json").read_bytes()
+        with self.assertRaises(handoff.HandoffError) as caught:
             review_manifest(self.root, manifest, output, self.engine)
+        self.assertEqual(caught.exception.code, "OUTPUT_DIRECTORY_UNAVAILABLE")
+        self.assertEqual((output / "report.json").read_bytes(), before)
+        self.assertEqual(self.engine.recognize.call_count, 1)
 
     def test_bad_hash_and_corrupt_input_never_call_engine(self):
         manifest = self.manifest([self.sample(data=self.data, digest="0" * 64), self.sample("corrupt", b"not an image", sha256(b"not an image").hexdigest())])

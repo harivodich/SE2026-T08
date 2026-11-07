@@ -178,6 +178,21 @@ $env:HF_HUB_OFFLINE='1'
 Preflight output identity dùng casefold trên mọi OS: `a1/A1` bị reject trước khi
 tạo output hoặc gọi engine; ID hợp lệ vẫn giữ nguyên case trong path/report.
 
+Local report `vietdoc.ocr-handoff.v2` thêm `report_version`, `run_status`
+(`completed`/`aborted`) và `abort_code`. `completed` nghĩa đã accounting mọi ID,
+không bảo đảm mọi sample thành công: CLI chỉ exit0 khi tất cả ok. Typed failure
+vẫn thử sample sau; unexpected exception/bare MemoryError abort, sample còn lại
+`not_run/BATCH_ABORTED`, không gọi engine. Counts luôn giữ đủ requested IDs khi
+final report ghi được; `native_attempted` chỉ tăng tại engine call thật.
+
+Stage là `input`/`preprocess`/`ocr`/`export`, hoặc `not_started` sau abort. I/O errors
+giữ stage/code riêng; lỗi export từng sample vẫn vào accounting. Lỗi ghi `run.json`
+thêm `record_write_error`; sample ok chuyển failed nếu không ghi được record.
+CLI exit2 cho aborted/failed/missing/storage failure, chỉ in safe codes/counts và
+`report_written`; final storage failure không được claim report đã ghi. Existing
+output trả safe `OUTPUT_DIRECTORY_UNAVAILABLE`, không ghi đè. Đây là offline helper
+policy, không production HTTP error contract; default OCR v1/shared schemas giữ nguyên.
+
 Output directory phải mới; `ocr.json`, `prepared.json`, `canonical.png`, `processed.png`,
 `overlay.png`, `preview.html`, `run.json` theo sample ID và report tổng. Browser mở
 preview local để xem hình/IDs/score; HTML chưa là Java viewer acceptance. Với manifest
