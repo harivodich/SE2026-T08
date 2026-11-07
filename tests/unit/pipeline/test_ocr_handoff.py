@@ -1,6 +1,7 @@
 """Offline handoff wiring: tiny fictional bytes, never native quality claims."""
 
 from hashlib import sha256
+from copy import deepcopy
 from dataclasses import replace
 from io import BytesIO
 import json
@@ -15,6 +16,7 @@ from vietdoc.contracts.ocr import OcrPage, PreparedPage
 from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
 from vietdoc.pipeline.ocr import OcrError
 from vietdoc.pipeline.ocr.handoff import review_manifest
+from vietdoc.pipeline.ocr.paddle_adapter import VietnameseOcrEngine, _to_page
 from vietdoc.pipeline.geometry import canonical_quad
 from vietdoc.pipeline.preprocess import load_document
 
@@ -105,6 +107,62 @@ class HandoffTest(unittest.TestCase):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 review_manifest(self.root, self.manifest([sample]), self.root / "review", self.engine)
         self.assertFalse((self.root / "review").exists())
+
+    def test_casefold_aliases_rejected_before_output_and_engine_on_every_os(self):
+        for index, ids in enumerate((("a1", "A1"), ("Receipt_7", "RECEIPT_7"))):
+            output = self.root / f"alias-{index}"
+            manifest = self.manifest([self.sample(name) for name in ids])
+            with self.subTest(ids=ids):
+                with self.assertRaises(ValueError):
+                    review_manifest(self.root, manifest, output, self.engine)
+                self.assertFalse(output.exists())
+                self.engine.recognize.assert_not_called()
+
+    def test_portable_identity_preserves_original_case_in_report_and_directory(self):
+        manifest = self.manifest([self.sample("AbC_1", self.data)])
+        output = self.root / "case-preserved"
+        report = review_manifest(self.root, manifest, output, self.engine)
+        self.assertEqual(report["samples"][0]["sample_id"], "AbC_1")
+        self.assertTrue((output / "AbC_1/ocr.json").is_file())
+        self.assertEqual(report["counts"]["native_attempted"], 1)
+
+    def test_v2_handoff_keeps_mixed_unreadable_and_no_detection_semantics(self):
+        golden = json.loads((Path(__file__).resolve().parents[2] / "fixtures/ocr-artifact-v2.json").read_text(encoding="utf-8"))
+        with Image.new("RGB", (100, 100), "white") as image, BytesIO() as stream:
+            image.save(stream, format="PNG")
+            data = stream.getvalue()
+        for case in golden["cases"]:
+            name = case["case_id"]
+            manifest = self.manifest([self.sample(name, data, sha256(data).hexdigest())])
+            self.engine.recognize.side_effect = lambda loaded, **kwargs: _to_page(case["provider"], loaded.metadata, artifact_version=2)
+            output = self.root / (name + "-review")
+            with self.subTest(case=name):
+                report = review_manifest(self.root, manifest, output, self.engine)
+                actual = json.loads((output / name / "ocr.json").read_text(encoding="utf-8"))
+                expected = {**case["expected"], "ocr_version": actual["ocr_version"]}
+                self.assertEqual(actual, expected)
+                self.assertEqual(report["counts"]["ok"], 1)
+                self.assertEqual(report["samples"][0]["recognition_status"], expected["recognition_status"])
+                missing = match_evidence(OcrPage.from_dict(actual), EvidenceRequest("/total_amount", None)).to_field_metadata()
+                self.assertEqual(missing["value_origin"], "prediction")
+                self.assertEqual(missing["source_regions"], [])
+                for flag in expected["review_flags"]:
+                    self.assertIn(flag, missing["review_flags"])
+                    self.assertIn(flag, (output / name / "preview.html").read_text(encoding="utf-8"))
+
+    def test_v2_invalid_provider_score_or_geometry_remains_typed_failure(self):
+        valid = {"rec_texts": [""], "rec_polys": [[[10,10],[20,10],[20,20],[10,20]]], "rec_scores": [0]}
+        for index, key, value in ((0, "rec_scores", [float("nan")]), (1, "rec_polys", [[[0,0],[1,0],[1,1]]])):
+            provider = {**deepcopy(valid), key: value}
+            engine = VietnameseOcrEngine("unused-local-models", artifact_version=2)
+            engine._predictor = Mock()
+            engine._predictor.predict.side_effect = lambda *args, **kwargs: iter([provider])
+            manifest = self.manifest([self.sample(data=self.data)])
+            with self.subTest(key=key):
+                report = review_manifest(self.root, manifest, self.root / f"invalid-{index}", engine)
+                self.assertEqual(report["counts"], {"requested":1, "native_attempted":1, "ok":0, "failed":1, "not_run":0})
+                self.assertEqual(report["samples"][0]["error_code"], "OUTPUT_INVALID")
+                self.assertFalse(engine._slot.locked())
 
 
 class D1GeometryHandshakeTest(unittest.TestCase):

@@ -66,6 +66,10 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
     ids = [sample.get("sample_id") if isinstance(sample, dict) else None for sample in samples]
     if any(not isinstance(s, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", s) for s in ids) or len(ids) != len(set(ids)):
         raise ValueError("Invalid or duplicate Data sample IDs")
+    # Portable output identity: aliases collide on Windows, even on a Linux run.
+    # Detect before creating any directory; preserve the original IDs verbatim.
+    if len({sample_id.casefold() for sample_id in ids}) != len(ids):
+        raise ValueError("Data sample IDs alias the same output path")
     if sample_ids is not None and (not sample_ids or len(sample_ids) != len(set(sample_ids)) or set(sample_ids) - set(ids)):
         raise ValueError("Requested IDs must be unique and declared in the manifest")
     selected = [sample for sample in samples if sample_ids is None or sample["sample_id"] in sample_ids]

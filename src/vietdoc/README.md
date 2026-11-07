@@ -175,6 +175,9 @@ $env:HF_HUB_OFFLINE='1'
   --output-dir artifacts/evaluation/d1-new-review --artifact-version 2
 ```
 
+Preflight output identity dùng casefold trên mọi OS: `a1/A1` bị reject trước khi
+tạo output hoặc gọi engine; ID hợp lệ vẫn giữ nguyên case trong path/report.
+
 Output directory phải mới; `ocr.json`, `prepared.json`, `canonical.png`, `processed.png`,
 `overlay.png`, `preview.html`, `run.json` theo sample ID và report tổng. Browser mở
 preview local để xem hình/IDs/score; HTML chưa là Java viewer acceptance. Với manifest
