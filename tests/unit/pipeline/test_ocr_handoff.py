@@ -62,6 +62,85 @@ class HandoffTest(unittest.TestCase):
             status = handoff.main()
         return status, json.loads(stream.getvalue())
 
+    def test_manifest_mutation_after_snapshot_keeps_digest_version_and_samples(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        snapshot = manifest.read_bytes()
+        changed = json.dumps({"version":"mutated", "samples":[self.sample("different")]}).encode()
+        original_loads, original_open = json.loads, Path.open
+        reads, mutations = [], []
+        def open_file(path, mode="r", *args, **kwargs):
+            if path == manifest and mode in ("r", "rb"):
+                reads.append(mode)
+            return original_open(path, mode, *args, **kwargs)
+        def parse(value, *args, **kwargs):
+            parsed = original_loads(value, *args, **kwargs)
+            if not mutations and value in (snapshot, snapshot.decode()):
+                manifest.write_bytes(changed)
+                mutations.append(True)
+            return parsed
+        with patch.object(Path, "open", open_file), patch.object(handoff.json, "loads", side_effect=parse):
+            report = review_manifest(self.root, manifest, self.root / "snapshot", self.engine)
+        self.assertEqual(mutations, [True])
+        self.assertEqual(report["manifest_sha256"], sha256(snapshot).hexdigest())
+        self.assertEqual(report["manifest_version"], "fictional")
+        self.assertEqual([s["sample_id"] for s in report["samples"]], ["tiny"])
+        self.assertEqual(len(reads), 1)
+        self.assertEqual(manifest.read_bytes(), changed)
+
+    def test_cli_uses_preflight_snapshot_even_if_engine_load_changes_file(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        snapshot = manifest.read_bytes()
+        changed = json.dumps({"version":"mutated", "samples":[self.sample("different")]}).encode()
+        self.engine.load.side_effect = lambda: manifest.write_bytes(changed)
+        output = self.root / "cli-snapshot"
+        status, payload = self.run_cli(manifest, output)
+        self.assertEqual(status, 0)
+        self.assertTrue(payload["report_written"])
+        report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["manifest_sha256"], sha256(snapshot).hexdigest())
+        self.assertEqual(report["manifest_version"], "fictional")
+        self.assertEqual(report["counts"]["requested"], 1)
+        self.assertEqual(report["samples"][0]["sample_id"], "tiny")
+        self.engine.load.assert_called_once()
+
+    def test_oversized_valid_manifest_rejected_before_output_and_engine(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        manifest.write_bytes(b" " * handoff.MAX_MANIFEST_BYTES + manifest.read_bytes())
+        output = self.root / "oversized"
+        with self.assertRaises(ValueError):
+            review_manifest(self.root, manifest, output, self.engine)
+        self.assertFalse(output.exists())
+        self.engine.recognize.assert_not_called()
+
+    def test_bad_snapshot_json_identity_path_rejected_before_cli_load(self):
+        manifest = self.root / "invalid.json"
+        samples = json.dumps([self.sample()]).encode()
+        invalid = [b"{", b"\xff", b'{}', b'{"version":"v","samples":NaN}',
+                   b'{"version":"v","version":"again","samples":'+samples+b'}',
+                   json.dumps({"version":"", "samples":[self.sample()]}).encode(),
+                   json.dumps({"version":"v", "samples":[self.sample("a1"), self.sample("A1")]}).encode(),
+                   json.dumps({"version":"v", "samples":[{**self.sample(), "assets":{"png":{"path":"/PRIVATE/input.png", "sha256":"0"*64}}}]}).encode()]
+        for index, data in enumerate(invalid):
+            manifest.write_bytes(data)
+            output = self.root / f"invalid-snapshot-{index}"
+            with self.subTest(index=index):
+                status, payload = self.run_cli(manifest, output)
+                self.assertNotEqual(status, 0)
+                self.assertEqual(payload, {"code":"MANIFEST_INVALID", "stage":"input", "report_written":False})
+                self.assertFalse(output.exists())
+                self.engine.load.assert_not_called()
+                self.engine.recognize.assert_not_called()
+
+    def test_invalid_selected_id_types_rejected_before_side_effects(self):
+        manifest = self.manifest([self.sample()])
+        for index, ids in enumerate(("tiny", [], [[]], [None], ["tiny","tiny"], ["unknown"])):
+            output = self.root / f"selection-{index}"
+            with self.subTest(ids=ids):
+                with self.assertRaises(ValueError):
+                    review_manifest(self.root, manifest, output, self.engine, sample_ids=ids)
+                self.assertFalse(output.exists())
+                self.engine.recognize.assert_not_called()
+
     def test_unexpected_engine_failure_aborts_with_complete_accounting_and_safe_cli(self):
         private = "PRIVATE_TOKEN D:/private/document.png"
         manifest = self.manifest([self.sample(name, self.data) for name in ("one", "two", "later")])

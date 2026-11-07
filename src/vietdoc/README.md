@@ -178,6 +178,13 @@ $env:HF_HUB_OFFLINE='1'
 Preflight output identity dùng casefold trên mọi OS: `a1/A1` bị reject trước khi
 tạo output hoặc gọi engine; ID hợp lệ vẫn giữ nguyên case trong path/report.
 
+Manifest đọc binary đúng một lần với cap1MiB; parse UTF-8 JSON và SHA-256 dùng cùng
+buffer. Reject duplicate keys/nonfinite JSON, version thiếu/rỗng, identity/selection
+hoặc asset path sai trước side effects. CLI preflight trước khi load engine và dùng
+lại snapshot đã kiểm; helper không gọi recognize khi preflight lỗi. File manifest
+đổi sau snapshot không đổi version/samples/digest của lượt đang chạy. Không sửa
+label/split/asset hashes hoặc đọc transcript/gold vào inference.
+
 Local report `vietdoc.ocr-handoff.v2` thêm `report_version`, `run_status`
 (`completed`/`aborted`) và `abort_code`. `completed` nghĩa đã accounting mọi ID,
 không bảo đảm mọi sample thành công: CLI chỉ exit0 khi tất cả ok. Typed failure

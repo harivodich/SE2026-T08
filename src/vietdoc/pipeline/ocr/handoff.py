@@ -22,6 +22,7 @@ from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits
 
 
 HANDOFF_REPORT_VERSION = "vietdoc.ocr-handoff.v2"
+MAX_MANIFEST_BYTES = 1024 * 1024
 
 
 class HandoffError(ValueError):
@@ -51,8 +52,24 @@ def _asset(root, asset):
     if not isinstance(asset.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", asset["sha256"]):
         raise ValueError("Asset must declare an exact SHA-256")
     path = root.joinpath(*relative.parts)
-    path.resolve().relative_to(root)
+    try:
+        path.resolve().relative_to(root)
+    except ValueError:
+        raise ValueError("Asset must remain under the repository root") from None
     return path
+
+
+def _unique_record(pairs):
+    record = {}
+    for key, value in pairs:
+        if key in record:
+            raise ValueError("Duplicate manifest JSON key")
+        record[key] = value
+    return record
+
+
+def _invalid_constant(value):
+    raise ValueError("Invalid manifest JSON number")
 
 
 def _memory():
@@ -64,21 +81,23 @@ def _memory():
         return None
 
 
-def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
-                    limits=None, remaining_budget_ms=180_000, fixture_fallback=False):
-    """Write local review outputs, not runtime storage or consumer acceptance.
-
-    Tiny-fixture fallback is opt-in and still uses the manifest's exact hash.
-    Missing assets are NOT_RUN handoff failures, never fabricated native calls.
-    """
-    from vietdoc.pipeline.ocr.paddle_adapter import draw_overlay
-    from vietdoc.pipeline.ocr.preview import render_preview
-
-    root, manifest_path, output_dir = Path(root).resolve(), Path(manifest_path), Path(output_dir)
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=False):
+    """One bounded snapshot for validation, sample planning and exact byte hash."""
+    root = Path(root).resolve()
+    with Path(manifest_path).open("rb") as stream:
+        snapshot = stream.read(MAX_MANIFEST_BYTES + 1)
+    if len(snapshot) > MAX_MANIFEST_BYTES:
+        raise ValueError("Manifest exceeds the byte limit")
+    try:
+        manifest = json.loads(snapshot.decode("utf-8"), object_pairs_hook=_unique_record,
+                              parse_constant=_invalid_constant)
+    except (ValueError, RecursionError):
+        raise ValueError("Invalid manifest JSON") from None
     samples = manifest.get("samples") if isinstance(manifest, dict) else None
     if not isinstance(samples, list) or not samples or len(samples) > 20:
         raise ValueError("Expected 1..20 D1 integration samples")
+    if not isinstance(manifest.get("version"), str) or not manifest["version"].strip():
+        raise ValueError("Manifest must declare its version")
     ids = [sample.get("sample_id") if isinstance(sample, dict) else None for sample in samples]
     if any(not isinstance(s, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", s) for s in ids) or len(ids) != len(set(ids)):
         raise ValueError("Invalid or duplicate Data sample IDs")
@@ -86,7 +105,9 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
     # Detect before creating any directory; preserve the original IDs verbatim.
     if len({sample_id.casefold() for sample_id in ids}) != len(ids):
         raise ValueError("Data sample IDs alias the same output path")
-    if sample_ids is not None and (not sample_ids or len(sample_ids) != len(set(sample_ids)) or set(sample_ids) - set(ids)):
+    if sample_ids is not None and (not isinstance(sample_ids, (list, tuple)) or not sample_ids
+            or any(not isinstance(s, str) for s in sample_ids)
+            or len(sample_ids) != len(set(sample_ids)) or set(sample_ids) - set(ids)):
         raise ValueError("Requested IDs must be unique and declared in the manifest")
     selected = [sample for sample in samples if sample_ids is None or sample["sample_id"] in sample_ids]
     for sample in selected:
@@ -94,10 +115,45 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
             raise ValueError("Only receipt/invoice handoff is supported")
         assets = sample.get("assets")
         _asset(root, assets.get("png") if isinstance(assets, dict) else None)
+    plans = []
+    for sample in selected:
+        sample_id, asset = sample["sample_id"], sample["assets"]["png"]
+        path = _asset(root, asset)
+        fallback = False
+        if not path.is_file() and fixture_fallback:
+            path = _asset(root, {"path": "tests/fixtures/d12/" + sample_id + ".png", "sha256": asset["sha256"]})
+            fallback = True
+        case = {"sample_id": sample_id, "document_type": sample["document_type"],
+                "input_declared_path": asset["path"], "fixture_fallback": fallback,
+                "expected_input_sha256": asset["sha256"], "native_attempted": False,
+                "status": "not_run", "stage": "not_started", "error_code": "BATCH_ABORTED",
+                "duration_seconds": 0.0}
+        plans.append((case, path))
+    return manifest, sha256(snapshot).hexdigest(), tuple(plans)
+
+
+def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
+                    limits=None, remaining_budget_ms=180_000, fixture_fallback=False):
+    """Offline handoff with caller-owned engine; no model load or business state.
+
+    Preflight validates one bounded manifest snapshot before output/inference.
+    Tiny-fixture fallback is opt-in and still uses the manifest's exact hash.
+    """
+    plan = _prepare_manifest(root, manifest_path, sample_ids=sample_ids, fixture_fallback=fixture_fallback)
+    return _review_plan(plan, output_dir, engine, limits=limits, remaining_budget_ms=remaining_budget_ms)
+
+
+def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=180_000):
+    from vietdoc.pipeline.ocr.paddle_adapter import draw_overlay
+    from vietdoc.pipeline.ocr.preview import render_preview
+
+    manifest, digest, inputs = plan
+    plans = [(dict(case), path) for case, path in inputs]
     limits = PreprocessLimits() if limits is None else limits
+    output_dir = Path(output_dir)
     report = {"kind": "offline D1 OCR handoff; not evaluator or consumer acceptance",
               "report_version": HANDOFF_REPORT_VERSION, "run_status": "completed", "abort_code": None,
-              "manifest_version": manifest.get("version"), "manifest_sha256": sha256(manifest_path.read_bytes()).hexdigest(),
+              "manifest_version": manifest["version"], "manifest_sha256": digest,
               "provider": type(engine).__name__, "python": platform.python_version(), "hardware": platform.platform(),
               "engine_load_seconds": getattr(engine, "load_seconds", None),
               "font_sha256": manifest.get("font_sha256"), "config_sha256": manifest.get("config_sha256"),
@@ -105,23 +161,8 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
                            "Pillow": version("Pillow"), "pypdfium2": version("pypdfium2")},
               "profile": {"processed_long_edge": limits.processed_long_edge, "pdf_dpi": limits.pdf_dpi,
                           "max_pixels": limits.max_pixels, "budget_ms": remaining_budget_ms},
-              "consumer_acceptance": "pending AI2/Backend; local parser check only", "samples": []}
-    plans = []
-    for sample in selected:
-        sample_id, asset = sample["sample_id"], sample["assets"]["png"]
-        path = _asset(root, asset)
-        fallback = False
-        if not path.is_file() and fixture_fallback:
-            path = root / "tests/fixtures/d12" / (sample_id + ".png")
-            path.resolve().relative_to(root)
-            fallback = True
-        case = {"sample_id": sample_id, "document_type": sample["document_type"],
-                "input_declared_path": asset["path"], "fixture_fallback": fallback,
-                "expected_input_sha256": asset["sha256"], "native_attempted": False,
-                "status": "not_run", "stage": "not_started", "error_code": "BATCH_ABORTED",
-                "duration_seconds": 0.0}
-        report["samples"].append(case)
-        plans.append((case, path))
+              "consumer_acceptance": "pending AI2/Backend; local parser check only",
+              "samples": [case for case, _ in plans]}
     try:
         output_dir.mkdir(parents=True, exist_ok=False)
     except OSError:
@@ -193,7 +234,7 @@ def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
             report.update(run_status="aborted", abort_code="UNEXPECTED_FAILURE")
         if report["run_status"] == "aborted":
             break
-    report["counts"] = {"requested": len(selected), "native_attempted": sum(c["native_attempted"] for c in report["samples"]),
+    report["counts"] = {"requested": len(plans), "native_attempted": sum(c["native_attempted"] for c in report["samples"]),
                         **{s: sum(c["status"] == s for c in report["samples"]) for s in ("ok", "failed", "not_run")}}
     try:
         _json(output_dir / "report.json", report)
@@ -215,13 +256,15 @@ def main():
     parser.add_argument("--fixture-fallback", action="store_true")
     parser.add_argument("--artifact-version", type=int, choices=(1,2), default=1)
     args = parser.parse_args()
-    engine, stage, report_written = None, "engine_load", False
+    engine, stage, report_written = None, "input", False
     try:
+        plan = _prepare_manifest(args.root, args.manifest, sample_ids=args.sample_ids,
+                                 fixture_fallback=args.fixture_fallback)
+        stage = "engine_load"
         engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
         engine.load()
         stage = "input"
-        report = review_manifest(args.root, args.manifest, args.output_dir, engine,
-                                 sample_ids=args.sample_ids, fixture_fallback=args.fixture_fallback)
+        report = _review_plan(plan, args.output_dir, engine)
         report_written = True
         payload = {"counts": report["counts"], "run_status": report["run_status"], "report_written": True}
         status = 0 if report["run_status"] == "completed" and report["counts"]["ok"] == report["counts"]["requested"] else 2
