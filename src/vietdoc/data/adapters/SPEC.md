@@ -8,6 +8,11 @@ Public data adapter đã audit Owner: Data.
 
 Map source IDs/label coverage vào format chung sau license/provenance/PII audit.
 
+`labels.py`: accessor `field_labels` và file adapter `load_training_labels`,
+contract `vietdoc.field-labels.v1`; giữ business decimal strings, JSON pointers và
+bốn statuses. Xem [contract/examples](../../../../docs/label-adapter.md).
+File adapter dùng renderer consumer hiện có; không chọn mask/loss policy của AI2.
+
 ## Ranh giới và dữ liệu
 
 Không partial QA thành full JSON/transcript, không coi unlabeled là absent. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
