@@ -8,6 +8,6 @@
 - [web legacy](web/SPEC.md), [migrations legacy](migrations/SPEC.md)
 - [build/test scripts](scripts/SPEC.md), [CI/CD runbook](docs/cicd.md)
 
-[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) v? [task theo vai tr?](docs/team/README.md). Python c? Data generator v? OCR/page/geometry/evidence; Java c? manual/demo foundation. Docs/tests ri?ng kh?ng ch?ng minh actual-provider integration. Kh?ng folder tasks ho?c implementation TODO ?? l?p c?y.
+[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks hoặc implementation TODO để lấp cây. Java manual/demo, Python compute boundary/baseline, Data generator/evaluator và AI-1 OCR/page/geometry/evidence đã có source; actual-provider integration và model quality cần evidence riêng, docs không là bằng chứng app chạy.
 
-No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 b?t bi?n. [Git Flow](docs/git-flow.md): feature?develop; commit/push c?n y?u c?u ri?ng.
+No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 bất biến. [Git Flow](docs/git-flow.md): feature → develop; commit/push cần yêu cầu riêng.

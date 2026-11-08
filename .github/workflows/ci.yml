@@ -93,9 +93,36 @@ jobs:
       - name: Fresh install the declared Data extra
         run: python -m pip install --no-build-isolation -c .github/ci-constraints.txt ".[data]"
       - name: Run portable Data regression tests
-        run: python -m scripts.ci.checks tests data
+        run: python -m scripts.ci.checks tests data --separate-pdf
       - name: Generate and verify twenty fictional samples
         run: python -m scripts.ci.checks integration
+      - name: Check tracked fixtures were not changed
+        run: git diff --exit-code
+
+  data-pdf:
+    name: data-pdf-verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install independent PDF parser and renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y poppler-utils
+          pdfinfo -v
+          pdfimages -v
+          pdftoppm -v
+      - name: Install build tools
+        run: python -m pip install -c .github/ci-constraints.txt setuptools wheel
+      - name: Fresh install the declared Data extra
+        run: python -m pip install --no-build-isolation -c .github/ci-constraints.txt ".[data]"
+      - name: Verify generated PDFs with Poppler; no skipped tests permitted
+        run: python -m scripts.ci.checks tests pdf
       - name: Check tracked fixtures were not changed
         run: git diff --exit-code
 
@@ -126,7 +153,7 @@ jobs:
 
   release-readiness:
     name: release-readiness
-    needs: [workflow, contracts, data, package, ai]
+    needs: [workflow, contracts, data, data-pdf, package, ai]
     if: >-
       ${{ always() &&
       (github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main') }}
@@ -143,7 +170,7 @@ jobs:
 
   ci-gate:
     name: ci-gate
-    needs: [workflow, contracts, data, package, ai, release-readiness]
+    needs: [workflow, contracts, data, data-pdf, package, ai, release-readiness]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
