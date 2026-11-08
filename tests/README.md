@@ -1,5 +1,11 @@
 # Tests ownership
 
+PR4 candidate sau Backend CI và đồng bộ develop D3.2: fixture profile
+`.[serve,test,ai1]` + `numpy==2.2.6` trên Python 3.12/Windows đã chạy
+**720 collected, 719 passed, 389 subtests, 1 allowed Windows symlink skip**;
+`pip check` sạch. Inventory bắt buộc 13 file AI2 + 7 file AI1; floor 720.
+Hosted Linux phải chạy lại trên head PR mới và không cho skip. Native suite riêng.
+
 PR4 candidate B (07/11/2026): native tests đã tách khỏi fixture discovery. Giữ nguyên
 AST của `NativeGeometrySmokeTest` (2 methods/12 transforms) và `NativeOcrSmokeTest`
 (1 method/20 format/error cases từ một trang synthetic) trong `tests/native/ocr/`.
