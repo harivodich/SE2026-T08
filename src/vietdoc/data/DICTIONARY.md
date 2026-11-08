@@ -97,6 +97,7 @@ Bash: `PYTHONPATH=src python3 -m unittest discover -s tests/unit -p "test_data_v
 PowerShell: `$env:PYTHONPATH="src"` rồi `python -m unittest discover -s tests/unit -p "test_data_values.py" -v`.
 D1.1 không cần font/Pillow; cài extra Data trong virtualenv riêng với AI serving/train.
 Artifacts luôn UTF-8/LF; tests đọc UTF-8 tường minh, không phụ thuộc locale Windows.
+Setup Bash/PowerShell và font cho D1.2 ở [generator README](generator/README.md).
 
 Config: `generator/fake-values.json`; logic: `generator/values.py` (Python stdlib).
 Từ repository root, tạo vào thư mục mới:

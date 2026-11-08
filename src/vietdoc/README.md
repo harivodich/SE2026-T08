@@ -1,6 +1,6 @@
 # Python AI/Data source
 
-Đã có: compute contract adapter (`contracts/compute.py`), release manifest verifier (`ml/release_manifest.py`), normalizer `vi-VND.v2` (`pipeline/normalization.py`, policy cần Data/Lead review vì evaluator dùng chung), model output parser (`pipeline/extraction/output_parser.py`, no repair, strict shape), JSON logging, private FastAPI service (`entrypoints/api`, auth/limits/schema/hash/release/slot) và env report CLI. Chưa có preprocess/OCR/extraction/training, nên service trả `AI_NOT_READY` thay vì kết quả. Docker: [infra](../../infra/README.md). Python chỉ computation và offline Data/ML; Java quản lý business state.
+Đã có: compute contract adapter (`contracts/compute.py`), release manifest verifier (`ml/release_manifest.py`), normalizer `vi-VND.v2` (`pipeline/normalization.py`), model output parser (`pipeline/extraction/output_parser.py`, no repair, strict shape), B0 baseline/offline OCR consumer (`pipeline/extraction/`), JSON logging, private FastAPI service (`entrypoints/api`, auth/limits/schema/hash/release/slot) và env report CLI. Data có D1/D2 generator/validator và D3 evaluator; normalization policy của evaluator được version riêng, vẫn Proposed. Service chưa nối pipeline preprocess/OCR/extraction thật nên trả `AI_NOT_READY`; chưa có model training. Docker: [infra](../../infra/README.md). Python chỉ computation và offline Data/ML; Java quản lý business state.
 
 Core package không cài dependencies. Chọn extra trong môi trường mới, từ repo root:
 
