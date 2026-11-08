@@ -8,6 +8,10 @@ Data/gold/lineage/splits Owner: Data Engineer.
 
 Generator/adapters/manifest.py/validation.py/splits.py; assets lớn ở datasets/
 
+`benchmark.py`: bounded local D2.1 render/strict validate/consumer load/evaluate
+cost measurements; xem [BENCHMARK.md](BENCHMARK.md). Không nhận final holdout,
+không tăng base-limit trên 40, không inference hoặc tự approve capacity.
+
 ## Ranh giới và dữ liệu
 
 Không predictions làm gold hoặc random variant splits qua tập Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
