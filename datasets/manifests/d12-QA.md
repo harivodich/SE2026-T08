@@ -13,7 +13,7 @@ Checkout hiện tại đã merge guidance từ main (commit b5a6ee9), có `docs/
 - R01: D1 reads dùng UTF-8 tường minh, D1.1 writer LF; D1.2 JSON/transcript ghi bytes UTF-8/LF. D1.1 tests pass với harness default cp1252; D1.2 có test cp1252. Chưa chạy native Windows.
 - R02: font test/CLI nhận `VIETDOC_DATA_FONT`/`--font`, có discovery và lỗi rõ nếu thiếu font/glyph. Portable test render với DejaVuSerif pass (chỉ skip canonical-only test). Test canonical bật `VIETDOC_CANONICAL_BYTES=1` pass với fingerprint được lưu ở tiny fixtures; không bỏ checks hash. Data render environment tách khỏi AI extras; chưa resolve chung với AI.
 - R03: adapter renderer-local-v1 strip label prefix chính xác, group wrap liên tiếp và so toàn bộ từng occurrence. Negative controls ảnh/text 37.500/gold 0, 180.000/gold 80.000 và một repeated occurrence sai đều bị từ chối sau cập nhật hashes. PNG/text/box agreement vẫn cần visual audit, không suy ra từ sidecar equality.
-- R04: manifest/sample shape/version, nhánh business theo type, schema ID, row/status counts, ID/lineage và asset set được kiểm. `--full-set` yêu cầu đủ 20 IDs/type/layout/row profiles; tiny loader vẫn hỗ trợ 2 mẫu. Seed/font/environment ghi provenance; generic loader không chứng minh nó thực sự là nguồn render. Loader D1.2 chỉ nhận present/absent; không nhận partial D1.1 để tránh biến null thành absent.
+- R04: manifest/sample shape/version, nhánh business theo type, schema ID, row/status counts, ID/lineage và asset set được kiểm. `--full-set` yêu cầu đủ 20 IDs/type/layout/row profiles; tiny loader vẫn hỗ trợ 2 mẫu. Seed/font/environment ghi provenance; generic loader không chứng minh nó thực sự là nguồn render. D2.2 adapter smoke giữ obscured/unlabeled; strict split/source checks thuộc `d22.validate`. D1.2 vẫn chỉ nhận present/absent; không nhận partial D1.1 để tránh biến null thành absent.
 - R05: README có Bash/PowerShell setup và generate/verify cùng manifest mới. Đã chạy trên bản sao source sạch không có assets ignored cũ, với dependencies sẵn có; chưa thử fresh dependency installation hoặc Windows shell thật. Chưa có consumer AI/Backend chạy độc lập.
 - R06: integrity dùng ValueError kèm sample ID thay cho asserts. Tests subprocess normal và -O đều từ chối hash/path/duplicate/transcript/bbox/missing file sai, input đúng pass.
 
@@ -21,16 +21,57 @@ Output mới: `datasets/processed/d12-review-fixed-v2/` (ignored), safe manifest
 
 Checks trên branch PR #8: 6 D1.1 tests + 8 D1.2 tests, canonical bytes và portable font alternative; không gồm code/tests D2/D3. Native Windows và consumer AI/Backend handoff chưa chạy. Không claim CI hoặc API/model/browser pass.
 
+Checks bổ sung: 6 D1.1 tests pass; 8 D1.2 tests pass khi bật canonical; 32 D3 evaluator regressions pass. Full Data run đầu có 29 pass/1 error do adapter D2.2 đòi `seed` thay vì `value_seed`; đã sửa adapter và chạy lại `PYTHONPATH=src:tests/unit python3 -m unittest test_data_d22.DatasetTest.test_consumer_and_counts -v`: 1 test pass với 80 mẫu sinh mới. Không gọi lượt full-run lỗi ban đầu là xanh; focused rerun xác nhận lỗi đã sửa. Không claim CI hoặc API/model/browser pass.
+
 ### Commands kiểm chứng lượt sửa
 
 ```sh
 PYTHONPATH=src python3 -m unittest discover -s tests/unit -p 'test_data_values.py' -v
 PYTHONPATH=src VIETDOC_CANONICAL_BYTES=1 python3 -m unittest discover -s tests/unit -p 'test_data_integration.py' -v
 PYTHONPATH=src VIETDOC_DATA_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf python3 -m unittest discover -s tests/unit -p 'test_data_integration.py' -v
+PYTHONPATH=src python3 -m unittest discover -s tests/unit -p 'test_evaluation*.py' -v
+PYTHONPATH=src:tests/unit python3 -m unittest test_data_d22.DatasetTest.test_consumer_and_counts -v
 PYTHONPATH=src python3 -O -m vietdoc.data.generator.integration --verify --full-set --manifest datasets/manifests/d12-integration-v2.json
 ```
 
-Các mẫu tamper chỉ nằm trong temp directories của tests; fixtures/reference v1 không bị sửa. `git diff --check` sạch, assets v2 được xác nhận Git ignore. Các kết quả này không thay peer/Lead approval; chưa có gate consumer được duyệt.
+Các mẫu tamper chỉ nằm trong temp directories của tests; fixtures/reference v1 không bị sửa. `git diff --check` sạch, assets v2 được xác nhận Git ignore. Các kết quả lịch sử này không thay peer/Lead approval hoặc gate consumer.
+
+## Handoff #22 — inventory/bundle relocation (07/11/2026)
+
+Evidence 22.1–22.3 pin source `961d0f7eea0b046ce05f8a88f789fdfd7bf9726b`;
+không render lại, không sửa manifest/assets lịch sử. Inventory đủ 20 IDs,
+10 receipt/10 invoice, 204 rows, 100 assets; không missing/hash mismatch.
+Hai tiny IDs receipt-03/invoice-04 khớp cả 10 asset hashes. Danh sách 18 IDs
+formerly-NOT_RUN được suy ra bằng cách trừ hai tiny IDs từ bộ 20 theo handoff
+03/11; chưa đối chiếu original per-ID AI1 report, chưa claim replay mới.
+
+Bundle có manifest + 100 assets + business schema (102 files), giữ structure D1.
+Hash từng bản copy, từng member trong archive và nguồn sau đóng gói đều khớp.
+Giải nén vào root mới rồi verify CLI normal, `-O` và loader API đều PASS 20/10/10;
+manifest/tiny pins không đổi. Trong cả ba lượt, audit hook chặn đọc inputs từ
+`datasets/`, `specs/`, `tests/` của checkout gốc và staging bundle cũ. Source Python
+vẫn import từ checkout riêng; bundle không phải standalone runtime.
+
+Evidence local ngoài Git ở `/tmp/vietdoc-batch-a-2026-11-07/`:
+
+- `22.1/inventory.json`, `22.1/full-set20.log`: asset/source hashes và render/verify env.
+- `22.2/vietdoc-d12-handoff-v2.tar.gz`, `SHA256SUMS`, `bundle-inventory.json`:
+  archive pin/inventory (hai file metadata cùng directory `22.2`).
+- `22.3/relocation-report.json`, `full-set-normal.log`, `full-set-optimized.log`,
+  `full-set-api.log`: root mới, blocked roots, hashes và kết quả từng lượt.
+
+Đây là vị trí trên máy Data, có thể bị dọn; chưa chuyển/upload artifacts hoặc
+đăng evidence lên Issue/PR. Layout, checksum và commands nhận bundle ở
+[runbook](../../src/vietdoc/data/generator/README.md#bàn-giao-bundle-d12-hiện-có--22-07112026).
+
+Verification dùng Python 3.12.3/Linux, Pillow 10.2.0/jsonschema 4.10.3 đã có;
+binary hashes `_imaging`, `_imagingft`, libpng và libz khác render fingerprint
+lịch sử lưu trong manifest. Loader chỉ kiểm structure/integrity/schema/sidecars;
+không so environment hiện tại để chứng nhận tái tạo canonical bytes. Không chạy
+canonical rendering, OCR/model, Windows bundle replay hoặc API/viewer ở increment
+này. Smoke không chứng minh pixel/text agreement, nguồn độc lập hay untouched
+holdout. **22.5 native20 và 22.6 Consumer/Lead acceptance còn chờ**, không có kết
+quả inference/approval mới từ việc đóng gói.
 
 ## Kiểm tra tại snapshot D1.2 ban đầu
 

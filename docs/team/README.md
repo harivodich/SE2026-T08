@@ -2,7 +2,7 @@
 
 Mở SPEC.md ngay trong folder phụ trách, rồi doc cá nhân trong bảng dưới. Mỗi doc có roadmap tuần, task nhỏ/input/steps/output/acceptance, reviewer, Git Flow và checklist bàn giao. [SPEC của docs/team](SPEC.md) giải thích chính folder này; [workflow chung](workflow.md) giữ handoffs/gates, không plan cá nhân thứ hai.
 
-Repo hiện có scaffold và thiết kế Java/Spring Boot/Thymeleaf + Python AI; các file implementation nêu trong hướng dẫn là file cần viết khi nhận việc. Chưa gán bốn username GitHub vào vai trò vì chưa có phân công thực tế.
+Repo đã có Java manual/demo, Python compute boundary/baseline và Data generator/evaluator; actual-provider integration vẫn cần nghiệm thu riêng. Các file/mốc trong roadmap không tự là chức năng đã hoàn tất; trạng thái và phân công thực tế theo Issue/PR.
 
 UI Thymeleaf đã được chọn. Python pipeline/serving giao AI-2 (M2.3); AI-1 giữ preprocess/OCR; Backend giữ Java runner/client/DB/UI. [Architecture](../architecture.md), [compute protocol](../../specs/contracts/compute-api.md) là active design; v1 là snapshot.
 

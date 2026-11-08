@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -17,15 +18,33 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 SUITES = {
-    'data': ('tests/unit', 'test_data*.py', {'test_data_values.py', 'test_data_integration.py'}),
+    'data': ('tests/unit', 'test_data*.py', {'test_data_values.py', 'test_data_integration.py',
+                                          'test_data_d21.py', 'test_data_d22.py'}),
+    'pdf': ('tests/unit', 'test_data_d21.py', {'test_data_d21.py'}),
     'contracts': ('tests/contract', 'test_schemas.py', {'test_schemas.py'}),
     'ci': ('tests/unit', 'test_ci_gate.py', {'test_ci_gate.py'}),
 }
 CANONICAL_TEST = 'test_data_integration.IntegrationDataTest.test_canonical_reference_bytes'
-MINIMUM_TESTS = {'data': 14, 'contracts': 9, 'ci': 9}
+PDF_TEST = 'test_data_d21.D21Test.test_pdf_independent_parser_render_and_lossless_image'
+PDF_TOOLS = ('pdfinfo', 'pdfimages', 'pdftoppm')
+MINIMUM_TESTS = {'data': 30, 'pdf': 1, 'contracts': 9, 'ci': 9}
 
 
-def run_tests(name: str) -> int:
+def test_cases(suite):
+    for test in suite:
+        if isinstance(test, unittest.TestSuite):
+            yield from test_cases(test)
+        else:
+            yield test
+
+
+def run_tests(name: str, *, separate_pdf: bool = False) -> int:
+    if separate_pdf and name != 'data':
+        raise ValueError('--separate-pdf is only valid for the Data suite')
+    if name == 'pdf':
+        missing_tools = [tool for tool in PDF_TOOLS if shutil.which(tool) is None]
+        if missing_tools:
+            raise ValueError('Missing required PDF tools: ' + ', '.join(missing_tools))
     folder, pattern, required = SUITES[name]
     directory = ROOT / folder
     missing = required - {path.name for path in directory.glob(pattern)}
@@ -37,18 +56,32 @@ def run_tests(name: str) -> int:
         if not module_suite.countTestCases():
             raise ValueError(f'No tests discovered in {path.name}')
         suite.addTests(module_suite)
-    count = suite.countTestCases()
-    if count < MINIMUM_TESTS[name]:
-        raise ValueError(f'Test inventory shrank for {name}: {count} < {MINIMUM_TESTS[name]}')
+    cases = list(test_cases(suite))
+    discovered = len(cases)
+    if discovered < MINIMUM_TESTS[name]:
+        raise ValueError(f'Test inventory shrank for {name}: {discovered} < {MINIMUM_TESTS[name]}')
+    delegated = []
+    if name == 'pdf' or separate_pdf:
+        if sum(test.id() == PDF_TEST for test in cases) != 1:
+            raise ValueError('Expected exactly one mandatory PDF verification test')
+        if separate_pdf:
+            cases = [test for test in cases if test.id() != PDF_TEST]
+            delegated = [PDF_TEST]
+        else:
+            cases = [test for test in cases if test.id() == PDF_TEST]
+    suite = unittest.TestSuite(cases)
+    count = len(cases)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    unexpected_skips = [test.id() for test, _ in result.skipped if test.id() != CANONICAL_TEST]
+    unexpected_skips = [test.id() for test, _ in result.skipped
+                        if name != 'data' or test.id() != CANONICAL_TEST]
     versions = {}
     for dependency in ('Pillow', 'jsonschema'):
         try:
             versions[dependency] = version(dependency)
         except PackageNotFoundError:
             versions[dependency] = None
-    report = dict(suite=name, discovered=count, run_count=result.testsRun,
+    report = dict(suite=name, discovered=discovered, selected=count, delegated_to_pdf_job=delegated,
+                  run_count=result.testsRun,
                   executed=result.testsRun - len(result.skipped),
                   failures=len(result.failures), errors=len(result.errors),
                   skipped=[dict(test=test.id(), reason=reason) for test, reason in result.skipped],
@@ -114,12 +147,15 @@ def package() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest='command', required=True)
-    subparsers.add_parser('tests').add_argument('suite', choices=SUITES)
+    tests_parser = subparsers.add_parser('tests')
+    tests_parser.add_argument('suite', choices=SUITES)
+    tests_parser.add_argument('--separate-pdf', action='store_true',
+                              help='Data matrix only; mandatory PDF job runs the PDF test separately')
     subparsers.add_parser('integration')
     subparsers.add_parser('package')
     args = parser.parse_args()
     if args.command == 'tests':
-        return run_tests(args.suite)
+        return run_tests(args.suite, separate_pdf=args.separate_pdf)
     if args.command == 'integration':
         integration()
     else:

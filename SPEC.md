@@ -8,6 +8,6 @@
 - [web legacy](web/SPEC.md), [migrations legacy](migrations/SPEC.md)
 - [build/test scripts](scripts/SPEC.md), [CI/CD runbook](docs/cicd.md)
 
-[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. 25 Python init hiện docstring-only, Java chưa app; docs không app proof.
+[Scope](specs/scope.md), [source structure](docs/source-structure.md), [architecture](docs/architecture.md) và [task theo vai trò](docs/team/README.md). Không folder tasks, không implementation TODO để lấp cây. Java manual/demo, Python compute boundary/baseline và Data generator/evaluator đã có source; actual-provider integration và model quality cần evidence riêng, docs không app proof.
 
 No secrets/raw dataset/weights/runtime in Git. Snapshot docs/design/v1 bất biến, current task chỉ local redesign, chưa commit/push. [Git Flow](docs/git-flow.md): bootstrap main theo Lead yêu cầu riêng; team feature→develop khi coding bắt đầu.
