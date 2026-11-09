@@ -1,0 +1,23 @@
+{
+  "artifact_version": "vietdoc.ocr-consumer-assets.v1",
+  "kind": "Stored native canonical assets; fictional documents, not OCR gold or consumer acceptance",
+  "provider_sha": "7d96e93bf8315beb6fa33807231316e957671249",
+  "ocr_bundle": {
+    "path": "tests/fixtures/ocr-d1-native-handoff.json",
+    "git_blob_sha256": "4640dcf2aa77f62360171f07376cf235022603f4730125548b015957b153a5e1"
+  },
+  "input_manifest": {
+    "path": "tests/fixtures/d12/manifest.json",
+    "git_blob_sha256": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c"
+  },
+  "samples": [
+    {
+      "sample_id": "d12-receipt-03",
+      "canonical_png": "tests/fixtures/d12/d12-receipt-03.canonical.png"
+    },
+    {
+      "sample_id": "d12-invoice-04",
+      "canonical_png": "tests/fixtures/d12/d12-invoice-04.canonical.png"
+    }
+  ]
+}
