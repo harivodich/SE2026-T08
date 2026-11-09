@@ -263,9 +263,16 @@ Tái dùng [golden v2](../../tests/fixtures/ocr-artifact-v2.json) và tests hi�
 | Invalid score/geometry, provider failure | Adapter doubles trả typed failure; không đổi thành unreadable để che lỗi |
 | Repeated amount | Fixture + stored examples: đủ scope chọn exact IDs/source quad; thiếu scope abstain; không tạo substring bbox |
 
+[Ảnh mixed100×100](../../tests/fixtures/ocr-v2-mixed-canonical.png) là fixture
+contract được vẽ riêng, không chạy OCR hoặc dùng làm recognition gold. Phần
+`viewer_fixture` trong index có hash, golden case, input thiếu required total,
+declared hash sai và dimensions sai. Regression AI1 kiểm exact IDs/reasons/flags,
+preview, missing value không có source regions, reject hash và frame mismatch.
+Giữ fixture100×100 tách khỏi hai ảnh native1500×2600.
+
 AI2 cần xác nhận replay/diagnostics bằng workflow của họ. Backend cần xác nhận
 uncertainty, đúng run/revision/canonical hash/frame, và required-total blocker
 trên server; không dùng schema-valid hoặc OCR score để bypass approve. Golden100×100
-không dùng hai ảnh native1500×2600 làm canonical. Mixed viewer fixture/wire và các
-case hash sai/thiếu total phải được Backend compose/kiểm tại boundary của họ;
+không dùng hai ảnh native1500×2600 làm canonical. AI1 đã cung cấp input/expected
+cases; việc compose shared wire và kiểm promotion/approval thuộc Backend;
 chưa có browser/server acceptance. #24, R04/default-v2 và #63 tiếp tục chờ owner/Lead.
