@@ -181,8 +181,12 @@ Provenance `font_sha256`/`config_sha256` được phép vắng hoặc null; khi 
 phải là chuỗi 64 ký tự hex thường như asset SHA-256. Sai kiểu/format bị reject
 với safe CLI code `MANIFEST_INVALID`, trước load engine và tạo output. Helper
 không xác nhận bytes font/config từ digest này; đây là metadata do Data cung cấp.
-Writer serialize với `allow_nan=False` trước exclusive file creation, không để lại
-JSON dở dang do serialization failure. Timing không đo được, không hữu hạn, âm
+Preflight kiểm UTF-8 cho mọi JSON string/key, kể cả trong arrays/metadata; lone
+surrogate như `\ud800`/`\udfff` bị `MANIFEST_INVALID` trước load/output/inference.
+Không normalize Unicode hoặc đổi raw snapshot hash; tiếng Việt và emoji hợp lệ giữ nguyên.
+Writer serialize với `allow_nan=False` và encode UTF-8 trước exclusive binary
+file creation, không để lại JSON dở dang do serialization/encoding failure.
+Timing không đo được, không hữu hạn, âm
 hoặc sai kiểu thành null; số đo hợp lệ giữ nguyên, không làm tròn hoặc điền số giả.
 Nonfinite còn sót ở trường khác bị reject; CLI không claim report đã ghi nếu
 final report không serialize/ghi được (`LOCAL_REPORT_WRITE_FAILED`).

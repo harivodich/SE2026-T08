@@ -40,9 +40,9 @@ def _io_code(stage):
 
 
 def _json(path, data):
-    # Serialize before exclusive creation: rejected data must not leave partial JSON.
-    encoded = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
-    with path.open("x", encoding="utf-8", newline="\n") as stream:
+    # Serialize and encode before creation: invalid data must not leave partial JSON.
+    encoded = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+    with path.open("xb") as stream:
         stream.write(encoded)
 
 
@@ -82,6 +82,20 @@ def _finite_float(value):
     return number
 
 
+def _validate_unicode(value):
+    """Validate decoded JSON strings without reserializing the hashed snapshot."""
+    pending = [value]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, str):
+            current.encode("utf-8")
+        elif isinstance(current, dict):
+            pending.extend(current.keys())
+            pending.extend(current.values())
+        elif isinstance(current, list):
+            pending.extend(current)
+
+
 def _measured_seconds(value):
     """Unavailable/invalid instrumentation is null, never invented or nonfinite."""
     if type(value) in (int, float) and value >= 0:
@@ -112,6 +126,7 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
     try:
         manifest = json.loads(snapshot.decode("utf-8"), object_pairs_hook=_unique_record,
                               parse_constant=_invalid_constant, parse_float=_finite_float)
+        _validate_unicode(manifest)
     except (ValueError, RecursionError):
         raise ValueError("Invalid manifest JSON") from None
     samples = manifest.get("samples") if isinstance(manifest, dict) else None

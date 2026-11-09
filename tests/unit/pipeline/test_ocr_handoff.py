@@ -142,6 +142,81 @@ class HandoffTest(unittest.TestCase):
                     handoff._json(target, {"nested": [value]})
                 self.assertFalse(target.exists())
 
+    def test_json_writer_rejects_invalid_unicode_before_creating_a_file(self):
+        for index, text in enumerate(("\ud800", "\udfff")):
+            for location, value in (("value", {"text": text}), ("key", {text: "value"}),
+                                    ("nested", {"metadata": [{"text": text}]})):
+                target = self.root / f"invalid-unicode-{index}-{location}.json"
+                with self.subTest(index=index, location=location):
+                    with self.assertRaises(UnicodeEncodeError):
+                        handoff._json(target, value)
+                    self.assertFalse(target.exists())
+
+    def test_invalid_manifest_unicode_rejected_before_output_and_engine(self):
+        for index, text in enumerate(("\ud800", "\udfff")):
+            for location in ("version", "key", "array", "asset_path"):
+                manifest = self.manifest([self.sample(data=self.data)])
+                document = json.loads(manifest.read_text(encoding="utf-8"))
+                if location == "version":
+                    document["version"] = text
+                elif location == "key":
+                    document["metadata"] = {text: "value"}
+                elif location == "array":
+                    document["metadata"] = {"values": [[text]]}
+                else:
+                    document["samples"][0]["assets"]["png"]["path"] = text + ".png"
+                manifest.write_text(json.dumps(document), encoding="utf-8")
+                output = self.root / f"unicode-manifest-{index}-{location}"
+                with self.subTest(index=index, location=location):
+                    status, payload = self.run_cli(manifest, output)
+                    self.assertEqual(status, 2)
+                    self.assertEqual(payload, {"code":"MANIFEST_INVALID", "stage":"input", "report_written":False})
+                    self.assertFalse(output.exists())
+                    self.engine.load.assert_not_called()
+                    self.engine.recognize.assert_not_called()
+                    self.engine.close.assert_not_called()
+
+    def test_valid_unicode_preserves_utf8_bytes_and_manifest_snapshot_hash(self):
+        for index, (text, escaped) in enumerate((("T\u1ed5ng ti\u1ec1n", False),
+                                                ("To\u0302\u0309ng", True), ("\U0001f600", True))):
+            manifest = self.manifest([self.sample(data=self.data)])
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+            document.update(version=text, metadata={text: [[text]]})
+            snapshot = json.dumps(document, ensure_ascii=escaped).encode("utf-8")
+            manifest.write_bytes(snapshot)
+            output = self.root / f"valid-unicode-{index}"
+            with self.subTest(index=index):
+                status, payload = self.run_cli(manifest, output)
+                self.assertEqual(status, 0)
+                self.assertTrue(payload["report_written"])
+                report = json.loads((output / "report.json").read_bytes().decode("utf-8"))
+                self.assertEqual(report["manifest_version"], text)
+                self.assertEqual(report["manifest_sha256"], sha256(snapshot).hexdigest())
+                value = {"text": text, text: [text], "control": "\r\n\x00"}
+                target = self.root / f"valid-unicode-{index}.json"
+                handoff._json(target, value)
+                self.assertEqual(target.read_bytes(), json.dumps(value, ensure_ascii=False, indent=2,
+                                                                 allow_nan=False).encode("utf-8"))
+                self.assertEqual(json.loads(target.read_bytes().decode("utf-8")), value)
+
+    def test_invalid_runtime_unicode_keeps_accounting_and_no_partial_ocr_json(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        self.engine.recognize.side_effect = lambda *args, **kwargs: OcrPage(0, 60, 40, "fictional.\ud800", ())
+        output = self.root / "runtime-unicode"
+        status, payload = self.run_cli(manifest, output)
+        self.assertEqual(status, 2)
+        self.assertTrue(payload["report_written"])
+        self.assertFalse((output / "tiny/ocr.json").exists())
+        report = json.loads((output / "report.json").read_bytes().decode("utf-8"))
+        self.assertEqual(report["run_status"], "aborted")
+        self.assertEqual(report["counts"], {"requested":1, "native_attempted":1, "ok":0, "failed":1, "not_run":0})
+        self.assertEqual(report["samples"][0]["stage"], "export")
+        self.assertEqual(report["samples"][0]["error_code"], "UNEXPECTED_FAILURE")
+        self.engine.close.assert_called_once()
+        for image in self.images:
+            with self.assertRaises(ValueError):
+                image.getpixel((0, 0))
+
     def test_unserializable_runtime_report_returns_safe_failure_and_closes_images(self):
         manifest = self.manifest([self.sample(data=self.data)])
         output = self.root / "invalid-runtime-report"
