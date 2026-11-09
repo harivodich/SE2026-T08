@@ -202,3 +202,70 @@ muốn lấy hai PNG tiny đã có cùng SHA-256; 18 input thiếu vẫn `not_ru
 failure. Env AI-1 nằm trên D trong ignored artifacts, tách Data Pillow10.2.0 và
 AI-2 training. Không đưa weights/env/runtime outputs vào Git; fixture native hư cấu
 an toàn cho consumer review ở `tests/fixtures/ocr-d1-native-handoff.json`.
+
+## Bàn giao hai loại cho consumer — #24, 09/11/2026
+
+[Index assets](../../tests/fixtures/ocr-d1-canonical-assets.json) gắn hai PNG canonical
+với [bundle OCR observed](../../tests/fixtures/ocr-d1-native-handoff.json) và tiny
+manifest bằng SHA-256 của LF Git blobs. Giữ nguyên snapshot/provider pin
+`7d96e93bf8315beb6fa33807231316e957671249`, không gắn kết quả cũ với source mới.
+Mỗi record trong bundle đã có artifact version2, page0,1500×2600, block IDs,
+text/quads/scores, flags và PreparedPage. Index chỉ bổ sung đường dẫn bytes còn thiếu:
+
+| ID | Ảnh input OCR | Ảnh canonical để highlight |
+|---|---|---|
+| d12-receipt-03 | [input](../../tests/fixtures/d12/d12-receipt-03.png) | [canonical](../../tests/fixtures/d12/d12-receipt-03.canonical.png) |
+| d12-invoice-04 | [input](../../tests/fixtures/d12/d12-invoice-04.png) | [canonical](../../tests/fixtures/d12/d12-invoice-04.canonical.png) |
+
+Input hash lấy từ tiny manifest/`input_sha256`; encoded canonical hash lấy từ
+`canonical.sha256`; `rgb_pixel_sha256` chỉ kiểm pixels. Hai ảnh có cùng pixels
+nhưng encoded bytes/hash khác, không dùng input hash thay canonical hash. PNG
+canonical được copy byte-exact từ native output đã lưu, không re-encode. Regression
+decode input qua loader thật rồi so pixel/hash/dimensions với bytes canonical và
+kiểm OCR/PreparedPage cùng frame; dimensions của processed bị reject. Đã mở trực
+tiếp cả hai PNG; không có nội dung thật/PII, không dùng OCR output làm gold.
+
+Consumer AI2 hiện hành tại `9cfe295` replay provider lịch sử đạt12/12 evidence,
+2/2 native stored records và5/5 native evidence examples. CLI giữ provenance pin;
+đường checkout có CRLF trong JSON có thể trả `PROVENANCE_MISMATCH`. Để replay exact
+Git blobs mà không sửa file hoặc nới guard, dùng các directory mới từ repo root:
+
+```powershell
+$env:PYTHONPATH=(Resolve-Path src).Path
+$env:VIETDOC_CONTRACTS_DIR=(Resolve-Path specs/contracts).Path
+$fixturePython=Join-Path $PWD 'artifacts/models/.venv-ai1-fixture/Scripts/python.exe'
+$reviewRoot=Join-Path $PWD 'artifacts/evaluation/consumer-replay-new'
+New-Item -ItemType Directory $reviewRoot | Out-Null
+git archive --format=zip --output="$reviewRoot/fixtures.zip" HEAD tests/fixtures
+Expand-Archive -LiteralPath "$reviewRoot/fixtures.zip" -DestinationPath "$reviewRoot/exact"
+git worktree add --detach "$reviewRoot/provider" 7d96e93bf8315beb6fa33807231316e957671249
+& $fixturePython -B -m vietdoc.entrypoints.cli.ocr_consumer `
+  --provider-root "$reviewRoot/provider" `
+  --provider-sha 7d96e93bf8315beb6fa33807231316e957671249 `
+  --fixtures "$reviewRoot/exact/tests/fixtures" --output "$reviewRoot/results"
+```
+
+Đây là **stored replay bằng code AI2**, không OCR native mới hoặc owner acceptance.
+Report có consumer/provider SHA và source hashes; lượt kiểm trước commit ghi
+consumer9cfe295, dirty=true vì đang thêm assets/test/docs. CLI hiện chưa nhận
+canonical bytes nên vẫn ghi canonical verification NOT_RUN; regression AI1 xác minh
+bytes không thay Java promotion/viewer acceptance. Receipt vẫn có lỗi `nộp`; invoice
+header `SsL` vẫn không locate bảng, items rỗng. Không sửa text hay thêm sample alias.
+
+Tái dùng [golden v2](../../tests/fixtures/ocr-artifact-v2.json) và tests hiện hành:
+
+| Case | Expected và loại bằng chứng |
+|---|---|
+| Mixed empty/whitespace | Fixture100×100: giữ `p0-b0001`/`p0-b0004`; unreadable `p0-b0002`/`p0-b0003`, reason `EMPTY_RECOGNITION`, flag `OCR_UNREADABLE_REGIONS` |
+| All-unreadable | Fixture: blocks rỗng, detection ID/reason còn nguyên, status unreadable |
+| No detections | Fixture: blocks/regions rỗng, status complete; khác all-unreadable |
+| Version không hỗ trợ | Fixture parser reject; không tự upgrade output lịch sử |
+| Invalid score/geometry, provider failure | Adapter doubles trả typed failure; không đổi thành unreadable để che lỗi |
+| Repeated amount | Fixture + stored examples: đủ scope chọn exact IDs/source quad; thiếu scope abstain; không tạo substring bbox |
+
+AI2 cần xác nhận replay/diagnostics bằng workflow của họ. Backend cần xác nhận
+uncertainty, đúng run/revision/canonical hash/frame, và required-total blocker
+trên server; không dùng schema-valid hoặc OCR score để bypass approve. Golden100×100
+không dùng hai ảnh native1500×2600 làm canonical. Mixed viewer fixture/wire và các
+case hash sai/thiếu total phải được Backend compose/kiểm tại boundary của họ;
+chưa có browser/server acceptance. #24, R04/default-v2 và #63 tiếp tục chờ owner/Lead.
