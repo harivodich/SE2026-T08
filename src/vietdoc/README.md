@@ -171,11 +171,21 @@ Preflight output identity dùng casefold trên mọi OS: `a1/A1` bị reject tr�
 tạo output hoặc gọi engine; ID hợp lệ vẫn giữ nguyên case trong path/report.
 
 Manifest đọc binary đúng một lần với cap1MiB; parse UTF-8 JSON và SHA-256 dùng cùng
-buffer. Reject duplicate keys/nonfinite JSON, version thiếu/rỗng, identity/selection
+buffer. Reject duplicate keys/nonfinite JSON (kể cả overflow `1e999`), version thiếu/rỗng, identity/selection
 hoặc asset path sai trước side effects. CLI preflight trước khi load engine và dùng
 lại snapshot đã kiểm; helper không gọi recognize khi preflight lỗi. File manifest
 đổi sau snapshot không đổi version/samples/digest của lượt đang chạy. Không sửa
 label/split/asset hashes hoặc đọc transcript/gold vào inference.
+
+Provenance `font_sha256`/`config_sha256` được phép vắng hoặc null; khi có giá trị,
+phải là chuỗi 64 ký tự hex thường như asset SHA-256. Sai kiểu/format bị reject
+với safe CLI code `MANIFEST_INVALID`, trước load engine và tạo output. Helper
+không xác nhận bytes font/config từ digest này; đây là metadata do Data cung cấp.
+Writer serialize với `allow_nan=False` trước exclusive file creation, không để lại
+JSON dở dang do serialization failure. Timing không đo được, không hữu hạn, âm
+hoặc sai kiểu thành null; số đo hợp lệ giữ nguyên, không làm tròn hoặc điền số giả.
+Nonfinite còn sót ở trường khác bị reject; CLI không claim report đã ghi nếu
+final report không serialize/ghi được (`LOCAL_REPORT_WRITE_FAILED`).
 
 Local report `vietdoc.ocr-handoff.v2` thêm `report_version`, `run_status`
 (`completed`/`aborted`) và `abort_code`. `completed` nghĩa đã accounting mọi ID,
