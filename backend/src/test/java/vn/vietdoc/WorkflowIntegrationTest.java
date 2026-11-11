@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,6 +72,129 @@ class WorkflowIntegrationTest {
         type + "-demo." + extension,
         extension.equals("pdf") ? "application/pdf" : "image/png",
         Files.readAllBytes(Path.of("../samples/" + type + "-demo." + extension)));
+  }
+
+  private MockHttpSession batchSession(AuthService.Identity identity) throws Exception {
+    var login = mvc.perform(post("/api/v1/auth/session").with(csrf())
+            .contentType("application/json")
+            .content(json.write(Map.of("username", identity.username(), "password", "integration-password"))))
+        .andExpect(status().isOk()).andReturn();
+    return (MockHttpSession) login.getRequest().getSession(false);
+  }
+
+  private MockMultipartFile batchFile(boolean valid) throws Exception {
+    return new MockMultipartFile("files", valid ? "valid.png" : "bad.png", "image/png",
+        valid ? sample("receipt", "png").getBytes() : new byte[0]);
+  }
+
+  private org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder batch(
+      MockHttpSession session, boolean... files) throws Exception {
+    var request = multipart("/api/v1/documents/batch-import");
+    for (boolean valid : files) request.file(batchFile(valid));
+    request.session(session).param("document_type", "receipt");
+    return request;
+  }
+
+  @Test
+  void batchMixedFilesCommitBothValidRowsAndPreserveLegacyState() throws Exception {
+    var existing = extracted("receipt");
+    var legacy = approve(existing);
+    var artifact = exports.create(legacy.id(), owner.id(), new Requests.Export(legacy.headRevisionId(), "json"));
+    byte[] before = exports.download(artifact.id(), owner.id());
+    var response = mvc.perform(batch(batchSession(owner), true, false, true).with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items.length()").value(3))
+        .andExpect(jsonPath("$.items[0].state").value("IMPORTED"))
+        .andExpect(jsonPath("$.items[1].state").value("REJECTED"))
+        .andExpect(jsonPath("$.items[1].error_code").value("INPUT_CORRUPT"))
+        .andExpect(jsonPath("$.items[1].document_id").doesNotExist())
+        .andExpect(jsonPath("$.items[2].state").value("IMPORTED")).andReturn();
+    var items = json.read(response.getResponse().getContentAsString()).path("items");
+    for (int i = 0; i < items.size(); i++) assertEquals(i + 1, items.get(i).path("row").asInt());
+    String first = items.get(0).path("document_id").asText();
+    String last = items.get(2).path("document_id").asText();
+    assertNotEquals(first, last);
+    for (String id : List.of(first, last)) {
+      assertEquals(1L, documents.get(id, owner.id()).version());
+      assertNull(documents.get(id, owner.id()).headRevisionId());
+      assertEquals("UPLOAD", documents.audit(id, owner.id()).items().get(0).action());
+    }
+    mvc.perform(get("/api/v1/documents/" + first).session(batchSession(other)))
+        .andExpect(status().isNotFound());
+    assertEquals(3, documents.list(owner.id(), null, null, null, 100).items().size());
+    var after = documents.get(legacy.id(), owner.id());
+    assertEquals(legacy.version(), after.version());
+    assertEquals(legacy.headRevisionId(), after.headRevisionId());
+    assertArrayEquals(before, exports.download(artifact.id(), owner.id()));
+  }
+
+  @Test
+  void batchAllInvalidCreatesNothingAndAllValidImportsBoth() throws Exception {
+    var session = batchSession(owner);
+    mvc.perform(batch(session, false, false).with(csrf())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].state").value("REJECTED"))
+        .andExpect(jsonPath("$.items[1].state").value("REJECTED"));
+    assertTrue(documents.list(owner.id(), null, null, null, 100).items().isEmpty());
+    mvc.perform(batch(session, true, true).with(csrf())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].state").value("IMPORTED"))
+        .andExpect(jsonPath("$.items[1].state").value("IMPORTED"));
+    assertEquals(2, documents.list(owner.id(), null, null, null, 100).items().size());
+  }
+
+  @Test
+  void batchEnvelopeFailuresDoNotWrite() throws Exception {
+    var session = batchSession(owner);
+    mvc.perform(batch(session, true)).andExpect(status().isForbidden());
+    mvc.perform(multipart("/api/v1/documents/batch-import").file(batchFile(true))
+        .param("document_type", "receipt").with(csrf())).andExpect(status().isUnauthorized());
+    mvc.perform(batch(session, true).with(csrf()).header("Idempotency-Key", "batch-key"))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("BATCH_KEY_UNSUPPORTED"));
+    mvc.perform(multipart("/api/v1/documents/batch-import").file(batchFile(true))
+        .session(session).with(csrf()).param("document_type", "unsupported"))
+        .andExpect(status().isUnprocessableEntity());
+    mvc.perform(batch(session, true,true,true,true,true,true,true,true,true,true,true).with(csrf()))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("INVALID_BATCH_SIZE"));
+    assertTrue(documents.list(owner.id(), null, null, null, 100).items().isEmpty());
+  }
+
+  @Test
+  @EnabledIfSystemProperty(named = "vt028.load", matches = "true")
+  void batchLoad150ConcurrentTasks() throws Exception {
+    final int count = 150;
+    var session = batchSession(owner);
+    var requests = new ArrayList<org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder>();
+    for (int i = 0; i < count; i++) requests.add(batch(session, true, false, true));
+    var pool = Executors.newFixedThreadPool(count);
+    var ready = new CountDownLatch(count);
+    var start = new CountDownLatch(1);
+    var futures = new ArrayList<Future<Long>>();
+    try {
+      for (var request : requests) futures.add(pool.submit(() -> {
+        ready.countDown();
+        if (!start.await(30, TimeUnit.SECONDS)) throw new IllegalStateException("Start gate timeout");
+        long t0 = System.nanoTime();
+        mvc.perform(request.with(csrf())).andExpect(status().isOk())
+            .andExpect(jsonPath("$.items[0].state").value("IMPORTED"))
+            .andExpect(jsonPath("$.items[1].state").value("REJECTED"))
+            .andExpect(jsonPath("$.items[2].state").value("IMPORTED"));
+        return System.nanoTime() - t0;
+      }));
+      assertTrue(ready.await(30, TimeUnit.SECONDS));
+      start.countDown();
+      var latency = new ArrayList<Long>();
+      int failures = 0;
+      for (var result : futures) {
+        try { latency.add(result.get(60, TimeUnit.SECONDS)); }
+        catch (ExecutionException | TimeoutException e) { failures++; }
+      }
+      latency.sort(null);
+      double p95 = latency.isEmpty() ? Double.NaN : latency.get((int)Math.ceil(latency.size() * .95) - 1) / 1e9;
+      System.out.printf(Locale.ROOT, "VT028_LOAD tasks=%d successful=%d failed=%d p95_seconds=%.6f target_seconds=4.0 meets_target=%s%n",
+          count, latency.size(), failures, p95, failures == 0 && p95 <= 4.0);
+      assertEquals(0, failures, "Any failed task invalidates the latency comparison");
+    } finally {
+      pool.shutdownNow();
+    }
   }
 
   DocumentService.DocumentView extracted(String type) throws Exception {
