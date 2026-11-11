@@ -15,7 +15,16 @@ import vn.vietdoc.persistence.Entities.*;
 
 @Service
 public class DocumentService {
+  private static final Set<String> BATCH_ROW_ERRORS = Set.of(
+      "INPUT_CORRUPT", "UNSUPPORTED_MEDIA", "PROFILE_UNSUPPORTED", "FILE_TOO_LARGE", "PDF_RENDER_TIMEOUT");
+
   public record Page<T>(List<T> items, String nextCursor) {}
+
+  public enum BatchRowState { IMPORTED, REJECTED }
+
+  public record BatchRow(int row, BatchRowState state, String documentId, String errorCode) {}
+
+  public record BatchImportView(List<BatchRow> items) {}
 
   public record JobView(
       String id,
@@ -137,6 +146,27 @@ public class DocumentService {
   @Transactional(readOnly = true)
   public DocumentView get(String id, String user) {
     return view(store.owned(id, user, false));
+  }
+
+  // Keep this entrypoint outside a transaction: upload owns each row's commit and cleanup.
+  public BatchImportView importBatch(String user, List<MultipartFile> files, String type, String key) {
+    validator.type(type);
+    if (key != null)
+      throw new ApiException(400, "BATCH_KEY_UNSUPPORTED", "Batch import không hỗ trợ Idempotency-Key.");
+    if (files.isEmpty() || files.size() > 10)
+      throw new ApiException(400, "INVALID_BATCH_SIZE", "Batch phải có từ 1 đến 10 tệp.");
+    List<BatchRow> rows = new ArrayList<>(files.size());
+    for (int index = 0; index < files.size(); index++) {
+      int row = index + 1;
+      try {
+        DocumentView imported = upload(user, files.get(index), type, null);
+        rows.add(new BatchRow(row, BatchRowState.IMPORTED, imported.id(), null));
+      } catch (ApiException error) {
+        if (!BATCH_ROW_ERRORS.contains(error.code)) throw error;
+        rows.add(new BatchRow(row, BatchRowState.REJECTED, null, error.code));
+      }
+    }
+    return new BatchImportView(List.copyOf(rows));
   }
 
   @Transactional(readOnly = true)

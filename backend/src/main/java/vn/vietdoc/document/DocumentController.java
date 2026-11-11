@@ -48,6 +48,15 @@ public class DocumentController {
     return documents.list(user.id(), type, status, cursor, limit);
   }
 
+  @PostMapping(value = "/documents/batch-import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public DocumentService.BatchImportView batchImport(
+      @AuthenticationPrincipal Identity user,
+      @RequestPart("files") List<MultipartFile> files,
+      @RequestParam("document_type") String type,
+      @RequestHeader(value = "Idempotency-Key", required = false) String key) {
+    return documents.importBatch(user.id(), files, type, key);
+  }
+
   @GetMapping("/documents/{id}")
   public DocumentService.DocumentView detail(
       @PathVariable String id, @AuthenticationPrincipal Identity user) {
