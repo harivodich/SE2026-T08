@@ -9,6 +9,7 @@ from hashlib import sha256
 from importlib.metadata import version
 from io import BytesIO
 import json
+import math
 from pathlib import Path, PurePosixPath
 import platform
 import re
@@ -39,8 +40,10 @@ def _io_code(stage):
 
 
 def _json(path, data):
-    with path.open("x", encoding="utf-8", newline="\n") as stream:
-        json.dump(data, stream, ensure_ascii=False, indent=2)
+    # Serialize and encode before creation: invalid data must not leave partial JSON.
+    encoded = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+    with path.open("xb") as stream:
+        stream.write(encoded)
 
 
 def _asset(root, asset):
@@ -72,6 +75,38 @@ def _invalid_constant(value):
     raise ValueError("Invalid manifest JSON number")
 
 
+def _finite_float(value):
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("Invalid manifest JSON number")
+    return number
+
+
+def _validate_unicode(value):
+    """Validate decoded JSON strings without reserializing the hashed snapshot."""
+    pending = [value]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, str):
+            current.encode("utf-8")
+        elif isinstance(current, dict):
+            pending.extend(current.keys())
+            pending.extend(current.values())
+        elif isinstance(current, list):
+            pending.extend(current)
+
+
+def _measured_seconds(value):
+    """Unavailable/invalid instrumentation is null, never invented or nonfinite."""
+    if type(value) in (int, float) and value >= 0:
+        try:
+            if math.isfinite(value):
+                return value
+        except OverflowError:
+            pass
+    return None
+
+
 def _memory():
     try:
         import psutil
@@ -90,7 +125,8 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
         raise ValueError("Manifest exceeds the byte limit")
     try:
         manifest = json.loads(snapshot.decode("utf-8"), object_pairs_hook=_unique_record,
-                              parse_constant=_invalid_constant)
+                              parse_constant=_invalid_constant, parse_float=_finite_float)
+        _validate_unicode(manifest)
     except (ValueError, RecursionError):
         raise ValueError("Invalid manifest JSON") from None
     samples = manifest.get("samples") if isinstance(manifest, dict) else None
@@ -98,6 +134,10 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
         raise ValueError("Expected 1..20 D1 integration samples")
     if not isinstance(manifest.get("version"), str) or not manifest["version"].strip():
         raise ValueError("Manifest must declare its version")
+    for key in ("font_sha256", "config_sha256"):
+        value = manifest.get(key)
+        if value is not None and (not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)):
+            raise ValueError("Invalid manifest provenance hash")
     ids = [sample.get("sample_id") if isinstance(sample, dict) else None for sample in samples]
     if any(not isinstance(s, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", s) for s in ids) or len(ids) != len(set(ids)):
         raise ValueError("Invalid or duplicate Data sample IDs")
@@ -155,7 +195,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
               "report_version": HANDOFF_REPORT_VERSION, "run_status": "completed", "abort_code": None,
               "manifest_version": manifest["version"], "manifest_sha256": digest,
               "provider": type(engine).__name__, "python": platform.python_version(), "hardware": platform.platform(),
-              "engine_load_seconds": getattr(engine, "load_seconds", None),
+              "engine_load_seconds": _measured_seconds(getattr(engine, "load_seconds", None)),
               "font_sha256": manifest.get("font_sha256"), "config_sha256": manifest.get("config_sha256"),
               "versions": {"stage": OCR_STAGE_VERSION, "geometry": GEOMETRY_VERSION, "evidence": EVIDENCE_VERSION,
                            "Pillow": version("Pillow"), "pypdfium2": version("pypdfium2")},
@@ -211,7 +251,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
                                        "rgb_pixel_sha256": sha256(loaded.canonical.tobytes()).hexdigest()},
                             prepared=loaded.metadata.to_dict(), block_count=len(page.blocks),
                             unreadable_count=len(page.unreadable_regions), review_flags=list(page.review_flags),
-                            ocr_seconds=getattr(engine, "last_inference_seconds", None), memory_bytes=_memory(),
+                            ocr_seconds=_measured_seconds(getattr(engine, "last_inference_seconds", None)), memory_bytes=_memory(),
                             local_consumer_parse="passed; not AI2/Backend acceptance")
         except FileNotFoundError:
             missing_input = case["stage"] == "input"
@@ -225,7 +265,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
             code = "LOCAL_MEMORY_EXHAUSTED" if isinstance(exc, MemoryError) else "UNEXPECTED_FAILURE"
             case.update(status="failed", error_code=code)
             report.update(run_status="aborted", abort_code=code)
-        case["duration_seconds"] = time.monotonic() - started
+        case["duration_seconds"] = _measured_seconds(time.monotonic() - started)
         try:
             _json(target / "run.json", case)
         except OSError:
