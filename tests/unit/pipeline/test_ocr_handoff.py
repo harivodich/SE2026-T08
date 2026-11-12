@@ -62,6 +62,175 @@ class HandoffTest(unittest.TestCase):
             status = handoff.main()
         return status, json.loads(stream.getvalue())
 
+    def test_optional_provenance_hashes_preserve_valid_and_null_values(self):
+        for index, value in enumerate((None, "0123456789abcdef" * 4)):
+            manifest = self.manifest([self.sample(data=self.data)])
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+            document.update(font_sha256=value, config_sha256=value)
+            manifest.write_text(json.dumps(document), encoding="utf-8")
+            snapshot = manifest.read_bytes()
+            output = self.root / f"valid-provenance-{index}"
+            with self.subTest(value=value):
+                status, payload = self.run_cli(manifest, output)
+                self.assertEqual(status, 0)
+                self.assertTrue(payload["report_written"])
+                report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+                self.assertEqual(report["manifest_sha256"], sha256(snapshot).hexdigest())
+                self.assertEqual(report["font_sha256"], value)
+                self.assertEqual(report["config_sha256"], value)
+
+    def test_invalid_optional_provenance_rejected_before_cli_load_and_output(self):
+        for key in ("font_sha256", "config_sha256"):
+            for index, value in enumerate((True, 12, [], {}, "", "a" * 63, "a" * 65,
+                                           "A" * 64, "g" * 64, "a" * 64 + "\n")):
+                manifest = self.manifest([self.sample(data=self.data)])
+                document = json.loads(manifest.read_text(encoding="utf-8"))
+                document[key] = value
+                manifest.write_text(json.dumps(document), encoding="utf-8")
+                output = self.root / f"invalid-{key}-{index}"
+                with self.subTest(key=key, value=value):
+                    status, payload = self.run_cli(manifest, output)
+                    self.assertEqual(status, 2)
+                    self.assertEqual(payload, {"code":"MANIFEST_INVALID", "stage":"input", "report_written":False})
+                    self.assertFalse(output.exists())
+                    self.engine.load.assert_not_called()
+                    self.engine.recognize.assert_not_called()
+                    self.engine.close.assert_not_called()
+
+    def test_overflow_json_numbers_rejected_even_in_nested_metadata(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        base = manifest.read_text(encoding="utf-8")
+        for index, value in enumerate(("1e999", "-1e999", '{"nested":[1e999]}')):
+            manifest.write_text(base[:-1] + ',"environment":' + value + '}', encoding="utf-8")
+            output = self.root / f"overflow-{index}"
+            with self.subTest(value=value):
+                status, payload = self.run_cli(manifest, output)
+                self.assertEqual(status, 2)
+                self.assertEqual(payload, {"code":"MANIFEST_INVALID", "stage":"input", "report_written":False})
+                self.assertFalse(output.exists())
+                self.engine.load.assert_not_called()
+                self.engine.recognize.assert_not_called()
+
+    def test_unavailable_runtime_measurements_are_null_in_strict_report(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        for index, value in enumerate((float("nan"), float("inf"), float("-inf"), -1, True, "PRIVATE_TOKEN", 10**400)):
+            self.engine.load_seconds = self.engine.last_inference_seconds = value
+            output = self.root / f"measurement-{index}"
+            with self.subTest(value=value):
+                status, payload = self.run_cli(manifest, output)
+                self.assertEqual(status, 0)
+                self.assertTrue(payload["report_written"])
+                report = json.loads((output / "report.json").read_text(encoding="utf-8"),
+                                    parse_constant=lambda value: self.fail("Nonfinite JSON: " + value))
+                self.assertIsNone(report["engine_load_seconds"])
+                self.assertIsNone(report["samples"][0]["ocr_seconds"])
+                self.assertNotIn("PRIVATE_TOKEN", json.dumps(report))
+
+    def test_finite_runtime_measurements_preserved_without_rounding(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        self.engine.load_seconds = 0
+        self.engine.last_inference_seconds = 1.23456789
+        report = review_manifest(self.root, manifest, self.root / "finite-measurements", self.engine)
+        self.assertEqual(report["engine_load_seconds"], 0)
+        self.assertEqual(report["samples"][0]["ocr_seconds"], 1.23456789)
+
+    def test_json_writer_rejects_nonfinite_before_creating_a_partial_file(self):
+        for index, value in enumerate((float("nan"), float("inf"), float("-inf"))):
+            target = self.root / f"invalid-json-{index}.json"
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    handoff._json(target, {"nested": [value]})
+                self.assertFalse(target.exists())
+
+    def test_json_writer_rejects_invalid_unicode_before_creating_a_file(self):
+        for index, text in enumerate(("\ud800", "\udfff")):
+            for location, value in (("value", {"text": text}), ("key", {text: "value"}),
+                                    ("nested", {"metadata": [{"text": text}]})):
+                target = self.root / f"invalid-unicode-{index}-{location}.json"
+                with self.subTest(index=index, location=location):
+                    with self.assertRaises(UnicodeEncodeError):
+                        handoff._json(target, value)
+                    self.assertFalse(target.exists())
+
+    def test_invalid_manifest_unicode_rejected_before_output_and_engine(self):
+        for index, text in enumerate(("\ud800", "\udfff")):
+            for location in ("version", "key", "array", "asset_path"):
+                manifest = self.manifest([self.sample(data=self.data)])
+                document = json.loads(manifest.read_text(encoding="utf-8"))
+                if location == "version":
+                    document["version"] = text
+                elif location == "key":
+                    document["metadata"] = {text: "value"}
+                elif location == "array":
+                    document["metadata"] = {"values": [[text]]}
+                else:
+                    document["samples"][0]["assets"]["png"]["path"] = text + ".png"
+                manifest.write_text(json.dumps(document), encoding="utf-8")
+                output = self.root / f"unicode-manifest-{index}-{location}"
+                with self.subTest(index=index, location=location):
+                    status, payload = self.run_cli(manifest, output)
+                    self.assertEqual(status, 2)
+                    self.assertEqual(payload, {"code":"MANIFEST_INVALID", "stage":"input", "report_written":False})
+                    self.assertFalse(output.exists())
+                    self.engine.load.assert_not_called()
+                    self.engine.recognize.assert_not_called()
+                    self.engine.close.assert_not_called()
+
+    def test_valid_unicode_preserves_utf8_bytes_and_manifest_snapshot_hash(self):
+        for index, (text, escaped) in enumerate((("T\u1ed5ng ti\u1ec1n", False),
+                                                ("To\u0302\u0309ng", True), ("\U0001f600", True))):
+            manifest = self.manifest([self.sample(data=self.data)])
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+            document.update(version=text, metadata={text: [[text]]})
+            snapshot = json.dumps(document, ensure_ascii=escaped).encode("utf-8")
+            manifest.write_bytes(snapshot)
+            output = self.root / f"valid-unicode-{index}"
+            with self.subTest(index=index):
+                status, payload = self.run_cli(manifest, output)
+                self.assertEqual(status, 0)
+                self.assertTrue(payload["report_written"])
+                report = json.loads((output / "report.json").read_bytes().decode("utf-8"))
+                self.assertEqual(report["manifest_version"], text)
+                self.assertEqual(report["manifest_sha256"], sha256(snapshot).hexdigest())
+                value = {"text": text, text: [text], "control": "\r\n\x00"}
+                target = self.root / f"valid-unicode-{index}.json"
+                handoff._json(target, value)
+                self.assertEqual(target.read_bytes(), json.dumps(value, ensure_ascii=False, indent=2,
+                                                                 allow_nan=False).encode("utf-8"))
+                self.assertEqual(json.loads(target.read_bytes().decode("utf-8")), value)
+
+    def test_invalid_runtime_unicode_keeps_accounting_and_no_partial_ocr_json(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        self.engine.recognize.side_effect = lambda *args, **kwargs: OcrPage(0, 60, 40, "fictional.\ud800", ())
+        output = self.root / "runtime-unicode"
+        status, payload = self.run_cli(manifest, output)
+        self.assertEqual(status, 2)
+        self.assertTrue(payload["report_written"])
+        self.assertFalse((output / "tiny/ocr.json").exists())
+        report = json.loads((output / "report.json").read_bytes().decode("utf-8"))
+        self.assertEqual(report["run_status"], "aborted")
+        self.assertEqual(report["counts"], {"requested":1, "native_attempted":1, "ok":0, "failed":1, "not_run":0})
+        self.assertEqual(report["samples"][0]["stage"], "export")
+        self.assertEqual(report["samples"][0]["error_code"], "UNEXPECTED_FAILURE")
+        self.engine.close.assert_called_once()
+        for image in self.images:
+            with self.assertRaises(ValueError):
+                image.getpixel((0, 0))
+
+    def test_unserializable_runtime_report_returns_safe_failure_and_closes_images(self):
+        manifest = self.manifest([self.sample(data=self.data)])
+        output = self.root / "invalid-runtime-report"
+        with patch.object(handoff, "_memory", return_value={"rss": float("nan")}):
+            status, payload = self.run_cli(manifest, output)
+        self.assertEqual(status, 2)
+        self.assertEqual(payload, {"code":"LOCAL_REPORT_WRITE_FAILED", "stage":"export", "report_written":False})
+        self.assertFalse((output / "report.json").exists())
+        self.assertFalse((output / "tiny/run.json").exists())
+        self.engine.close.assert_called_once()
+        for image in self.images:
+            with self.assertRaises(ValueError):
+                image.getpixel((0, 0))
+
     def test_manifest_mutation_after_snapshot_keeps_digest_version_and_samples(self):
         manifest = self.manifest([self.sample(data=self.data)])
         snapshot = manifest.read_bytes()
