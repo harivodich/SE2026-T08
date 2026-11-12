@@ -20,7 +20,7 @@ from vietdoc.pipeline.ocr import handoff
 from vietdoc.pipeline.ocr.handoff import review_manifest
 from vietdoc.pipeline.ocr.paddle_adapter import VietnameseOcrEngine, _to_page
 from vietdoc.pipeline.geometry import canonical_quad
-from vietdoc.pipeline.preprocess import load_document
+from vietdoc.pipeline.preprocess import PreprocessError, load_document
 
 
 class HandoffTest(unittest.TestCase):
@@ -566,6 +566,83 @@ class HandoffTest(unittest.TestCase):
 
 
 class D1GeometryHandshakeTest(unittest.TestCase):
+    def test_mixed_viewer_inputs_keep_diagnostics_and_reject_wrong_hash_or_frame(self):
+        from vietdoc.pipeline.ocr.preview import render_preview
+
+        root = Path(__file__).resolve().parents[3]
+        index = json.loads((root / "tests/fixtures/ocr-d1-canonical-assets.json").read_text(encoding="utf-8"))
+        fixture = index["viewer_fixture"]
+        golden = json.loads((root / fixture["ocr_golden"]["path"]).read_text(encoding="utf-8"))
+        expected = next(c["expected"] for c in golden["cases"] if c["case_id"] == fixture["ocr_golden"]["case_id"])
+        page = OcrPage.from_dict(expected)
+        prepared = PreparedPage.from_dict(golden["prepared_page"])
+        data = (root / fixture["canonical_png"]).read_bytes()
+        self.assertEqual(sha256(data).hexdigest(), fixture["sha256"])
+        cases = {case["case_id"]: case for case in fixture["cases"]}
+        self.assertEqual(set(cases), {"mixed-v2", "required-total-missing", "wrong-canonical-hash", "wrong-canonical-frame"})
+        with load_document(data, expected_sha256=fixture["sha256"]) as loaded:
+            self.assertEqual(loaded.canonical.size, (fixture["width"], fixture["height"]))
+            page.validate_against(loaded.metadata)
+            page.validate_against(prepared)
+            self.assertEqual([b.block_id for b in page.blocks], ["p0-b0001", "p0-b0004"])
+            self.assertEqual([(r.region_id, r.reason) for r in page.unreadable_regions],
+                             [("p0-b0002", "EMPTY_RECOGNITION"), ("p0-b0003", "EMPTY_RECOGNITION")])
+            self.assertEqual(page.review_flags, ("OCR_UNREADABLE_REGIONS",))
+            html = render_preview(loaded.canonical, page)
+            for region_id in ("p0-b0001", "p0-b0002", "p0-b0003", "p0-b0004"):
+                self.assertIn(region_id, html)
+            missing = match_evidence(page, EvidenceRequest(**cases["required-total-missing"]["evidence_request"]), prepared=prepared)
+            self.assertEqual(missing.status, "value_unavailable")
+            metadata = missing.to_field_metadata()
+            self.assertIsNone(metadata["raw_value"])
+            self.assertEqual(metadata["source_regions"], [])
+            self.assertEqual(set(metadata["review_flags"]),
+                             {"SOURCE_VALUE_UNAVAILABLE", "OCR_UNREADABLE_REGIONS", "SOURCE_OCR_INCOMPLETE"})
+            dimensions = cases["wrong-canonical-frame"]["declared_dimensions"]
+            wrong = replace(prepared, canonical=replace(prepared.canonical, **dimensions))
+            with self.assertRaises(ValueError):
+                page.validate_against(wrong)
+        with self.assertRaises(PreprocessError) as caught:
+            load_document(data, expected_sha256=cases["wrong-canonical-hash"]["declared_sha256"])
+        self.assertEqual(caught.exception.code, "INPUT_INVALID")
+
+    def test_consumer_assets_bind_native_blocks_to_encoded_canonical_bytes(self):
+        root = Path(__file__).resolve().parents[3]
+        assets = json.loads((root / "tests/fixtures/ocr-d1-canonical-assets.json").read_text(encoding="utf-8"))
+        self.assertEqual(assets["artifact_version"], "vietdoc.ocr-consumer-assets.v1")
+        self.assertEqual(assets["provider_sha"], "7d96e93bf8315beb6fa33807231316e957671249")
+        for reference in (assets["ocr_bundle"], assets["input_manifest"]):
+            # Text snapshots pin LF Git blobs (.gitattributes), not checkout EOL bytes.
+            blob = (root / reference["path"]).read_text(encoding="utf-8").encode("utf-8")
+            self.assertEqual(sha256(blob).hexdigest(), reference["git_blob_sha256"])
+        bundle = json.loads((root / assets["ocr_bundle"]["path"]).read_text(encoding="utf-8"))
+        manifest = json.loads((root / assets["input_manifest"]["path"]).read_text(encoding="utf-8"))
+        self.assertEqual([s["sample_id"] for s in assets["samples"]], ["d12-receipt-03", "d12-invoice-04"])
+        for supplied in assets["samples"]:
+            sid = supplied["sample_id"]
+            observed = next(s for s in bundle["samples"] if s["sample_id"] == sid)
+            entry = next(s for s in manifest["samples"] if s["sample_id"] == sid)
+            data = (root / entry["assets"]["png"]["path"]).read_bytes()
+            canonical = (root / supplied["canonical_png"]).read_bytes()
+            expected = observed["canonical"]
+            with self.subTest(sample_id=sid):
+                self.assertEqual(sha256(data).hexdigest(), observed["input_sha256"])
+                self.assertEqual(sha256(data).hexdigest(), entry["assets"]["png"]["sha256"])
+                self.assertEqual(sha256(canonical).hexdigest(), expected["sha256"])
+                self.assertNotEqual(sha256(canonical).hexdigest(), observed["input_sha256"])
+                self.assertEqual(len(canonical), expected["size_bytes"])
+                with load_document(data, expected_sha256=observed["input_sha256"]) as loaded, Image.open(BytesIO(canonical)) as image:
+                    self.assertEqual(image.size, (expected["width"], expected["height"]))
+                    self.assertEqual(image.mode, "RGB")
+                    self.assertEqual(sha256(image.tobytes()).hexdigest(), expected["rgb_pixel_sha256"])
+                    self.assertEqual(image.tobytes(), loaded.canonical.tobytes())
+                    page = OcrPage.from_dict(observed["ocr"])
+                    page.validate_against(PreparedPage.from_dict(observed["prepared"]))
+                    page.validate_against(loaded.metadata)
+                    # Processed dimensions are a different frame, despite valid normalized quads.
+                    with self.assertRaises(ValueError):
+                        replace(page, width=loaded.processed.width, height=loaded.processed.height).validate_against(loaded.metadata)
+
     def test_observed_native_evidence_examples_keep_ids_or_abstain(self):
         root = Path(__file__).resolve().parents[3]
         bundle = json.loads((root / "tests/fixtures/ocr-d1-native-handoff.json").read_text(encoding="utf-8"))
