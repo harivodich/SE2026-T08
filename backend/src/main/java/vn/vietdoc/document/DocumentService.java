@@ -141,8 +141,18 @@ public class DocumentService {
 
   @Transactional(readOnly = true)
   public Page<DocumentView> list(String user, String type, String state, String cursor, int limit) {
+    return list(user, type, state, cursor, limit, null);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<DocumentView> list(
+      String user, String type, String state, String cursor, int limit, String q) {
     limit = Math.max(1, Math.min(100, limit));
+    String search = q == null ? "" : q.trim();
+    if (search.length() > 128)
+      throw new ApiException(400, "INVALID_QUERY", "Từ khóa tìm kiếm vượt quá 128 ký tự.");
     String where = " where d.ownerId=:u";
+    if (!search.isEmpty()) where += " and lower(d.filename) like :q escape '!'";
     if (type != null && !type.isBlank()) {
       validator.type(type);
       where += " and d.documentType=:t";
@@ -179,6 +189,9 @@ public class DocumentService {
             .setParameter("u", user)
             .setMaxResults(limit + 1);
     if (type != null && !type.isBlank()) query.setParameter("t", type);
+    if (!search.isEmpty())
+      query.setParameter("q", "%" + search.toLowerCase(Locale.ROOT)
+          .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
     if (previous != null)
       query.setParameter("time", previous.createdAt).setParameter("id", previous.id);
     List<Document> rows = query.getResultList();

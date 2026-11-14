@@ -217,6 +217,15 @@
             "schema": {
               "type": "integer"
             }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Optional literal filename substring; trim; case-insensitive with accents preserved. Maximum 128 UTF-16 code units after trim. Keep filters unchanged across cursor pages. Order: created_at DESC, id DESC.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },

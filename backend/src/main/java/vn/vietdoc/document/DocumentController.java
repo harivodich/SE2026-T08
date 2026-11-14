@@ -44,8 +44,9 @@ public class DocumentController {
       @RequestParam(required = false) String type,
       @RequestParam(required = false) String status,
       @RequestParam(required = false) String cursor,
-      @RequestParam(defaultValue = "20") int limit) {
-    return documents.list(user.id(), type, status, cursor, limit);
+      @RequestParam(defaultValue = "20") int limit,
+      @RequestParam(required = false) String q) {
+    return documents.list(user.id(), type, status, cursor, limit, q);
   }
 
   @GetMapping("/documents/{id}")
