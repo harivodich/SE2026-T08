@@ -1,0 +1,95 @@
+{
+  "tool": "JaCoCo 0.8.14",
+  "scope": "Full Java regression; load disabled",
+  "methods": [
+    {
+      "label": "DocumentController.list search route",
+      "line": "1/1 (100.0%)",
+      "branch": "N/A",
+      "descriptor": "(Lvn/vietdoc/auth/AuthService$Identity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lvn/vietdoc/document/DocumentService$Page;",
+      "counters": {
+        "INSTRUCTION": {
+          "type": "INSTRUCTION",
+          "missed": "0",
+          "covered": "11"
+        },
+        "LINE": {
+          "type": "LINE",
+          "missed": "0",
+          "covered": "1"
+        },
+        "COMPLEXITY": {
+          "type": "COMPLEXITY",
+          "missed": "0",
+          "covered": "1"
+        },
+        "METHOD": {
+          "type": "METHOD",
+          "missed": "0",
+          "covered": "1"
+        }
+      }
+    },
+    {
+      "label": "DocumentService.list legacy overload",
+      "line": "1/1 (100.0%)",
+      "branch": "N/A",
+      "descriptor": "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Lvn/vietdoc/document/DocumentService$Page;",
+      "counters": {
+        "INSTRUCTION": {
+          "type": "INSTRUCTION",
+          "missed": "0",
+          "covered": "9"
+        },
+        "LINE": {
+          "type": "LINE",
+          "missed": "0",
+          "covered": "1"
+        },
+        "COMPLEXITY": {
+          "type": "COMPLEXITY",
+          "missed": "0",
+          "covered": "1"
+        },
+        "METHOD": {
+          "type": "METHOD",
+          "missed": "0",
+          "covered": "1"
+        }
+      }
+    },
+    {
+      "label": "DocumentService.list search route",
+      "line": "38/38 (100.0%)",
+      "branch": "34/38 (89.5%)",
+      "descriptor": "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lvn/vietdoc/document/DocumentService$Page;",
+      "counters": {
+        "INSTRUCTION": {
+          "type": "INSTRUCTION",
+          "missed": "0",
+          "covered": "196"
+        },
+        "BRANCH": {
+          "type": "BRANCH",
+          "missed": "4",
+          "covered": "34"
+        },
+        "LINE": {
+          "type": "LINE",
+          "missed": "0",
+          "covered": "38"
+        },
+        "COMPLEXITY": {
+          "type": "COMPLEXITY",
+          "missed": "4",
+          "covered": "17"
+        },
+        "METHOD": {
+          "type": "METHOD",
+          "missed": "0",
+          "covered": "1"
+        }
+      }
+    }
+  ]
+}

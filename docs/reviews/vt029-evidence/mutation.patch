@@ -1,0 +1,17 @@
+diff --git a/backend/src/main/java/vn/vietdoc/document/DocumentController.java b/backend/src/main/java/vn/vietdoc/document/DocumentController.java
+index 3dd1974..f7503d8 100644
+--- a/backend/src/main/java/vn/vietdoc/document/DocumentController.java
++++ b/backend/src/main/java/vn/vietdoc/document/DocumentController.java
+@@ -46,7 +46,11 @@ public class DocumentController {
+       @RequestParam(required = false) String cursor,
+       @RequestParam(defaultValue = "20") int limit,
+       @RequestParam(required = false) String q) {
+-    return documents.list(user.id(), type, status, cursor, limit, q);
++    try {
++      return documents.list(user.id(), type, status, cursor, limit, q);
++    } catch (RuntimeException ignored) {
++      return new DocumentService.Page<>(List.of(), null);
++    }
+   }
+ 
+   @GetMapping("/documents/{id}")

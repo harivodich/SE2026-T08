@@ -1,0 +1,96 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/tmp/vietdoc-vt029-maven/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< vn.vietdoc:vietdoc-backend >---------------------
+[INFO] Building vietdoc-backend 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ vietdoc-backend ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 12 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ vietdoc-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 24 source files with javac [debug parameters release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ vietdoc-backend ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ vietdoc-backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 7 source files with javac [debug parameters release 17] to target/test-classes
+[INFO] /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java: /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java uses or overrides a deprecated API.
+[INFO] /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ vietdoc-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running vn.vietdoc.DocumentSearchContractTest
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+21:54:56.964 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [vn.vietdoc.DocumentSearchContractTest]: DocumentSearchContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+21:54:57.221 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration vn.vietdoc.VietDocApplication for test class vn.vietdoc.DocumentSearchContractTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-11-14T21:54:57.990+07:00  INFO 185 --- [           main] vn.vietdoc.DocumentSearchContractTest    : Starting DocumentSearchContractTest using Java 25.0.4.1 with PID 185 (started by dan in /home/dan/Documents/StudynWork/SE2026-T08/backend)
+2026-11-14T21:54:57.992+07:00  INFO 185 --- [           main] vn.vietdoc.DocumentSearchContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-11-14T21:54:59.729+07:00  INFO 185 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-14T21:54:59.778+07:00  INFO 185 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 0 JPA repository interfaces.
+2026-11-14T21:55:00.739+07:00  INFO 185 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-14T21:55:01.023+07:00  INFO 185 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:vt029 user=SA
+2026-11-14T21:55:01.026+07:00  INFO 185 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-14T21:55:01.105+07:00  INFO 185 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:vt029 (H2 2.3)
+2026-11-14T21:55:01.160+07:00  INFO 185 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-11-14T21:55:01.164+07:00  INFO 185 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.021s)
+2026-11-14T21:55:01.178+07:00  INFO 185 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-11-14T21:55:01.231+07:00  INFO 185 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-11-14T21:55:01.254+07:00  INFO 185 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - application"
+2026-11-14T21:55:01.308+07:00  INFO 185 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v1 (execution time 00:00.040s)
+2026-11-14T21:55:01.469+07:00  INFO 185 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-14T21:55:01.540+07:00  INFO 185 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+2026-11-14T21:55:01.592+07:00  INFO 185 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-14T21:55:02.001+07:00  INFO 185 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-14T21:55:02.120+07:00  INFO 185 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-14T21:55:03.565+07:00  INFO 185 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-14T21:55:03.600+07:00  INFO 185 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+2026-11-14T21:55:15.966+07:00  INFO 185 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-11-14T21:55:16.399+07:00  INFO 185 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-14T21:55:17.204+07:00  INFO 185 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-14T21:55:17.205+07:00  INFO 185 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-14T21:55:17.206+07:00  INFO 185 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-14T21:55:17.324+07:00  INFO 185 --- [           main] vn.vietdoc.DocumentSearchContractTest    : Started DocumentSearchContractTest in 19.854 seconds (process running for 21.749)
+2026-11-14T21:55:20.665+07:00 ERROR 185 --- [           main] vn.vietdoc.common.ErrorHandler           : request_id=81a32b56-3af3-44ed-b547-fff19b2476ef error_type=IllegalStateException
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 24.09 s -- in vn.vietdoc.DocumentSearchContractTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  32.985 s
+[INFO] Finished at: 2026-11-14T21:55:21+07:00
+[INFO] ------------------------------------------------------------------------

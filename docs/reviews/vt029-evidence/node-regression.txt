@@ -1,0 +1,207 @@
+COMMAND: node api.test.js
+TAP version 13
+# Subtest: browser API uses same-origin session and CSRF without exposing bearer auth
+ok 1 - browser API uses same-origin session and CSRF without exposing bearer auth
+  ---
+  duration_ms: 65.617964
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.056421
+COMMAND: node app.test.js
+TAP version 13
+# Subtest: polling preserves editor base and prevents silent save over a newer head
+ok 1 - polling preserves editor base and prevents silent save over a newer head
+  ---
+  duration_ms: 63.843216
+  type: 'test'
+  ...
+# Subtest: late detail and image responses cannot replace the selected document
+ok 2 - late detail and image responses cannot replace the selected document
+  ---
+  duration_ms: 4.79366
+  type: 'test'
+  ...
+# Subtest: reselecting a loaded document preserves payload and review draft without refetching
+ok 3 - reselecting a loaded document preserves payload and review draft without refetching
+  ---
+  duration_ms: 5.29567
+  type: 'test'
+  ...
+# Subtest: reselecting a document retries after its first load fails
+ok 4 - reselecting a document retries after its first load fails
+  ---
+  duration_ms: 4.045148
+  type: 'test'
+  ...
+# Subtest: saving a remaining row remaps reviewed path after deleting an earlier row
+ok 5 - saving a remaining row remaps reviewed path after deleting an earlier row
+  ---
+  duration_ms: 7.375815
+  type: 'test'
+  ...
+# Subtest: unchanged field review creates a metadata-only revision
+ok 6 - unchanged field review creates a metadata-only revision
+  ---
+  duration_ms: 5.252312
+  type: 'test'
+  ...
+# Subtest: editor inputs are locked while save is pending
+ok 7 - editor inputs are locked while save is pending
+  ---
+  duration_ms: 5.619438
+  type: 'test'
+  ...
+# Subtest: failed job polling cannot unlock or overwrite a pending save
+ok 8 - failed job polling cannot unlock or overwrite a pending save
+  ---
+  duration_ms: 6.799036
+  type: 'test'
+  ...
+# Subtest: failed list polling preserves pending mutation locks; owner finally releases them
+ok 9 - failed list polling preserves pending mutation locks; owner finally releases them
+  ---
+  duration_ms: 5.003399
+  type: 'test'
+  ...
+# Subtest: 401 during a pending save clears session and ignores its late response
+ok 10 - 401 during a pending save clears session and ignores its late response
+  ---
+  duration_ms: 4.135219
+  type: 'test'
+  ...
+# Subtest: rerun rejects unsaved payload and review marks, then works after save
+ok 11 - rerun rejects unsaved payload and review marks, then works after save
+  ---
+  duration_ms: 7.715522
+  type: 'test'
+  ...
+# Subtest: typing updates Save and Rerun immediately without rebuilding the focused editor
+ok 12 - typing updates Save and Rerun immediately without rebuilding the focused editor
+  ---
+  duration_ms: 4.600386
+  type: 'test'
+  ...
+# Subtest: field change before a Save click keeps the button node and sends one request
+ok 13 - field change before a Save click keeps the button node and sends one request
+  ---
+  duration_ms: 4.61173
+  type: 'test'
+  ...
+# Subtest: stale upload finally cannot unlock a newer document open
+ok 14 - stale upload finally cannot unlock a newer document open
+  ---
+  duration_ms: 5.604038
+  type: 'test'
+  ...
+# Subtest: focused editor keeps its draft but disables Save when polling finds a remote version
+ok 15 - focused editor keeps its draft but disables Save when polling finds a remote version
+  ---
+  duration_ms: 3.326505
+  type: 'test'
+  ...
+# Subtest: approve keeps its lock through background failure and releases it on request error
+ok 16 - approve keeps its lock through background failure and releases it on request error
+  ---
+  duration_ms: 4.064297
+  type: 'test'
+  ...
+# Subtest: adopt keeps its lock through background failure and releases it on request error
+ok 17 - adopt keeps its lock through background failure and releases it on request error
+  ---
+  duration_ms: 3.761257
+  type: 'test'
+  ...
+# Subtest: rerun keeps its lock through background failure and releases it on request error
+ok 18 - rerun keeps its lock through background failure and releases it on request error
+  ---
+  duration_ms: 5.108636
+  type: 'test'
+  ...
+# Subtest: upload keeps its lock through background failure and releases it on request error
+ok 19 - upload keeps its lock through background failure and releases it on request error
+  ---
+  duration_ms: 2.557793
+  type: 'test'
+  ...
+# Subtest: the visible mode identifies demo fixtures and manual operation
+ok 20 - the visible mode identifies demo fixtures and manual operation
+  ---
+  duration_ms: 4.293457
+  type: 'test'
+  ...
+# Subtest: passive polling keeps the active editor DOM and filters the current run
+ok 21 - passive polling keeps the active editor DOM and filters the current run
+  ---
+  duration_ms: 3.258869
+  type: 'test'
+  ...
+# Subtest: logout resets busy and refreshes CSRF for login without page reload
+ok 22 - logout resets busy and refreshes CSRF for login without page reload
+  ---
+  duration_ms: 2.537141
+  type: 'test'
+  ...
+# Subtest: login refreshes CSRF before and after session rotation
+ok 23 - login refreshes CSRF before and after session rotation
+  ---
+  duration_ms: 2.561776
+  type: 'test'
+  ...
+# Subtest: invalid login keeps the login form and displays the credential error
+ok 24 - invalid login keeps the login form and displays the credential error
+  ---
+  duration_ms: 2.552158
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 184.250509
+COMMAND: node domain.test.js
+TAP version 13
+# Subtest: receipt payload keeps exact business schema keys and unknown values null
+ok 1 - receipt payload keeps exact business schema keys and unknown values null
+  ---
+  duration_ms: 2.675525
+  type: 'test'
+  ...
+# Subtest: money and quantity stay decimal strings; empty input maps to null
+ok 2 - money and quantity stay decimal strings; empty input maps to null
+  ---
+  duration_ms: 0.727312
+  type: 'test'
+  ...
+# Subtest: invoice empty payload follows invoice.v1 keys without substituting zeros
+ok 3 - invoice empty payload follows invoice.v1 keys without substituting zeros
+  ---
+  duration_ms: 0.305156
+  type: 'test'
+  ...
+# Subtest: document statuses distinguish active, draft, approved and failed jobs
+ok 4 - document statuses distinguish active, draft, approved and failed jobs
+  ---
+  duration_ms: 1.638295
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21.901828

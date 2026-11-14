@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/home/dan/Documents/StudynWork/SE2026-T08/scripts/vt029_contract.py", line 16, in <module>
+    validator.validate(json.loads(path.read_text()))
+  File "/usr/lib/python3/dist-packages/jsonschema/validators.py", line 287, in validate
+    raise error
+jsonschema.exceptions.ValidationError: {'id': '7a659636-c1b1-4a30-8521--rev-h', 'document_id': '7a659636-c1b1-4a30-8521--h', 'parent_id': None, 'run_id': '7a659636-c1b1-4a30-8521--run-h', 'payload': {'invoice_number': None, 'issue_date': None, 'seller_name': None, 'buyer_name': None, 'subtotal': None, 'tax_amount': None, 'discount_amount': None, 'total_amount': None, 'items': []}, 'field_metadata': {}, 'issues': [], 'row_ids': [], 'origin': 'HUMAN', 'reason': 'fictional search fixture', 'created_at': '2026-01-02T03:04:05Z', 'state': 'DRAFT', 'approved_at': None, 'approval_reason': None} is not valid under any of the given schemas
+
+Failed validating 'anyOf' in schema['properties']['items']['items']['properties']['head']:
+    {'anyOf': [{'$ref': '#/components/schemas/Revision'}, {'type': 'null'}]}
+
+On instance['items'][1]['head']:
+    {'approval_reason': None,
+     'approved_at': None,
+     'created_at': '2026-01-02T03:04:05Z',
+     'document_id': '7a659636-c1b1-4a30-8521--h',
+     'field_metadata': {},
+     'id': '7a659636-c1b1-4a30-8521--rev-h',
+     'issues': [],
+     'origin': 'HUMAN',
+     'parent_id': None,
+     'payload': {'buyer_name': None,
+                 'discount_amount': None,
+                 'invoice_number': None,
+                 'issue_date': None,
+                 'items': [],
+                 'seller_name': None,
+                 'subtotal': None,
+                 'tax_amount': None,
+                 'total_amount': None},
+     'reason': 'fictional search fixture',
+     'row_ids': [],
+     'run_id': '7a659636-c1b1-4a30-8521--run-h',
+     'state': 'DRAFT'}

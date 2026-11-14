@@ -1,0 +1,21 @@
+{
+  "baseline_commit": "e5326f34549a23570ecf935f469a1f0082ed8a11",
+  "branch": "feature/VT-029_search_contract",
+  "implementation_commit": "5405dbcd1c44d5c81e98c6c6f9e3b437c6f0b18d",
+  "published": true,
+  "sha256": {
+    "backend/src/main/java/vn/vietdoc/document/DocumentController.java": "c63b27eadf73592d526ce8332cfb4d18cead8c3266ebde3e515e510e271b2201",
+    "backend/src/main/java/vn/vietdoc/document/DocumentService.java": "43d53c3b0307d3556952287513d1f1856ca0871b5fa56d51aba2c46e02c37d01",
+    "backend/src/main/resources/openapi.json": "274af2e201409c19553f1dcb8cdefae8fddaec4e7e840f05c63f6f5ad895e726",
+    "backend/src/test/resources/vt029-v1-contract.json": "ae2c085959215c6b3654a5e7db6b1f3cff80146499fc582d7ed5e1c756d5174b",
+    "backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java": "47252906c9375420640872a585b4b09a4e38c9b235c8c73091c61083a4f10676",
+    "backend/src/test/java/vn/vietdoc/DocumentSearchUnitTest.java": "e2a8ce709794d0aad4422ccee80737029267e18de80344553892d3a3e7e0f87c",
+    "backend/src/test/java/vn/vietdoc/DocumentSearchLoadTest.java": "32f2a83d436a8e8d01d7a46624bd340fe81f79de78459b2009618e6ac24554f9",
+    "specs/contracts/document-search.md": "520345285bee37e1a8761bb494406ffff41dd21f4c68a5767a0c92f7d7a6c8af",
+    "scripts/vt029_contract.py": "504ac9877656c0ff330c7c6bb3170798343b8e53e254e8417c4ce14551c6b312",
+    "scripts/vt029_experiment.py": "294f31b746e63fd661908a106941431441f3444c2c1f261a238218d3fd31a09c",
+    "scripts/vt029_report.py": "252777a27d7523af818298e33fc07b7ae9c009493af15ae10d2672c16040a99d",
+    "docs/reviews/VT-029-plan.md": "3c60b9938287717a4d9bf78fa12c875c292e90cad46fb65bfd48f6db25753c56",
+    "docs/reviews/VT-029-README.md": "e99edd43d625cb563ce552c71a5817a613fc5021eeac8dfabaa4c43e25ed4b84"
+  }
+}

@@ -1,0 +1,650 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/tmp/vietdoc-vt029-maven/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< vn.vietdoc:vietdoc-backend >---------------------
+[INFO] Building vietdoc-backend 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ vietdoc-backend ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 12 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ vietdoc-backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ vietdoc-backend ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ vietdoc-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 5 source files with javac [debug parameters release 17] to target/test-classes
+[INFO] /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java: /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java uses or overrides a deprecated API.
+[INFO] /home/dan/Documents/StudynWork/SE2026-T08/backend/src/test/java/vn/vietdoc/DocumentSearchContractTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ vietdoc-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running vn.vietdoc.DocumentSearchContractTest
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+21:36:31.553 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [vn.vietdoc.DocumentSearchContractTest]: DocumentSearchContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+21:36:31.765 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration vn.vietdoc.VietDocApplication for test class vn.vietdoc.DocumentSearchContractTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-11-14T21:36:32.436+07:00  INFO 20441 --- [           main] vn.vietdoc.DocumentSearchContractTest    : Starting DocumentSearchContractTest using Java 25.0.4.1 with PID 20441 (started by dan in /home/dan/Documents/StudynWork/SE2026-T08/backend)
+2026-11-14T21:36:32.438+07:00  INFO 20441 --- [           main] vn.vietdoc.DocumentSearchContractTest    : No active profile set, falling back to 1 default profile: "default"
+2026-11-14T21:36:34.011+07:00  INFO 20441 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-14T21:36:34.055+07:00  INFO 20441 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 0 JPA repository interfaces.
+2026-11-14T21:36:34.902+07:00  INFO 20441 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-14T21:36:35.159+07:00  INFO 20441 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:vt029 user=SA
+2026-11-14T21:36:35.161+07:00  INFO 20441 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-14T21:36:35.231+07:00  INFO 20441 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:vt029 (H2 2.3)
+2026-11-14T21:36:35.281+07:00  INFO 20441 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-11-14T21:36:35.285+07:00  INFO 20441 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.019s)
+2026-11-14T21:36:35.299+07:00  INFO 20441 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-11-14T21:36:35.346+07:00  INFO 20441 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-11-14T21:36:35.369+07:00  INFO 20441 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - application"
+2026-11-14T21:36:35.418+07:00  INFO 20441 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v1 (execution time 00:00.035s)
+2026-11-14T21:36:35.591+07:00  INFO 20441 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-14T21:36:35.663+07:00  INFO 20441 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+2026-11-14T21:36:35.709+07:00  INFO 20441 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-14T21:36:36.052+07:00  INFO 20441 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-14T21:36:36.158+07:00  INFO 20441 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-14T21:36:37.428+07:00  INFO 20441 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-14T21:36:37.461+07:00  INFO 20441 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/tmp/vietdoc-vt029-m2/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-14T21:36:39.357+07:00  INFO 20441 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-11-14T21:36:39.732+07:00  INFO 20441 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-14T21:36:40.510+07:00  INFO 20441 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-14T21:36:40.510+07:00  INFO 20441 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-14T21:36:40.512+07:00  INFO 20441 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-11-14T21:36:40.626+07:00  INFO 20441 --- [           main] vn.vietdoc.DocumentSearchContractTest    : Started DocumentSearchContractTest in 8.655 seconds (process running for 10.228)
+2026-11-14T21:36:43.737+07:00 ERROR 20441 --- [           main] vn.vietdoc.common.ErrorHandler           : request_id=510dbab9-b391-4fc3-8180-80204d974789 error_type=IllegalStateException
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {type=[letter]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=eb01696f-c000-47fa-9033-9558d6661dfe, username=5aaafdae-5575-4284-bc06--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = vn.vietdoc.common.ApiException
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 422
+    Error message = null
+          Headers = [X-Request-Id:"788f022f-38f5-4242-9448-1c6fc54138da", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"error":{"details":{"path":"/document_type"},"request_id":"788f022f-38f5-4242-9448-1c6fc54138da","code":"CONTRACT_INVALID","message":"Chỉ hỗ trợ receipt hoặc invoice."}}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[' OR 1=1 --]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=a17fddc0-52a2-42d1-a6bf-9ac89e1031d7, username=27f3bb6b-2927-4333-be32--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"7282725b-72fe-4094-95ad-6fe6f64bbfe3", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"27f3bb6b-2927-4333-be32--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"27f3bb6b-2927-4333-be32--j-i","document_id":"27f3bb6b-2927-4333-be32--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"27f3bb6b-2927-4333-be32--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"27f3bb6b-2927-4333-be32--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"27f3bb6b-2927-4333-be32--rev-h","head":{"id":"27f3bb6b-2927-4333-be32--rev-h","document_id":"27f3bb6b-2927-4333-be32--h","parent_id":null,"run_id":"27f3bb6b-2927-4333-be32--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"27f3bb6b-2927-4333-be32--j-h","document_id":"27f3bb6b-2927-4333-be32--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"27f3bb6b-2927-4333-be32--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"27f3bb6b-2927-4333-be32--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"27f3bb6b-2927-4333-be32--rev-g","head":{"id":"27f3bb6b-2927-4333-be32--rev-g","document_id":"27f3bb6b-2927-4333-be32--g","parent_id":null,"run_id":"27f3bb6b-2927-4333-be32--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"27f3bb6b-2927-4333-be32--j-g","document_id":"27f3bb6b-2927-4333-be32--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"27f3bb6b-2927-4333-be32--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"27f3bb6b-2927-4333-be32--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"27f3bb6b-2927-4333-be32--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"27f3bb6b-2927-4333-be32--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"27f3bb6b-2927-4333-be32--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"27f3bb6b-2927-4333-be32--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[50%_!]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=9187a651-fc9a-4722-b5d3-d1572553854c, username=7fef6e41-6ec8-41a4-99d7--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"556a4bac-b938-44dd-9285-5fe1323c7309", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"7fef6e41-6ec8-41a4-99d7--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"7fef6e41-6ec8-41a4-99d7--j-i","document_id":"7fef6e41-6ec8-41a4-99d7--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7fef6e41-6ec8-41a4-99d7--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"7fef6e41-6ec8-41a4-99d7--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"7fef6e41-6ec8-41a4-99d7--rev-h","head":{"id":"7fef6e41-6ec8-41a4-99d7--rev-h","document_id":"7fef6e41-6ec8-41a4-99d7--h","parent_id":null,"run_id":"7fef6e41-6ec8-41a4-99d7--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"7fef6e41-6ec8-41a4-99d7--j-h","document_id":"7fef6e41-6ec8-41a4-99d7--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7fef6e41-6ec8-41a4-99d7--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"7fef6e41-6ec8-41a4-99d7--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"7fef6e41-6ec8-41a4-99d7--rev-g","head":{"id":"7fef6e41-6ec8-41a4-99d7--rev-g","document_id":"7fef6e41-6ec8-41a4-99d7--g","parent_id":null,"run_id":"7fef6e41-6ec8-41a4-99d7--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"7fef6e41-6ec8-41a4-99d7--j-g","document_id":"7fef6e41-6ec8-41a4-99d7--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7fef6e41-6ec8-41a4-99d7--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"7fef6e41-6ec8-41a4-99d7--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7fef6e41-6ec8-41a4-99d7--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7fef6e41-6ec8-41a4-99d7--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7fef6e41-6ec8-41a4-99d7--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7fef6e41-6ec8-41a4-99d7--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=a609fd66-6f8d-4416-a15e-f1a75295c246, username=43f76226-8782-4723-b0bd--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"2bb81bb3-ee7d-4ea0-96ad-8c3872b877ac", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"43f76226-8782-4723-b0bd--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"43f76226-8782-4723-b0bd--j-i","document_id":"43f76226-8782-4723-b0bd--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"43f76226-8782-4723-b0bd--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"43f76226-8782-4723-b0bd--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"43f76226-8782-4723-b0bd--rev-h","head":{"id":"43f76226-8782-4723-b0bd--rev-h","document_id":"43f76226-8782-4723-b0bd--h","parent_id":null,"run_id":"43f76226-8782-4723-b0bd--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"43f76226-8782-4723-b0bd--j-h","document_id":"43f76226-8782-4723-b0bd--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"43f76226-8782-4723-b0bd--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"43f76226-8782-4723-b0bd--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"43f76226-8782-4723-b0bd--rev-g","head":{"id":"43f76226-8782-4723-b0bd--rev-g","document_id":"43f76226-8782-4723-b0bd--g","parent_id":null,"run_id":"43f76226-8782-4723-b0bd--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"43f76226-8782-4723-b0bd--j-g","document_id":"43f76226-8782-4723-b0bd--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"43f76226-8782-4723-b0bd--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"43f76226-8782-4723-b0bd--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"43f76226-8782-4723-b0bd--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"43f76226-8782-4723-b0bd--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"43f76226-8782-4723-b0bd--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"43f76226-8782-4723-b0bd--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[  HÓA  ], type=[invoice]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=7bab9ca7-21a3-46c7-884d-e13a5abacaf8, username=5adf99b5-f846-4da1-b45a--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"8829f489-55d6-4ed6-903a-d0297559fd13", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"5adf99b5-f846-4da1-b45a--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"5adf99b5-f846-4da1-b45a--j-i","document_id":"5adf99b5-f846-4da1-b45a--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"5adf99b5-f846-4da1-b45a--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"5adf99b5-f846-4da1-b45a--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"5adf99b5-f846-4da1-b45a--rev-h","head":{"id":"5adf99b5-f846-4da1-b45a--rev-h","document_id":"5adf99b5-f846-4da1-b45a--h","parent_id":null,"run_id":"5adf99b5-f846-4da1-b45a--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"5adf99b5-f846-4da1-b45a--j-h","document_id":"5adf99b5-f846-4da1-b45a--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"5adf99b5-f846-4da1-b45a--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"5adf99b5-f846-4da1-b45a--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"5adf99b5-f846-4da1-b45a--rev-g","head":{"id":"5adf99b5-f846-4da1-b45a--rev-g","document_id":"5adf99b5-f846-4da1-b45a--g","parent_id":null,"run_id":"5adf99b5-f846-4da1-b45a--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"5adf99b5-f846-4da1-b45a--j-g","document_id":"5adf99b5-f846-4da1-b45a--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"5adf99b5-f846-4da1-b45a--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"5adf99b5-f846-4da1-b45a--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"5adf99b5-f846-4da1-b45a--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"5adf99b5-f846-4da1-b45a--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"5adf99b5-f846-4da1-b45a--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=3b008ee5-d67e-49d3-91f7-675afbec1f34, username=e4a72741-3c0c-48fd-b038--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"bf3e1a5d-88b6-47c6-9b73-d2ce06c36042", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"e4a72741-3c0c-48fd-b038--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"e4a72741-3c0c-48fd-b038--j-i","document_id":"e4a72741-3c0c-48fd-b038--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-h","head":{"id":"e4a72741-3c0c-48fd-b038--rev-h","document_id":"e4a72741-3c0c-48fd-b038--h","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-h","document_id":"e4a72741-3c0c-48fd-b038--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-g","head":{"id":"e4a72741-3c0c-48fd-b038--rev-g","document_id":"e4a72741-3c0c-48fd-b038--g","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-g","document_id":"e4a72741-3c0c-48fd-b038--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[   ]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=3b008ee5-d67e-49d3-91f7-675afbec1f34, username=e4a72741-3c0c-48fd-b038--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"18ca0e51-79a2-4b81-a8d2-40386c33da0c", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"e4a72741-3c0c-48fd-b038--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"e4a72741-3c0c-48fd-b038--j-i","document_id":"e4a72741-3c0c-48fd-b038--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-h","head":{"id":"e4a72741-3c0c-48fd-b038--rev-h","document_id":"e4a72741-3c0c-48fd-b038--h","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-h","document_id":"e4a72741-3c0c-48fd-b038--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-g","head":{"id":"e4a72741-3c0c-48fd-b038--rev-g","document_id":"e4a72741-3c0c-48fd-b038--g","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-g","document_id":"e4a72741-3c0c-48fd-b038--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[không tồn tại]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=3b008ee5-d67e-49d3-91f7-675afbec1f34, username=e4a72741-3c0c-48fd-b038--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"7f26353f-b315-47c6-be2e-4c49403cb812", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"e4a72741-3c0c-48fd-b038--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"e4a72741-3c0c-48fd-b038--j-i","document_id":"e4a72741-3c0c-48fd-b038--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-h","head":{"id":"e4a72741-3c0c-48fd-b038--rev-h","document_id":"e4a72741-3c0c-48fd-b038--h","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-h","document_id":"e4a72741-3c0c-48fd-b038--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"e4a72741-3c0c-48fd-b038--rev-g","head":{"id":"e4a72741-3c0c-48fd-b038--rev-g","document_id":"e4a72741-3c0c-48fd-b038--g","parent_id":null,"run_id":"e4a72741-3c0c-48fd-b038--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"e4a72741-3c0c-48fd-b038--j-g","document_id":"e4a72741-3c0c-48fd-b038--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"e4a72741-3c0c-48fd-b038--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"e4a72741-3c0c-48fd-b038--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"e4a72741-3c0c-48fd-b038--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[HÓA], limit=[2]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=1561369a-1b7f-4622-946f-cd0160556020, username=7450a9c6-1dfd-43a1-8b72--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"7640d7ba-0c8a-43a6-a19f-d84cb70ca4e5", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"7450a9c6-1dfd-43a1-8b72--i","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":{"id":"7450a9c6-1dfd-43a1-8b72--j-i","document_id":"7450a9c6-1dfd-43a1-8b72--i","state":"RUNNING","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7450a9c6-1dfd-43a1-8b72--run-i","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"7450a9c6-1dfd-43a1-8b72--h","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"7450a9c6-1dfd-43a1-8b72--rev-h","head":{"id":"7450a9c6-1dfd-43a1-8b72--rev-h","document_id":"7450a9c6-1dfd-43a1-8b72--h","parent_id":null,"run_id":"7450a9c6-1dfd-43a1-8b72--run-h","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"DRAFT","approved_at":null,"approval_reason":null},"job":{"id":"7450a9c6-1dfd-43a1-8b72--j-h","document_id":"7450a9c6-1dfd-43a1-8b72--h","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7450a9c6-1dfd-43a1-8b72--run-h","pipeline_manifest":"synthetic.v1","mode":"manual"}}],"next_cursor":"7450a9c6-1dfd-43a1-8b72--h"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[HÓA], limit=[2], cursor=[7450a9c6-1dfd-43a1-8b72--h]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=1561369a-1b7f-4622-946f-cd0160556020, username=7450a9c6-1dfd-43a1-8b72--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"d9341eb6-ad48-4b75-8d0b-24e467f1da6d", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"7450a9c6-1dfd-43a1-8b72--g","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":"7450a9c6-1dfd-43a1-8b72--rev-g","head":{"id":"7450a9c6-1dfd-43a1-8b72--rev-g","document_id":"7450a9c6-1dfd-43a1-8b72--g","parent_id":null,"run_id":"7450a9c6-1dfd-43a1-8b72--run-g","payload":{"invoice_number":null,"issue_date":null,"seller_name":null,"buyer_name":null,"subtotal":null,"tax_amount":null,"discount_amount":null,"total_amount":null,"items":[]},"field_metadata":{},"issues":[],"row_ids":[],"origin":"HUMAN","reason":"fictional search fixture","created_at":"2026-01-02T03:04:05Z","state":"APPROVED","approved_at":"2026-01-02T03:04:05Z","approval_reason":null},"job":{"id":"7450a9c6-1dfd-43a1-8b72--j-g","document_id":"7450a9c6-1dfd-43a1-8b72--g","state":"SUCCEEDED","stage":"fixture","error_code":null,"error_message":null,"attempts":0,"created_at":"2026-01-02T03:04:05Z","updated_at":"2026-01-02T03:04:05Z","result_run_id":"7450a9c6-1dfd-43a1-8b72--run-g","pipeline_manifest":"synthetic.v1","mode":"manual"}},{"id":"7450a9c6-1dfd-43a1-8b72--e","filename":"giảm 500xx.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":"7450a9c6-1dfd-43a1-8b72--e"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[HÓA], limit=[2], cursor=[7450a9c6-1dfd-43a1-8b72--e]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=1561369a-1b7f-4622-946f-cd0160556020, username=7450a9c6-1dfd-43a1-8b72--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"f0ae9fe4-0faf-4942-b066-e5fa1d3648bb", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"7450a9c6-1dfd-43a1-8b72--d","filename":"giảm 50%_!.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7450a9c6-1dfd-43a1-8b72--c","filename":"khác.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":"7450a9c6-1dfd-43a1-8b72--c"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+
+MockHttpServletRequest:
+      HTTP Method = GET
+      Request URI = /api/v1/documents
+       Parameters = {q=[HÓA], limit=[2], cursor=[7450a9c6-1dfd-43a1-8b72--c]}
+          Headers = []
+             Body = null
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=Identity[id=1561369a-1b7f-4622-946f-cd0160556020, username=7450a9c6-1dfd-43a1-8b72--owner], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[]]]}
+
+Handler:
+             Type = vn.vietdoc.document.DocumentController
+           Method = vn.vietdoc.document.DocumentController#list(Identity, String, String, String, int)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [X-Request-Id:"ef0905bd-9dcd-4b3f-b7de-df777a5aa4a8", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
+     Content type = application/json
+             Body = {"items":[{"id":"7450a9c6-1dfd-43a1-8b72--b","filename":"hóa đơn Hà Nội.png","document_type":"receipt","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null},{"id":"7450a9c6-1dfd-43a1-8b72--a","filename":"HÓA đơn Hà Nội.png","document_type":"invoice","file_bytes":128,"image_width":10,"image_height":10,"created_at":"2026-01-02T03:04:05Z","version":1,"head_revision_id":null,"head":null,"job":null}],"next_cursor":null}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+[ERROR] Tests run: 12, Failures: 7, Errors: 0, Skipped: 0, Time elapsed: 37.93 s <<< FAILURE! -- in vn.vietdoc.DocumentSearchContractTest
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc07_invalidTypeAndStatus -- Time elapsed: 2.262 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<422>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:640)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at vn.vietdoc.DocumentSearchContractTest.tc07_invalidTypeAndStatus(DocumentSearchContractTest.java:163)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc11_sqlLookingTextIsData -- Time elapsed: 2.314 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at vn.vietdoc.DocumentSearchContractTest.tc11_sqlLookingTextIsData(DocumentSearchContractTest.java:183)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc04_wildcardsAreLiteral -- Time elapsed: 2.210 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <[7fef6e41-6ec8-41a4-99d7--d]> but was: <[7fef6e41-6ec8-41a4-99d7--i, 7fef6e41-6ec8-41a4-99d7--h, 7fef6e41-6ec8-41a4-99d7--g, 7fef6e41-6ec8-41a4-99d7--e, 7fef6e41-6ec8-41a4-99d7--d, 7fef6e41-6ec8-41a4-99d7--c, 7fef6e41-6ec8-41a4-99d7--b, 7fef6e41-6ec8-41a4-99d7--a]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at vn.vietdoc.DocumentSearchContractTest.tc04_wildcardsAreLiteral(DocumentSearchContractTest.java:145)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc08_invalidLengthAndLimit -- Time elapsed: 2.207 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<200>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:640)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at vn.vietdoc.DocumentSearchContractTest.tc08_invalidLengthAndLimit(DocumentSearchContractTest.java:168)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc02_searchCombinesTypeAndOwner -- Time elapsed: 2.238 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <[5adf99b5-f846-4da1-b45a--i, 5adf99b5-f846-4da1-b45a--h, 5adf99b5-f846-4da1-b45a--g, 5adf99b5-f846-4da1-b45a--a]> but was: <[5adf99b5-f846-4da1-b45a--i, 5adf99b5-f846-4da1-b45a--h, 5adf99b5-f846-4da1-b45a--g, 5adf99b5-f846-4da1-b45a--e, 5adf99b5-f846-4da1-b45a--d, 5adf99b5-f846-4da1-b45a--c, 5adf99b5-f846-4da1-b45a--a]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at vn.vietdoc.DocumentSearchContractTest.tc02_searchCombinesTypeAndOwner(DocumentSearchContractTest.java:135)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc05_blankSearchAndNoMatches -- Time elapsed: 2.303 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at vn.vietdoc.DocumentSearchContractTest.tc05_blankSearchAndNoMatches(DocumentSearchContractTest.java:149)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] vn.vietdoc.DocumentSearchContractTest.tc06_tiedTimestampsKeysetHasNoGapsOrDuplicates -- Time elapsed: 2.567 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <[7450a9c6-1dfd-43a1-8b72--i, 7450a9c6-1dfd-43a1-8b72--h, 7450a9c6-1dfd-43a1-8b72--g, 7450a9c6-1dfd-43a1-8b72--b, 7450a9c6-1dfd-43a1-8b72--a]> but was: <[7450a9c6-1dfd-43a1-8b72--i, 7450a9c6-1dfd-43a1-8b72--h, 7450a9c6-1dfd-43a1-8b72--g, 7450a9c6-1dfd-43a1-8b72--e, 7450a9c6-1dfd-43a1-8b72--d, 7450a9c6-1dfd-43a1-8b72--c, 7450a9c6-1dfd-43a1-8b72--b, 7450a9c6-1dfd-43a1-8b72--a]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at vn.vietdoc.DocumentSearchContractTest.tc06_tiedTimestampsKeysetHasNoGapsOrDuplicates(DocumentSearchContractTest.java:160)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   DocumentSearchContractTest.tc02_searchCombinesTypeAndOwner:135 expected: <[5adf99b5-f846-4da1-b45a--i, 5adf99b5-f846-4da1-b45a--h, 5adf99b5-f846-4da1-b45a--g, 5adf99b5-f846-4da1-b45a--a]> but was: <[5adf99b5-f846-4da1-b45a--i, 5adf99b5-f846-4da1-b45a--h, 5adf99b5-f846-4da1-b45a--g, 5adf99b5-f846-4da1-b45a--e, 5adf99b5-f846-4da1-b45a--d, 5adf99b5-f846-4da1-b45a--c, 5adf99b5-f846-4da1-b45a--a]>
+[ERROR]   DocumentSearchContractTest.tc04_wildcardsAreLiteral:145 expected: <[7fef6e41-6ec8-41a4-99d7--d]> but was: <[7fef6e41-6ec8-41a4-99d7--i, 7fef6e41-6ec8-41a4-99d7--h, 7fef6e41-6ec8-41a4-99d7--g, 7fef6e41-6ec8-41a4-99d7--e, 7fef6e41-6ec8-41a4-99d7--d, 7fef6e41-6ec8-41a4-99d7--c, 7fef6e41-6ec8-41a4-99d7--b, 7fef6e41-6ec8-41a4-99d7--a]>
+[ERROR]   DocumentSearchContractTest.tc05_blankSearchAndNoMatches:149 expected: <true> but was: <false>
+[ERROR]   DocumentSearchContractTest.tc06_tiedTimestampsKeysetHasNoGapsOrDuplicates:160 expected: <[7450a9c6-1dfd-43a1-8b72--i, 7450a9c6-1dfd-43a1-8b72--h, 7450a9c6-1dfd-43a1-8b72--g, 7450a9c6-1dfd-43a1-8b72--b, 7450a9c6-1dfd-43a1-8b72--a]> but was: <[7450a9c6-1dfd-43a1-8b72--i, 7450a9c6-1dfd-43a1-8b72--h, 7450a9c6-1dfd-43a1-8b72--g, 7450a9c6-1dfd-43a1-8b72--e, 7450a9c6-1dfd-43a1-8b72--d, 7450a9c6-1dfd-43a1-8b72--c, 7450a9c6-1dfd-43a1-8b72--b, 7450a9c6-1dfd-43a1-8b72--a]>
+[ERROR]   DocumentSearchContractTest.tc07_invalidTypeAndStatus:163 Status expected:<400> but was:<422>
+[ERROR]   DocumentSearchContractTest.tc08_invalidLengthAndLimit:168 Status expected:<400> but was:<200>
+[ERROR]   DocumentSearchContractTest.tc11_sqlLookingTextIsData:183 expected: <true> but was: <false>
+[INFO] 
+[ERROR] Tests run: 12, Failures: 7, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:01 min
+[INFO] Finished at: 2026-11-14T21:37:09+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project vietdoc-backend: There are test failures.
+[ERROR] 
+[ERROR] See /home/dan/Documents/StudynWork/SE2026-T08/backend/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

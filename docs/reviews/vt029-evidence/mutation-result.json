@@ -1,0 +1,10 @@
+{
+  "mutation": "swallow RuntimeException and return Page(empty, null)",
+  "isolation": "temporary backend copy, no commit or branch mutation",
+  "exit_code": 1,
+  "test_count": 1,
+  "killed": true,
+  "failure": "Status expected:<500> but was:<200>",
+  "controller_sha256_before": "c63b27eadf73592d526ce8332cfb4d18cead8c3266ebde3e515e510e271b2201",
+  "controller_sha256_after": "c63b27eadf73592d526ce8332cfb4d18cead8c3266ebde3e515e510e271b2201"
+}

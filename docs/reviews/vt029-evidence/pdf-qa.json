@@ -1,0 +1,10 @@
+{
+  "pages": 10,
+  "main_pages": 8,
+  "appendix_pages": 2,
+  "reflection_whitespace_words": 312,
+  "all_pages_rendered_and_visually_inspected": true,
+  "all_text_within_page_bounds": true,
+  "pdf_sha256": "d5b557cb453863c71434daf687b17362d3c9bbe1b4e97d566df9083d75567607",
+  "submission_status": "code branch published; awaiting student review/confirmation"
+}
