@@ -128,3 +128,20 @@ def test_expired_after_extraction_cannot_publish(tmp_path, monkeypatch):
         service.B0Pipeline(job.release, FixtureEngine()).run(job)
     assert error.value.code == "COMPUTE_TIMEOUT"
     assert not (job.attempt_dir / "canonical.png").exists()
+
+
+def test_partial_storage_failure_cannot_return_success(tmp_path, monkeypatch):
+    import vietdoc.pipeline.service as service
+    job = make_job(tmp_path)
+    original = service.AttemptWriter.write
+    def fail_ocr(self, name, *args):
+        if name == "ocr.json":
+            raise OSError("private storage detail")
+        return original(self, name, *args)
+    monkeypatch.setattr(service.AttemptWriter, "write", fail_ocr)
+    with pytest.raises(service.ComputeFailure) as error:
+        service.B0Pipeline(job.release, FixtureEngine()).run(job)
+    assert error.value.code == "AI_NOT_READY"
+    assert (job.attempt_dir / "canonical.png").exists()
+    assert not (job.attempt_dir / "ocr.json").exists()
+    # Orphan is retained; another attempt must be used instead of overwriting.

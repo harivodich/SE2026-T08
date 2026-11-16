@@ -1,6 +1,7 @@
 """Actual bytes, no-replace and partial-publication checks."""
 import hashlib
 import os
+import sys
 import time
 import uuid
 
@@ -62,3 +63,21 @@ def test_expired_deadline_does_not_publish(tmp_path):
     with pytest.raises(ValueError, match="COMPUTE_TIMEOUT"):
         writer.write("ocr.json", b"data", "ocr", "application/json")
     assert list(tmp_path.iterdir()) == []
+
+
+def test_attempt_parent_cannot_redirect_to_another_directory(tmp_path):
+    from vietdoc.pipeline.attempt_artifacts import reserve_attempt
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    root = tmp_path / "attempts"
+    root.mkdir()
+    job, attempt = str(uuid.uuid4()), str(uuid.uuid4())
+    link = root / job
+    if sys.platform == "win32":
+        import _winapi
+        _winapi.CreateJunction(str(outside), str(link))
+    else:
+        link.symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ValueError, match="OUTPUT_INVALID"):
+        reserve_attempt(root, job, attempt)
+    assert list(outside.iterdir()) == []
