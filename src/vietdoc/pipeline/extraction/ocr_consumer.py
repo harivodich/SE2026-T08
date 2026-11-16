@@ -61,8 +61,10 @@ def validate_match(page: dict, request: dict, match: dict) -> dict:
         required = set(source.review_flags) | ({"SOURCE_OCR_INCOMPLETE"} if source.unreadable_regions else set())
         if not required <= set(flags):
             raise ValueError("OCR diagnostics lost")
+        scope = request.get("context_block_ids", ())
         for candidate in match["candidate_block_ids"]:
-            if not isinstance(candidate, list) or not candidate or any(key not in blocks for key in candidate):
+            if (not isinstance(candidate, list) or not candidate or len(set(candidate)) != len(candidate)
+                    or any(key not in blocks or scope and key not in scope for key in candidate)):
                 raise ValueError("invalid candidate IDs")
         selected = []
         scope = request.get("context_block_ids", ())
@@ -81,6 +83,8 @@ def validate_match(page: dict, request: dict, match: dict) -> dict:
                 raise ValueError("missing or duplicate source")
             if norm(" ".join(block.text for block in selected)) != norm(request["raw_value"]):
                 raise ValueError("source text does not match raw value")
+            if [b.block_id for b in selected] not in match["candidate_block_ids"]:
+                raise ValueError("selected source missing from candidates")
         elif selected:
             raise ValueError("abstention cannot publish selected regions")
         score = selected[0].score if len(selected) == 1 else None
