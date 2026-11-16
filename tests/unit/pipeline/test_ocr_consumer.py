@@ -157,3 +157,17 @@ def test_golden_expectations_are_independent_of_baseline_output():
     assert all(r["quality_status"] == "NOT_EVALUATED" for r in records)
     assert all(r["checks"] for r in records)
     assert records[0]["ocr_diagnostics"]["recognition_status"] == "partial"
+
+
+def test_unexpected_cli_failure_still_writes_safe_failure_report(tmp_path, monkeypatch, capsys):
+    from vietdoc.entrypoints.cli import ocr_consumer as cli
+    def crash(*args, **kwargs):
+        raise RuntimeError("credential/private/path")
+    monkeypatch.setattr(cli, "ProviderEvidence", crash)
+    output = tmp_path / "failure"
+    with pytest.raises(SystemExit) as error:
+        cli.main(["--provider-root", str(tmp_path), "--output", str(output)])
+    assert error.value.code == 2
+    report = json.loads((output / "consumer-report.json").read_bytes())
+    assert report["summary"]["status"] == "FAIL" and report["summary"]["incomplete"]
+    assert "credential" not in json.dumps(report) + capsys.readouterr().err

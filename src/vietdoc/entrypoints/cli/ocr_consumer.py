@@ -133,7 +133,7 @@ def main(argv=None) -> int:
         status = publish_report(args.output, report)
     except FileExistsError:
         parser.exit(2, "OCR consumer failed: output directory already exists\n")
-    except (BaselineError, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+    except Exception as error:
         code = error.code if isinstance(error, BaselineError) else "CONSUMER_SETUP_FAILED"
         if not args.output.exists():
             try:
