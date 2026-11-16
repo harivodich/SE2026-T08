@@ -138,4 +138,3 @@ class B0Pipeline:
             for name, milliseconds in timings.items():
                 logging.getLogger("vietdoc.ai_service").info("pipeline_stage", extra={
                     "attempt_id": job.request["attempt_id"], "stage": name, "duration_ms": milliseconds})
-
