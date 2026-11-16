@@ -97,3 +97,35 @@ def test_cli_refuses_to_overwrite_an_existing_report(tmp_path, capsys):
     assert raised.value.code == 2
     assert "output directory already exists" in capsys.readouterr().err
     assert report.read_bytes() == b"existing-user-report"
+
+
+@pytest.mark.parametrize("bad", [{}, {"sample_id": None}, {"sample_id": "../private"}, None, 5])
+def test_invalid_id_does_not_lose_following_sample(bad):
+    from vietdoc.pipeline.extraction.ocr_consumer import consume_native, batch_summary
+    bundle = json.loads((FIXTURES / "ocr-d1-native-handoff.json").read_text(encoding="utf-8"))
+    bundle["samples"].insert(1, bad)
+    records = consume_native(bundle)
+    assert [r["status"] for r in records] == ["ok", "failed", "ok"]
+    assert records[1] == dict(sample_index=1, status="failed", error="OCR_INPUT_INVALID")
+    assert batch_summary(records) == dict(requested=3, ok=2, failed=1, not_run=0, incomplete=False)
+
+
+@pytest.mark.parametrize("bundle", [None, {}, {"samples": None}, {"samples": "invalid"}])
+def test_invalid_batch_is_rejected_before_processing(bundle):
+    from vietdoc.pipeline.extraction.ocr_consumer import consume_native
+    with pytest.raises(BaselineError, match="OCR_BATCH_INVALID"):
+        consume_native(bundle)
+
+
+def test_unexpected_failure_preserves_incomplete_denominator(monkeypatch):
+    from vietdoc.pipeline.extraction import ocr_consumer as consumer
+    bundle = json.loads((FIXTURES / "ocr-d1-native-handoff.json").read_text(encoding="utf-8"))
+    def fail(*args, **kwargs):
+        raise RuntimeError("secret/private/path")
+    monkeypatch.setattr(consumer, "extract_baseline", fail)
+    records = consumer.consume_native(bundle)
+    assert [r["status"] for r in records] == ["failed", "not_run"]
+    assert records[0]["error"] == "INTERNAL_ERROR"
+    assert records[1]["error"] == "BATCH_ABORTED"
+    assert consumer.batch_summary(records) == dict(requested=2, ok=0, failed=1, not_run=1, incomplete=True)
+    assert "secret" not in json.dumps(records)
