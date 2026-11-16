@@ -129,3 +129,31 @@ def test_unexpected_failure_preserves_incomplete_denominator(monkeypatch):
     assert records[1]["error"] == "BATCH_ABORTED"
     assert consumer.batch_summary(records) == dict(requested=2, ok=0, failed=1, not_run=1, incomplete=True)
     assert "secret" not in json.dumps(records)
+
+
+def test_semantic_mismatch_is_not_execution_pass_and_report_exit_is_nonzero(tmp_path):
+    from vietdoc.entrypoints.cli.ocr_consumer import evaluate_expectations, publish_report
+    checks = evaluate_expectations({"payload": {"total_amount": "100000"}},
+                                   [{"path": "/payload/total_amount", "expected": "80000"}])
+    assert checks == [dict(path="/payload/total_amount", expected="80000", actual="100000", result="FAIL")]
+    report = dict(golden_results=[dict(execution_status="PASS", status="FAIL", checks=checks)],
+                  evidence_checks=[], native_results=[])
+    assert publish_report(tmp_path / "out", report) == 1
+    saved = json.loads((tmp_path / "out/consumer-report.json").read_bytes())
+    assert saved["summary"]["status"] == "FAIL"
+    assert saved["golden_results"][0]["execution_status"] == "PASS"
+
+
+def test_parse_only_has_no_accuracy_pass():
+    from vietdoc.entrypoints.cli.ocr_consumer import evaluate_expectations
+    assert evaluate_expectations({"payload": {}}, []) == []
+
+
+def test_golden_expectations_are_independent_of_baseline_output():
+    from vietdoc.entrypoints.cli.ocr_consumer import golden_reports
+    golden = json.loads((FIXTURES / "ocr-artifact-v2.json").read_bytes())
+    records = golden_reports(golden)
+    assert all(r["execution_status"] == "PASS" and r["status"] == "PASS" for r in records)
+    assert all(r["quality_status"] == "NOT_EVALUATED" for r in records)
+    assert all(r["checks"] for r in records)
+    assert records[0]["ocr_diagnostics"]["recognition_status"] == "partial"
