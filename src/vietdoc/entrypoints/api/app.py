@@ -33,7 +33,8 @@ from vietdoc.entrypoints.api.metadata import decode_metadata
 from vietdoc.entrypoints.api.output import encode_output
 from vietdoc.infrastructure.logging import configure_logging
 from vietdoc.ml.release_manifest import Release, discover_releases
-from vietdoc.pipeline.service import ComputeInput, ComputePipeline
+from vietdoc.pipeline.service import ComputeFailure, ComputeInput, ComputePipeline
+from vietdoc.pipeline.attempt_artifacts import ArtifactError, reserve_attempt
 
 log = logging.getLogger("vietdoc.ai_service")
 
@@ -194,6 +195,8 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
     async def lifespan(_app: FastAPI):
         state.releases, state.release_errors = await run_in_threadpool(discover_releases, settings.models_dir)
         state.attempts_writable = await run_in_threadpool(_writable, settings.attempts_dir)
+        if pipeline is not None and hasattr(pipeline, "startup"):
+            await run_in_threadpool(pipeline.startup, state.releases)
         log.info(
             "startup",
             extra={
@@ -202,8 +205,16 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
                 "reasons": ready_reasons(),
             },
         )
-        yield
-        log.info("shutdown")
+        try:
+            yield
+        finally:
+            if pipeline is not None and hasattr(pipeline, "close"):
+                await run_in_threadpool(state.slot.acquire)
+                try:
+                    await run_in_threadpool(pipeline.close)
+                finally:
+                    state.slot.release()
+            log.info("shutdown")
 
     app = FastAPI(
         title="VietDoc private compute",
@@ -334,15 +345,17 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
             return fail(503, "AI_BUSY", "Compute slot is busy", True, attempt_id, retry_after=True)
 
         ids = {"job_id": meta["job_id"], "run_id": meta["run_id"], "attempt_id": attempt_id}
-        attempt_dir = settings.attempts_dir / meta["job_id"] / meta["attempt_id"]
         try:
-            attempt_dir.mkdir(parents=True, exist_ok=False)
+            attempt_dir = reserve_attempt(settings.attempts_dir, meta["job_id"], meta["attempt_id"])
         except FileExistsError:
             state.slot.release()
             return fail(503, "AI_BUSY", "Attempt already submitted; use a new attempt_id", False, attempt_id)
         except OSError:
             state.slot.release()
             return fail(503, "AI_NOT_READY", "Attempt storage is unavailable", True, attempt_id, retry_after=True)
+        except ArtifactError:
+            state.slot.release()
+            return fail(422, "OUTPUT_INVALID", "Attempt storage path is unsafe", False, attempt_id)
 
         if time.monotonic() >= deadline:
             state.slot.release()
@@ -365,8 +378,15 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
             response = await run_in_threadpool(run)
         except _BudgetExpired:
             return timeout_response()
+        except ComputeFailure as error:
+            codes = {"INPUT_INVALID": 422, "INPUT_TOO_LARGE": 413, "PROFILE_EXCEEDED": 422,
+                     "MANIFEST_UNAVAILABLE": 422, "OUTPUT_INVALID": 422, "MODEL_OOM": 500,
+                     "MODEL_LOAD_FAILED": 500, "AI_BUSY": 503, "AI_NOT_READY": 503,
+                     "COMPUTE_TIMEOUT": 504, "INTERNAL_ERROR": 500}
+            code = error.code if error.code in codes else "INTERNAL_ERROR"
+            return fail(codes[code], code, "Compute stage failed", code in {"AI_BUSY", "AI_NOT_READY"}, attempt_id)
         except Exception:
-            log.exception("compute_failed", extra=ids)
+            log.error("compute_failed", extra=ids)
             return fail(500, "INTERNAL_ERROR", "Compute failed", False, attempt_id)
         finally:
             # Cancellation while waiting for AnyIO capacity must not leak a reservation.
@@ -395,3 +415,10 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
         return success_response
 
     return app
+
+
+def create_runtime_app() -> FastAPI:
+    """CLI production factory: actual native composition, no fixture fallback."""
+    from vietdoc.pipeline.composition import ManagedPipeline
+    settings = Settings.from_env()
+    return create_app(settings, ManagedPipeline(settings.pipeline_manifest_id, ComputeContracts(settings.contracts_dir)))
