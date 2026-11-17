@@ -1,6 +1,6 @@
 # Private compute API v1: Java ↔ Python
 
-Reference protocol v1. Python đã có endpoint boundary/fixtures, chưa pipeline OCR/extraction thật hoặc Java↔Python actual-provider acceptance. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
+Reference protocol v1. Python có endpoint boundary, concrete OCR/B0 pipeline và fixture process HTTP tests; Java↔Python actual-provider acceptance vẫn chưa đạt. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
 
 ## Transport và endpoints
 

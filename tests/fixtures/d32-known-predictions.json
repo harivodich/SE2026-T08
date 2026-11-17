@@ -1,0 +1,97 @@
+{
+  "artifact_version": "vietdoc.predictions.v1",
+  "dataset_manifest_sha256": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c",
+  "model_version": "fixture-d32-errors.v1",
+  "normalizer_version": "fixture-canonical.v1",
+  "ocr_version": "fixture-only.v1",
+  "purpose": "Hand-edited D3.2 known-score synthetic fixture; NOT B0/M0/M1 output; reorder, duplicate, extra, dropped, wrong cell and failed job.",
+  "predictions": [
+    {
+      "sample_id": "d12-receipt-03",
+      "status": "ok",
+      "payload": {
+        "merchant_name": "Sai tên cửa hàng",
+        "merchant_address": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+        "transaction_date": "2026-10-03",
+        "transaction_time": "10:05",
+        "total_amount": null,
+        "items": [
+          {
+            "description": "Trà sen hư cấu",
+            "quantity": "3",
+            "unit": "hộp",
+            "unit_price": "45000",
+            "line_total": "90000"
+          },
+          {
+            "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy\ntrưng bày mùa thu",
+            "quantity": "0.5",
+            "unit": "kg",
+            "unit_price": "80000",
+            "line_total": "40000"
+          },
+          {
+            "description": "Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy\ntrưng bày mùa thu",
+            "quantity": "0.5",
+            "unit": "kg",
+            "unit_price": "80000",
+            "line_total": "40000"
+          },
+          {
+            "description": "Sản phẩm khác giả lập",
+            "quantity": "9",
+            "unit": "cái",
+            "unit_price": "7",
+            "line_total": "63"
+          }
+        ]
+      },
+      "ocr_text": "PHIẾU THANH TOÁN\nDỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH\nCửa hàng: Cửa hàng Hư Cấu Mây Tím\nĐịa chỉ: Lô GIẢ-LẬP, khu phố Hư Cấu\nNgày bán: 03/10/2026\nGiờ: 10:05\nTên hàng\nSL\nĐVT\nĐơn giá\nThành tiền\nBộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy\ntrưng bày mùa thu\n0,5\nkg\n80.000 đ\n40.000 đ\nVải màu hư cấu\n1,5\nmét\n32.000 đ\n48.000 đ\nTrà sen hư cấu\n2\nhộp\n45.000 đ\n90.000 đ\nTổng thanh toán: 178.000 đ\nSố tiền ghi lại: 178.000 đ\n",
+      "geometry_convention": "canonical-normalized-quad-v1",
+      "canonical_page": {
+        "page": 0,
+        "width": 1500,
+        "height": 2600,
+        "sha256": "a1f0da31052e3be1e3faaa07f95f746838fd345c4fc00bb5220c8104406d95ac"
+      },
+      "field_metadata": [
+        {
+          "path": "/merchant_name",
+          "evidence_text": "Cửa hàng: Cửa hàng Hư Cấu Mây Tím",
+          "review_flags": [],
+          "source_regions": [
+            {
+              "page": 0,
+              "quad": [
+                [
+                  0.03,
+                  0.05269230769230769
+                ],
+                [
+                  0.31733333333333336,
+                  0.05269230769230769
+                ],
+                [
+                  0.31733333333333336,
+                  0.06230769230769231
+                ],
+                [
+                  0.03,
+                  0.06230769230769231
+                ]
+              ],
+              "ocr_block_ids": [
+                "fictional-block-1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "d12-invoice-04",
+      "status": "failed",
+      "error": "synthetic timeout for known-score test"
+    }
+  ]
+}

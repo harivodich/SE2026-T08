@@ -16,6 +16,11 @@ SUITES = (
     "tests/integration/api", "tests/unit/test_ci_gate.py", "tests/unit/test_ci_ai.py",
 )
 REQUIRED_FILES = (
+    "tests/unit/pipeline/test_evidence_adapter.py",
+    "tests/unit/pipeline/test_attempt_artifacts.py",
+    "tests/unit/pipeline/test_compute_pipeline.py",
+    "tests/unit/pipeline/test_composition.py",
+    "tests/integration/api/test_b0_http_process.py",
     "tests/unit/pipeline/test_ocr_consumer.py",
     "tests/unit/pipeline/test_ocr_input.py",
     "tests/unit/pipeline/test_baseline.py", "tests/unit/pipeline/test_baseline_export.py",
@@ -23,6 +28,10 @@ REQUIRED_FILES = (
     "tests/unit/ml/test_release_manifest.py", "tests/contract/test_schemas.py",
     "tests/contract/test_compute_contract.py", "tests/architecture/test_python_boundaries.py",
     "tests/integration/api/test_compute_api.py", "tests/unit/test_ci_gate.py", "tests/unit/test_ci_ai.py",
+    "tests/unit/pipeline/test_preprocess.py", "tests/unit/pipeline/test_geometry.py",
+    "tests/unit/pipeline/test_evidence.py", "tests/unit/pipeline/test_paddle_adapter.py",
+    "tests/unit/pipeline/test_ocr_handoff.py", "tests/unit/pipeline/test_ocr_preview.py",
+    "tests/contract/test_ocr_contracts.py",
 )
 SYMLINK_TEST = "tests/unit/ml/test_release_manifest.py::test_symlinked_file_is_rejected"
 
@@ -42,7 +51,11 @@ class _Inventory:
         self.collected = len(session.items)
         collected_files = {item.path.resolve() for item in session.items}
         for path in sorted(self.files - collected_files):
-            self.failures.append(f"No tests collected from {path.name}")
+            try:
+                location = path.relative_to(ROOT)
+            except ValueError:
+                location = path
+            self.failures.append(f"No tests collected from {location}")
         if self.collected < self.minimum:
             self.failures.append(f"Test inventory shrank: {self.collected} < {self.minimum}")
 
@@ -120,7 +133,7 @@ def main() -> int:
             print(f"Missing mandatory test file: {name}", file=sys.stderr)
             return 1
     return run_tests([ROOT / name for name in SUITES], junitxml=args.junitxml,
-                     minimum_tests=473, allow_windows_symlink_skip=args.allow_windows_symlink_skip)
+                     minimum_tests=720, allow_windows_symlink_skip=args.allow_windows_symlink_skip)
 
 
 if __name__ == "__main__":

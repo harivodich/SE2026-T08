@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import sys
 
-CORE_CHECKS = ('workflow', 'contracts', 'data', 'package', 'ai')
+CORE_CHECKS = ('workflow', 'contracts', 'data', 'data-pdf', 'package', 'ai')
 APPLICATION_CHECKS = ('backend', 'postgres', 'parity', 'e2e', 'application-artifact')
 
 

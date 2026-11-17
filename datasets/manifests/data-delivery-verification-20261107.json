@@ -1,0 +1,416 @@
+{
+  "artifact_version": "vietdoc.data-verification.v1",
+  "date": "2026-11-07",
+  "base_commit": "50e55e81466294a49ea3cd68ec68bc60e89a274d",
+  "branch": "feature/data-d3-2",
+  "scope": "Data handoff and evaluator only; self-run evidence, no peer/Lead approval",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux",
+    "pillow": "10.2.0",
+    "jsonschema": "4.10.3",
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONPATH": "src"
+    }
+  },
+  "source_sha256": {
+    "src/vietdoc/data/__init__.py": "d7882a57230b3348e51bb9cc36239e30ab4b4dfb382c7e45e34b53dac3a84a64",
+    "src/vietdoc/data/adapters/__init__.py": "a06b37b14ecea0c999b154c479f7bb011a417effe715c8e6263ba454589b70d9",
+    "src/vietdoc/data/generator/__init__.py": "3efacd0a9327a25390d03e04dd8a142dcbfb335445013d9cb74bdb050bcab977",
+    "src/vietdoc/data/generator/artifact_io.py": "3d68ab4e488e55f7bbdea61cfadbfff4113cecc5bb5eaf7cede9202273aa86f5",
+    "src/vietdoc/data/generator/augmentation.py": "22b59717c1d6bda7c69e6ac54da5aae0c108e0352877218145305d910c155e78",
+    "src/vietdoc/data/generator/d21.py": "e022ab20637068029f5d080636a25d916cd3ec8aea3efe7e6747f341697338ba",
+    "src/vietdoc/data/generator/d22.py": "aa137276eb5b681d5836e1b8869fdd6e3247fe9408c6df3ec6a7057a4395479e",
+    "src/vietdoc/data/generator/handoff.py": "444bcc12c203898f4f222bc3995eb1ff6a06149e333eb850fa5d3644bcecb7a3",
+    "src/vietdoc/data/generator/integration.py": "508b7df2a613f17356c69103a61ca85292461a907f0a21c0f764367e5733d190",
+    "src/vietdoc/data/generator/pdf.py": "902f70a7f1d4f81080d38a589dc48ef924a148c42275cded19ce2d8a07169144",
+    "src/vietdoc/data/generator/render_environment.py": "9b97f768256c5de3fe15cceb1477a3ae16a8437b0e818215d24d320f0fe0f98a",
+    "src/vietdoc/data/generator/rendering.py": "829215531ce21b8be4b4924f9f4b40fa7d94c5f4712edd2c52c21ce7b09e2b77",
+    "src/vietdoc/data/generator/templates/__init__.py": "c1eb4603d30a405393efbd9bccc5a8f4b81cd35efaaf4187ff943c50ea6aaea3",
+    "src/vietdoc/data/generator/templates/families.py": "814f6aff680eb0ba749091586772c44f621edb40cb7d6b82cf12cf8add7db003",
+    "src/vietdoc/data/generator/values.py": "3938d9a90b8371871c963313c3df5e4cfa26010d7b116e69c3877db9295b1aec",
+    "src/vietdoc/data/manifest.py": "c9bc206cb3c939bc9283c7d400a66cdf708cd0252b5c492557400670fbab30c7",
+    "src/vietdoc/data/splits.py": "adad9a800731b08758fc4eb8f4505ac7366aca22380ed012ecabb1d19e043740",
+    "src/vietdoc/data/validation.py": "34e64745c232da5b7b867298f87d8b5c6d0803ab9a21f2c2980c3de9cbc4c055",
+    "src/vietdoc/evaluation/__init__.py": "1b28dcf8552c97b320a251cae0da1e3c3f1fa8b8cc8a5ebe38c5e222be5d0c7c",
+    "src/vietdoc/evaluation/__main__.py": "1909c22b59f2e7db030ee2aa3ccdd0c807a2ea91330f1525f8fcde8c22c52c79",
+    "src/vietdoc/evaluation/diagnostics.py": "7c562b4acb68ea73d5b71dba875a03307ceda98fef4b267292e7bcc393b4b510",
+    "src/vietdoc/evaluation/evidence.py": "216ce0240bc59c92a9479f8c002bf08d82074b95e6b128e65a8ece294b3e58d3",
+    "src/vietdoc/evaluation/extended.py": "d908f621928b55a7523efa6d4ccbd5c2d67196291afd53dce78e8b6e621df183",
+    "src/vietdoc/evaluation/gold_validation.py": "43a12285ddafe6afa6ae7abc30afe1dcdb87957d3ce760823659c4e99ef01c7b",
+    "src/vietdoc/evaluation/matching.py": "e229100ebde46fb6adcdb2b41a4e896550063440b6100aecfd171042b247cbe7",
+    "src/vietdoc/evaluation/policy.py": "cfc134579a161a3eaa7dfe339b1c707f6ffede6d8344296304b69615a3e813f0",
+    "src/vietdoc/evaluation/scalar_ocr.py": "4352c9246fd969e549afbbc58024b577c4e53d02a9d1d81bcf61cf5859620a3b",
+    "src/vietdoc/evaluation/tables.py": "dc6892e9fb86308eac7c9d77bc17ed3b0c2392bc126ebb5fb65c162761e48825",
+    "tests/unit/test_data_d21.py": "856ec44bc66ee0f050163507158f858461e62c87c3d10d4544728929e7a02ba6",
+    "tests/unit/test_data_d22.py": "eccd92bc8ea005af0a6a167c9db163ae6cb0ba1c299be80a4e9f414278fa5338",
+    "tests/unit/test_data_handoff.py": "47aa428da5d27ee195293133741312ab16bfdb45ddf3b63aa0b6f382bccb2e66",
+    "tests/unit/test_data_integration.py": "5ef26be02d0431fe6f11d299416cfbc3df28859ab76d241285fb9acdfa48a106",
+    "tests/unit/test_data_values.py": "99109e090a2c8da72237c019f39e2418f54788eec856bce0fdf67caef49e8244",
+    "tests/unit/test_evaluation.py": "7eaab1285aacd776c8328777e24282dcbc1fed928b5b080216b32d7c86835be5",
+    "tests/unit/test_evaluation_boundary.py": "ac68c278db3833cc5b957aea6fad02cbe160546416f9443e8aa5995e9400f30b",
+    "tests/unit/test_evaluation_diagnostics.py": "7feb670af824f17eac92ff0823900da0ee4adbfd3c3dd37e1f52769c3c9370e8",
+    "tests/unit/test_evaluation_tables.py": "033d7ec61717e9e63315ded6a558f546595a502831546cb65af18990e3844d06",
+    "tests/unit/test_review_regressions.py": "f921052c4cc5a5f4cf7db9ffcdfc61469e1086d5298db952c2704f1dc46925e0"
+  },
+  "checks": [
+    {
+      "name": "data",
+      "command": "python3 -m unittest discover -s tests/unit -p 'test_data*.py' -v",
+      "tests_run": 38,
+      "skipped": 1,
+      "seconds": 851.405,
+      "status": "PASS",
+      "log_sha256": "14dd0edd701258b653b6fa9d9891a97c1665eb41b3333c891003c4ca940d8abd"
+    },
+    {
+      "name": "evaluation",
+      "command": "python3 -m unittest discover -s tests/unit -p 'test_evaluation*.py' -v",
+      "tests_run": 49,
+      "skipped": 0,
+      "seconds": 9.632,
+      "status": "PASS",
+      "log_sha256": "f6c4a5b2dbf88757d276990eb03e22d220252f25f719eaec4b360e4c59c29048"
+    },
+    {
+      "name": "review",
+      "command": "python3 -m unittest discover -s tests/unit -p 'test_review_regressions.py' -v",
+      "tests_run": 7,
+      "skipped": 0,
+      "seconds": 172.616,
+      "status": "PASS",
+      "log_sha256": "39d0e084b61ae1ec11e8cad95bf1996ddc6262c1a6e88dbcb198bbdd7911c410"
+    },
+    {
+      "name": "handoff-focused",
+      "command": "python3 -m unittest discover -s tests/unit -p 'test_data_handoff.py' -v",
+      "tests_run": 8,
+      "skipped": 0,
+      "seconds": 13.013,
+      "status": "PASS",
+      "log_sha256": "a2ec228d042790ee25ca28aee07bf5c3c870de8308d1ec7123783785085f94a6"
+    }
+  ],
+  "notes": [
+    "Focused handoff suite rerun after final checksum-path/shape guards; D2 generator source pins did not change.",
+    "Focused suite overlaps full Data suite; do not add its 8 tests to the 94 full-suite methods.",
+    "Full Data suite includes independent Poppler PDF check and D2.2 fresh byte equality/strict replay."
+  ],
+  "relocated": {
+    "tiny-final-normal": {
+      "samples": 2,
+      "document_types": {
+        "receipt": 1,
+        "invoice": 1
+      },
+      "rows": 6,
+      "manifest_sha256": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c"
+    },
+    "full-final-normal": {
+      "samples": 20,
+      "document_types": {
+        "receipt": 10,
+        "invoice": 10
+      },
+      "rows": 204,
+      "manifest_sha256": "093b8f772d19e5357ee6209f3358f44d7a072f457aaef64507f38081c0e70e9a"
+    },
+    "full-final-optimized": {
+      "samples": 20,
+      "document_types": {
+        "receipt": 10,
+        "invoice": 10
+      },
+      "rows": 204,
+      "manifest_sha256": "093b8f772d19e5357ee6209f3358f44d7a072f457aaef64507f38081c0e70e9a"
+    }
+  },
+  "bundle_inventories": {
+    "tiny": "591cb7676ca2c7e50c9b4d617e1fe1af738ae6a06021b0a0a28764b493aefb18",
+    "full": "f2895b26b48e9c6ec52e2b4a2aec0c75b27d7e4611d3a2ea8c1ff92234fcb17e"
+  },
+  "fixture_only": {
+    "evaluator_version": "d3.2.v4",
+    "evaluator_source_sha256": "cf5200788b90246bd067a155113026d4478b1e62bf8fd5bc92b4b7d655b85d06",
+    "manifest_sha256": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c",
+    "predictions_sha256": "75903c027c8afff22a679c0d858e6819fbc57d48406e5c0eb344314e383ae1e5",
+    "tables": {
+      "counts": {
+        "gold_rows": 6,
+        "predicted_rows": 4,
+        "matched_rows": 2,
+        "missing_gold_rows": 4,
+        "extra_predicted_rows": 2,
+        "invalid_tables": 0,
+        "missing_tables": 1,
+        "empty_gold_tables": 0,
+        "gold_duplicates": 0,
+        "predicted_duplicates": 1,
+        "excess_duplicates": 1,
+        "ambiguous_matches": 1,
+        "present_cells": 30,
+        "description_gold_cells": 6,
+        "description_present_cells": 6,
+        "e2e_cells": 30,
+        "matched_cells": 10,
+        "correct_cells": 9,
+        "description_cells": 2,
+        "description_correct": 2,
+        "quantity_gold_cells": 6,
+        "quantity_present_cells": 6,
+        "quantity_cells": 2,
+        "quantity_correct": 1,
+        "unit_gold_cells": 6,
+        "unit_present_cells": 6,
+        "unit_cells": 2,
+        "unit_correct": 2,
+        "unit_price_gold_cells": 6,
+        "unit_price_present_cells": 6,
+        "unit_price_cells": 2,
+        "unit_price_correct": 2,
+        "line_total_gold_cells": 6,
+        "line_total_present_cells": 6,
+        "line_total_cells": 2,
+        "line_total_correct": 2,
+        "fully_labeled_rows": 6,
+        "exact_rows": 1
+      },
+      "matched_cell_accuracy": {
+        "numerator": 9,
+        "denominator": 10,
+        "value": 0.9,
+        "support": 30,
+        "exclusions": {
+          "obscured": 0,
+          "unlabeled": 0,
+          "unmatched_labeled_cells": 20
+        },
+        "zero_denominator": "null"
+      },
+      "e2e_cell_accuracy": {
+        "numerator": 9,
+        "denominator": 30,
+        "value": 0.3,
+        "support": 30,
+        "exclusions": {
+          "obscured": 0,
+          "unlabeled": 0
+        },
+        "zero_denominator": "null"
+      },
+      "exact_row_accuracy": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666,
+        "support": 6,
+        "exclusions": {
+          "partial_rows": 0
+        },
+        "zero_denominator": "null"
+      },
+      "columns": {
+        "description": {
+          "numerator": 2,
+          "denominator": 2,
+          "value": 1.0,
+          "support": 6,
+          "exclusions": {
+            "obscured": 0,
+            "unlabeled": 0,
+            "unmatched_labeled_cells": 4
+          },
+          "zero_denominator": "null"
+        },
+        "quantity": {
+          "numerator": 1,
+          "denominator": 2,
+          "value": 0.5,
+          "support": 6,
+          "exclusions": {
+            "obscured": 0,
+            "unlabeled": 0,
+            "unmatched_labeled_cells": 4
+          },
+          "zero_denominator": "null"
+        },
+        "unit": {
+          "numerator": 2,
+          "denominator": 2,
+          "value": 1.0,
+          "support": 6,
+          "exclusions": {
+            "obscured": 0,
+            "unlabeled": 0,
+            "unmatched_labeled_cells": 4
+          },
+          "zero_denominator": "null"
+        },
+        "unit_price": {
+          "numerator": 2,
+          "denominator": 2,
+          "value": 1.0,
+          "support": 6,
+          "exclusions": {
+            "obscured": 0,
+            "unlabeled": 0,
+            "unmatched_labeled_cells": 4
+          },
+          "zero_denominator": "null"
+        },
+        "line_total": {
+          "numerator": 2,
+          "denominator": 2,
+          "value": 1.0,
+          "support": 6,
+          "exclusions": {
+            "obscured": 0,
+            "unlabeled": 0,
+            "unmatched_labeled_cells": 4
+          },
+          "zero_denominator": "null"
+        }
+      }
+    },
+    "evidence": {
+      "counts": {
+        "gold_annotated_fields": 42,
+        "gold_annotated_regions": 46,
+        "present_fields_without_regions": 0,
+        "ambiguous_fields": 5,
+        "covered_fields": 1,
+        "incompatible_fields": 22,
+        "invalid_region_fields": 0,
+        "missing_evidence_fields": 41,
+        "comparable_gold_regions": 1,
+        "comparable_predicted_regions": 1,
+        "geometry_matched_regions": 1,
+        "extra_regions": 0,
+        "ambiguous_region_matches": 0,
+        "text_covered_fields": 1,
+        "text_correct_fields": 1
+      },
+      "coverage": {
+        "numerator": 1,
+        "denominator": 42,
+        "value": 0.023809523809523808,
+        "support": 42,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "geometry_recall": {
+        "numerator": 1,
+        "denominator": 46,
+        "value": 0.021739130434782608,
+        "support": 46,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "geometry_accuracy_on_available": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "support": 1,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "geometry_precision_on_available": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "support": 1,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "text_coverage": {
+        "numerator": 1,
+        "denominator": 42,
+        "value": 0.023809523809523808,
+        "support": 42,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "text_accuracy_on_available": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "support": 1,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      },
+      "text_e2e_accuracy": {
+        "numerator": 1,
+        "denominator": 42,
+        "value": 0.023809523809523808,
+        "support": 42,
+        "exclusions": {
+          "excluded_gold_samples": 0,
+          "excluded_declared_fields": 0,
+          "excluded_declared_regions": 0
+        },
+        "zero_denominator": "null"
+      }
+    },
+    "accounting": {
+      "gold_samples": 2,
+      "prediction_records": 2,
+      "outcomes": {
+        "ok": 1,
+        "failed": 1
+      },
+      "unknown_ids": []
+    },
+    "calibration_eligible": 0,
+    "population": {
+      "split_counts": {
+        "unspecified": 2
+      },
+      "dev_partition_counts": {
+        "unpartitioned": 2
+      },
+      "mixed_splits": false,
+      "note": "All supplied manifest IDs are scored; mixed splits are not a dev/final headline or authorization to open holdout."
+    },
+    "model_quality": false
+  },
+  "not_run": [
+    "Native Windows",
+    "Canonical reference byte reproduction",
+    "Native OCR20 and new AI1 consumer run",
+    "Actual B0/M0/M1 evaluator artifacts",
+    "AI1 PDF canonicalization compatibility",
+    "Training/calibration/final holdout",
+    "Hosted CI for this increment",
+    "Backend upload/viewer acceptance"
+  ],
+  "awaiting_owner": {
+    "AI1": "native artifacts/canonical PNG bytes and PDF compatibility",
+    "AI2": "predictions.v1 plus diagnostics, dataset version/exporter compatibility",
+    "Backend": "mandatory evaluator/review regression CI inventory",
+    "Lead": "C01-C06 metric/split/population and final-open decisions"
+  }
+}

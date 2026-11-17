@@ -11,8 +11,72 @@ import platform
 import subprocess
 
 from vietdoc.pipeline.extraction.baseline import BASELINE_VERSION, extract_baseline
-from vietdoc.pipeline.extraction.ocr_consumer import PROVIDER_SHA, ProviderEvidence, consume_native, evidence_checks
+from vietdoc.pipeline.extraction.ocr_consumer import PROVIDER_SHA, ProviderEvidence, batch_summary, consume_native, evidence_checks
 from vietdoc.pipeline.extraction.ocr_input import BaselineError, snapshot_page
+
+
+# Hand-reviewed assertions for fictional consumer cases, NOT recognition gold.
+GOLDEN_EXPECTATIONS = {
+    "mixed-empty-whitespace": ("partial", ["p0-b0002", "p0-b0003"]),
+    "all-unreadable": ("unreadable", ["p0-b0001"]),
+    "blank-no-detections": ("complete", []),
+}
+
+
+def evaluate_expectations(actual: dict, expectations: list[dict]) -> list[dict]:
+    checks = []
+    for check in expectations:
+        value = actual
+        try:
+            for part in check["path"].strip("/").split("/"):
+                value = value[int(part)] if isinstance(value, list) else value[part.replace("~1", "/").replace("~0", "~")]
+            passed = type(value) is type(check["expected"]) and value == check["expected"]
+        except (KeyError, IndexError, TypeError, ValueError):
+            value, passed = "MISSING", False
+        checks.append(dict(**check, actual=value, result="PASS" if passed else "FAIL"))
+    return checks
+
+
+def golden_reports(golden: dict, provider=None) -> list[dict]:
+    records = []
+    for case in golden["cases"]:
+        identity = dict(case_id=case["case_id"], quality_status="NOT_EVALUATED")
+        try:
+            page = snapshot_page(case["expected"], golden["prepared_page"])
+            result = extract_baseline(case["expected"], "receipt", prepared=golden["prepared_page"],
+                                      evidence_matcher=provider.matcher(case["expected"], golden["prepared_page"]) if provider else None)
+            record = dict(**identity, execution_status="PASS", ocr_diagnostics=asdict(page), **asdict(result))
+            oracle = GOLDEN_EXPECTATIONS.get(case["case_id"])
+            expectations = [] if oracle is None else [
+                dict(path="/payload/total_amount", expected=None),
+                dict(path="/payload/items", expected=[]),
+                dict(path="/field_states/~1total_amount", expected="unknown"),
+                dict(path="/ocr_diagnostics/recognition_status", expected=oracle[0]),
+            ]
+            checks = evaluate_expectations(record, expectations)
+            if oracle is not None:
+                ids = [r.region_id for r in page.unreadable_regions]
+                checks.append(dict(path="/ocr_diagnostics/unreadable_region_ids", expected=oracle[1],
+                                   actual=ids, result="PASS" if ids == oracle[1] else "FAIL"))
+            record.update(checks=checks, status=("FAIL" if any(c["result"] == "FAIL" for c in checks)
+                                                else "PASS" if checks else "NOT_EVALUATED"))
+        except (BaselineError, ValueError, KeyError, TypeError):
+            record = dict(**identity, execution_status="FAIL", status="FAIL", error="GOLDEN_INPUT_INVALID", checks=[])
+        records.append(record)
+    return records
+
+
+def publish_report(output: Path, report: dict) -> int:
+    native = report.get("native_results", [])
+    failed = (any(r["status"] == "FAIL" for r in report.get("golden_results", []))
+              or any(c["result"] != "PASS" for c in report.get("evidence_checks", []))
+              or any(r["status"] != "ok" or any(c["result"] != "PASS" for c in r.get("native_evidence_checks", [])) for r in native))
+    report["summary"] = dict(status="FAIL" if failed else "PASS", native=batch_summary(native),
+                           quality_status="NOT_EVALUATED")
+    output.mkdir(parents=True, exist_ok=False)
+    (output / "consumer-report.json").write_bytes(
+        (json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8"))
+    return int(failed)
 
 
 def main(argv=None) -> int:
@@ -42,13 +106,7 @@ def main(argv=None) -> int:
             fixtures[name] = json.loads(data)
         golden, bundle = fixtures["ocr-artifact-v2.json"], fixtures["ocr-d1-native-handoff.json"]
         checks = evidence_checks(provider, golden)
-        golden_results = []
-        for case in golden["cases"]:
-            page = snapshot_page(case["expected"], golden["prepared_page"])
-            result = extract_baseline(case["expected"], "receipt", prepared=golden["prepared_page"],
-                                      evidence_matcher=provider.matcher(case["expected"], golden["prepared_page"]))
-            golden_results.append(dict(case_id=case["case_id"], status="PASS", ocr_diagnostics=asdict(page),
-                                       **asdict(result)))
+        golden_results = golden_reports(golden, provider)
         native = consume_native(bundle, provider, args.fixtures)
         root = Path(__file__).resolve().parents[4]
         consumer_head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], timeout=10).decode().strip()
@@ -58,7 +116,7 @@ def main(argv=None) -> int:
                  root / "pyproject.toml", Path(__file__),
                  *root.joinpath("specs/contracts").glob("*.schema.json")]
         hashes = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
-        report = dict(artifact_version="vietdoc.ocr-consumer-report.v1",
+        report = dict(artifact_version="vietdoc.ocr-consumer-report.v2",
                       observed_at_utc=datetime.now(timezone.utc).isoformat(),
                       consumer_head=consumer_head, consumer_worktree_dirty=dirty,
                       consumer_source_sha256=hashes, model_version=BASELINE_VERSION,
@@ -72,16 +130,24 @@ def main(argv=None) -> int:
                       limitations=["Observed native JSON replay, not a new OCR/model run or D1 benchmark",
                                    "Golden partial cases are separate from the two complete native v2 pages",
                                    "Default-v2/Backend policy/HTTP/hosted CI acceptance remains pending"])
-        args.output.mkdir(parents=True, exist_ok=False)
-        (args.output / "consumer-report.json").write_bytes(
-            (json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8"))
-    except (BaselineError, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
-        parser.exit(2, f"OCR consumer failed: {error}\n")
+        status = publish_report(args.output, report)
+    except FileExistsError:
+        parser.exit(2, "OCR consumer failed: output directory already exists\n")
+    except Exception as error:
+        code = error.code if isinstance(error, BaselineError) else "CONSUMER_SETUP_FAILED"
+        if not args.output.exists():
+            try:
+                args.output.mkdir(parents=True, exist_ok=False)
+                (args.output / "consumer-report.json").write_text(json.dumps(dict(
+                    artifact_version="vietdoc.ocr-consumer-report.v2", error=code,
+                    summary=dict(status="FAIL", incomplete=True, quality_status="NOT_EVALUATED"))), encoding="utf-8")
+            except OSError:
+                pass
+        parser.exit(2, f"OCR consumer failed: {code}\n")
     print(json.dumps(dict(evidence_passed=sum(c["result"] == "PASS" for c in checks),
                           evidence_total=len(checks), native_ok=sum(r["status"] == "ok" for r in native),
                           native_total=len(native), output=str(args.output))))
-    return int(any(c["result"] != "PASS" for c in checks)
-               or any(r["status"] != "ok" or any(c["result"] != "PASS" for c in r.get("native_evidence_checks", [])) for r in native))
+    return status
 
 
 if __name__ == "__main__":

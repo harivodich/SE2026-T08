@@ -8,6 +8,11 @@ Sinh fake documents và gold Owner: Data.
 
 values/render/templates: render image/PDF/transcript/regions từ cùng gold object và seed/version.
 
+`handoff.py`: pack/verify existing D1 bytes thành ZIP cùng inventory/checksums,
+relocated semantic verification; không inference hoặc render lại. Full20 là mặc
+định; tiny explicit chỉ receipt-03/invoice-04. Binary bundles ở ignored artifacts,
+safe inventories ở datasets/manifests; không commit toàn bộ assets.
+
 ## Ranh giới và dữ liệu
 
 Không OCR predictions làm gold/real PII; không nhãn bị clip nhưng coi visible. Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.
