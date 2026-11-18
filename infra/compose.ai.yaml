@@ -1,0 +1,95 @@
+# AI-2 Python services only. Java app/job-runner/postgres Compose belongs to Backend (B7.1).
+#   docker compose -f infra/compose.ai.yaml up -d --build ai-service
+#   docker compose -f infra/compose.ai.yaml --profile train run --rm ai-train
+# Paths are relative to this file. Copy infra/.env.example to infra/.env to override.
+name: vietdoc-ai
+
+services:
+  ai-service:
+    build:
+      context: ..
+      dockerfile: infra/ai-service.Dockerfile
+      target: runtime
+    image: vietdoc-ai-service:dev
+    environment:
+      VIETDOC_SERVICE_TOKEN_FILE: /run/secrets/ai_service_token
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    secrets:
+      - ai_service_token
+    ports:
+      # Loopback only; the service is private and never public.
+      - "127.0.0.1:${AI_SERVICE_PORT:-8090}:8090"
+    volumes:
+      - type: bind
+        source: ${VIETDOC_MODELS_DIR:-../artifacts/models}
+        target: /models
+        read_only: true
+      - ai-attempts:/attempts
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: ${AI_SERVICE_CPUS:-2}
+    mem_limit: ${AI_SERVICE_MEMORY:-4g}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ai-train: &train
+    profiles: ["train"]
+    build:
+      context: ..
+      dockerfile: infra/ai-train.Dockerfile
+    image: vietdoc-ai-train:dev
+    # No network by default: no implicit model/dataset downloads.
+    network_mode: none
+    volumes: &train-volumes
+      - type: bind
+        source: ${VIETDOC_MODELS_DIR:-../artifacts/models}
+        target: /models
+      - type: bind
+        source: ${VIETDOC_DATASETS_DIR:-../datasets}
+        target: /datasets
+        read_only: true
+      - type: bind
+        source: ${VIETDOC_EVALUATION_DIR:-../artifacts/evaluation}
+        target: /artifacts/evaluation
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: ${AI_TRAIN_CPUS:-4}
+    mem_limit: ${AI_TRAIN_MEMORY:-8g}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Same environment with CUDA torch and the host NVIDIA GPU (Docker Desktop + WSL2).
+  #   docker compose -f infra/compose.ai.yaml --profile gpu run --rm ai-train-gpu
+  ai-train-gpu:
+    <<: *train
+    profiles: ["gpu"]
+    build:
+      context: ..
+      dockerfile: infra/ai-train.Dockerfile
+      args:
+        TORCH_INDEX: ${AI_TRAIN_TORCH_INDEX:-cu126}
+    image: vietdoc-ai-train:${AI_TRAIN_TORCH_INDEX:-cu126}
+    volumes: *train-volumes
+    gpus: all
+    shm_size: 2g
+
+secrets:
+  ai_service_token:
+    file: ${VIETDOC_SERVICE_TOKEN_PATH:-../secrets/ai_service_token}
+
+volumes:
+  ai-attempts:

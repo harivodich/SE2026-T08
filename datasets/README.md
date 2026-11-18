@@ -5,3 +5,7 @@
 - manifests/: metadata/split/hash nhỏ có thể commit, không chứa PII hoặc đường dẫn máy cá nhân.
 
 Data Engineer phụ trách. Dataset public cần audit terms/provenance/PII trước khi dùng. Source code generator ở src/vietdoc/data/, không đặt trong folder dữ liệu này.
+
+D2.2 bounded smoke và các gaps/G0 pending: [QA/handoff](manifests/d22-QA.md).
+Family catalog, split/augmentation policies và CLI ở
+[generator README](../src/vietdoc/data/generator/README.md). Smoke không là final freeze.

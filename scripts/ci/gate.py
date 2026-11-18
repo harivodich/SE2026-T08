@@ -6,9 +6,9 @@ import os
 from pathlib import Path
 import sys
 
-CORE_CHECKS = ('workflow', 'contracts', 'data', 'package')
+CORE_CHECKS = ('workflow', 'contracts', 'data', 'data-pdf', 'package', 'ai')
 WEB_CHECKS = ('test', 'docker-smoke')
-APPLICATION_CHECKS = ('backend', 'postgres', 'ai', 'parity', 'e2e', 'application-artifact')
+APPLICATION_CHECKS = ('backend', 'postgres', 'parity', 'e2e', 'application-artifact')
 
 
 def target_branch(event_name: str, ref: str, event: dict) -> str:
@@ -64,7 +64,7 @@ def main() -> int:
     lines = [f'{args.mode} gate on {branch}: {"FAIL" if failures else "PASS"}']
     lines.extend(f'- {failure}' for failure in failures)
     if args.mode == 'ci' and branch == 'develop' and not failures:
-        lines.append('Data/contracts and Web/Java smoke verified; this is not application release readiness.')
+        lines.append('Data/contracts/AI fixtures and Web/Java smoke verified; this is not application release readiness.')
     if args.mode == 'release' and failures:
         lines.append('Wire executable application jobs into release-readiness.needs before releasing.')
     output = '\n'.join(lines) + '\n'

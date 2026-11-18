@@ -1,30 +1,23 @@
 """Bounded D1.2 integration renderer and versioned artifact smoke loader."""
 import argparse
 from collections import Counter
-from decimal import Decimal
-import json
 import math
 import os
 from pathlib import Path
-import random
 import re
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageFont
 from jsonschema import Draft202012Validator
 
 from .artifact_io import asset_path, encoded, read_json, require, sample_id, sha
 from .render_environment import environment
-from .values import CONFIG
+from .rendering import FONT, render, raw
+from .templates import LABELS
+from .values import CONFIG, integration_samples as samples
 
 VERSION = 'd1.2.v2'
 D1_VERSIONS = ('d1.2.v1', VERSION)
 ASSETS = {'png', 'gold.json', 'txt', 'regions.json', 'labels.json'}
-FONT = Path('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
-MONEY = {'unit_price', 'line_total', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount'}
-LABELS = dict(merchant_name='Cửa hàng', merchant_address='Địa chỉ', transaction_date='Ngày bán',
-              transaction_time='Giờ', invoice_number='Số hóa đơn', issue_date='Ngày lập',
-              seller_name='Đơn vị bán', buyer_name='Đơn vị mua', subtotal='Cộng tiền hàng',
-              tax_amount='Tiền thuế GTGT', discount_amount='Chiết khấu', total_amount='Tổng thanh toán')
 
 
 def dump(path, value):
@@ -37,112 +30,6 @@ def leaves(payload):
     for i, row in enumerate(payload['items']):
         result.update({f'/items/{i}/{k}': v for k, v in row.items()})
     return result
-
-
-def raw(key, value):
-    if value is None:
-        return None
-    if key in MONEY:
-        integer, dot, fraction = value.partition('.')
-        return f'{int(integer):,}'.replace(',', '.') + (',' + fraction if dot else '') + ' đ'
-    if key.endswith('date'):
-        return '/'.join(reversed(value.split('-')))
-    return value.replace('.', ',') if key == 'quantity' else value
-
-
-def samples(seed=1202):
-    config = json.loads(CONFIG.read_text(encoding='utf-8'))
-    rng = random.Random(seed)
-    for kind in ('receipt', 'invoice'):
-        for i in range(10):
-            count = [1, 3, 5, 12, 30][i // 2]
-            rows = [dict(rng.choice(config['products'])) for _ in range(count)]
-            if i >= 2:
-                rows[0]['description'] = 'Bộ giấy gói hư cấu họa tiết lá và hoa dành cho quầy trưng bày mùa thu'
-            subtotal = sum((Decimal(r['line_total']) for r in rows), Decimal(0))
-            if kind == 'receipt':
-                payload = dict(merchant_name=config['merchants'][i % 2],
-                               merchant_address=None if i % 3 == 0 else config['addresses'][0],
-                               transaction_date=f'2026-10-{i+1:02}',
-                               transaction_time=None if i % 3 == 0 else f'{8+i:02}:05',
-                               total_amount=str(subtotal), items=rows)
-            else:
-                tax, discount = ('10000', '5000') if i % 2 else ('0', '0')
-                payload = dict(invoice_number=f'GIẢ-LẬP-{seed}-{i+1:02}', issue_date=f'2026-10-{i+1:02}',
-                               seller_name=config['sellers'][i % 2], buyer_name=None if i % 3 == 0 else config['buyers'][0],
-                               subtotal=str(subtotal), tax_amount=tax, discount_amount=discount,
-                               total_amount=str(subtotal + Decimal(tax) - Decimal(discount)), items=rows)
-            yield f'd12-{kind}-{i+1:02}', kind, i % 2, payload
-
-
-def render(payload, kind, layout, font_path=FONT):
-    width, height = 1500, 2600
-    image = Image.new('RGB', (width, height), 'white')
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(str(font_path), 23)
-    title_font = ImageFont.truetype(str(font_path), 32)
-    regions, transcript = [], []
-    y = 35
-
-    def text(value, x, top, pointer=None, title=False):
-        face = title_font if title else font
-        box = list(draw.textbbox((x, top), value, font=face))
-        if not (0 <= box[0] < box[2] < width and 0 <= box[1] < box[3] < height):
-            raise ValueError(f'Clipping: {value}: {box}')
-        draw.text((x, top), value, font=face, fill='black')
-        transcript.append(value)
-        regions.append(dict(text=value, pointer=pointer, page=0, bbox_px=box))
-
-    text('HÓA ĐƠN BÁN HÀNG' if kind == 'invoice' else 'PHIẾU THANH TOÁN', 45, y, title=True)
-    y += 55
-    text('DỮ LIỆU HƯ CẤU — KHÔNG CÓ GIÁ TRỊ GIAO DỊCH', 45, y)
-    y += 45
-    for key, value in payload.items():
-        if key == 'items' or key in MONEY or value is None:
-            continue
-        text(LABELS[key] + ': ' + raw(key, value), 45 if layout == 0 else 180, y, '/' + key)
-        y += 36
-    y += 15
-    columns = [('description', 'Tên hàng', 45, 650), ('quantity', 'SL', 720, 100),
-               ('unit', 'ĐVT', 850, 100), ('unit_price', 'Đơn giá', 1000, 190),
-               ('line_total', 'Thành tiền', 1240, 210)]
-    if layout:
-        columns = [columns[0], columns[2], columns[1], columns[3], columns[4]]
-        columns = [(k, label, x, w) for (k, label, _, w), x in zip(columns, [45, 720, 850, 1000, 1240])]
-    for _, label, x, _ in columns:
-        text(label, x, y)
-    y += 38
-    for index, row in enumerate(payload['items']):
-        max_lines = 1
-        for key, _, x, max_width in columns:
-            value = raw(key, row[key])
-            lines, line = [], ''
-            for word in value.split():
-                candidate = (line + ' ' + word).strip()
-                if draw.textlength(candidate, font=font) > max_width:
-                    if not line:
-                        raise ValueError('Word exceeds column')
-                    lines.append(line)
-                    line = word
-                else:
-                    line = candidate
-            lines.append(line)
-            for offset, fragment in enumerate(lines):
-                text(fragment, x, y + offset * 29, f'/items/{index}/{key}')
-            max_lines = max(max_lines, len(lines))
-        y += max_lines * 29 + 8
-        if layout:
-            draw.line((40, y - 3, 1460, y - 3), fill='#bbbbbb')
-    y += 20
-    for key in payload:
-        if key in MONEY:
-            text(LABELS[key] + ': ' + raw(key, payload[key]), 650 if layout == 0 else 45, y, '/' + key)
-            y += 36
-    text('Số tiền ghi lại: ' + raw('total_amount', payload['total_amount']), 45, y + 10, '/total_amount')
-    return image, '\n'.join(transcript) + '\n', dict(
-        convention='renderer-local-v1; not approved shared geometry', page=0,
-        width=width, height=height, origin='top-left', units='pixels',
-        transform='identity; PNG is the rendered page', regions=regions)
 
 
 def resolve_font(font_path=None):
@@ -204,13 +91,14 @@ def build(root, output, manifest, seed=1202, font_path=None, tiny=False):
                             row_count=len(payload['items']), label_statuses=dict(Counter(x['status'] for x in labels.values())),
                             assets=assets))
     dump(manifest, dict(version=VERSION, purpose='shared integration set; not untouched holdout',
+                        transcript_scope='full_page', transcript_order='renderer-draw-call-v1',
                         font_sha256=sha(font_path), config_sha256=sha(CONFIG),
                         environment=environment(), samples=entries))
 
 
 def check_manifest(data):
     require(isinstance(data, dict), 'manifest must be an object')
-    require(data.get('version') in D1_VERSIONS, 'unsupported manifest version')
+    require(data.get('version') in (*D1_VERSIONS, 'd2.1.v1', 'd2.2.v1'), 'unsupported manifest version')
     require(isinstance(data.get('samples'), list), 'manifest samples must be an array')
     for key in ('font_sha256',):
         require(isinstance(data.get(key), str) and re.fullmatch('[0-9a-f]{64}', data[key]), f'invalid {key}')
@@ -231,8 +119,14 @@ def check_manifest(data):
                     all(isinstance(name, str) and '/' not in name and '\\' not in name and
                         isinstance(digest, str) and re.fullmatch('[0-9a-f]{64}', digest)
                         for name, digest in binaries.items()), 'invalid renderer binary hashes')
-        require(set(data) == keys, 'missing/unknown D1 manifest keys')
+        transcript_keys = {'transcript_scope', 'transcript_order'}
+        require(set(data) == keys or set(data) == keys | transcript_keys, 'missing/unknown D1 manifest keys')
         require(data['config_sha256'] == sha(CONFIG), 'D1 vocabulary hash mismatch')
+    elif data['version'] == 'd2.2.v1':
+        require(data.get('asset_paths') == 'relative to manifest directory', 'D2 asset_paths mismatch')
+    if 'transcript_scope' in data or 'transcript_order' in data:
+        require(data.get('transcript_scope') == 'full_page' and
+                data.get('transcript_order') == 'renderer-draw-call-v1', 'unsupported renderer transcript convention')
 
 
 def check_metadata(sample, data, schema):
@@ -241,7 +135,7 @@ def check_metadata(sample, data, schema):
     require(kind in ('receipt', 'invoice'), 'unsupported document_type')
     require(sample.get('schema_id') == schema['$id'], 'schema_id mismatch')
     require(sample.get('generator_version') == data['version'], 'generator version mismatch')
-    seed_key = 'seed'
+    seed_key = 'value_seed' if data['version'] == 'd2.2.v1' else 'seed'
     require(type(sample.get(seed_key)) is int and 0 <= sample[seed_key] < 2**63, f'invalid {seed_key}')
     require(type(sample.get('row_count')) is int and 0 <= sample['row_count'] <= 30, 'invalid row_count')
     counts = sample.get('label_statuses')
@@ -258,10 +152,35 @@ def check_metadata(sample, data, schema):
         require(sample['base_id'] == sid and sample['family_id'] == f'{kind}-layout-{layout}' and
                 sample['template_id'] == f'{kind}-layout-{layout}-v1', 'lineage mismatch')
         require(sample['row_count'] == [1, 3, 5, 12, 30][index // 2], 'D1 row profile mismatch')
+    elif data['version'] == 'd2.1.v1':
+        from .templates import TEMPLATE_VERSION
+        layout = sample.get('layout')
+        require(type(layout) is int and layout in (0, 1) and sample.get('base_id') == sid and
+                sample.get('family_id') == f'{kind}-layout-{layout}' and
+                sample.get('template_id') == f'{kind}-layout-{layout}-{TEMPLATE_VERSION}', 'D2.1 lineage mismatch')
+        require(sample['seed'] == data.get('seed'), 'D2.1 seed mismatch')
+        from .values import document_cases
+        expected = next((c for c in document_cases(data['seed'], data['config'], read_json(CONFIG)) if c[0] == sid), None)
+        require(expected is not None and expected[1:3] == (kind, layout), 'D2.1 source lineage mismatch')
+    else:
+        from .templates.families import VERSION as FAMILY_VERSION, catalog
+        from .d22 import CLEAN, plan, validate_config
+        from ..splits import digest
+        family = next((f for f in catalog() if f['family_id'] == sample.get('family_id')), None)
+        require(family is not None and family['document_type'] == kind, 'D2 family/type mismatch')
+        config = validate_config(data['config'])
+        record = next((r for r in plan(config, data['seed']) if r['base_id'] == sample.get('base_id')), None)
+        require(record is not None and all(sample.get(k) == v for k, v in record.items()), 'D2 assignment lineage mismatch')
+        policy = sample.get('augmentation')
+        require(policy in [CLEAN] + config['augmentations'], 'D2 augmentation mismatch')
+        require(sid == record['base_id'] + '-' + policy['name'] and
+                sample.get('template_id') == record['family_id'] + '-' + FAMILY_VERSION and
+                sample.get('augmentation_seed') == int(digest([record['value_seed'], policy['name']])[:15], 16),
+                'D2 variant lineage mismatch')
     return kind
 
 
-def occurrences(regions, pointer):
+def occurrences(regions, pointer, alternate=False):
     """Exact v1 adapter: strip known label prefixes, group ordered wrap fragments.
 
     Scalar prefixes start occurrences, so repeated amounts are checked separately.
@@ -277,7 +196,11 @@ def occurrences(regions, pointer):
                 groups[-1].append(region['text'])
             previous = region['pointer']
         return [' '.join(group) for group in groups]
-    prefix = LABELS[pointer[1:]] + ': '
+    labels = LABELS
+    if alternate:
+        from .templates.families import ALTERNATE
+        labels = ALTERNATE
+    prefix = labels[pointer[1:]] + ': '
     prefixes = [prefix] + (['Số tiền ghi lại: '] if pointer == '/total_amount' else [])
     groups, previous = [], None
     for region in regions:
@@ -295,8 +218,12 @@ def occurrences(regions, pointer):
 
 def check_sample(root, manifest, sample, data, schema):
     kind = check_metadata(sample, data, schema)
-    base = root
-    expected_assets = ASSETS
+    family = None
+    if data['version'] == 'd2.2.v1':
+        from .templates.families import catalog
+        family = next(f for f in catalog() if f['family_id'] == sample['family_id'])
+    base = manifest.parent if data['version'].startswith('d2.') else root
+    expected_assets = ASSETS if data['version'] in D1_VERSIONS else ASSETS | {'pdf'}
     require(isinstance(sample['assets'], dict) and set(sample['assets']) == expected_assets, 'missing/unknown asset')
     assets, paths = {}, set()
     for suffix, asset in sample['assets'].items():
@@ -337,26 +264,42 @@ def check_sample(root, manifest, sample, data, schema):
         label = labels[pointer]
         require(isinstance(label, dict) and set(label) == {'status', 'raw', 'reason'}, f'invalid label: {pointer}')
         status = label['status']
-        allowed = ('present', 'absent')
+        allowed = ('present', 'absent') if data['version'] in D1_VERSIONS else ('present', 'absent', 'obscured', 'unlabeled')
         require(status in allowed and (status == 'present') == (value is not None), f'label status mismatch: {pointer}')
         require(label['raw'] == raw(pointer.rsplit('/', 1)[-1], value), f'label raw mismatch: {pointer}')
         require(label['reason'] is None if status == 'present' else isinstance(label['reason'], str) and bool(label['reason']),
                 f'label reason mismatch: {pointer}')
-        hits = occurrences(regions, pointer)
+        alternate = family is not None and family['vocabulary'] == 'alternate'
+        hits = occurrences(regions, pointer, alternate)
         if value is None:
             require(not hits, f'null field has evidence: {pointer}')
         else:
             require(hits and all(hit == label['raw'] for hit in hits), f'exact occurrence mismatch: {pointer}')
-            if data['version'] in D1_VERSIONS:
-                require(len(hits) == (2 if pointer == '/total_amount' else 1), f'occurrence count mismatch: {pointer}')
+            # D1/D2.1 repeat the total; every D2.2 family renders each scalar
+            # once, above or below the table. Wrapped cells remain one hit.
+            expected = 2 if family is None and pointer == '/total_amount' else 1
+            require(len(hits) == expected, f'occurrence count mismatch: {pointer}')
     require(sample['label_statuses'] == dict(Counter(v['status'] for v in labels.values())), 'label status counts mismatch')
+    if family is not None:
+        policy = sample['augmentation']  # Already validated against the config.
+        statuses = {label['status'] for label in labels.values()}
+        require('unlabeled' not in statuses, 'D2 variant has unlabeled fields')
+        if policy['unreadable']:
+            require(not regions and 'present' not in statuses, 'D2 unreadable variant has evidence')
+            quality = 'unreadable'
+        elif policy['name'] == 'clean':
+            require('obscured' not in statuses, 'D2 clean variant has obscured fields')
+            quality = 'clean'
+        else:
+            quality = 'content-loss' if 'obscured' in statuses else 'bounded'
+        require(sample.get('quality') == quality, 'D2 quality mismatch')
     return gold
 
 
 def load_artifacts(root, manifest, *, full_set=False):
     """Smoke consumer. Explicit integrity checks also run under python -O.
 
-    Supports legacy D1 v1 and current D1 v2. Does not
+    Supports legacy D1 v1 and current D1 v2 plus the D2.2 smoke adapter. Does not
     certify pixel/text alignment, renderer provenance, or consumer approval.
     """
     root, manifest = root.resolve(), manifest.resolve()
