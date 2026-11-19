@@ -4,6 +4,9 @@ Owner: Data Engineer; consumer reviewer: AI2 (AI1 review data semantics).
 Trạng thái: **adapter ready for consumer review**, chưa hoàn tất training handoff.
 Đây là contract Python offline Data, không thay shared business JSON Schema.
 
+Integration snapshot mới sau sync develop: [verification 19/11/2026](reviews/data-label-adapter-integration-2026-11-19.md).
+Snapshot này tách DE self-run khỏi AI2 consumer acceptance và full training handoff.
+
 ## Input và cách dùng
 
 API cũ `generator.integration.load_artifacts(root, manifest, full_set=False)` vẫn
