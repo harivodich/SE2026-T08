@@ -22,6 +22,7 @@ class Settings:
     log_level: str = "INFO"
     host: str = "127.0.0.1"
     port: int = 8090
+    pipeline_manifest_id: str | None = None
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] = os.environ) -> Settings:
@@ -39,4 +40,5 @@ class Settings:
             log_level=env.get("LOG_LEVEL", "INFO"),
             host=env.get("VIETDOC_HOST", "127.0.0.1"),
             port=int(env.get("VIETDOC_PORT", "8090")),
+            pipeline_manifest_id=env.get("VIETDOC_PIPELINE_MANIFEST_ID") or None,
         )

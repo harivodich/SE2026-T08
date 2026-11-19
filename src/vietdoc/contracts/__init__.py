@@ -1,1 +1,1 @@
-"""Shared typed contracts; Backend owns implementation with consumer review."""
+"""Python OCR/page and compute adapters; neutral schemas live in specs/contracts."""

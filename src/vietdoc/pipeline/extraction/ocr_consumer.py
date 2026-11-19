@@ -61,8 +61,10 @@ def validate_match(page: dict, request: dict, match: dict) -> dict:
         required = set(source.review_flags) | ({"SOURCE_OCR_INCOMPLETE"} if source.unreadable_regions else set())
         if not required <= set(flags):
             raise ValueError("OCR diagnostics lost")
+        scope = request.get("context_block_ids", ())
         for candidate in match["candidate_block_ids"]:
-            if not isinstance(candidate, list) or not candidate or any(key not in blocks for key in candidate):
+            if (not isinstance(candidate, list) or not candidate or len(set(candidate)) != len(candidate)
+                    or any(key not in blocks or scope and key not in scope for key in candidate)):
                 raise ValueError("invalid candidate IDs")
         selected = []
         scope = request.get("context_block_ids", ())
@@ -81,6 +83,8 @@ def validate_match(page: dict, request: dict, match: dict) -> dict:
                 raise ValueError("missing or duplicate source")
             if norm(" ".join(block.text for block in selected)) != norm(request["raw_value"]):
                 raise ValueError("source text does not match raw value")
+            if [b.block_id for b in selected] not in match["candidate_block_ids"]:
+                raise ValueError("selected source missing from candidates")
         elif selected:
             raise ValueError("abstention cannot publish selected regions")
         score = selected[0].score if len(selected) == 1 else None
@@ -189,10 +193,22 @@ def evidence_checks(provider: ProviderEvidence, golden: dict) -> list[dict]:
 def consume_native(bundle: dict, provider: ProviderEvidence | None = None,
                    fixtures: Path | None = None) -> list[dict]:
     """Infer only from observed OCR/prepared metadata; never open annotation files."""
+    if not isinstance(bundle, dict) or not isinstance(bundle.get("samples"), list):
+        raise BaselineError("OCR_BATCH_INVALID")
     records = []
-    for sample in bundle["samples"]:
-        sid = sample["sample_id"]
+    aborted = False
+    for index, sample in enumerate(bundle["samples"]):
+        identity = dict(sample_index=index)
+        sid = sample.get("sample_id") if isinstance(sample, dict) else None
+        valid_id = isinstance(sid, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", sid)
+        if valid_id:
+            identity["sample_id"] = sid
+        if aborted:
+            records.append(dict(**identity, status="not_run", error="BATCH_ABORTED"))
+            continue
         try:
+            if not valid_id:
+                raise BaselineError("OCR_INPUT_INVALID")
             source = snapshot_page(sample["ocr"], sample["prepared"])
             if (not isinstance(sid, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", sid)
                     or sample["input_sha256"] != sample["expected_input_sha256"]
@@ -236,14 +252,25 @@ def consume_native(bundle: dict, provider: ProviderEvidence | None = None,
                     checks.append(dict(expected_status=example["status"],
                                        result="PASS" if actual["status"] == example["status"] else "FAIL", **actual))
             record["native_evidence_checks"] = checks
-            records.append(record)
+            records.append(dict(sample_index=index, **record))
         except BaselineError as error:
-            records.append(dict(sample_id=sid, status="failed", error=error.code))
+            records.append(dict(**identity, status="failed", error=error.code))
+            aborted = error.code == "OCR_PROVIDER_INVALID"
         except (KeyError, TypeError, ValueError):
-            records.append(dict(sample_id=sid, status="failed", error="OCR_INPUT_INVALID"))
+            records.append(dict(**identity, status="failed", error="OCR_INPUT_INVALID"))
         except OSError:
-            records.append(dict(sample_id=sid, status="failed", error="INPUT_STORAGE_UNAVAILABLE"))
+            records.append(dict(**identity, status="failed", error="INPUT_STORAGE_UNAVAILABLE"))
+        except Exception:
+            records.append(dict(**identity, status="failed", error="INTERNAL_ERROR"))
+            aborted = True
     return records
+
+
+def batch_summary(records: list[dict]) -> dict:
+    return dict(requested=len(records), ok=sum(r["status"] == "ok" for r in records),
+                failed=sum(r["status"] == "failed" for r in records),
+                not_run=sum(r["status"] == "not_run" for r in records),
+                incomplete=any(r["status"] == "not_run" for r in records))
 
 
 def _field_values(payload: dict):

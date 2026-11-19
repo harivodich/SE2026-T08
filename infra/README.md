@@ -16,14 +16,14 @@ Pin env/deps/images sau actual smoke; test CPU/GPU profile và readiness trướ
 | `.env.example` | Ports/limits/volume paths; không chứa secret |
 
 Service cài `.[serve]`, training cài `.[train]`; cả hai khai báo validator hiện đại trực tiếp.
-Target `test` cài thêm `.[test]`, kiểm `pip check` và chạy `scripts.ci.ai` gồm
+Target `test` cài thêm `.[test,ai1]` và NumPy2.2.6, kiểm `pip check` và chạy `scripts.ci.ai` gồm
 pipeline/ML/contracts/architecture/API cùng CI runner/gate regressions. Linux không
 cho unexpected skips; JUnit tại `/app/test-results/ai.xml` trong test image.
 CI scripts chỉ được COPY vào test stage. Data render tests chạy riêng với `.[data]`
 theo [Data README](../src/vietdoc/data/generator/README.md), không đưa pins
 Pillow/jsonschema của renderer vào AI image.
 
-Hiện trạng đã kiểm: service validate auth/limits/schema/hash/release rồi trả `503 AI_NOT_READY` vì chưa có pipeline OCR/extraction (M2.1/M2.3). `/health/ready` luôn 503 cho tới khi có pipeline; Docker healthcheck chỉ dùng `/health/live`. Java `AiClient` hiện gọi `/extract` với payload khác protocol nên chưa nối được với service này.
+CLI factory đã có concrete OCR/B0 pipeline. Minimal runtime image chỉ cài serve, chưa chứa native OCR deps/model release; thiếu cấu hình vẫn trả `503 AI_NOT_READY`. Chọn verified profile bằng `VIETDOC_PIPELINE_MANIFEST_ID`; native runtime/env và Java acceptance còn chờ theo [handoff W1–W4](../docs/team/AI-2/2026-11-16-w1-w4-handoff.md). Docker healthcheck chỉ dùng `/health/live`; fixture Linux test image không là native OCR evidence.
 
 Chạy trên Windows (PowerShell, từ repo root, Docker Desktop đang chạy):
 
@@ -54,4 +54,3 @@ Model/checkpoint: mount `VIETDOC_MODELS_DIR` (mặc định `artifacts/models`, 
 GPU (NVIDIA, Docker Desktop + WSL2): `docker compose -f infra/compose.ai.yaml --profile gpu run --rm ai-train-gpu`. Image `vietdoc-ai-train:cu126` (~11 GB) dùng torch `cu126` khớp driver 560.x; driver mới hơn có thể đặt `AI_TRAIN_TORCH_INDEX`. Đã kiểm trên RTX 4060 Laptop 8 GB: `cuda_available=true`, bf16 matmul+backward chạy. Chưa đo model thật, chưa có code training. Service inference vẫn CPU.
 
 Logs: JSON lines ra stdout (`ts/level/logger/event` + IDs/status/code/duration), không ghi document text, payload hay token; Docker `json-file` xoay vòng 3×10 MB.
-

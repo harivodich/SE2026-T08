@@ -13,7 +13,7 @@ def main() -> None:
     settings = Settings.from_env()
     configure_logging(settings.log_level)
     uvicorn.run(
-        "vietdoc.entrypoints.api.app:create_app",
+        "vietdoc.entrypoints.api.app:create_runtime_app",
         factory=True,
         host=settings.host,
         port=settings.port,

@@ -2,14 +2,11 @@
 
 ## Phạm vi đang chạy
 
-Workflow `VietDoc CI` kiểm Data/contracts và AI framework bằng fictional fixtures.
-Job AI được bổ sung trong follow-up PR3 ngày 01/11/2026, chưa có hosted run cho
-working tree này. Các tests không chứng minh OCR/model, Java–Python actual-provider,
-PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình.
+Workflow `VietDoc CI` kiểm Data/contracts, AI framework bằng fictional fixtures và Web/Java/package/assets/Docker smoke trên cùng run. Các tests chưa chứng minh OCR/model, Java–Python actual-provider, PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
 
 ```text
-PR → develop: workflow + schemas/gate tests + Data matrix + Data wheel + AI fixtures → ci-gate
-PR → main:    các kiểm tra trên + application release checks             → ci-gate
+PR → develop: workflow + schemas/gate tests + Data matrix + PDF verification + Data wheel + AI fixtures + Web/Java/package/assets + Docker smoke → ci-gate
+PR → main:    các kiểm tra trên + application release checks → ci-gate
 ```
 
 PR vào `develop`/`main`, push lên hai branch và manual dispatch đều được xử lý. Không paths filter, nên docs-only PR vẫn có required check. Push lên feature branch không chạy thêm một bản trùng với PR. Manual dispatch chỉ chẩn đoán, không thay check PR. Workflow dispatch cần workflow trên default branch mới được GitHub cho gọi; không tự merge lên main để kích hoạt nút này.
@@ -21,26 +18,27 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | workflow | workflow-validation | actionlint 1.7.12 và zizmor 1.31.1, tải binary upstream và kiểm SHA-256 trước khi chạy |
 | contracts | schemas-and-gate-tests | 7 schemas Draft 2020-12, fixtures positive/negative, registry local không tải refs; regression gate |
 | data | data-OS-pyVERSION | Ubuntu 24.04/Windows 2025 × Python 3.11/3.12, fresh Data install, tests và 20 samples |
+| data-pdf | data-pdf-verification | Ubuntu 24.04/Python 3.12, Poppler (`poppler-utils`), parse/render/extract 14 generated PDFs; bắt buộc, không cho skip |
 | package | data-package-smoke | Build wheel, kiểm fictional dictionary được package, cài wheel ngoài checkout, sinh 4 samples, ghi hash/source SHA |
-| ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test]`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
+| ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test,ai1]` + `numpy==2.2.6`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
+| test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
+| docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
-Không có runtime Java/AI job giả. Job `ai` chỉ kiểm framework/fixtures;
-actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness`
-còn thiếu `backend`, `postgres`, `parity`, `e2e`, `application-artifact` trên main.
-Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng
-vào `needs` và có kết quả success.
+`ci-gate` nhận kết quả `test` và `docker-smoke` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một trong hai đều chặn develop. Job `ai` chỉ kiểm framework/fixtures; actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness` còn thiếu `backend`, `postgres`, `parity`, `e2e`, `application-artifact` trên main. Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng vào `needs` và có kết quả success.
 
-Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
+Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Docker smoke phụ thuộc `test`; nếu `test` lỗi khiến Docker bị skip, gate báo cả hai trạng thái. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
 
 Data dùng pins Pillow 10.2.0/jsonschema 4.10.3 trong `pyproject.toml`; `.github/ci-constraints.txt` pin transitive/build tools cho CI. Schema/gate tests dùng environment riêng với `.github/contract-requirements.txt`, jsonschema 4.26.0 + referencing local registry. Validator 4.10.3 đã tái hiện lỗi nested URN `$ref` giữa các shared schemas; không đổi renderer dependency để xử lý lỗi đó.
 
-Portable Data tests mặc định skip đúng một canonical-byte test. Runner fail khi thiếu test file, mỗi module discover rỗng, tổng inventory nhỏ hơn baseline, hoặc có skip khác. Schema/gate tests không được skip. Mỗi suite ghi count/version/skip reason vào job summary.
+Portable Data matrix chạy `tests data --separate-pdf`: discover ít nhất 30 tests, chuyển đúng một PDF test sang job `data-pdf`, chạy 29 tests còn lại và chỉ cho skip canonical-byte test. Summary ghi rõ discovered/selected/delegated, không ghi PDF là đã pass trong matrix. Thiếu/đổi ID PDF test, module rỗng hoặc skip khác đều fail.
 
-AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test]`. Runner
+Job `data-pdf` cài Poppler từ Ubuntu repository rồi chạy `tests pdf`: kiểm đủ `pdfinfo`, `pdfimages`, `pdftoppm` trước discovery, chạy đúng PDF test hiện có và từ chối mọi skip/failure/error. Job là prerequisite của cả `ci-gate` và `release-readiness`; missing/failure/cancelled/skipped đều chặn gate. Không cần cài Poppler trên Windows. Local `tests data` không có cờ vẫn chạy toàn bộ 30 tests và từ chối PDF skip. Schema/gate tests không được skip. Mỗi suite ghi count/version/skip reason vào job summary.
+
+AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test,ai1]`. Runner
 `scripts.ci.ai` yêu cầu đủ mandatory files, mỗi test module được collect, inventory
-tối thiểu 473 tests, bắt buộc cả baseline/export/OCR-consumer modules, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
+tối thiểu 720 top-level tests theo candidate PR #4 sau khi đồng bộ develop D3.2 và thêm 8 probes CI; gồm 13 file AI2 và 7 file AI1, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
 kể cả symlink case. Local Windows có thể dùng explicit
 `--allow-windows-symlink-skip` cho đúng ca symlink và đúng lý do thiếu quyền;
 không dùng cờ này trên hosted job. Summary tách top-level tests và subtests;
@@ -57,6 +55,9 @@ python -m venv .venv
 .venv/bin/python -m pip install -c .github/ci-constraints.txt setuptools wheel
 .venv/bin/python -m pip install --no-build-isolation -c .github/ci-constraints.txt '.[data]'
 .venv/bin/python -m scripts.ci.checks tests data
+# Hoặc cùng cách chia suite với CI; PDF tools phải có ở môi trường chạy lệnh thứ hai:
+.venv/bin/python -m scripts.ci.checks tests data --separate-pdf
+.venv/bin/python -m scripts.ci.checks tests pdf
 .venv/bin/python -m scripts.ci.checks integration
 .venv/bin/python -m scripts.ci.checks package
 .venv/bin/python -m scripts.ci.lint
@@ -73,7 +74,7 @@ AI environment riêng (dùng directory mới thay vì ghi đè venv Data):
 
 ```sh
 python -m venv /tmp/vietdoc-ai-env
-/tmp/vietdoc-ai-env/bin/python -m pip install '.[serve,test]'
+/tmp/vietdoc-ai-env/bin/python -m pip install '.[serve,test,ai1]' numpy==2.2.6
 /tmp/vietdoc-ai-env/bin/python -m pip check
 export VIETDOC_CONTRACTS_DIR="$PWD/specs/contracts"
 /tmp/vietdoc-ai-env/bin/python -m scripts.ci.ai --junitxml=test-results/ai.xml

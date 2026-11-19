@@ -13,6 +13,7 @@ services:
     image: vietdoc-ai-service:dev
     environment:
       VIETDOC_SERVICE_TOKEN_FILE: /run/secrets/ai_service_token
+      VIETDOC_PIPELINE_MANIFEST_ID: ${VIETDOC_PIPELINE_MANIFEST_ID:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     secrets:
       - ai_service_token
