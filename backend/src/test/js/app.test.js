@@ -21,10 +21,12 @@ function deferred() {
 
 async function harness(routes = {}) {
   const listeners = new Map();
+  const intervals = [];
   const controls = {
     '[data-action="save"]': { disabled: true },
     '[data-action="rerun"]': { disabled: false },
     '[data-action="approve"]': { disabled: true },
+    '[data-message]': { hidden: true, textContent: "", className: "notice" },
   };
   const root = {
     innerHTML: "",
@@ -65,14 +67,14 @@ async function harness(routes = {}) {
     window: { confirm: routes.confirm ?? (() => true) },
     URL: { createObjectURL: blob => blob.url, revokeObjectURL() {} },
     crypto: { randomUUID: () => "00000000-0000-4000-8000-000000000001" },
-    structuredClone, AbortController, setInterval: () => 1, clearInterval() {}, setTimeout,
+    structuredClone, AbortController, setInterval: callback => intervals.push(callback), clearInterval() {}, setTimeout,
     Intl, Date, console,
   };
   runInNewContext(source, context, { filename: "app.js" });
   await new Promise(setImmediate);
   context.hooks.state.user = { id: "u", username: "operator" };
   return {
-    ...context.hooks, root, document, controls,
+    ...context.hooks, root, document, controls, intervals,
     async emit(type, target) {
       for (const listener of listeners.get(type) || [])
         await listener({ target, preventDefault() {} });
@@ -408,6 +410,56 @@ test("focused editor keeps its draft but disables Save when polling finds a remo
   assert.equal(app.state.remoteDocument.version, 2);
   assert.equal(app.controls['[data-action="save"]'].disabled, true);
   assert.equal(app.controls['[data-action="rerun"]'].disabled, true);
+});
+
+test("list polling failure shows an error without replacing the focused editor", async () => {
+  const original = doc("A", 1);
+  let listFails = false;
+  const app = await harness({
+    login: async () => ({ user: { id: "u", username: "operator" } }),
+    document: async () => original,
+    listDocuments: async () => {
+      if (listFails) throw new ApiError(503, "LIST_UNAVAILABLE");
+      return { items: [original] };
+    },
+  });
+  await app.login({ preventDefault() {} });
+  await app.openDocument("A");
+  const active = { dataset: { scalar: "total_amount" }, value: "200", matches: () => true };
+  app.root.contains = element => element === active;
+  app.document.activeElement = active;
+  app.updateBoundValue(active);
+  const html = app.root.innerHTML;
+  listFails = true;
+  await app.intervals[0]();
+  assert.equal(app.root.innerHTML, html);
+  assert.equal(app.document.activeElement, active);
+  assert.equal(app.state.payload.total_amount, "200");
+  assert.equal(app.controls['[data-action="save"]'].disabled, false);
+  assert.equal(app.controls['[data-message]'].hidden, false);
+  assert.equal(app.controls['[data-message]'].textContent, "API error (LIST_UNAVAILABLE)");
+});
+
+test("job polling failure preserves focus, while an expired session still exits", async () => {
+  const original = doc("A", 1);
+  original.job = { id: "job", state: "QUEUED" };
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    request: async () => { throw new ApiError(503, "JOB_UNAVAILABLE"); },
+  });
+  await app.openDocument("A");
+  const active = { matches: () => true };
+  app.root.contains = element => element === active;
+  app.document.activeElement = active;
+  const html = app.root.innerHTML;
+  await app.pollJob();
+  assert.equal(app.root.innerHTML, html);
+  assert.equal(app.document.activeElement, active);
+  assert.equal(app.controls['[data-message]'].textContent, "API error (JOB_UNAVAILABLE)");
+  app.apiFailure(new ApiError(401), { passive: true });
+  assert.equal(app.state.user, null);
+  assert.match(app.root.innerHTML, /Phiên đăng nhập đã hết hạn/);
 });
 
 for (const action of ["approve", "adopt", "rerun", "upload"]) {

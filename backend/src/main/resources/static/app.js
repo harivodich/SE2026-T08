@@ -91,7 +91,7 @@ function message(text, kind = "info") {
   render();
 }
 
-function apiFailure(error) {
+function apiFailure(error, { passive = false } = {}) {
   if (error instanceof ApiError && error.status === 401) {
     if (error.code === "INVALID_CREDENTIALS") {
       state.message = { text: error.message, kind: "error" };
@@ -107,7 +107,7 @@ function apiFailure(error) {
     ? `${error.message}${error.code ? ` (${error.code})` : ""}`
     : (error?.message || "Không thể kết nối đến VietDoc.");
   state.message = { text, kind: "error" };
-  render();
+  render({ passive });
 }
 
 function beginBusy(action) {
@@ -171,7 +171,7 @@ async function start() {
     if (session !== sessionGeneration) return;
     render();
     listTimer = setInterval(() => refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     }), 5000);
   } catch (error) {
     if (session !== sessionGeneration) return;
@@ -198,7 +198,7 @@ async function login(event) {
     await refreshDocuments();
     render();
     listTimer = setInterval(() => refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     }), 5000);
   } catch (error) { if (session === sessionGeneration) apiFailure(error); }
   finally { releaseBusy(owner); }
@@ -324,7 +324,7 @@ async function pollJob() {
       return;
     }
     render({ passive: true });
-  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error, { passive: true }); }
 }
 
 async function uploadAndProcess(event) {
@@ -535,6 +535,7 @@ function render({ passive = false } = {}) {
       document.activeElement?.matches?.("input, textarea, select")) {
     const notice = root.querySelector("[data-remote-notice]");
     if (notice) notice.hidden = !remoteChanged();
+    syncMessage();
     syncDraftControls();
     return;
   }
@@ -548,13 +549,16 @@ function render({ passive = false } = {}) {
     const scroll = root.querySelector(".review-scroll");
     if (scroll) scroll.scrollTop = scrollTop;
   }
-  if (state.message) {
-    const notice = root.querySelector("[data-message]");
-    if (notice) {
-      notice.textContent = state.message.text;
-      notice.className = `notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}`;
-    }
-  }
+  syncMessage();
+}
+
+function syncMessage() {
+  const notice = root.querySelector("[data-message]");
+  if (!notice) return;
+  notice.hidden = !state.message;
+  if (!state.message) return;
+  notice.textContent = state.message.text;
+  notice.className = `notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}`;
 }
 
 function renderLogin() {
@@ -591,7 +595,7 @@ function renderShell() {
       <div class="page-head"><div><div class="eyebrow">VietDoc / Review</div><h1>Chứng từ của bạn</h1><p class="subtitle">Tải lên, đối chiếu dữ liệu và duyệt trước khi xuất.</p>${renderModeBadge()}</div>
         ${selected ? `<button class="btn btn-secondary" data-action="reload">Tải lại</button>` : ""}
       </div>
-      ${state.message ? `<div class="notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}" data-message>${escapeHtml(state.message.text)}</div>` : ""}
+      <div class="notice" data-message role="alert" ${state.message ? "" : "hidden"}></div>
       <div class="layout">
         <aside>
           ${renderUpload()}
@@ -840,7 +844,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && state.user) {
     const session = sessionGeneration;
     refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     });
   }
 });
