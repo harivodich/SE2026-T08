@@ -27,6 +27,6 @@ Schema Draft 2020-12 ở đây là contract trung lập cho thiết kế đích.
 
 ## Backend adapter hiện có
 
-Java `ContractValidator` đọc các schema đóng gói ở `../../backend/src/main/resources/contracts/` và map payload sang typed DTO. Đây là bản adapter của contract trung lập tại thư mục này, không phải nguồn schema mới. Bất kỳ thay đổi contract nào phải kiểm parity hai bản và cùng fixtures trước khi bật HTTP compute; Java client hiện vẫn bị gate.
+Java `ContractValidator` đọc các schema đóng gói ở `../../backend/src/main/resources/contracts/` và map business payload sang typed DTO. Compute request/response/error được kiểm cấu trúc, correlation, provenance và asset declarations; `ComputeContractTest` so byte ba compute schema đóng gói với nguồn ở đây và dùng ba fixture chung. Đây là adapter của contract trung lập, không phải nguồn schema mới. Python typed adapter, actual HTTP, kiểm hash/size trên bytes, và promotion vẫn chờ increment riêng; Java client hiện vẫn bị gate.
 
 `../../tests/fixtures/contracts/business-validation.json` là vectors synthetic cho receipt/invoice: null, unknown/missing key, ngày không tồn tại, boundary 30/31 items, kiểu sai ở business fields/line items, JSON number thay decimal string, và `schema_version` thiếu/sai. `BusinessContractTest` của backend đọc trực tiếp vectors này; Data/AI-2 có thể dùng chung khi triển khai consumer. Các fixtures không chứng minh OCR/model quality.

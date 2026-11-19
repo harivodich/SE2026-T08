@@ -48,6 +48,7 @@
     },
     "input_sha256": {
       "type": "string",
+      "maxLength": 64,
       "pattern": "^[0-9a-f]{64}$"
     },
     "pipeline_manifest_id": {
