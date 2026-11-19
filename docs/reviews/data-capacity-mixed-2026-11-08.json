@@ -1,0 +1,292 @@
+{
+  "version": "data-capacity.v1",
+  "status": "complete",
+  "started_utc": "2026-11-08T13:42:46.783874+00:00",
+  "config": {
+    "rows": [
+      1,
+      3,
+      12,
+      30
+    ],
+    "base_limit": 40,
+    "repeats": 2,
+    "seed": 2101,
+    "stage_timeout_seconds": 300,
+    "attempted_bases_per_repeat": 20,
+    "total_attempted_bases": 40,
+    "renderer_config": {
+      "version": "d2.1.v1",
+      "rows": [
+        1,
+        3,
+        12,
+        30
+      ],
+      "font_sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280"
+    }
+  },
+  "generator_version": "d2.1.v1",
+  "dataset_scope": "synthetic integration/boundary QA; no split",
+  "config_sha256": "e962149adb612092ae5c661e763a78192363fb1a31f9483bb558cfc2d59f6f56",
+  "renderer_default_config_sha256": "877db00fb2a2089ac208ca92afeb9f342f0618d6e42eabcad2c82e78cc54785b",
+  "source_sha256": {
+    "data/__init__.py": "d7882a57230b3348e51bb9cc36239e30ab4b4dfb382c7e45e34b53dac3a84a64",
+    "data/adapters/__init__.py": "a06b37b14ecea0c999b154c479f7bb011a417effe715c8e6263ba454589b70d9",
+    "data/adapters/labels.py": "70f4f4c74f42a3b16bb9de24b06ab8e6a7f41f62f08cf8681298c12242da365a",
+    "data/benchmark.py": "80b2554b5f11f9da4976bdb3b87d86dc8acf4bc51ca2578d982c8495861abaaf",
+    "data/duplicate_review.py": "f40338bc7974af9507245295f39f3602d504ddd855e600e7e5ac3e5f62199412",
+    "data/generator/__init__.py": "3efacd0a9327a25390d03e04dd8a142dcbfb335445013d9cb74bdb050bcab977",
+    "data/generator/artifact_io.py": "3d68ab4e488e55f7bbdea61cfadbfff4113cecc5bb5eaf7cede9202273aa86f5",
+    "data/generator/augmentation.py": "22b59717c1d6bda7c69e6ac54da5aae0c108e0352877218145305d910c155e78",
+    "data/generator/d21.py": "e022ab20637068029f5d080636a25d916cd3ec8aea3efe7e6747f341697338ba",
+    "data/generator/d22.py": "aa137276eb5b681d5836e1b8869fdd6e3247fe9408c6df3ec6a7057a4395479e",
+    "data/generator/handoff.py": "f0cfc93e30bcf907549792ab17e894c1b880e5a20815485f429657d4b5aff39f",
+    "data/generator/integration.py": "f22f76e43467fe7b90ed98185e2ba56bcd6c88f6cbb5295e1129dfcb7647c52e",
+    "data/generator/pdf.py": "902f70a7f1d4f81080d38a589dc48ef924a148c42275cded19ce2d8a07169144",
+    "data/generator/render_environment.py": "9b97f768256c5de3fe15cceb1477a3ae16a8437b0e818215d24d320f0fe0f98a",
+    "data/generator/rendering.py": "829215531ce21b8be4b4924f9f4b40fa7d94c5f4712edd2c52c21ce7b09e2b77",
+    "data/generator/templates/__init__.py": "c1eb4603d30a405393efbd9bccc5a8f4b81cd35efaaf4187ff943c50ea6aaea3",
+    "data/generator/templates/families.py": "bf7d971a34546bdd3867d2b49d099001992ba8d806fa1bfda589866559f73b31",
+    "data/generator/values.py": "3938d9a90b8371871c963313c3df5e4cfa26010d7b116e69c3877db9295b1aec",
+    "data/manifest.py": "c9bc206cb3c939bc9283c7d400a66cdf708cd0252b5c492557400670fbab30c7",
+    "data/splits.py": "adad9a800731b08758fc4eb8f4505ac7366aca22380ed012ecabb1d19e043740",
+    "data/validation.py": "34e64745c232da5b7b867298f87d8b5c6d0803ab9a21f2c2980c3de9cbc4c055",
+    "evaluation/__init__.py": "1b28dcf8552c97b320a251cae0da1e3c3f1fa8b8cc8a5ebe38c5e222be5d0c7c",
+    "evaluation/__main__.py": "1909c22b59f2e7db030ee2aa3ccdd0c807a2ea91330f1525f8fcde8c22c52c79",
+    "evaluation/diagnostics.py": "7c562b4acb68ea73d5b71dba875a03307ceda98fef4b267292e7bcc393b4b510",
+    "evaluation/evidence.py": "216ce0240bc59c92a9479f8c002bf08d82074b95e6b128e65a8ece294b3e58d3",
+    "evaluation/extended.py": "d908f621928b55a7523efa6d4ccbd5c2d67196291afd53dce78e8b6e621df183",
+    "evaluation/gold_validation.py": "43a12285ddafe6afa6ae7abc30afe1dcdb87957d3ce760823659c4e99ef01c7b",
+    "evaluation/matching.py": "e229100ebde46fb6adcdb2b41a4e896550063440b6100aecfd171042b247cbe7",
+    "evaluation/policy.py": "cfc134579a161a3eaa7dfe339b1c707f6ffede6d8344296304b69615a3e813f0",
+    "evaluation/scalar_ocr.py": "4352c9246fd969e549afbbc58024b577c4e53d02a9d1d81bcf61cf5859620a3b",
+    "evaluation/tables.py": "dc6892e9fb86308eac7c9d77bc17ed3b0c2392bc126ebb5fb65c162761e48825"
+  },
+  "schema_sha256": "0948307b0c274d565fbe89b25d69f1692d0d6a4241352939f424ce0eba6b3ded",
+  "vocabulary_sha256": "d959b811a15911c2b66d3fa6f5570b2810c152e4f2ada91cc14635b6c2a10c5c",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "linux",
+    "pillow": "10.2.0",
+    "jsonschema": "4.10.3",
+    "freetype": "2.13.2",
+    "raqm": "0.10.1",
+    "harfbuzz": null,
+    "fribidi": null,
+    "zlib": "1.3",
+    "renderer_binaries": {
+      "_imaging.cpython-312-x86_64-linux-gnu.so": "c2f269ba7a93c583c5e6226646b9a47af9e0c431f8e85329375170ac0b384da1",
+      "_imagingft.cpython-312-x86_64-linux-gnu.so": "f0886dddea96d3e62fbad4daf57889b8c210fcd2bc09319cdd5473d6e3590942",
+      "libfreetype.so.6.20.1": "992dac80abe3a3854f3eb2668da4207c029664ceca5f122ddb46e2a8169e9499",
+      "libfribidi.so.0.4.0": "550020af7ff4f77e3f05500e71051b676ee76f530479c2a836dfe899fcaf8395",
+      "libharfbuzz.so.0.60830.0": "4562cfcfd18935324ba3ac74a944898b867ab87a56e925ab3e351ba773f1513e",
+      "libpng16.so.16.43.0": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8",
+      "libraqm.so.0.10.1": "9d72974146a848fef39f8341247509d1649ca33ac761a6e9f8feedac13b98bb5",
+      "libz.so.1.3": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+    }
+  },
+  "hardware": {
+    "cpu_model": "11th Gen Intel(R) Core(TM) i5-11400H @ 2.70GHz",
+    "logical_cpus": 12,
+    "machine": "x86_64",
+    "os": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+    "physical_memory_bytes": 16473440256,
+    "cpu_affinity_count": 12,
+    "visible_cgroup_v2_memory_max": null,
+    "visible_cgroup_v2_cpu_max": null
+  },
+  "measurement_scope": {
+    "render": "D2.1 build: values, render, encode, write and rejection probes",
+    "validate": "strict D2.1 replay including re-render and byte comparison",
+    "load": "D3.2 load_bundle including semantic gate and asset hashing",
+    "evaluate": "D3.2 core scalar/table/evidence with gold-copy synthetic payload; OCR absent",
+    "memory": "process lifetime peak RSS including imports and setup; not stage delta",
+    "cache": "OS caches uncontrolled; each stage in a fresh process; no warmup",
+    "disk": "recursive file sizes, before own stage result write; allocated bytes filesystem dependent"
+  },
+  "limitations": [
+    "No OCR/model/training/GPU measurement or quality claim",
+    "No D2.2 augmentation, family split or duplicate scan measurement",
+    "No final holdout input; no arbitrary input/config/model path accepted",
+    "AI2 hardware/model feasibility and Lead final budget remain pending"
+  ],
+  "runs": [
+    {
+      "index": 1,
+      "stages": [
+        {
+          "stage": "render",
+          "status": "ok",
+          "wall_seconds": 12.234160364000218,
+          "cpu_seconds": 12.218496221,
+          "process_peak_rss_bytes": 92205056,
+          "disk": {
+            "files": 112,
+            "logical_bytes": 4591716,
+            "allocated_bytes": 4845568
+          }
+        },
+        {
+          "stage": "validate",
+          "status": "ok",
+          "wall_seconds": 12.95414486799973,
+          "cpu_seconds": 12.943834298,
+          "process_peak_rss_bytes": 108457984,
+          "disk": {
+            "files": 113,
+            "logical_bytes": 4592710,
+            "allocated_bytes": 4849664
+          }
+        },
+        {
+          "stage": "load",
+          "status": "ok",
+          "wall_seconds": 1.3401825020000615,
+          "cpu_seconds": 1.3374082840000001,
+          "process_peak_rss_bytes": 53456896,
+          "disk": {
+            "files": 114,
+            "logical_bytes": 4593033,
+            "allocated_bytes": 4853760
+          }
+        },
+        {
+          "stage": "evaluate",
+          "status": "ok",
+          "wall_seconds": 5.85958855600029,
+          "cpu_seconds": 5.689614836,
+          "process_peak_rss_bytes": 58494976,
+          "disk": {
+            "files": 115,
+            "logical_bytes": 4593372,
+            "allocated_bytes": 4857856
+          }
+        }
+      ],
+      "manifest_sha256": "242e1462b8f49d53d0c26651fcaa8701161855f8ce283a5d79c29d1d41efeeff",
+      "accepted": 18,
+      "by_type": {
+        "receipt": 9,
+        "invoice": 9
+      },
+      "rejections": {
+        "rejected": [
+          {
+            "sample_id": "d21-receipt-overflow",
+            "document_type": "receipt",
+            "row_count": 30,
+            "status": "rejected",
+            "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+          },
+          {
+            "sample_id": "d21-invoice-overflow",
+            "document_type": "invoice",
+            "row_count": 30,
+            "status": "rejected",
+            "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+          }
+        ],
+        "excluded": [],
+        "accepted_count": 18,
+        "rejected_count": 2
+      },
+      "dataset_disk": {
+        "files": 110,
+        "logical_bytes": 4591160,
+        "allocated_bytes": 4837376
+      }
+    },
+    {
+      "index": 2,
+      "stages": [
+        {
+          "stage": "render",
+          "status": "ok",
+          "wall_seconds": 15.319949958999587,
+          "cpu_seconds": 15.063129168000001,
+          "process_peak_rss_bytes": 92102656,
+          "disk": {
+            "files": 112,
+            "logical_bytes": 4591716,
+            "allocated_bytes": 4845568
+          }
+        },
+        {
+          "stage": "validate",
+          "status": "ok",
+          "wall_seconds": 15.031545592999919,
+          "cpu_seconds": 14.821241581,
+          "process_peak_rss_bytes": 108187648,
+          "disk": {
+            "files": 113,
+            "logical_bytes": 4592716,
+            "allocated_bytes": 4849664
+          }
+        },
+        {
+          "stage": "load",
+          "status": "ok",
+          "wall_seconds": 1.4499922320001133,
+          "cpu_seconds": 1.4421006219999999,
+          "process_peak_rss_bytes": 54669312,
+          "disk": {
+            "files": 114,
+            "logical_bytes": 4593040,
+            "allocated_bytes": 4853760
+          }
+        },
+        {
+          "stage": "evaluate",
+          "status": "ok",
+          "wall_seconds": 4.106356188000063,
+          "cpu_seconds": 4.084425919,
+          "process_peak_rss_bytes": 59002880,
+          "disk": {
+            "files": 115,
+            "logical_bytes": 4593379,
+            "allocated_bytes": 4857856
+          }
+        }
+      ],
+      "manifest_sha256": "242e1462b8f49d53d0c26651fcaa8701161855f8ce283a5d79c29d1d41efeeff",
+      "accepted": 18,
+      "by_type": {
+        "receipt": 9,
+        "invoice": 9
+      },
+      "rejections": {
+        "rejected": [
+          {
+            "sample_id": "d21-receipt-overflow",
+            "document_type": "receipt",
+            "row_count": 30,
+            "status": "rejected",
+            "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+          },
+          {
+            "sample_id": "d21-invoice-overflow",
+            "document_type": "invoice",
+            "row_count": 30,
+            "status": "rejected",
+            "reason": "Clipping: Hàng hóa hư cấu mô tả dài Hàng hóa hư cấu mô tả dài: [45, 2602, 677, 2627]"
+          }
+        ],
+        "excluded": [],
+        "accepted_count": 18,
+        "rejected_count": 2
+      },
+      "dataset_disk": {
+        "files": 110,
+        "logical_bytes": 4591160,
+        "allocated_bytes": 4837376
+      }
+    }
+  ],
+  "finished_utc": "2026-11-08T13:44:02.687547+00:00",
+  "output_disk_before_summary_write": {
+    "files": 233,
+    "logical_bytes": 19800683,
+    "allocated_bytes": 20336640
+  }
+}
