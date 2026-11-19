@@ -5,12 +5,13 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import json
 from pathlib import Path
+import re
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from scripts.ci import checks
-from scripts.ci.gate import APPLICATION_CHECKS, CORE_CHECKS, evaluate, target_branch
+from scripts.ci.gate import APPLICATION_CHECKS, CORE_CHECKS, WEB_CHECKS, evaluate, target_branch
 
 
 def results(*names):
@@ -19,23 +20,23 @@ def results(*names):
 
 class CiGateTest(unittest.TestCase):
     def setUp(self):
-        self.develop = results(*CORE_CHECKS)
+        self.develop = results(*(CORE_CHECKS + WEB_CHECKS))
         self.develop['release-readiness'] = {'result': 'skipped'}
 
-    def test_increment_success_requires_all_core_jobs(self):
+    def test_increment_success_requires_all_core_and_web_jobs(self):
         self.assertEqual(evaluate('ci', 'develop', self.develop), [])
-        for name in CORE_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS:
             broken = copy.deepcopy(self.develop)
             del broken[name]
-            self.assertTrue(evaluate('ci', 'develop', broken), name)
+            self.assertIn(f'{name}: missing', evaluate('ci', 'develop', broken))
 
     def test_failure_cancel_skip_unknown_and_empty_never_pass(self):
-        for name in CORE_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS:
             for status in ('failure', 'cancelled', 'skipped', 'neutral', '', None):
                 with self.subTest(name=name, status=status):
                     broken = copy.deepcopy(self.develop)
                     broken[name] = {'result': status}
-                    self.assertTrue(evaluate('ci', 'develop', broken))
+                    self.assertIn(f'{name}: {status or "missing"}', evaluate('ci', 'develop', broken))
         self.assertTrue(evaluate('ci', 'develop', {}))
 
     def test_main_requires_successful_release_gate(self):
@@ -52,18 +53,33 @@ class CiGateTest(unittest.TestCase):
             self.assertIn(f'{name}: missing', failures)
 
     def test_all_application_checks_required_not_only_file_presence(self):
-        ready = results(*(CORE_CHECKS + APPLICATION_CHECKS))
+        ready = results(*(CORE_CHECKS + WEB_CHECKS + APPLICATION_CHECKS))
         self.assertEqual(evaluate('release', 'main', ready), [])
         for name in APPLICATION_CHECKS:
             for status in ('failure', 'cancelled', 'skipped'):
                 broken = copy.deepcopy(ready)
                 broken[name]['result'] = status
                 self.assertTrue(evaluate('release', 'main', broken))
+        for name in WEB_CHECKS:
+            broken = copy.deepcopy(ready)
+            del broken[name]
+            self.assertIn(f'{name}: missing', evaluate('release', 'main', broken))
         self.assertTrue(evaluate('release', 'develop', ready))
 
     def test_develop_skip_must_be_explicit(self):
         del self.develop['release-readiness']
         self.assertTrue(evaluate('ci', 'develop', self.develop))
+
+    def test_workflow_connects_web_jobs_to_required_gate(self):
+        source = (Path(__file__).resolve().parents[2] / '.github/workflows/ci.yml').read_text(encoding='utf-8')
+        headers = list(re.finditer(r'(?m)^  ([a-z][a-z0-9-]+):\s*$', source))
+        jobs = {match.group(1): source[match.end():headers[index + 1].start() if index + 1 < len(headers) else None]
+                for index, match in enumerate(headers)}
+        for name in WEB_CHECKS:
+            self.assertIn(name, jobs)
+            self.assertRegex(jobs['ci-gate'], rf'(?m)^    needs: \[[^\n]*\b{re.escape(name)}\b[^\n]*\]$')
+        self.assertRegex(jobs['docker-smoke'], r'(?m)^    needs: test$')
+        self.assertFalse((Path(__file__).resolve().parents[2] / '.github/workflows/web-backend.yml').exists())
 
     def test_ai_and_pdf_success_are_required_on_develop_and_main(self):
         for branch in ('develop', 'main'):
