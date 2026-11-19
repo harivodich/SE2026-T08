@@ -16,6 +16,11 @@ SUITES = (
     "tests/integration/api", "tests/unit/test_ci_gate.py", "tests/unit/test_ci_ai.py",
 )
 REQUIRED_FILES = (
+    "tests/unit/pipeline/test_evidence_adapter.py",
+    "tests/unit/pipeline/test_attempt_artifacts.py",
+    "tests/unit/pipeline/test_compute_pipeline.py",
+    "tests/unit/pipeline/test_composition.py",
+    "tests/integration/api/test_b0_http_process.py",
     "tests/unit/pipeline/test_ocr_consumer.py",
     "tests/unit/pipeline/test_ocr_input.py",
     "tests/unit/pipeline/test_baseline.py", "tests/unit/pipeline/test_baseline_export.py",

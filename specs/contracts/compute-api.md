@@ -1,6 +1,6 @@
 # Private compute API v1: Java ↔ Python
 
-Reference protocol v1. Python đã có endpoint boundary/fixtures, chưa pipeline OCR/extraction thật hoặc Java↔Python actual-provider acceptance. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
+Reference protocol v1. Python có endpoint boundary, concrete OCR/B0 pipeline và fixture process HTTP tests; Java↔Python actual-provider acceptance vẫn chưa đạt. Writer protocol: Backend; Python consumer/producer: AI-2; geometry reviewer: AI-1. Lead duyệt tại L1.2, shared fixture contract tests ở B1.2/M2.3.
 
 ## Transport và endpoints
 
@@ -27,6 +27,8 @@ và resource isolation cần cấu hình/verification riêng khi tích hợp.
 Metadata part hiện có cap 16 KiB; Python producer cap nesting 8 object/array containers,
 reject duplicate keys và malformed/decoder-limit errors bằng 422 INPUT_INVALID.
 Metadata v1 là flat object; Backend cần review policy producer này khi nối client.
+Python yêu cầu `job_id`, `run_id` và `attempt_id` là UUID dạng canonical lowercase
+có dấu gạch nối. Dạng khác trả 422 INPUT_INVALID trước khi cấp attempt directory.
 Storage I/O failures ở parse/read/cleanup được phân biệt với input invalid: 503
 AI_NOT_READY, retryable theo budget hiện có. Cleanup error không che primary input
 error đã xác định; unexpected programming failures vẫn INTERNAL_ERROR, không retry giả.

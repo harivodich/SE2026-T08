@@ -23,7 +23,7 @@ RUN pip install --no-deps . && rm -rf build src/*.egg-info
 ENV VIETDOC_CONTRACTS_DIR=/app/specs/contracts
 
 FROM base AS test
-RUN pip install ".[test]"
+RUN pip install ".[test,ai1]" numpy==2.2.6
 COPY tests ./tests
 COPY scripts/ci ./scripts/ci
 COPY docs/design/v1/examples ./docs/design/v1/examples
