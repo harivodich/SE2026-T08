@@ -27,6 +27,8 @@ và resource isolation cần cấu hình/verification riêng khi tích hợp.
 Metadata part hiện có cap 16 KiB; Python producer cap nesting 8 object/array containers,
 reject duplicate keys và malformed/decoder-limit errors bằng 422 INPUT_INVALID.
 Metadata v1 là flat object; Backend cần review policy producer này khi nối client.
+Python yêu cầu `job_id`, `run_id` và `attempt_id` là UUID dạng canonical lowercase
+có dấu gạch nối. Dạng khác trả 422 INPUT_INVALID trước khi cấp attempt directory.
 Storage I/O failures ở parse/read/cleanup được phân biệt với input invalid: 503
 AI_NOT_READY, retryable theo budget hiện có. Cleanup error không che primary input
 error đã xác định; unexpected programming failures vẫn INTERNAL_ERROR, không retry giả.

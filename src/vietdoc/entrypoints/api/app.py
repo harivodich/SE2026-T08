@@ -146,8 +146,7 @@ def _authorized(header: str | None, token: str) -> bool:
     return secrets.compare_digest(header[7:].encode(), token.encode())
 
 
-def _attempt_id(metadata: Any) -> str | None:
-    value = metadata.get("attempt_id") if isinstance(metadata, dict) else None
+def _canonical_uuid(value: object) -> str | None:
     try:
         return value if isinstance(value, str) and str(uuid.UUID(value)) == value else None
     except ValueError:
@@ -298,11 +297,15 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
                 meta = decode_metadata(metadata)
             except ValueError:
                 return fail(422, "INPUT_INVALID", "Request metadata is not valid JSON", False)
-            attempt_id = _attempt_id(meta)
+            attempt_id = _canonical_uuid(meta.get("attempt_id")) if isinstance(meta, dict) else None
             try:
                 contracts.validate(REQUEST_SCHEMA, meta)
             except ContractError as error:
                 return fail(422, "INPUT_INVALID", f"Request metadata invalid at {error.path}", False, attempt_id)
+            for field in ("job_id", "run_id", "attempt_id"):
+                if _canonical_uuid(meta[field]) is None:
+                    return fail(422, "INPUT_INVALID",
+                                f"Request metadata /{field} must be a canonical lowercase UUID", False, attempt_id)
             return meta, await upload.read(settings.max_input_bytes + 1)
 
         try:

@@ -106,6 +106,24 @@ def test_http_bytes_produce_actual_correlated_artifacts(server, kind, format):
     assert fetch(base + "/internal/v1/compute", multipart(meta, data))[0] == 503
 
 
+@pytest.mark.parametrize("field", ["job_id", "run_id", "attempt_id"])
+def test_http_rejects_noncanonical_uuid_without_creating_attempt(server, field):
+    base, root = server
+    with Image.new("RGB", (100, 100), "white") as image, BytesIO() as stream:
+        image.save(stream, format="PNG")
+        data = stream.getvalue()
+    meta = metadata(data)
+    meta[field] = "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA"
+    before = set((root / "attempts").iterdir())
+
+    code, response = fetch(base + "/internal/v1/compute", multipart(meta, data))
+
+    assert code == 422
+    assert response["code"] == "INPUT_INVALID"
+    assert response["attempt_id"] == (None if field == "attempt_id" else meta["attempt_id"])
+    assert set((root / "attempts").iterdir()) == before
+
+
 def test_http_failure_and_auth_do_not_poison_next_request(server):
     base, root = server
     bad = b"invalid image"
