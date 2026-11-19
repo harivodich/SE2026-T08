@@ -3,8 +3,9 @@
 ## Phạm vi đang chạy
 
 Workflow `VietDoc CI` kiểm Data/contracts và AI framework bằng fictional fixtures.
-Job AI được bổ sung trong follow-up PR3 ngày 01/11/2026, chưa có hosted run cho
-working tree này. Các tests không chứng minh OCR/model, Java–Python actual-provider,
+PR #4 đã có hosted run trên head cũ `354c9b9`: AI fixture job fail lúc collect vì
+thiếu NumPy/Pillow. Candidate mới cài profile kết hợp AI1/AI2 và cần hosted run
+trên head sau commit CI trước khi coi gate đạt. Các tests không chứng minh OCR/model, Java–Python actual-provider,
 PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình.
 
 ```text
@@ -23,7 +24,7 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | data | data-OS-pyVERSION | Ubuntu 24.04/Windows 2025 × Python 3.11/3.12, fresh Data install, tests và 20 samples |
 | data-pdf | data-pdf-verification | Ubuntu 24.04/Python 3.12, Poppler (`poppler-utils`), parse/render/extract 14 generated PDFs; bắt buộc, không cho skip |
 | package | data-package-smoke | Build wheel, kiểm fictional dictionary được package, cài wheel ngoài checkout, sinh 4 samples, ghi hash/source SHA |
-| ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test]`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
+| ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test,ai1]` + `numpy==2.2.6`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
@@ -41,9 +42,9 @@ Portable Data matrix chạy `tests data --separate-pdf`: discover ít nhất 30 
 
 Job `data-pdf` cài Poppler từ Ubuntu repository rồi chạy `tests pdf`: kiểm đủ `pdfinfo`, `pdfimages`, `pdftoppm` trước discovery, chạy đúng PDF test hiện có và từ chối mọi skip/failure/error. Job là prerequisite của cả `ci-gate` và `release-readiness`; missing/failure/cancelled/skipped đều chặn gate. Không cần cài Poppler trên Windows. Local `tests data` không có cờ vẫn chạy toàn bộ 30 tests và từ chối PDF skip. Schema/gate tests không được skip. Mỗi suite ghi count/version/skip reason vào job summary.
 
-AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test]`. Runner
+AI dùng môi trường riêng, không cài `.[data]` cùng `.[serve,test,ai1]`. Runner
 `scripts.ci.ai` yêu cầu đủ mandatory files, mỗi test module được collect, inventory
-tối thiểu 473 tests, bắt buộc cả baseline/export/OCR-consumer modules, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
+tối thiểu 720 top-level tests theo candidate PR #4 sau khi đồng bộ develop D3.2 và thêm 8 probes CI; gồm 13 file AI2 và 7 file AI1, không deselect/skip/xfail ngoài policy. Linux CI không cho skip,
 kể cả symlink case. Local Windows có thể dùng explicit
 `--allow-windows-symlink-skip` cho đúng ca symlink và đúng lý do thiếu quyền;
 không dùng cờ này trên hosted job. Summary tách top-level tests và subtests;
@@ -79,7 +80,7 @@ AI environment riêng (dùng directory mới thay vì ghi đè venv Data):
 
 ```sh
 python -m venv /tmp/vietdoc-ai-env
-/tmp/vietdoc-ai-env/bin/python -m pip install '.[serve,test]'
+/tmp/vietdoc-ai-env/bin/python -m pip install '.[serve,test,ai1]' numpy==2.2.6
 /tmp/vietdoc-ai-env/bin/python -m pip check
 export VIETDOC_CONTRACTS_DIR="$PWD/specs/contracts"
 /tmp/vietdoc-ai-env/bin/python -m scripts.ci.ai --junitxml=test-results/ai.xml

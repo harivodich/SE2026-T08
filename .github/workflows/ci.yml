@@ -57,8 +57,8 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
-      - name: Fresh install the isolated serve and test environment
-        run: python -m pip install ".[serve,test]"
+      - name: Fresh install the combined AI1 and AI2 fixture environment
+        run: python -m pip install ".[serve,test,ai1]" numpy==2.2.6
       - name: Check AI dependency consistency
         run: python -m pip check
       - name: Run AI suites with inventory and strict skip policy
