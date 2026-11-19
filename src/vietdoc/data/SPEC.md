@@ -11,6 +11,8 @@ Generator/adapters/manifest.py/validation.py/splits.py; assets lớn ở dataset
 `benchmark.py`: bounded local D2.1 render/strict validate/consumer load/evaluate
 cost measurements; xem [BENCHMARK.md](BENCHMARK.md). Không nhận final holdout,
 không tăng base-limit trên 40, không inference hoặc tự approve capacity.
+Measurements chỉ trên Linux Data environment; import/guard tests portable,
+unsupported runtime fail rõ và không tạo measurements giả.
 
 ## Ranh giới và dữ liệu
 

@@ -1,6 +1,6 @@
 # Bounded capacity benchmark
 
-Chạy từ repository root trong Data environment đã pin (`Pillow==10.2.0`,
+Benchmark thật chỉ hỗ trợ Linux. Chạy từ repository root trong Data environment đã pin (`Pillow==10.2.0`,
 `jsonschema==4.10.3` và font đúng `d21.json`), không cài thêm dịch vụ/model:
 
 ```bash
@@ -11,6 +11,17 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m vietdoc.data.benchmark \
 Output phải chưa tồn tại. CLI không nhận existing dataset, final manifest, model
 hoặc arbitrary generator config. D2.1 là synthetic integration/boundary QA, không
 có split final. Không gọi D2.2 builder vì builder đó sinh cả family gán final.
+
+Module import và guard tests chạy được trên Windows; không cần package `resource`.
+Linux font/hardware probes chỉ chạy trong measurement environment; worker chỉ
+import `resource` sau khi kiểm platform. Runtime parent/worker trên platform khác
+báo lỗi rõ trước measurements/output mới, không tạo số RAM/RSS thay thế.
+Tests dùng environment fixture cho output/failure accounting, không dùng fixture
+đó làm performance evidence. Bounds, no-overwrite và stop-after-failure vẫn được
+kiểm bằng logic parent/worker thật.
+
+Portability fix, fresh Linux smoke và giới hạn CI ở
+[verification 19/11/2026](../../../docs/reviews/data-benchmark-portability-2026-11-19.md).
 
 Workload mỗi lượt: `4 * số row profiles + 4` attempted bases (hai loại, hai layout;
 thêm hai missing-total và hai overflow probes). Rejections được giữ nguyên.
