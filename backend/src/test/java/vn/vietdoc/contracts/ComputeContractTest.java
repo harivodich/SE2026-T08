@@ -64,6 +64,41 @@ class ComputeContractTest {
   }
 
   @Test
+  void computeNumbersUseSchemaValueEquality() {
+    request.put("contract_version", 1.0);
+    request.put("remaining_budget_ms", 1000.0);
+    response.put("contract_version", 1.0);
+    error.put("contract_version", 1.0);
+    validator.computeRequest(request);
+    validator.computeResponse(request, response);
+    validator.computeError(request, error);
+
+    request.put("remaining_budget_ms", 1000.5);
+    assertInvalid(() -> validator.computeRequest(request));
+    request.put("remaining_budget_ms", "1000");
+    assertInvalid(() -> validator.computeRequest(request));
+  }
+
+  @Test
+  void computeDigestsRejectTrailingLineBreaks() {
+    for (String ending : List.of("\r", "\n")) {
+      String invalidHash = "0".repeat(64) + ending;
+      ObjectNode badRequest = request.deepCopy();
+      badRequest.put("input_sha256", invalidHash);
+      assertInvalid(() -> validator.computeRequest(badRequest));
+
+      ObjectNode badPage = response.deepCopy();
+      ((ObjectNode) badPage.path("canonical_page")).put("sha256", invalidHash);
+      ((ObjectNode) badPage.path("artifacts").get(0)).put("sha256", invalidHash);
+      assertInvalid(() -> validator.computeResponse(request, badPage));
+
+      ObjectNode badArtifact = response.deepCopy();
+      ((ObjectNode) badArtifact.path("artifacts").get(1)).put("sha256", invalidHash);
+      assertInvalid(() -> validator.computeResponse(request, badArtifact));
+    }
+  }
+
+  @Test
   void responseRejectsCorrelationProvenanceGeometryAndDecimalViolations() {
     ObjectNode wrongAttempt = response.deepCopy();
     wrongAttempt.put("attempt_id", "44444444-4444-4444-8444-444444444444");

@@ -103,6 +103,26 @@ class SharedSchemasTest(unittest.TestCase):
         self.validators['compute-request'].validate(invoice)
         self.invalid('compute-request', dict(invoice, schema_version='receipt.v1'))
 
+    def test_compute_numeric_and_digest_parity_vectors(self):
+        request = dict(self.fixture('compute-request'), contract_version=1.0,
+                       remaining_budget_ms=1000.0)
+        self.validators['compute-request'].validate(request)
+        for name in ('compute-response', 'compute-error'):
+            self.validators[name].validate(dict(self.fixture(name), contract_version=1.0))
+        for budget in (1000.5, '1000'):
+            self.invalid('compute-request', dict(request, remaining_budget_ms=budget))
+
+        for ending in ('\r', '\n'):
+            invalid_hash = '0' * 64 + ending
+            self.invalid('compute-request', dict(request, input_sha256=invalid_hash))
+            response = self.fixture('compute-response')
+            response['canonical_page']['sha256'] = invalid_hash
+            response['artifacts'][0]['sha256'] = invalid_hash
+            self.invalid('compute-response', response)
+            response = self.fixture('compute-response')
+            response['artifacts'][1]['sha256'] = invalid_hash
+            self.invalid('compute-response', response)
+
     def test_result_and_export_type_must_match_payload(self):
         for name in ('extraction-result', 'export'):
             receipt = self.example(name)

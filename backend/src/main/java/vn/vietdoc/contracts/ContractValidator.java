@@ -358,7 +358,7 @@ public class ContractValidator {
       } else valid = isType(value, types.asText());
       if (!valid) invalid(path, "Sai kiểu dữ liệu; tiền và số lượng phải là chuỗi hoặc null.");
     }
-    if (schema.has("const") && !schema.get("const").equals(value))
+    if (schema.has("const") && !matchesLiteral(schema.get("const"), value))
       invalid(path, "Giá trị cố định không khớp.");
     if (schema.has("enum")) {
       boolean found = false;
@@ -416,13 +416,21 @@ public class ContractValidator {
     }
   }
 
+  private boolean matchesLiteral(JsonNode expected, JsonNode value) {
+    if (expected.isNumber() && value.isNumber())
+      return Double.isFinite(value.asDouble())
+          && expected.decimalValue().compareTo(value.decimalValue()) == 0;
+    return expected.equals(value);
+  }
+
   private boolean isType(JsonNode value, String type) {
     return switch (type) {
       case "object" -> value.isObject();
       case "array" -> value.isArray();
       case "string" -> value.isTextual();
       case "number" -> value.isNumber();
-      case "integer" -> value.isIntegralNumber();
+      case "integer" -> value.isNumber() && Double.isFinite(value.asDouble())
+          && value.decimalValue().stripTrailingZeros().scale() <= 0;
       case "null" -> value.isNull();
       case "boolean" -> value.isBoolean();
       default -> throw new IllegalStateException("Unsupported schema type");
