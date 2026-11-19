@@ -2,15 +2,11 @@
 
 ## Phạm vi đang chạy
 
-Workflow `VietDoc CI` kiểm Data/contracts và AI framework bằng fictional fixtures.
-PR #4 đã có hosted run trên head cũ `354c9b9`: AI fixture job fail lúc collect vì
-thiếu NumPy/Pillow. Candidate mới cài profile kết hợp AI1/AI2 và cần hosted run
-trên head sau commit CI trước khi coi gate đạt. Các tests không chứng minh OCR/model, Java–Python actual-provider,
-PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình.
+Workflow `VietDoc CI` kiểm Data/contracts, AI framework bằng fictional fixtures và Web/Java/package/assets/Docker smoke trên cùng run. Các tests chưa chứng minh OCR/model, Java–Python actual-provider, PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
 
 ```text
-PR → develop: workflow + schemas/gate tests + Data matrix + PDF verification + Data wheel + AI fixtures → ci-gate
-PR → main:    các kiểm tra trên + application release checks             → ci-gate
+PR → develop: workflow + schemas/gate tests + Data matrix + PDF verification + Data wheel + AI fixtures + Web/Java/package/assets + Docker smoke → ci-gate
+PR → main:    các kiểm tra trên + application release checks → ci-gate
 ```
 
 PR vào `develop`/`main`, push lên hai branch và manual dispatch đều được xử lý. Không paths filter, nên docs-only PR vẫn có required check. Push lên feature branch không chạy thêm một bản trùng với PR. Manual dispatch chỉ chẩn đoán, không thay check PR. Workflow dispatch cần workflow trên default branch mới được GitHub cho gọi; không tự merge lên main để kích hoạt nút này.
@@ -25,16 +21,14 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | data-pdf | data-pdf-verification | Ubuntu 24.04/Python 3.12, Poppler (`poppler-utils`), parse/render/extract 14 generated PDFs; bắt buộc, không cho skip |
 | package | data-package-smoke | Build wheel, kiểm fictional dictionary được package, cài wheel ngoài checkout, sinh 4 samples, ghi hash/source SHA |
 | ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test,ai1]` + `numpy==2.2.6`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
+| test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
+| docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
-Không có runtime Java/AI job giả. Job `ai` chỉ kiểm framework/fixtures;
-actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness`
-còn thiếu `backend`, `postgres`, `parity`, `e2e`, `application-artifact` trên main.
-Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng
-vào `needs` và có kết quả success.
+`ci-gate` nhận kết quả `test` và `docker-smoke` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một trong hai đều chặn develop. Job `ai` chỉ kiểm framework/fixtures; actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness` còn thiếu `backend`, `postgres`, `parity`, `e2e`, `application-artifact` trên main. Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng vào `needs` và có kết quả success.
 
-Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
+Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Docker smoke phụ thuộc `test`; nếu `test` lỗi khiến Docker bị skip, gate báo cả hai trạng thái. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
 
 Data dùng pins Pillow 10.2.0/jsonschema 4.10.3 trong `pyproject.toml`; `.github/ci-constraints.txt` pin transitive/build tools cho CI. Schema/gate tests dùng environment riêng với `.github/contract-requirements.txt`, jsonschema 4.26.0 + referencing local registry. Validator 4.10.3 đã tái hiện lỗi nested URN `$ref` giữa các shared schemas; không đổi renderer dependency để xử lý lỗi đó.
 

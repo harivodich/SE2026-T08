@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 CORE_CHECKS = ('workflow', 'contracts', 'data', 'data-pdf', 'package', 'ai')
+WEB_CHECKS = ('test', 'docker-smoke')
 APPLICATION_CHECKS = ('backend', 'postgres', 'parity', 'e2e', 'application-artifact')
 
 
@@ -38,10 +39,10 @@ def evaluate(mode: str, branch: str, needs: dict) -> list[str]:
     if mode == 'release':
         if branch != 'main':
             return ['Release evaluation is allowed only for a main candidate']
-        return failed_checks(needs, CORE_CHECKS + APPLICATION_CHECKS)
+        return failed_checks(needs, CORE_CHECKS + WEB_CHECKS + APPLICATION_CHECKS)
     if mode != 'ci':
         raise ValueError(f'Unknown gate: {mode}')
-    required = CORE_CHECKS + (('release-readiness',) if branch == 'main' else ())
+    required = CORE_CHECKS + WEB_CHECKS + (('release-readiness',) if branch == 'main' else ())
     failures = failed_checks(needs, required)
     if branch == 'develop':
         release = needs.get('release-readiness')
@@ -63,7 +64,7 @@ def main() -> int:
     lines = [f'{args.mode} gate on {branch}: {"FAIL" if failures else "PASS"}']
     lines.extend(f'- {failure}' for failure in failures)
     if args.mode == 'ci' and branch == 'develop' and not failures:
-        lines.append('Data/contracts/AI fixture increment verified; this is not application release readiness.')
+        lines.append('Data/contracts/AI fixtures and Web/Java smoke verified; this is not application release readiness.')
     if args.mode == 'release' and failures:
         lines.append('Wire executable application jobs into release-readiness.needs before releasing.')
     output = '\n'.join(lines) + '\n'
