@@ -21,6 +21,7 @@ documents/jobs/review Python subfolders legacy; Java domain tests backend.
 [Scope](../../specs/scope.md), [structure](../../docs/source-structure.md), [architecture](../../docs/architecture.md).
 - [documents](documents/SPEC.md)
 - [jobs](jobs/SPEC.md)
+- [ml](ml/SPEC.md)
 - [pipeline](pipeline/SPEC.md)
 - [review](review/SPEC.md)
 

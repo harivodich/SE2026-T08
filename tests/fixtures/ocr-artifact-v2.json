@@ -1,0 +1,49 @@
+{
+  "purpose": "Proposed OCR v2 consumer golden cases; fictional contract data, not recognition gold or consumer acceptance",
+  "prepared_page": {
+    "page": 0,
+    "canonical": {"width": 100, "height": 100, "color_order": "RGB", "dtype": "uint8"},
+    "processed": {"width": 100, "height": 100, "color_order": "RGB", "dtype": "uint8"},
+    "preprocess_version": "fictional.v1", "geometry_status": "available",
+    "inverse_transform": [[1,0,0],[0,1,0],[0,0,1]], "geometry_reason": null
+  },
+  "cases": [
+    {
+      "case_id": "mixed-empty-whitespace",
+      "provider": {
+        "rec_texts": ["Có chữ", "", " \t ", "80.000"],
+        "rec_polys": [[[10,10],[30,10],[30,20],[10,20]], [[40,10],[50,10],[50,20],[40,20]], [[60,10],[70,10],[70,20],[60,20]], [[10,40],[40,40],[40,50],[10,50]]],
+        "rec_scores": [0.9,0,null,0.8]
+      },
+      "expected": {
+        "artifact_version": 2, "page": 0, "width": 100, "height": 100, "ocr_version": "fictional.ocr.v2",
+        "blocks": [
+          {"block_id": "p0-b0001", "text": "Có chữ", "quad": [[0.1,0.1],[0.3,0.1],[0.3,0.2],[0.1,0.2]], "score": 0.9, "geometry_reason": null},
+          {"block_id": "p0-b0004", "text": "80.000", "quad": [[0.1,0.4],[0.4,0.4],[0.4,0.5],[0.1,0.5]], "score": 0.8, "geometry_reason": null}
+        ],
+        "unreadable_regions": [
+          {"region_id": "p0-b0002", "quad": [[0.4,0.1],[0.5,0.1],[0.5,0.2],[0.4,0.2]], "score": 0, "geometry_reason": null, "reason": "EMPTY_RECOGNITION"},
+          {"region_id": "p0-b0003", "quad": [[0.6,0.1],[0.7,0.1],[0.7,0.2],[0.6,0.2]], "score": null, "geometry_reason": null, "reason": "EMPTY_RECOGNITION"}
+        ],
+        "recognition_status": "partial", "review_flags": ["OCR_UNREADABLE_REGIONS"]
+      }
+    },
+    {
+      "case_id": "all-unreadable",
+      "provider": {"rec_texts": [""], "rec_polys": [[[10,10],[30,10],[30,20],[10,20]]], "rec_scores": [0]},
+      "expected": {
+        "artifact_version": 2, "page": 0, "width": 100, "height": 100, "ocr_version": "fictional.ocr.v2", "blocks": [],
+        "unreadable_regions": [{"region_id": "p0-b0001", "quad": [[0.1,0.1],[0.3,0.1],[0.3,0.2],[0.1,0.2]], "score": 0, "geometry_reason": null, "reason": "EMPTY_RECOGNITION"}],
+        "recognition_status": "unreadable", "review_flags": ["OCR_UNREADABLE_REGIONS"]
+      }
+    },
+    {
+      "case_id": "blank-no-detections",
+      "provider": {"rec_texts": [], "rec_polys": [], "rec_scores": []},
+      "expected": {
+        "artifact_version": 2, "page": 0, "width": 100, "height": 100, "ocr_version": "fictional.ocr.v2", "blocks": [],
+        "unreadable_regions": [], "recognition_status": "complete", "review_flags": []
+      }
+    }
+  ]
+}
