@@ -52,6 +52,7 @@ let autosaveTimer;
 let autosaveFlight = null;
 let editGeneration = 0;
 let autosaveBlocked = false;
+let pendingReviewReason = false;
 const AUTOSAVE_DELAY_MS = 700;
 const api = () => new ApiClient();
 async function refreshCsrf() {
@@ -65,9 +66,15 @@ const remoteChanged = () => !!(state.remoteDocument && state.editorBase &&
   (state.remoteDocument.head_revision_id !== state.editorBase.id ||
    state.remoteDocument.version !== state.editorBase.version));
 
+function isNewerRemote(document) {
+  return state.editorBase && document.version > state.editorBase.version &&
+    (!state.remoteDocument || document.version > state.remoteDocument.version);
+}
+
 function setEditorDocument(document) {
   cancelAutosave();
   autosaveBlocked = false;
+  pendingReviewReason = false;
   state.document = document;
   state.editorBase = document.head ? {
     id: document.head_revision_id, version: document.version,
@@ -97,6 +104,10 @@ function scheduleAutosave() {
   }, AUTOSAVE_DELAY_MS);
 }
 
+function reviewSaveReason() {
+  return state.reviewReason.trim() || "Đã chỉnh sửa sau khi đối chiếu ảnh nguồn";
+}
+
 function reviewSaveBody() {
   const payload = toBusinessPayload(state.document.document_type, currentPayload());
   const reviewedPaths = [...state.changedPaths];
@@ -111,7 +122,7 @@ function reviewSaveBody() {
     base_revision_id: state.editorBase.id,
     expected_document_version: state.editorBase.version,
     payload,
-    reason: state.reviewReason.trim() || "Đã chỉnh sửa sau khi đối chiếu ảnh nguồn",
+    reason: reviewSaveReason(),
     row_ids: rowIds,
     reviewed_paths: [...new Set(reviewedPaths)],
   };
@@ -122,13 +133,16 @@ async function autosaveReview() {
       remoteChanged() || autosaveBlocked) return;
   const session = sessionGeneration, navigation = navigationGeneration, id = state.document.id;
   const generation = editGeneration;
+  const body = reviewSaveBody();
   const flight = {};
   autosaveFlight = flight;
-  const body = reviewSaveBody();
+  let reasonChanged = false;
   syncDraftControls();
   try {
     const updated = await api().save(id, body);
     if (!currentView(session, navigation, id) || autosaveFlight !== flight) return;
+    const newerRemote = state.remoteDocument?.version > updated.version ? state.remoteDocument : null;
+    reasonChanged = reviewSaveReason() !== body.reason;
     if (generation === editGeneration) {
       setEditorDocument(updated);
       state.message = { text: "Bản nháp đã được lưu tự động.", kind: "success" };
@@ -139,8 +153,9 @@ async function autosaveReview() {
         id: updated.head_revision_id, version: updated.version,
         payload: copy(updated.head.payload),
       };
-      state.remoteDocument = null;
     }
+    state.remoteDocument = newerRemote;
+    pendingReviewReason = reasonChanged;
     render({ passive: true });
     void api().revisions(id).then((revisions) => {
       if (currentView(session, navigation, id) && state.editorBase?.version === updated.version) {
@@ -154,13 +169,13 @@ async function autosaveReview() {
       autosaveBlocked = true;
       cancelAutosave();
       state.message = { text: "Bản nháp trên máy chưa được lưu vì chứng từ đã thay đổi ở nơi khác. Hãy đối chiếu và tải lại trước khi sửa tiếp.", kind: "error" };
-      render();
-    } else apiFailure(error);
+      render({ passive: true });
+    } else apiFailure(error, { passive: true });
   } finally {
     if (autosaveFlight === flight) {
       autosaveFlight = null;
       syncDraftControls();
-      if (currentView(session, navigation, id) && generation !== editGeneration &&
+      if (currentView(session, navigation, id) && (generation !== editGeneration || reasonChanged) &&
           !autosaveTimer && !autosaveBlocked && hasUnsavedReview()) scheduleAutosave();
     }
   }
@@ -182,7 +197,7 @@ function message(text, kind = "info") {
   render();
 }
 
-function apiFailure(error) {
+function apiFailure(error, { passive = false } = {}) {
   if (error instanceof ApiError && error.status === 401) {
     if (error.code === "INVALID_CREDENTIALS") {
       state.message = { text: error.message, kind: "error" };
@@ -198,7 +213,7 @@ function apiFailure(error) {
     ? `${error.message}${error.code ? ` (${error.code})` : ""}`
     : (error?.message || "Không thể kết nối đến VietDoc.");
   state.message = { text, kind: "error" };
-  render();
+  render({ passive });
 }
 
 function beginBusy(action) {
@@ -221,6 +236,7 @@ function clearSession() {
   cancelAutosave();
   autosaveFlight = null;
   autosaveBlocked = false;
+  pendingReviewReason = false;
   busyOwner = 0;
   busyGeneration++;
   sessionGeneration++;
@@ -265,7 +281,7 @@ async function start() {
     if (session !== sessionGeneration) return;
     render();
     listTimer = setInterval(() => refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     }), 5000);
   } catch (error) {
     if (session !== sessionGeneration) return;
@@ -292,7 +308,7 @@ async function login(event) {
     await refreshDocuments();
     render();
     listTimer = setInterval(() => refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     }), 5000);
   } catch (error) { if (session === sessionGeneration) apiFailure(error); }
   finally { releaseBusy(owner); }
@@ -322,7 +338,7 @@ async function refreshDocuments() {
   state.documents = page.items || [];
   if (state.selectedId) {
     const updated = state.documents.find((item) => item.id === state.selectedId);
-    if (updated && state.editorBase && updated.version > state.editorBase.version)
+    if (updated && isNewerRemote(updated))
       state.remoteDocument = updated;
     else if (updated && !state.editorBase && updated.head && state.document) {
       const id = state.selectedId, navigation = navigationGeneration;
@@ -345,8 +361,7 @@ async function refreshDocuments() {
 async function openDocument(id, { force = false, transferFrom = null } = {}) {
   if (!force && state.selectedId === id && state.document) return;
   if (state.busy && state.busyAction !== "open" && transferFrom !== busyOwner) return;
-  if (state.selectedId && state.selectedId !== id &&
-      (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
+  if (state.selectedId && state.selectedId !== id && hasUnsavedReview() &&
       !window.confirm("Bạn có thay đổi chưa lưu. Mở chứng từ khác sẽ bỏ các thay đổi này. Tiếp tục?")) return;
   const session = sessionGeneration;
   const navigation = ++navigationGeneration;
@@ -410,7 +425,7 @@ async function pollJob() {
       const changed = await api().document(id);
       if (!currentView(session, navigation, id) || state.document?.job?.id !== job.id) return;
       if (!state.editorBase && changed.head) setEditorDocument(changed);
-      else if (state.editorBase && changed.version > state.editorBase.version)
+      else if (isNewerRemote(changed))
         state.remoteDocument = changed;
       else state.document.job = changed.job;
       state.revisions = revisions.items || [];
@@ -420,7 +435,7 @@ async function pollJob() {
       return;
     }
     render({ passive: true });
-  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error); }
+  } catch (error) { if (currentView(session, navigation, id)) apiFailure(error, { passive: true }); }
 }
 
 async function uploadAndProcess(event) {
@@ -468,7 +483,7 @@ async function rerun() {
 async function saveReview() {
   const document = state.document;
   if (!document?.head || state.busy || autosaveFlight || remoteChanged() || autosaveBlocked ||
-      (!isDirty() && !state.changedPaths.size && !state.changedItemFields.size)) return;
+      !hasUnsavedReview()) return;
   const session = sessionGeneration, navigation = navigationGeneration;
   const id = document.id;
   cancelAutosave();
@@ -490,7 +505,7 @@ async function saveReview() {
 async function adoptCandidate(runId) {
   const document = state.document;
   if (!document?.head) return;
-  if (state.busy || autosaveFlight || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size)
+  if (state.busy || autosaveFlight || remoteChanged() || hasUnsavedReview())
     return message("Hãy lưu hoặc tải lại thay đổi chưa lưu trước khi áp dụng candidate.", "error");
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const owner = beginBusy("adopt");
@@ -514,8 +529,7 @@ async function adoptCandidate(runId) {
 
 async function approve() {
   const document = state.document;
-  if (!document?.head || state.busy || autosaveFlight || remoteChanged() || isDirty() ||
-      state.changedPaths.size || state.changedItemFields.size) return;
+  if (!document?.head || state.busy || autosaveFlight || remoteChanged() || hasUnsavedReview()) return;
   const session = sessionGeneration, navigation = navigationGeneration, id = document.id;
   const owner = beginBusy("approve");
   try {
@@ -571,7 +585,7 @@ function isDirty() {
 }
 
 function hasUnsavedReview() {
-  return isDirty() || state.changedPaths.size > 0 || state.changedItemFields.size > 0;
+  return pendingReviewReason || isDirty() || state.changedPaths.size > 0 || state.changedItemFields.size > 0;
 }
 
 function stableStringify(value) {
@@ -583,12 +597,15 @@ function stableStringify(value) {
 }
 
 function updateBoundValue(target) {
+  const value = target.value === "" ? null : target.value;
   if (target.dataset.scalar) {
-    state.payload[target.dataset.scalar] = target.value === "" ? null : target.value;
+    if (state.payload[target.dataset.scalar] === value) return;
+    state.payload[target.dataset.scalar] = value;
     state.changedPaths.add(`/${target.dataset.scalar}`);
   } else if (target.dataset.itemField) {
     const index = Number(target.dataset.index);
-    state.payload.items[index][target.dataset.itemField] = target.value === "" ? null : target.value;
+    if (state.payload.items[index][target.dataset.itemField] === value) return;
+    state.payload.items[index][target.dataset.itemField] = value;
     const rowId = state.rowIds[index];
     if (!state.changedItemFields.has(rowId)) state.changedItemFields.set(rowId, new Set());
     state.changedItemFields.get(rowId).add(target.dataset.itemField);
@@ -621,6 +638,7 @@ function render({ passive = false } = {}) {
       document.activeElement?.matches?.("input, textarea, select")) {
     const notice = root.querySelector("[data-remote-notice]");
     if (notice) notice.hidden = !remoteChanged();
+    syncMessage();
     syncDraftControls();
     return;
   }
@@ -634,13 +652,16 @@ function render({ passive = false } = {}) {
     const scroll = root.querySelector(".review-scroll");
     if (scroll) scroll.scrollTop = scrollTop;
   }
-  if (state.message) {
-    const notice = root.querySelector("[data-message]");
-    if (notice) {
-      notice.textContent = state.message.text;
-      notice.className = `notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}`;
-    }
-  }
+  syncMessage();
+}
+
+function syncMessage() {
+  const notice = root.querySelector("[data-message]");
+  if (!notice) return;
+  notice.hidden = !state.message;
+  if (!state.message) return;
+  notice.textContent = state.message.text;
+  notice.className = `notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}`;
 }
 
 function renderLogin() {
@@ -677,7 +698,7 @@ function renderShell() {
       <div class="page-head"><div><div class="eyebrow">VietDoc / Review</div><h1>Chứng từ của bạn</h1><p class="subtitle">Tải lên, đối chiếu dữ liệu và duyệt trước khi xuất.</p>${renderModeBadge()}</div>
         ${selected ? `<button class="btn btn-secondary" data-action="reload">Tải lại</button>` : ""}
       </div>
-      ${state.message ? `<div class="notice ${state.message.kind === "error" ? "error" : state.message.kind === "success" ? "success" : ""}" data-message>${escapeHtml(state.message.text)}</div>` : ""}
+      <div class="notice" data-message role="alert" ${state.message ? "" : "hidden"}></div>
       <div class="layout">
         <aside>
           ${renderUpload()}
@@ -795,8 +816,7 @@ function renderIssues(issues) {
 }
 
 function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
-  const dirty = isDirty();
-  const pending = dirty || state.changedPaths.size || state.changedItemFields.size;
+  const pending = hasUnsavedReview();
   const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy && !autosaveFlight;
   const disabledSave = !pending || remoteChanged() || state.busy || !!autosaveFlight || autosaveBlocked || !document.head;
   return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" ${state.busy ? "disabled" : ""} /></div>
@@ -815,7 +835,7 @@ function renderJobProgress(job) {
 }
 
 function renderCandidates(runs) {
-  return `<div class="section-heading"><h3>Kết quả xử lý khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || autosaveFlight || remoteChanged() || isDirty() || state.changedPaths.size || state.changedItemFields.size || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
+  return `<div class="section-heading"><h3>Kết quả xử lý khác</h3></div>${runs.map((run) => `<div class="revision-info"><span>Run ${escapeHtml(run.id.slice(0, 8))} · ${formatDate(run.created_at)}</span><button class="btn btn-secondary btn-small" data-adopt-run="${escapeHtml(run.id)}" ${state.busy || autosaveFlight || remoteChanged() || hasUnsavedReview() || !state.document.head ? "disabled" : ""}>Tạo revision từ candidate</button></div>`).join("")}`;
 }
 
 function renderExport(document, approved, selectedId) {
@@ -886,7 +906,7 @@ root.addEventListener("click", (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
   if (action === "logout") return logout();
   if (action === "reload") {
-    if (state.selectedId && (isDirty() || state.changedPaths.size || state.changedItemFields.size) &&
+    if (state.selectedId && hasUnsavedReview() &&
         !window.confirm("Tải lại sẽ bỏ các thay đổi chưa lưu. Tiếp tục?")) return;
     return openDocument(state.selectedId, { force: true });
   }
@@ -929,7 +949,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && state.user) {
     const session = sessionGeneration;
     refreshDocuments().catch(error => {
-      if (session === sessionGeneration) apiFailure(error);
+      if (session === sessionGeneration) apiFailure(error, { passive: true });
     });
   }
 });

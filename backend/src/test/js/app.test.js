@@ -22,11 +22,13 @@ function deferred() {
 async function harness(routes = {}) {
   const listeners = new Map();
   const timers = new Map();
+  const intervals = [];
   let now = 0, nextTimer = 1;
   const controls = {
     '[data-action="save"]': { disabled: true },
     '[data-action="rerun"]': { disabled: false },
     '[data-action="approve"]': { disabled: true },
+    '[data-message]': { hidden: true, textContent: "", className: "notice" },
   };
   const root = {
     innerHTML: "",
@@ -67,7 +69,7 @@ async function harness(routes = {}) {
     window: { confirm: routes.confirm ?? (() => true) },
     URL: { createObjectURL: blob => blob.url, revokeObjectURL() {} },
     crypto: { randomUUID: () => "00000000-0000-4000-8000-000000000001" },
-    structuredClone, AbortController, setInterval: () => 1, clearInterval() {},
+    structuredClone, AbortController, setInterval: callback => intervals.push(callback), clearInterval() {},
     setTimeout(callback, delay) {
       const id = nextTimer++;
       timers.set(id, { callback, due: now + delay });
@@ -80,7 +82,7 @@ async function harness(routes = {}) {
   await new Promise(setImmediate);
   context.hooks.state.user = { id: "u", username: "operator" };
   return {
-    ...context.hooks, root, document, controls,
+    ...context.hooks, root, document, controls, intervals,
     async advance(ms) {
       const end = now + ms;
       while (true) {
@@ -426,6 +428,91 @@ test("VT-031 newer edit survives an older autosave response and is saved from th
   assert.equal(calls[1].payload.total_amount, "300");
 });
 
+test("VT-031 blur after a completed autosave does not create a duplicate revision", async () => {
+  const original = doc("A", 1), calls = [];
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async (_, body) => { calls.push(body); return doc("A", 2, body.payload.total_amount); },
+  });
+  await app.openDocument("A");
+  const field = {
+    dataset: { scalar: "total_amount" },
+    value: "200",
+    matches: selector => selector === "[data-scalar], [data-item-field]" ||
+      selector === "input, textarea, select",
+  };
+  app.root.contains = element => element === field;
+  app.document.activeElement = field;
+  await app.emit("input", field);
+  await app.advance(700);
+  assert.equal(app.state.editorBase.version, 2);
+  app.document.activeElement = null;
+  await app.emit("change", field);
+  await app.advance(700);
+  assert.equal(calls.length, 1);
+
+  const reviewButton = { dataset: { reviewField: "total_amount" } };
+  await app.emit("click", { closest: selector => selector === "[data-review-field]" ? reviewButton : null });
+  await app.advance(700);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(Array.from(calls[1].reviewed_paths), ["/total_amount"]);
+});
+
+test("VT-031 retains a newer remote head when an earlier save succeeds", async () => {
+  const original = doc("A", 1), first = deferred(), calls = [];
+  let remote = doc("A", 3, "300");
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [remote] }),
+    save: async (_, body) => {
+      calls.push(body);
+      if (calls.length > 1) throw new ApiError(409, "REVISION_CONFLICT");
+      return first.promise;
+    },
+  });
+  await app.openDocument("A");
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.advance(700);
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "250" });
+  await app.refreshDocuments();
+  remote = doc("A", 2, "200");
+  await app.refreshDocuments();
+  first.resolve(remote);
+  await app.advance(0);
+  await app.advance(700);
+  assert.equal(app.state.remoteDocument?.version, 3);
+  assert.equal(app.state.payload.total_amount, "250");
+  assert.equal(calls.length, 1);
+});
+
+test("VT-031 a note edited during save goes into the next revision", async () => {
+  const original = doc("A", 1), first = deferred(), calls = [];
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    save: async (_, body) => {
+      calls.push(body);
+      return calls.length === 1 ? first.promise : doc("A", 3, body.payload.total_amount);
+    },
+  });
+  await app.openDocument("A");
+  const reason = value => ({ value, matches: selector => selector === "[data-reason]" });
+  await app.emit("input", reason("First reason"));
+  await app.advance(700);
+  assert.equal(calls.length, 0);
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.advance(700);
+  await app.emit("input", reason("Note typed during save"));
+  first.resolve(doc("A", 2, "200"));
+  await app.advance(0);
+  await app.advance(700);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].reason, "First reason");
+  assert.equal(calls[1].base_revision_id, "A-r2");
+  assert.equal(calls[1].reason, "Note typed during save");
+});
+
 test("VT-031 a stale autosave keeps the local draft and does not retry without a new edit", async () => {
   const original = doc("A", 1);
   let calls = 0;
@@ -442,6 +529,29 @@ test("VT-031 a stale autosave keeps the local draft and does not retry without a
   await app.advance(10000);
   assert.equal(calls, 1);
 });
+
+for (const status of [409, 422]) {
+  test(`VT-031 background save error ${status} leaves the focused editor mounted`, async () => {
+    const original = doc("A", 1);
+    const app = await harness({
+      document: async () => original,
+      listDocuments: async () => ({ items: [original] }),
+      save: async () => { throw new ApiError(status); },
+    });
+    await app.openDocument("A");
+    const field = { dataset: { scalar: "total_amount" }, value: "100.", matches: () => true };
+    app.root.contains = element => element === field;
+    app.document.activeElement = field;
+    const html = app.root.innerHTML;
+    app.updateBoundValue(field);
+    await app.advance(700);
+    assert.equal(app.root.innerHTML, html);
+    assert.equal(app.document.activeElement, field);
+    assert.equal(app.state.payload.total_amount, "100.");
+    assert.equal(app.controls['[data-message]'].hidden, false);
+    assert.equal(app.controls['[data-action="save"]'].disabled, status === 409);
+  });
+}
 
 test("VT-031 manual save cancels a queued autosave", async () => {
   const original = doc("A", 1);
@@ -522,6 +632,56 @@ test("focused editor keeps its draft but disables Save when polling finds a remo
   assert.equal(app.state.remoteDocument.version, 2);
   assert.equal(app.controls['[data-action="save"]'].disabled, true);
   assert.equal(app.controls['[data-action="rerun"]'].disabled, true);
+});
+
+test("list polling failure shows an error without replacing the focused editor", async () => {
+  const original = doc("A", 1);
+  let listFails = false;
+  const app = await harness({
+    login: async () => ({ user: { id: "u", username: "operator" } }),
+    document: async () => original,
+    listDocuments: async () => {
+      if (listFails) throw new ApiError(503, "LIST_UNAVAILABLE");
+      return { items: [original] };
+    },
+  });
+  await app.login({ preventDefault() {} });
+  await app.openDocument("A");
+  const active = { dataset: { scalar: "total_amount" }, value: "200", matches: () => true };
+  app.root.contains = element => element === active;
+  app.document.activeElement = active;
+  app.updateBoundValue(active);
+  const html = app.root.innerHTML;
+  listFails = true;
+  await app.intervals[0]();
+  assert.equal(app.root.innerHTML, html);
+  assert.equal(app.document.activeElement, active);
+  assert.equal(app.state.payload.total_amount, "200");
+  assert.equal(app.controls['[data-action="save"]'].disabled, false);
+  assert.equal(app.controls['[data-message]'].hidden, false);
+  assert.equal(app.controls['[data-message]'].textContent, "API error (LIST_UNAVAILABLE)");
+});
+
+test("job polling failure preserves focus, while an expired session still exits", async () => {
+  const original = doc("A", 1);
+  original.job = { id: "job", state: "QUEUED" };
+  const app = await harness({
+    document: async () => original,
+    listDocuments: async () => ({ items: [original] }),
+    request: async () => { throw new ApiError(503, "JOB_UNAVAILABLE"); },
+  });
+  await app.openDocument("A");
+  const active = { matches: () => true };
+  app.root.contains = element => element === active;
+  app.document.activeElement = active;
+  const html = app.root.innerHTML;
+  await app.pollJob();
+  assert.equal(app.root.innerHTML, html);
+  assert.equal(app.document.activeElement, active);
+  assert.equal(app.controls['[data-message]'].textContent, "API error (JOB_UNAVAILABLE)");
+  app.apiFailure(new ApiError(401), { passive: true });
+  assert.equal(app.state.user, null);
+  assert.match(app.root.innerHTML, /Phiên đăng nhập đã hết hạn/);
 });
 
 for (const action of ["approve", "adopt", "rerun", "upload"]) {
