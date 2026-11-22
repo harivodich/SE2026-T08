@@ -1,0 +1,60 @@
+{
+  "observed_on": "2026-11-22",
+  "scope": "Data self-verification and export, not consumer/native OCR ACK",
+  "bundle_version": "vietdoc.d12-handoff.v1",
+  "manifest": {
+    "version": "d1.2.v2",
+    "sha256": "093b8f772d19e5357ee6209f3358f44d7a072f457aaef64507f38081c0e70e9a"
+  },
+  "files": {
+    "d12-handoff.zip": {
+      "size": 1773382,
+      "sha256": "a660f7d52abaf4d28c3bcd7db7814560cf40675ab6e42ff1e7db88915bbbcf0d"
+    },
+    "inventory.json": {
+      "size": 19786,
+      "sha256": "f2895b26b48e9c6ec52e2b4a2aec0c75b27d7e4611d3a2ea8c1ff92234fcb17e"
+    },
+    "SHA256SUMS": {
+      "size": 163,
+      "sha256": "c33b490358c98c721de684117c0fce9537292a1d5b9edc2f1a12316029a5e20f"
+    }
+  },
+  "transfer_url": "https://github.com/user-attachments/files/34526599/full20-transfer.zip",
+  "transfer_status": "URL posted in #22; receiver access/verification not independently confirmed",
+  "verified": {
+    "samples": 20,
+    "document_types": {
+      "receipt": 10,
+      "invoice": 10
+    },
+    "rows": 204,
+    "members": 102
+  },
+  "records": {
+    "version": "vietdoc.training-records.v1",
+    "sha256": "aca61aaa4da1cbbedcd5e6c4ac3e85d748606cac592f456e78d134c42f725e8f",
+    "counts": {
+      "samples": 20,
+      "document_types": {
+        "receipt": 10,
+        "invoice": 10
+      },
+      "label_statuses": {
+        "present": 1138,
+        "absent": 12
+      }
+    }
+  },
+  "source_pins": {
+    "src/vietdoc/data/generator/handoff.py": "f0cfc93e30bcf907549792ab17e894c1b880e5a20815485f429657d4b5aff39f",
+    "src/vietdoc/data/generator/integration.py": "f22f76e43467fe7b90ed98185e2ba56bcd6c88f6cbb5295e1129dfcb7647c52e",
+    "src/vietdoc/data/adapters/labels.py": "70f4f4c74f42a3b16bb9de24b06ab8e6a7f41f62f08cf8681298c12242da365a",
+    "src/vietdoc/data/adapters/records.py": "46e8ca69f650b5fd045062d671dff99b9d76d9f4f0fbb2c0b87ff1d19bc25be9"
+  },
+  "pending_acks": [
+    "AI1 receiver verify20 and native20 outcomes",
+    "AI2 pointer/status reader + actual decoded target/batch and masking policy",
+    "Backend full20 consumer receipt"
+  ]
+}
