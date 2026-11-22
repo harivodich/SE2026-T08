@@ -191,6 +191,12 @@
       "src/vietdoc/evaluation/tables.py": "dc6892e9fb86308eac7c9d77bc17ed3b0c2392bc126ebb5fb65c162761e48825"
     },
     "records_test_sha256": "6013da7ba1a863fb3d917bdbcbc79a8e8f9c7fd27dd8c0b0ba42d0bafb81df9b",
-    "data_discovery": 11
+    "data_discovery": {
+      "discovered": 93,
+      "selected_without_pdf": 92,
+      "import_errors": 0,
+      "scope": "collection only; not a full execution",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B; unittest discovery test_data*.py"
+    }
   }
 }
