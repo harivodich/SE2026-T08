@@ -3,8 +3,17 @@
 Execution ledger for the user-requested decomposition of `Data-giao-viec.md` v2.
 Issue/PR acceptance remains authoritative; LOCAL PASS below never means consumer
 ACK, Lead approval, merged, or hosted CI. Work starts at `develop@e040e94` on
-`codex/SE-22_data_handoff_increments`. No push, PR, merge, or external messaging
-is authorized in this run. Existing untracked documents/assets remain untouched.
+`codex/SE-22_data_handoff_increments`. The original local execution authorized
+commits only. Existing untracked documents/assets remain untouched.
+
+Follow-up publication request on 22/11/2026 authorizes push and a review PR into
+develop. The candidate branch is now `feature/SE-22_data_handoff_increments`.
+The historical local/remote `codex/issue-38-duplicate-review-packet` was renamed
+to `feature/issue-38-duplicate-review-packet` without changing either head (local
+`055d7c6`, remote `1e1e5c1`); no history was overwritten to synchronize them.
+Source/test bytes still match the verification inventory below. Hosted CI and
+consumer/Lead acceptance must be read from the publication PR; the original local
+results do not establish those outcomes. Merge remains a Lead decision.
 
 ## Mini tasks and commit boundaries
 
