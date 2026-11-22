@@ -1,0 +1,1228 @@
+{
+  "version": "duplicate-review-v1",
+  "manifest": {
+    "name": "d22-smoke-v01.json",
+    "sha256": "eaabf08f5511de0db7bfdf9b7f087716cd0acf197bb00bca9fcb34341f8314db"
+  },
+  "report": {
+    "name": "d22-report-v01.json",
+    "sha256": "5173053cfb5197fe4e6642ed1a903a96b5f41f7ffcf0531c4029ffabc8af0d1e"
+  },
+  "dispositions": [
+    {
+      "candidate_id": "pair-225e6f1413bd1d1725f585ad4193cd7726b1613c780cb553ea0c23b77792db51",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-fda67c7c7af293f32036845a70f79b98bfdf7e97c6fb942c1c4476b047e2445b",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-047a43c17349814a1413b2698279311cd626ca526cde95317581376692d5daa0",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.125; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-002d1091e6622bb785a510bb828b550981e0c44413e2c7a75e7a626a147d8e0d",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-5cd1b223f1ca4f69df9c0574f8e98075fc83bb904a7d29af410280bb8478c530",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-68bc3a4ede11bd5ced69daa1c73d8d47dc49dbb2e46e8b902ddbee19d4a9b4f2",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=3; content_jaccard=0.1429; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2b7fd43c4733a3fa083b691e017863d1ae850475eb4ea76ddba0b201b731ee34",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=3; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c245c2f8c7e6362e136f30fca7df54eb2b81c06eb6fde1a01333c5b409cb7353",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=7; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-36e9d8e40c620035dd79bb47ac64ed7d890b0a02e045d7b4348fb3b4c57a2f75",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=3; content_jaccard=0.1429; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2ac18af75e5e0494a7da84819f6e87082624322992e85d27f1057be225bf1fcb",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c80dfd39adf17f48fef84c4460df60d71516f6890b63f6be3ff52d362a8bf360",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.05; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-07b73bdefd6f5cbf049ca3787fb017f258f7b157b1edff5e1c2703a18067e991",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f01-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.0417; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-7f5dea2ce199de389ccd839cd5d1574ffb6d1c630c79c35b36adb332fac72d81",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f01-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c032af8564ec6bcce47dcddf1234e5191869b0d5855231e15cc5891f80862175",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f01-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8605fd6d725cb859228ad6096159cfdb8aea014327b605608006d6258157b74f",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f01-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.1579; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2237b767a2e51a7cb108e2a323f4371d9aae61627aee66cc7cf539069fe0ce80",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-02201d958ff2624140ec888a0ecbdc7a1eb47eded0efd2005f9b4c3dcf28e3d5",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.0625; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-3c57aced825d4f6be3ff53c1940682abbad08503e1f529e977c094c362016a77",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-20b8305d6a493c3d0c86ed64f3f5711330692011682e1b9af170c3657d930a76",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c40c7b2aafdd5e8276ac38788866c5e44fabdb6ec2c777e1d5d68ae509053c80",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=1; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-cb1cccd2187032a610fe2817cf588d3cbd468cd039e23ad9a9b787192bbb9c9c",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.0417; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c20e152bd2693a6884e10242f849c7e35da859dce24e5a47fc7e2b7d01925327",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f02-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.1; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-ac139a4db9641e47ed534a14daa2bdd8f8e7175a2813d72bcac3979bf938d426",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f02-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.1818; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-707157d72d76865d7a40b4ea5a7aa6d081d892582336c015eb48512ef8d1c886",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f02-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=2; content_jaccard=0.24; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-219953c7ad64d6c9ea7474fa948e4918bdf240117a8682c464b9fa47145a6070",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-b27552b12fe0323e3319eb4378af1f701b20633a1642ea430be6f25658ed1c76",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-464fea3413679d6b3d63c218feb9f60036b392e24a337e2c4d4312f982ff84b1",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.1875; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-e46b1f87c4bd1ca1c809fe3939df36422175c65a6fa1c6ab901f349ee3470c9d",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-54e6ee8687766241573b0a0fe5a16e6d67fb3887aee11e1f70b453982ea6bb17",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=5; content_jaccard=0.1304; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-000fa07e89490c3dfb0dfaf21126f20449d1510c97d8908c8eee172047449dcf",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.0625; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-4088eda949605c03bc686b53d3a622f8c8412953685ba0a5f45e27508124b366",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f03-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=8; content_jaccard=0.1591; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-6c8accd33fd76a9278997f42ed7c57a790d65c061987d36e2f3efcb5ffd2ad83",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f03-b0000",
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=1; content_jaccard=0.1833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-de897ae1a211a307b982aa94ab0af0bc8955fb883a3e498dc7b9c83a952ffaa0",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f03-b0000",
+        "v0-1-d22-smoke-receipt-f03-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=1; content_jaccard=0.2188; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8f318fd4144a2a2b79f95eafddb81be95fe2e4c83e24816d1a1dab5a62910294",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f08-b0000",
+        "v0-1-d22-smoke-receipt-f03-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.2031; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8400c6d648d9d782296ac81591cf7194d4eab6b62641ab3978f6741d1dba8187",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f04-b0000",
+        "v0-1-d22-smoke-receipt-f09-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.1301; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-d9b04e2fa18ca3257599aa987921d703cf916eea75af6b83adb07c25c9ccbf94",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f04-b0000",
+        "v0-1-d22-smoke-receipt-f04-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.0992; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-200efa1a61889c4e54c2462d409cb5d5cc07d9af5ff34433b0224a9664beb0b6",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f09-b0000",
+        "v0-1-d22-smoke-receipt-f04-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=2; content_jaccard=0.1181; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8faeca7715a2ce6c05576b2ae81b70fb40ca504920e46f93350645e6729b3788",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f05-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=2; content_jaccard=0.0769; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-cfeda8d344dea0890fc50cc9deef3f34207a24a9f23a9f67d6b0df1160ec1dfe",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f05-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=5; content_jaccard=0.1176; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c4dc77c6d0c3703a406e4310f3256820b208a62d882963cb45cb0d51e6f9b0e0",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.125; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-89f38bf96eb29eccab8a6984a66d9c6f45945e5cdd824fa715ab5d692518ba16",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0769; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-88f349e12d3c296d468e67445f92b5fe69d63c2be390682e7a100895af8ab484",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=7; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-fb5bb4d3692fe70d1263d6e623cbdf0f0ce7edfecff15fcac9f6c2cda3978ed7",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=1; content_jaccard=0.125; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-e7ea81d8f0828455161749937a3e68009909a8e8bb5b8fbdf54faf56df9e68e9",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.0769; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-1b912f3abe4196668c7616eccf3de657ea2376d016286d38c34005572f8a082c",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=5; content_jaccard=0.0476; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-02b4964097a281cebce00574b0eb438cad128d7b0563d02d694f55dfc90edb05",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f06-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=7; content_jaccard=0.0952; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-92f51405ba9f4023fc6db0696401917d18307a05dcbe1587765fac7d8ef258b6",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=5; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c567144d4b435033f27e0098d2f1b35f3be0aa88e6d5b91ff7e54aa75a5b7aa0",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-5ba38a4e90066ff10a19cbeef040e7141c255938669a2c21dd83f9dbdd585267",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.0714; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-44aa727ef8f73bb135c633c72295b6437585dea0ee46089cc9d76414563b343f",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-b5d9db1c8e754ffcf2816ceb6fefc404f8a4e5bbf9c99b0d3716777207192150",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.2; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-b88b6c8ba194b0c53171c2e8d1667f82c6b4ed82a33a5de2c20ae52dac68fb47",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-92ec201d08943d02678f4db64b2053850733573a951b3468711c1a344f4933f9",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f07-b0000",
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.1429; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2f978b1c5081771bae84d433f84c0192d83ec177ffe88891236f2d62e0ea71b8",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=8; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-446b8e89f1429cedd29bcf77e4e767ac7e53e8934874b21965b3a1ca92833814",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=8; content_jaccard=0.0952; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-bec3fa161ddcbebe4d38316752a03c48b473d80bd2e4ec574dc947bdbcc40e4e",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.0606; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8677729a2cd8b5d7d500426999872d11b8dc62da7b1f00cd64f18b327e233daa",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.0; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-51ae34a4701e76fd57119df8d1201bd673ee2b19a8d8029fe78e9e40048bfcfb",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=5; content_jaccard=0.0455; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-065410cf1f1e402fbaf1487ac1b4f8f8de7c9a27c420ec2c773d96484cd54749",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.069; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-a96f1b1eaf07a66cfce377fb226eb5fbd10a6bcb6d0c8da5948215816018c4b6",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f03-b0000",
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=2; content_jaccard=0.1538; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c0c0de61404d2abd38d256692e4e893b0f0435b1597036cc4f388b00f9f3a47f",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f08-b0000",
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.1562; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-cc34c52bdab9fba3284d49e385f8b3879fa586092828a5176a0d8097f463fa17",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f04-b0000",
+        "v0-1-d22-smoke-receipt-f09-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.1349; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-8184d5143be6f5e9660ecf9ac8cf517ff67251cf80fa46a3661f294f055cd9b0",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f09-b0000",
+        "v0-1-d22-smoke-receipt-f09-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=3; content_jaccard=0.1102; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c4fae231aec52352c14827ba0dc7be2589b075f873380ddd88b2237633287404",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f01-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=2; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2b12100b740d166dc4fa05b582387de0e93366574c79e8fe60df0244024e08d6",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.0417; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-04dfe1a9d97389312c37f5681171d25fbb2f8d4f687cfa7fbe1682e57337ede7",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.3333; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-f43eec3e8f9d3e5b0c38e84fa8d724e6f33beb27d6a7f8a09d45d24e7aa6d033",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=5; content_jaccard=0.1818; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-fa8b2d97bdf47dcb73ea5d265da1ac3a92dd74cdcbfdee70cc6915c8e11899c9",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.05; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-15c0429aba0e3c6cfa18cf5656394c236873de8f0a51bc5ef3be88145e0a5b28",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-invoice-f02-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.1111; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-85cbe728e5e693da84b6d82eb7d53bf73d1dfaad5b185699eb2005203c2655b8",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-invoice-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=4; content_jaccard=0.1818; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-ce45e63422240e4d386b7936a495891db8097b4ae6d5b0ac03a52169e0910733",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-invoice-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.125; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-b937ed0c9e51d42a84937df27165928f497a664426e7db2a420773a18209a80b",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.2381; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-59f16e8e837037716d8b290a080c9bbc1ecf2a2a3e5a198410697d6e8f1a2e56",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-invoice-f05-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=6; content_jaccard=0.087; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c9513d1ec67e2206c8cf5fd8d7547cb00af00d91ac46b3440d18e165621954a9",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-invoice-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.0714; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-f3c59628b875daee9827f969e9430703c1ee332691067dccd6c2a7a5bee03bb1",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=6; content_jaccard=0.1515; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-7de538f3dac6c554c0d8c286d6ee8d5bcfe01f2a7eddb79ca77eaf09377345b8",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f03-b0000",
+        "v0-1-d22-smoke-invoice-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.2273; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-ab766efb29a9331406e56ce733801bf064423845a7aa3c1f553d44613eba9c08",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f04-b0000",
+        "v0-1-d22-smoke-invoice-f09-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.1231; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-27d90b912f10fdcddd0440c2b21d721b9f91127f45c9e8a3eb8ab1dc81064983",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-invoice-f06-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=3; content_jaccard=0.0833; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-87c3e3a62701631fdb96baa5f83a2d581a367b4f022ba399db7999066a4362f5",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=4; content_jaccard=0.1053; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-2ca6fa29832aed7042fd67a85e5a04e5c798f3bf569cdfe2a2f6711312c004de",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: same-split; dhash_distance=3; content_jaccard=0.04; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    },
+    {
+      "candidate_id": "pair-c87138366eef0d094e8c30da913ee596c6d84109de4c6258aa51f46470b727a6",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-invoice-f08-b0000"
+      ],
+      "disposition": "pending",
+      "reason": "Metadata-only inspection: cross-split; dhash_distance=7; content_jaccard=0.0962; shared lineage/hash fields=none. PNG/content bytes matching the historical manifest are unavailable in this workspace. Screening and unequal hashes do not prove independence. Pending image/content comparison by DE, AI1/AI2 for ambiguity; Lead approval before pilot/freeze.",
+      "reviewer": "Codex (DE metadata inspection, 2026-11-08; not human sign-off)",
+      "evidence": {
+        "image": false,
+        "content": false,
+        "lineage": true
+      }
+    }
+  ]
+}
