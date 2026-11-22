@@ -33,6 +33,11 @@ Rejects zero type/split support and plan drift; never edits/cuts the canonical
 source manifest or exports historical final records. Preparation still requires
 membership acceptance, asset archive/QA and actual consumer ACK before training.
 
+`exposure.py`: records validated integration identities/hashes and known lineage;
+metadata-only holdout preflight rejects known exposure even after ID renaming.
+Unknown legacy lineage stays null. No final asset access, independence certification,
+per-person access authentication or final-open authority.
+
 ## Ranh giới và dữ liệu
 
 Không predictions làm gold hoặc random variant splits qua tập Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.

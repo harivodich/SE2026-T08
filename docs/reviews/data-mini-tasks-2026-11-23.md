@@ -11,16 +11,17 @@ This execution ledger supplements the current plan, not a new roadmap or approva
 Fix and regression belong in the same commit. Record commands/results below as
 they actually run. LOCAL PASS never means hosted CI, peer acceptance or model quality.
 
-| ID | Plan | Mini task / concrete completion criterion | Initial status |
+| ID | Plan | Mini task / concrete completion criterion | Execution status / commit |
 |---|---|---|---|
-| M00 | All | Decompose work, preserve existing files, identify real dependencies | This ledger |
-| M01 | S0 | Reject missing/duplicate clean representatives; rebound-hash file/CLI regressions; valid baseline unchanged | Ready |
-| M02 | R00 | Separate fresh-output full-set rejection from no-overwrite, normal/-O; mutation detects dropped flag | Ready |
-| M03 | R00 | Derive benchmark bound from actual workload; reject forged/malformed counters before stage work | Ready |
-| M04 | R01/R05 | Recheck existing transfer locally; source-based evaluator replay recipe and handoff index with exact pins/counts | Ready; receiver ACK separate |
-| M05 | R02 | Prepare next duplicate-review batches with pinned clean assets/content/lineage and cross-split priority; no implicit peer verdict | Ready; accepted dispositions await peer |
-| M06 | R03 | Implement selection-to-records preparation against validated source and recomputed plan; reject tampering, partial groups, invalid IDs and zero support | Ready for tooling; actual membership blocked |
-| M07 | All | Run affected suites, inspect complete diff and record source/commands/limits and remaining owner-specific work | After M01–M06 |
+| M00 | All | Decompose work, preserve existing files, identify real dependencies | Complete, `5da582d` |
+| M01 | S0 | Reject missing/duplicate clean representatives; rebound-hash file/CLI regressions; valid baseline unchanged | LOCAL PASS, `58bc3b1`; hosted CI/reviewer pending |
+| M02 | R00 | Separate fresh-output full-set rejection from no-overwrite, normal/-O; mutation detects dropped flag | LOCAL PASS, `2a989ee` |
+| M03 | R00 | Derive benchmark bound from actual workload; reject forged/malformed counters before stage work | LOCAL PASS, `3de726a` |
+| M04 | R01/R05 | Recheck existing transfer locally; source-based evaluator replay recipe and handoff index with exact pins/counts | LOCAL PASS, `567ab51`; receiver ACK separate |
+| M05 | R02 | Prepare next duplicate-review batches with pinned clean assets/content/lineage and cross-split priority; no implicit peer verdict | LOCAL PASS preparation, `8273450`; accepted dispositions await peer |
+| M06 | R03 | Implement selection-to-records preparation against validated source and recomputed plan; reject tampering, partial groups, invalid IDs and zero support | LOCAL PASS tooling, `77880d6`; actual membership/archive blocked |
+| M07 | All | Run affected suites, inspect complete diff and record source/commands/limits and remaining owner-specific work | Full Data suite in progress; evaluator/PDF PASS |
+| M08 | R07/R10 | Capture current exposed D1/D22 identities/hashes/lineage and reject reuse through metadata-only preflight | LOCAL PASS; added while renderer suite runs; no final assets opened |
 
 ## Remaining acceptance mini tasks
 
@@ -116,3 +117,15 @@ Focused coverage: actual fresh 5-base/10-image renderer source, selecting all 8 
 
 Final focused command `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest
 discover -s tests/unit -p test_data_pilot_records.py -v`: 6 PASS (38.386 s).
+
+### M08 — LOCAL PASS (exposure capture/preflight)
+
+[Machine-checkable exposure ledgers and recipe](data-exposure-2026-11-23.md) pin
+20 full20 + 80 D22 + two fixture records, preserving versions and unknown legacy
+lineage. Metadata-only preflight rejects known ID/base/family/source/group and
+image/gold/content/source-gold overlap. It never opens final assets or grants approval.
+Four new focused tests PASS (1.681 s), including every identity/hash overlap field,
+normal/-O negative CLI and no output/no-overwrite. Actual historical samples were
+rejected individually: 20/20 full20, 80/80 D22 and 2/2 evaluator fixtures.
+This new file was added after the running Data suite's collection; focused tests
+are accounted separately. Existing runtime/source/test bytes were not changed.
