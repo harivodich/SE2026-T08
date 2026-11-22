@@ -98,14 +98,24 @@ dated evidence; only this run's commands establish the current local results.
 
 ## Remaining mini tasks and exact external inputs
 
+**Supplement received later on 22/11/2026:** L01/L02 settle extractor modality
+and permit model-neutral pilot preparation before G0 or final host provisioning.
+See [follow-up mini tasks, source/tests and actual group plan](data-lead-followup-2026-11-22.md).
+This supersedes waiting for modality/G0/final host as a prerequisite to Data
+preparation. Candidate/context/rows/capacity and actual consumer packets remain
+pending. The planner now quantifies the current membership blocker: both unresolved
+components (16 + 4 bases) quarantine all 20 bases/80 samples. Pilot packaging waits
+for resolved/accepted membership, not for G0. Native four-input HTTP evidence is
+historical smoke only; it does not close native20, OCR metrics or training gates.
+
 | Mini tasks | Owner/input needed | Checkpoint and next action once received |
 |---|---|---|
 | B4 | AI1 receiver verify + native20 outcomes; AI2/Backend full20 receipts | Correct full20 bytes and replay commands ready; need actual consumer commands/environment/hash/counts |
 | C3 | AI2 #52 actual reader/decoded target/batch, model/preprocess pins and reviewed masking/filtering policy | Adapter/records/four-state vectors ready; no training reader/collator source exists in current candidate to verify |
 | D3 | AI1/AI2 peer review of first batch's image/content/lineage reasoning | 10 decisions ready for challenge/acceptance; remaining 71 not auto-classified while the first-batch gate is pending |
-| D4 | Accepted dispositions/confirmed relations and Lead grouping/split decision | No wrong grouping confirmed in first batch; existing transitive grouping is preserved; no invented fix or whole-group exclusion |
-| E1 | AI2 modality/model, max context/rows and G0 hardware/train-step/checkpoint; AI1 transcript/geometry requirements; Lead pilot scope/budget | Bounded Data measurement available; no approved pilot size inferred from scorer timing |
-| E2/E3/E4 | D4/E1 first, then Data package and AI1 pinned cache/baseline + AI2 actual batch/tiny pilot ACK | Historical smoke remains historical; do not relabel its exposed final members as an untouched final |
+| D4 | L02 permits preparation; peer/Lead still accept dispositions/membership | Runnable group/quarantine plan now exists; no historical resplit. Both unresolved components excluded in full; 0 eligible members |
+| E1 | Modality settled by L01; AI2 model/context/rows/G0 and AI1 actual cache/profile requirements still pending | Model-neutral preparation proceeds now; no model-specific size inferred from Data timing |
+| E2/E3/E4 | Resolve/accept D4 membership, then Data QA/package and AI1 cache/baseline + AI2 actual batch ACK | G0/final host no longer block preparation. Historical smoke final is exposed and not relabeled; current D22 membership is fully quarantined |
 | F3 | Actual AI1 OCR and AI2 predictions.v1 packets with manifest/version/source/runtime pins and failures | Evaluator/oracle packet ready; do not substitute synthetic known predictions for these inputs |
 | F4 | AI1/AI2 replay ACK and Lead #53 metric/split protocol acceptance | Normalization/matching/evidence/calibration remain Proposed |
 | V1/V2/V3 | Lead/AI2 accepted capacity/support; peer-authored independent layouts with provenance/QA; pilot acceptance | No new dataset volume, families, holdout membership or training batch invented |

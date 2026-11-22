@@ -1,0 +1,135 @@
+{
+  "observed_on": "2026-11-22",
+  "source_snapshot": "e040e94bb20509055d06fa0182e05a565e588b94",
+  "inputs": {
+    "Evidence-native-19-11-pham-vi.md": "c731961cfa602ce582a9254ace7c71cc5c0e5feda3783282e0237243b0fa44c6",
+    "Lead-quyet-dinh-va-evidence-cho-Data.md": "e1d36af42e1779f3a9f286652a4f0a149847050046a20841aa621806fedefa8e"
+  },
+  "native_scope": {
+    "status": "supplied historical summary; raw report/model hashes/logs not supplied",
+    "candidate_base": "a96830b337d9f6c8845c9b3bec5321ccdd7f3123",
+    "pr83_delta": "3f439d84775b9e6c72273a5a863e6fc2f4e99a1c",
+    "inputs": 4,
+    "outcomes": "reported HTTP 200 on four synthetic inputs",
+    "not_established": [
+      "native20",
+      "OCR CER/WER",
+      "extractor G0",
+      "pilot training/checkpoint",
+      "Java E2E",
+      "final host/access"
+    ]
+  },
+  "decisions": {
+    "modality": "OCR text/layout to business JSON; receipt/invoice, one printed Vietnamese page",
+    "pilot_preparation": "allowed before G0/final host; no model-specific size approval",
+    "unresolved": "quarantine entire connected component, including family/source/base and variants",
+    "metrics": "oracles now; actual packets and dev-based quality targets still pending",
+    "final": "Lead approval and isolated custodian host/runner required before opening"
+  },
+  "execution": {
+    "source_commit": "e71f7630035d84a9aa28ffe6b1cd0d47ce157a59",
+    "planner_source_sha256": "09c55609b73a52497f9781b50ea841fbbcd8545e4c0692045586f449fffe3030",
+    "planner_test_sha256": "6f5be85c8f303d752da281c19c612fcdf51c88c095f047923dd1ae48b47661c6",
+    "plan": {
+      "path": "datasets/manifests/d22-pilot-plan-20261122.json",
+      "sha256": "9b234566c73f3a1572e4b53dd5256903df6c08d0b101540a609bc3e64ba0ac80",
+      "status": "blocked_membership",
+      "confirmed_groups": 20,
+      "risk_components": [
+        {
+          "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+          "bases": 16,
+          "unresolved_pairs": 66
+        },
+        {
+          "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+          "bases": 4,
+          "unresolved_pairs": 5
+        }
+      ],
+      "counts": {
+        "before": {
+          "base_documents": 20,
+          "samples_including_variants": 80,
+          "bases_by_type_split": {
+            "receipt": {
+              "train": 6,
+              "dev": 2,
+              "final": 2
+            },
+            "invoice": {
+              "train": 6,
+              "dev": 2,
+              "final": 2
+            }
+          },
+          "samples_by_type_split": {
+            "receipt": {
+              "train": 24,
+              "dev": 8,
+              "final": 8
+            },
+            "invoice": {
+              "train": 24,
+              "dev": 8,
+              "final": 8
+            }
+          }
+        },
+        "after": {
+          "base_documents": 0,
+          "samples_including_variants": 0,
+          "bases_by_type_split": {
+            "receipt": {
+              "train": 0,
+              "dev": 0,
+              "final": 0
+            },
+            "invoice": {
+              "train": 0,
+              "dev": 0,
+              "final": 0
+            }
+          },
+          "samples_by_type_split": {
+            "receipt": {
+              "train": 0,
+              "dev": 0,
+              "final": 0
+            },
+            "invoice": {
+              "train": 0,
+              "dev": 0,
+              "final": 0
+            }
+          }
+        }
+      },
+      "excluded_samples": 80,
+      "unresolved_candidates": 71
+    },
+    "focused_tests": {
+      "pilot": 11,
+      "duplicate_review": 8,
+      "training_records": 5,
+      "evaluator": 49,
+      "total": 73,
+      "failures": 0,
+      "skips": 0
+    },
+    "actual_snapshot": {
+      "asset_hashes_verified": 480,
+      "manifest_sha256": "eaabf08f5511de0db7bfdf9b7f087716cd0acf197bb00bca9fcb34341f8314db",
+      "report_sha256": "5173053cfb5197fe4e6642ed1a903a96b5f41f7ffcf0531c4029ffabc8af0d1e",
+      "review_sha256": "5ba78a451dfffdc4333a336f63a147e8c2f38d987b5756dcd9b77ea075970092",
+      "plan_replay": "PASS"
+    },
+    "limitations": [
+      "metadata plan is not asset/gold/pixel QA or acceptance",
+      "no full Data/PDF/review/Windows rerun on follow-up source; focused suites and hosted CI are separate",
+      "no valid pilot archive emitted because both types have zero eligible train/dev support",
+      "no model download, inference/training, native replay, final host provisioning or final access"
+    ]
+  }
+}
