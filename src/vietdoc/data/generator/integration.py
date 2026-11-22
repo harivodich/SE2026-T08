@@ -216,7 +216,7 @@ def occurrences(regions, pointer, alternate=False):
     return [' '.join(group) for group in groups]
 
 
-def check_sample(root, manifest, sample, data, schema):
+def check_labeled_sample(root, manifest, sample, data, schema):
     kind = check_metadata(sample, data, schema)
     family = None
     if data['version'] == 'd2.2.v1':
@@ -293,10 +293,16 @@ def check_sample(root, manifest, sample, data, schema):
         else:
             quality = 'content-loss' if 'obscured' in statuses else 'bounded'
         require(sample.get('quality') == quality, 'D2 quality mismatch')
+    return gold, labels
+
+
+def check_sample(root, manifest, sample, data, schema):
+    """Compatibility accessor: retain the business-gold-only result."""
+    gold, _ = check_labeled_sample(root, manifest, sample, data, schema)
     return gold
 
 
-def load_artifacts(root, manifest, *, full_set=False):
+def load_labeled_artifacts(root, manifest, *, full_set=False):
     """Smoke consumer. Explicit integrity checks also run under python -O.
 
     Supports legacy D1 v1 and current D1 v2 plus the D2.2 smoke adapter. Does not
@@ -312,20 +318,26 @@ def load_artifacts(root, manifest, *, full_set=False):
         try:
             require(isinstance(sample, dict), 'sample must be an object')
             require(sid not in ids, 'duplicate sample_id')
-            gold = check_sample(root, manifest, sample, data, schema)
+            gold, labels = check_labeled_sample(root, manifest, sample, data, schema)
             ids.add(sid)
-            loaded.append((sample, gold))
+            loaded.append((sample, gold, labels))
         except (ValueError, OSError, KeyError, TypeError) as error:
             raise ValueError(f'{sid}: {error}') from error
     if full_set:
         require(data['version'] in D1_VERSIONS, 'full_set requires D1.2 manifest')
         expected = {sid for sid, *_ in samples()}
         require(ids == expected, f'full D1.2 requires 20 IDs; missing={sorted(expected-ids)}, extra={sorted(ids-expected)}')
-        require(len({s['seed'] for s, _ in loaded}) == 1, 'full D1.2 seed mismatch')
-        require(Counter((s['document_type'], s['family_id']) for s, _ in loaded) ==
+        require(len({s['seed'] for s, _, _ in loaded}) == 1, 'full D1.2 seed mismatch')
+        require(Counter((s['document_type'], s['family_id']) for s, _, _ in loaded) ==
                 Counter({(k, f'{k}-layout-{i}'): 5 for k in ('receipt', 'invoice') for i in (0, 1)}),
                 'full D1.2 type/layout counts mismatch')
     yield from loaded
+
+
+def load_artifacts(root, manifest, *, full_set=False):
+    """Retain the existing (sample, gold) API and all validation gates."""
+    for sample, gold, _ in load_labeled_artifacts(root, manifest, full_set=full_set):
+        yield sample, gold
 
 
 def main():
