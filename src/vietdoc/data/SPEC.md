@@ -18,6 +18,9 @@ unsupported runtime fail rõ và không tạo measurements giả.
 confirmed source/family/base/duplicate unions and unresolved risk components stay
 separate. Whole-component quarantine, original train/dev only, per-type support
 and exclusions; no resplit, final access or training/Lead acceptance claim.
+Duplicate screening requires exactly one `quality == 'clean'` representative
+for every base present in the supplied inventory, including metadata-only callers.
+Valid subsets must retain that representative and their declared variants.
 
 ## Ranh giới và dữ liệu
 

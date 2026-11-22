@@ -11,6 +11,7 @@ from vietdoc.data import pilot
 from vietdoc.data.duplicate_review import candidate_id
 from vietdoc.data.manifest import encoded, read_json, sha
 from vietdoc.data.splits import digest
+from vietdoc.data import splits
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / 'datasets/manifests/d22-smoke-v01.json'
@@ -110,6 +111,59 @@ class PilotFileBoundaryTest(unittest.TestCase):
             target = self.root / path.name
             target.write_bytes(path.read_bytes())
             self.paths.append(target)
+
+    def rebind_invalid_clean_inventory(self, case):
+        manifest = read_json(MANIFEST)
+        base = manifest['samples'][0]['base_id']
+        if case == 'missing_all':
+            manifest['samples'] = [s for s in manifest['samples'] if s['quality'] != 'clean']
+        elif case == 'missing_one':
+            manifest['samples'] = [s for s in manifest['samples']
+                                   if not (s['base_id'] == base and s['quality'] == 'clean')]
+        else:
+            clean = deepcopy(next(s for s in manifest['samples'] if s['base_id'] == base and s['quality'] == 'clean'))
+            clean['sample_id'] += '-alias'
+            manifest['samples'].append(clean)
+        report = read_json(REPORT)
+        # Bind the exact legacy screening output, not stale hashes. This setup
+        # reproduces the fail-open input independently of the new guard.
+        with patch.object(splits, 'require_clean_representatives'):
+            report['leakage'] = splits.duplicate_report(manifest['samples'])
+        self.paths[1].write_bytes(encoded(report))
+        manifest['report']['sha256'] = sha(self.paths[1])
+        self.paths[0].write_bytes(encoded(manifest))
+        review = read_json(REVIEW)
+        old = {e['candidate_id']: e for e in review['dispositions']}
+        review['dispositions'] = [old[candidate_id(p['base_ids'])]
+                                  for p in report['leakage']['ambiguous']]
+        for key, path in zip(('manifest', 'report'), self.paths):
+            review[key] = dict(name=path.name, sha256=sha(path))
+        self.paths[2].write_bytes(encoded(review))
+
+    def test_rebound_missing_and_duplicate_clean_rejected_before_planning_or_output(self):
+        for case in ('missing_one', 'missing_all', 'duplicate'):
+            with self.subTest(case=case):
+                self.rebind_invalid_clean_inventory(case)
+                expected = 'requires exactly one clean representative; found ' + ('2' if case == 'duplicate' else '0')
+                with self.assertRaisesRegex(ValueError, expected):
+                    pilot.plan_files(*self.paths)
+                for optimized in (False, True):
+                    output = self.root / case / f'{optimized}.json'
+                    command = [sys.executable, *(['-O'] if optimized else []), '-m', 'vietdoc.data.pilot']
+                    for key, path in zip(('manifest', 'report', 'review'), self.paths):
+                        command += ['--' + key, str(path)]
+                    run = subprocess.run([*command, '--output', str(output)], capture_output=True)
+                    self.assertNotEqual(run.returncode, 0)
+                    self.assertIn(expected.encode(), run.stderr)
+                    self.assertFalse(output.parent.exists())
+
+    def test_valid_metadata_subset_keeps_clean_and_variants(self):
+        samples = read_json(MANIFEST)['samples']
+        base = samples[0]['base_id']
+        subset = [s for s in samples if s['base_id'] == base]
+        result = splits.duplicate_report(subset)
+        self.assertEqual(result['ambiguous'], [])
+        self.assertEqual(len(subset), 4)
 
     def test_actual_snapshot_quarantines_all_twenty_bases_in_two_components(self):
         original = [sha(p) for p in self.paths]

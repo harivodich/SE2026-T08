@@ -45,5 +45,21 @@ No empty commit is needed for an external receipt or decision.
 
 ## Execution evidence
 
-Pending. Each owning increment appends actual results; no command in this file is
-claimed executed merely because it appears in a plan.
+### M01 — LOCAL PASS
+
+Shared duplicate screening now rejects every present base with zero or multiple
+clean representatives. Current call sites are D2.2 report generation and duplicate
+review validation (including public planner); per-sample semantic loading is not
+changed. Valid base subsets retaining clean+variants remain supported.
+
+Actual commands, with `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B`:
+
+- `-m unittest discover -s tests/unit -p test_data_pilot.py -v`: 13 PASS.
+- `-m unittest discover -s tests/unit -p test_data_duplicate_review.py -v`: 8 PASS.
+- In-memory mutation of `require_clean_representatives` to a no-op: the new
+  rebound-hash test fails for all three malformed inventories as expected. No
+  source mutation persisted. CLI negatives run in normal and optimized modes.
+- Original positive snapshot remains 71 pending, risk components 16+4, 20 bases /
+  80 samples quarantined, zero members. No snapshot/report/review hashes changed.
+
+Hosted CI and reviewer F2 closure require publication of the new head; NOT_RUN.
