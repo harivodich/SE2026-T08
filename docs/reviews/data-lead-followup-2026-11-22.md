@@ -46,6 +46,7 @@ substitute for those missing execution artifacts.
 | N3 | Run planner on exact historical manifest/report + current batch review; verify bindings/no mutation; report remaining members/support | Local complete; actual plan and 480 asset hashes replayed |
 | N4 | Prepare/verify train/dev package if both types have eligible members in both splits; otherwise record exact quarantine IDs/owners needed to unblock | Blocked by membership: all 20 bases quarantined, no eligible train/dev; not G0/host |
 | N5 | Focused compatibility checks, updated ledger/PR evidence and push to existing review candidate | 73 focused PASS; publication/hosted CI tracked in PR #88 |
+| N6 | Diagnose old-head Windows failure, preserve UTF-8 contract/assertions and add CP1252 replay regression | Local complete: records suite 6/6 PASS; fresh hosted Windows result pending |
 
 Group planning is metadata/review preparation. Asset/gold/pixel QA, peer acceptance
 and actual AI2 reader still gate the accepted pilot; a nonempty proposed plan alone
@@ -129,3 +130,24 @@ New test inventory handoff to Backend: `test_data_pilot.py` (11), protect the
 missing-disposition, frozen/drifting input, transitive whole-component/variant
 quarantine, immutable split, exact-vs-screening and no-overwrite negatives.
 Current `test_data*.py` discovers it; mandatory-file ownership remains Backend.
+
+## N6 — Windows encoding failure found before publication
+
+The [original PR run](https://github.com/harivodich/SE2026-T08/actions/runs/45039035547)
+on `388c0af` finished with both Ubuntu Data jobs SUCCESS but both Windows Data
+jobs FAILURE. Raw failed logs identify exactly one error in each: records test
+line 43 read its UTF-8 JSON using the Windows CP1252 locale default, causing
+`UnicodeDecodeError`. The exporter already writes UTF-8 bytes; its product
+behavior was not changed. The failed logs' digest is recorded in the receipt.
+
+The fix explicitly reads UTF-8 in that assertion and retains every gold/pointer/
+hash/root/no-overwrite assertion. A new regression replays the actual export and
+all the same checks while unspecified `Path.read_text` encodings default to
+CP1252. This reproduces the failing boundary locally and passes after the fix;
+it is not a lowered expectation or a skip/matrix change.
+
+After this fix, `test_data_training_records.py` has **6 PASS in 16.848 s**.
+The final follow-up focused total is **74 PASS** (11 pilot + 8 duplicate + 6
+records + 49 evaluator), no skips/failures. The prior five-test records result
+above remains the pre-fix checkpoint. Native Windows verification must still
+come from the new hosted candidate, not this Linux locale simulation.

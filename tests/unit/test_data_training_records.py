@@ -40,8 +40,17 @@ class TrainingRecordsTest(unittest.TestCase):
             self.assertEqual(fields['/total_amount'].value, expected[sample['sample_id']])
             self.assertEqual(record['labels']['fields'], [dict(pointer=f.pointer, value=f.value, status=f.status)
                                                         for f in projected.fields])
-        self.assertNotIn(str(ROOT), output.read_text())
+        self.assertNotIn(str(ROOT), output.read_text(encoding='utf-8'))
         self.assertEqual(packet, records.training_packet(ROOT, MANIFEST))
+
+    def test_records_replay_under_cp1252_default(self):
+        native = Path.read_text
+
+        def cp1252(path, encoding=None, errors=None):
+            return native(path, encoding=encoding or 'cp1252', errors=errors)
+
+        with patch.object(Path, 'read_text', cp1252):
+            self.test_renderer_records_replay_gold_labels_and_relative_paths()
 
     def test_no_overwrite_or_output_when_later_sample_is_invalid(self):
         output = self.base / 'records.json'
