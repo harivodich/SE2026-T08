@@ -20,7 +20,7 @@ they actually run. LOCAL PASS never means hosted CI, peer acceptance or model qu
 | M04 | R01/R05 | Recheck existing transfer locally; source-based evaluator replay recipe and handoff index with exact pins/counts | LOCAL PASS, `567ab51`; receiver ACK separate |
 | M05 | R02 | Prepare next duplicate-review batches with pinned clean assets/content/lineage and cross-split priority; no implicit peer verdict | LOCAL PASS preparation, `8273450`; accepted dispositions await peer |
 | M06 | R03 | Implement selection-to-records preparation against validated source and recomputed plan; reject tampering, partial groups, invalid IDs and zero support | LOCAL PASS tooling, `77880d6`; actual membership/archive blocked |
-| M07 | All | Run affected suites, inspect complete diff and record source/commands/limits and remaining owner-specific work | Full Data suite in progress; evaluator/PDF PASS |
+| M07 | All | Run affected suites, inspect complete diff and record source/commands/limits and remaining owner-specific work | LOCAL PASS; final verification receipt/commit |
 | M08 | R07/R10 | Capture current exposed D1/D22 identities/hashes/lineage and reject reuse through metadata-only preflight | LOCAL PASS; added while renderer suite runs; no final assets opened |
 
 ## Remaining acceptance mini tasks
@@ -129,3 +129,42 @@ normal/-O negative CLI and no output/no-overwrite. Actual historical samples wer
 rejected individually: 20/20 full20, 80/80 D22 and 2/2 evaluator fixtures.
 This new file was added after the running Data suite's collection; focused tests
 are accounted separately. Existing runtime/source/test bytes were not changed.
+
+### M07 — LOCAL PASS; external gates remain open
+
+[Machine-readable verification receipt](data-verification-2026-11-23.json) pins
+commands, source/test bytes, historical inputs, log hashes and complete test IDs.
+
+| Actual check | Result |
+|---|---|
+| `python3 -B -m scripts.ci.checks tests data --separate-pdf` | 107 discovered, 106 selected/run; **105 PASS + 1 canonical opt-in SKIP**, 0 errors/failures; 1258.973 s |
+| `python3 -B -m scripts.ci.checks tests pdf` | **1 PASS**, 0 skips; 28.931 s |
+| `python3 -B -m unittest discover -s tests/unit -p 'test_evaluation*.py' -v` | **49 PASS**, 0 skips; 10.688 s |
+| `python3 -B -m unittest discover -s tests/unit -p test_data_exposure.py -v` | **4 PASS**, 0 skips; 1.681 s |
+| Current Data collection and coverage union | **111 IDs**, 0 import errors; equals main suite + delegated PDF + exposure tests, without overlap |
+
+All commands used `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src` in the existing pinned
+Data environment. Unique total across these checks: **159 PASS, 1 SKIP**, 0 failures
+or errors. Earlier focused reruns are not added again. The exposure module/tests
+were added after main-suite collection and ran separately; existing source/test
+Python files from `77880d6` are unchanged. This is explicit coverage accounting,
+not a claim that the earlier suite discovered the later file.
+
+Diff review: historical D22 manifest/report/review/plan bytes unchanged; new JSON
+parses with duplicate-key rejection; local Markdown links resolve; private-key/
+token patterns absent. Shared schemas, evaluator source, Java/Flyway and CI files
+unchanged. Existing user untracked files preserved; large artifacts/logs ignored.
+
+NOT_RUN: hosted CI on new heads, native Windows, canonical reference-byte opt-in,
+actual AI1/AI2 OCR/model/training, Java/PG/browser E2E, new final access/inference.
+Full20 verify/export and isolated source evaluator replay are Data self-runs only.
+
+Immediate next external inputs: reviewer S0/required CI after authorized publication;
+peer/Lead first-ten duplicate verdict then accepted group/support membership; actual
+AI1/AI2 receipts. The 71 pairs remain pending and actual pilot eligibility stays
+zero. Archive/QA delivery is still pending accepted membership. Exposure tooling
+does not grant final permission or certify independent layouts. R01–R12 acceptance
+mini tasks above remain tracked by owner, not silently marked Done by source commits.
+
+All execution commits are local. No push, GitHub review, merge, Issue closure,
+consumer message, dataset/model download or deployment occurred.
