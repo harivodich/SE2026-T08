@@ -81,6 +81,26 @@ serialize); raw/reason không trở thành business value hoặc training target
 
 ## Validation và compatibility
 
+### Export records cho consumer
+
+Từ repo root trong Data env, xuất file mới (không ghi đè):
+
+```sh
+PYTHONPATH=src python3 -m vietdoc.data.adapters.records \
+  --root . --manifest tests/fixtures/d12/manifest.json --output outputs/tiny-records.json
+```
+
+Full20 dùng root đã giải nén/verify, manifest bên trong root đó và `--full-set`.
+`vietdoc.training-records.v1` chứa manifest/version/hash, schema ID/hash, counts,
+và mỗi record có `sample`, `gold`, `labels` theo `vietdoc.field-labels.v1`.
+`sample.assets` giữ paths/hashes gốc; `asset_base=root` cho D1, còn
+`manifest_directory` cho D2. Consumer cần cả manifest/assets ở đúng base và schema
+đã pin; JSON export không mang ảnh hoặc thay validation boundary. Kiểm schema thực
+để biết required keys của receipt/invoice, không suy optional từ status absent.
+Exporter kiểm lại manifest/schema/asset hashes trước xuất, không xuất partial
+records nếu sample sau lỗi. Không đổi three-null statuses thành full-JSON targets
+hoặc mask/loss; AI2 vẫn cần chứng minh policy trong reader/collator thật.
+
 `load_training_labels` chỉ yield sau khi toàn manifest đã validate. Nó dùng chính
 labels object từ lần kiểm renderer, không mở lại labels sau validation hoặc suy
 status từ `None`. Các gate path containment/hash, metadata/lineage, business
