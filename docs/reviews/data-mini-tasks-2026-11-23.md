@@ -73,3 +73,13 @@ call asserts no-overwrite stderr and byte preservation. Product exporter unchang
 -p test_data_training_records.py -v`: 6 PASS (18.140 s).
 Disposable subprocess wrapper dropping `full_set` makes the test fail for both
 normal and optimized CLI invocations; no production mutation persisted.
+
+### M03 — LOCAL PASS
+
+Worker derives its bound from `workload()` and checks any declared counter is an
+integer equal to that result. Missing optional counter no longer causes KeyError;
+sample count is still bounded by computed attempts. Forged counters fail before
+platform probes/stage work. Resource import remains Linux-only after preflight.
+`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest discover -s tests/unit
+-p test_data_benchmark.py -v`: 12 PASS (0.386 s). This is guard/failure-accounting
+verification, not a new performance/model capacity measurement.

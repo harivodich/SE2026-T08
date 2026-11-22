@@ -40,6 +40,37 @@ class BenchmarkTest(unittest.TestCase):
                 worker('render', ROOT, output)
             self.assertFalse((output / 'dataset').exists())
 
+    def test_internal_worker_rejects_forged_or_malformed_counter_before_stage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            config = dict(rows=[1], base_limit=8, repeats=1, stage_timeout_seconds=30, seed=2101)
+            for counter in (10000, 7, '8', True, None):
+                with self.subTest(counter=counter):
+                    (output / 'config.json').write_bytes(encoded(dict(config, attempted_bases_per_repeat=counter)))
+                    with patch.object(benchmark, 'require_measurement_platform') as platform, \
+                            self.assertRaisesRegex(ValueError, 'counter drift'):
+                        worker('validate', ROOT, output)
+                    platform.assert_not_called()
+                    self.assertFalse((output / 'validate.json').exists())
+
+    def test_internal_worker_bounds_samples_without_optional_counter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            config = dict(rows=[1], base_limit=8, repeats=1, stage_timeout_seconds=30, seed=2101)
+            renderer = dict(read_json(benchmark.d21.DEFAULT_CONFIG), rows=[1])
+            (output / 'config.json').write_bytes(encoded(config))
+            (output / 'renderer-config.json').write_bytes(encoded(renderer))
+            dataset = output / 'dataset'
+            dataset.mkdir()
+            (dataset / 'manifest.json').write_bytes(encoded(dict(version=benchmark.d21.VERSION,
+                config=renderer, seed=2101, samples=[{} for _ in range(9)])))
+            with patch.object(benchmark, 'require_measurement_platform'), \
+                    patch.object(benchmark.d21, 'validate') as validate, \
+                    self.assertRaisesRegex(ValueError, 'exceeds computed workload'):
+                worker('validate', ROOT, output)
+            validate.assert_not_called()
+            self.assertFalse((output / 'validate.json').exists())
+
     def test_bounds_include_rejection_probes(self):
         self.assertEqual(workload([1], 8, 1, 30), 8)
         self.assertEqual(workload(list(range(9)), 40, 3, 600), 40)

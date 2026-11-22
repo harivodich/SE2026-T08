@@ -74,19 +74,20 @@ def worker(stage, root, output):
     dataset = output / 'dataset'
     manifest_path = dataset / 'manifest.json'
     config = read_json(output / 'config.json')
-    workload(config['rows'], config['base_limit'], config['repeats'], config['stage_timeout_seconds'])
+    attempts = workload(config['rows'], config['base_limit'], config['repeats'], config['stage_timeout_seconds'])
+    if 'attempted_bases_per_repeat' in config:
+        declared = config['attempted_bases_per_repeat']
+        require(type(declared) is int and declared == attempts, 'worker attempted-base counter drift')
     require(type(config['seed']) is int and 0 <= config['seed'] < 2**63, 'seed range')
     require_measurement_platform()
-    import resource
-
     expected_config = dict(d21.load_config(d21.DEFAULT_CONFIG), rows=config['rows'])
     require(read_json(output / 'renderer-config.json') == expected_config, 'worker renderer config drift')
     if stage != 'render':
         manifest = read_json(manifest_path)
         require(manifest['version'] == d21.VERSION and manifest['config'] == expected_config and
                 manifest['seed'] == config['seed'], 'worker requires bounded D2.1 manifest')
-        require(len(manifest['samples']) <= config['attempted_bases_per_repeat'] and
-                all(s.get('split') is None for s in manifest['samples']), 'worker forbids split/final inputs')
+        require(len(manifest['samples']) <= attempts, 'worker sample count exceeds computed workload')
+        require(all(s.get('split') is None for s in manifest['samples']), 'worker forbids split/final inputs')
     samples = artifact = None
     if stage == 'evaluate':
         # Loading/semantic gate has its own measurement; core scoring is timed here.
@@ -95,6 +96,8 @@ def worker(stage, root, output):
                         model_version='synthetic-cost-probe.v1', normalizer_version='not-applicable',
                         ocr_version='not-applicable', predictions=[
                             dict(sample_id=s['sample_id'], status='ok', payload=s['gold']) for s in samples])
+    import resource
+
     start_cpu = time.process_time()
     start = time.perf_counter()
     if stage == 'render':
