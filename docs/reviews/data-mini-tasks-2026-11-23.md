@@ -102,3 +102,17 @@ pairs exactly once: 33 cross-split first, 38 same-split second. Clean asset/cont
 hashes and lineage/catalog support are pinned; no verdict or inspection is invented.
 Four focused tests PASS. Actual normal/-O commands produce identical bytes.
 [Queue and next peer action](data-review-batches-2026-11-23.md).
+
+### M06 — LOCAL PASS (preparation tooling)
+
+`vietdoc.data.pilot_records` recomputes/compares the complete plan and validates all
+source records through the existing boundary before selecting train/dev records.
+It preserves the records.v1 shape and full-source pins in a versioned preparation
+envelope; source manifest/assets are unchanged. [Contract/recipe](../pilot-records.md).
+Actual snapshot still rejects zero support with no output. The archive and real
+membership acceptance remain R03 dependencies, not completed by this tool.
+
+Focused coverage: actual fresh 5-base/10-image renderer source, selecting all 8 train/dev images and excluding final; status/gold parity; tampered/unknown/duplicate/cross-split members; corruption in excluded source; fully rebound path escape and aliased ID; drift/no-overwrite; normal/-O CLI positive and real zero-support negative. Initial path negative expected the symlink-containment error, but `../` correctly fails the earlier relative-path guard; expectation corrected to that owning guard. No product guard was relaxed. No approval or actual pilot archive is claimed.
+
+Final focused command `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest
+discover -s tests/unit -p test_data_pilot_records.py -v`: 6 PASS (38.386 s).
