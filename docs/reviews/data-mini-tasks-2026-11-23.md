@@ -83,3 +83,13 @@ platform probes/stage work. Resource import remains Linux-only after preflight.
 `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest discover -s tests/unit
 -p test_data_benchmark.py -v`: 12 PASS (0.386 s). This is guard/failure-accounting
 verification, not a new performance/model capacity measurement.
+
+### M04 — LOCAL PASS
+
+[Handoff index](data-handoff-index-2026-11-23.md) removes dependence on a private
+evaluator ZIP by giving a pinned-source/fixture recipe, inputs and exact scores.
+Actual full20 verify/export matched existing manifest/records hashes and counts;
+11 handoff regressions PASS. Evaluator CLI replay from isolated exported source
+matched every historical hand-counted oracle. [Receipt](data-handoff-receipt-2026-11-23.json).
+Large outputs stay ignored in `artifacts/evaluation/data-mini-20261123`.
+Existing transfer URL retained; remote receiver access and ACK remain unverified.
