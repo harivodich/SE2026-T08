@@ -63,3 +63,13 @@ Actual commands, with `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B`:
   80 samples quarantined, zero members. No snapshot/report/review hashes changed.
 
 Hosted CI and reviewer F2 closure require publication of the new head; NOT_RUN.
+
+### M02 — LOCAL PASS
+
+Records CLI regression now uses a fresh nested output for `--full-set`, asserts
+`full D1.2 requires 20 IDs` and no created directory in normal/-O. A separate CLI
+call asserts no-overwrite stderr and byte preservation. Product exporter unchanged.
+`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -B -m unittest discover -s tests/unit
+-p test_data_training_records.py -v`: 6 PASS (18.140 s).
+Disposable subprocess wrapper dropping `full_set` makes the test fail for both
+normal and optimized CLI invocations; no production mutation persisted.

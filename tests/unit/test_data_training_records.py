@@ -105,13 +105,22 @@ class TrainingRecordsTest(unittest.TestCase):
 
     def test_normal_and_optimized_cli_and_full_set_gate(self):
         for optimized in (False, True):
-            command = [sys.executable, *(['-O'] if optimized else []), '-m',
-                       'vietdoc.data.adapters.records', '--root', str(ROOT), '--manifest', str(MANIFEST),
-                       '--output', str(self.base / f'{optimized}.json')]
-            run = subprocess.run(command, capture_output=True)
-            self.assertEqual(run.returncode, 0, run.stderr.decode())
-            run = subprocess.run([*command, '--full-set'], capture_output=True)
-            self.assertNotEqual(run.returncode, 0)  # existing output is preserved
+            with self.subTest(optimized=optimized):
+                command = [sys.executable, *(['-O'] if optimized else []), '-m',
+                           'vietdoc.data.adapters.records', '--root', str(ROOT), '--manifest', str(MANIFEST)]
+                output = self.base / f'{optimized}.json'
+                run = subprocess.run([*command, '--output', str(output)], capture_output=True)
+                self.assertEqual(run.returncode, 0, run.stderr.decode())
+                before = output.read_bytes()
+                run = subprocess.run([*command, '--output', str(output)], capture_output=True)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn(b'output already exists', run.stderr)
+                self.assertEqual(output.read_bytes(), before)
+                fresh = self.base / f'full-{optimized}' / 'records.json'
+                run = subprocess.run([*command, '--full-set', '--output', str(fresh)], capture_output=True)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn(b'full D1.2 requires 20 IDs', run.stderr)
+                self.assertFalse(fresh.parent.exists())
         with self.assertRaisesRegex(ValueError, 'full D1.2 requires 20 IDs'):
             records.export_records(ROOT, MANIFEST, self.base / 'full.json', full_set=True)
         self.assertFalse((self.base / 'full.json').exists())
