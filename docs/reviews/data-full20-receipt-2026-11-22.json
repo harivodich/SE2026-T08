@@ -56,5 +56,14 @@
     "AI1 receiver verify20 and native20 outcomes",
     "AI2 pointer/status reader + actual decoded target/batch and masking policy",
     "Backend full20 consumer receipt"
-  ]
+  ],
+  "transfer_head_check": {
+    "method": "HEAD",
+    "follow_redirects": true,
+    "observed_on": "2026-11-22",
+    "status": 200,
+    "content_type": "application/zip",
+    "content_length": 1765431,
+    "scope": "Data host reachability only; no remote bytes/hash or receiver ACK verified"
+  }
 }

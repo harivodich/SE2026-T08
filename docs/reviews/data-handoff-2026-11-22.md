@@ -29,6 +29,11 @@ and `SHA256SUMS`, and run `verify --bundle THAT_FOLDER --output NEW_ROOT`.
 Only exit 0 with the expected manifest hash/counts establishes Data verification.
 Asset paths then resolve relative to NEW_ROOT, not to `datasets/manifests`.
 
+An HTTP HEAD check from the Data host followed the GitHub redirect and returned
+200, `application/zip`, attachment filename `full20-transfer.zip`, 1765431 bytes.
+This confirms current Data-host reachability only; remote bytes were not fetched
+or hashed and recipient access/ACK still requires the receiver.
+
 Handoff suite: 11 tests PASS (13.627 s). Two new negatives bind updated archive/
 manifest checksums before testing missing-member and aliased-ID rejection, and
 assert no output publication. Existing traversal, duplicate-member, modified-file,
