@@ -22,6 +22,11 @@ Duplicate screening requires exactly one `quality == 'clean'` representative
 for every base present in the supplied inventory, including metadata-only callers.
 Valid subsets must retain that representative and their declared variants.
 
+`review_batches.py`: prepares cross-split-first inspection queues from the pinned
+review and a byte-identical local asset manifest, using the existing whole-source
+records validation boundary. Mechanical comparisons never become dispositions;
+image/content/lineage inspection and peer verdict remain explicit.
+
 ## Ranh giới và dữ liệu
 
 Không predictions làm gold hoặc random variant splits qua tập Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.

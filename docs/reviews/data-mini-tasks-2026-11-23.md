@@ -93,3 +93,12 @@ Actual full20 verify/export matched existing manifest/records hashes and counts;
 matched every historical hand-counted oracle. [Receipt](data-handoff-receipt-2026-11-23.json).
 Large outputs stay ignored in `artifacts/evaluation/data-mini-20261123`.
 Existing transfer URL retained; remote receiver access and ACK remain unverified.
+
+### M05 — LOCAL PASS (preparation only)
+
+Runnable `vietdoc.data.review_batches` validates the pinned actual source through
+the existing records exporter, then prepares eight batches covering all 71 pending
+pairs exactly once: 33 cross-split first, 38 same-split second. Clean asset/content
+hashes and lineage/catalog support are pinned; no verdict or inspection is invented.
+Four focused tests PASS. Actual normal/-O commands produce identical bytes.
+[Queue and next peer action](data-review-batches-2026-11-23.md).
