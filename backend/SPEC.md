@@ -10,7 +10,7 @@ Java ở `src/main/java/vn/vietdoc`; Thymeleaf ở `src/main/resources/templates
 
 ## Ranh giới
 
-Java là business DB writer và approval authority duy nhất. Java đã validate compute envelope/ID/provenance/asset declarations theo fixture, nhưng `AI_MODE=http` vẫn fail-fast cho đến khi Python consumer và Java client/runner cùng kiểm contract, canonical asset bytes và fencing theo run. Không load model weights hay viết OCR/model trong API. Completion vẫn cần fencing, idempotency và kiểm approval theo revision hiện hành.
+Java là business DB writer và approval authority duy nhất. `AI_MODE=http` nhận compute envelope v1 qua runner, kiểm correlation/schema, copy và xác minh attempt artifacts trước khi CAS-complete; viewer đọc canonical copy gắn với run/revision. Startup HTTP yêu cầu service token và attempts volume đã mount. H2 + fake HTTP regression không là actual-provider hoặc PostgreSQL acceptance. Không load model weights hay viết OCR/model trong API. Completion giữ fencing, idempotency và approval theo revision hiện hành.
 
 ## Workflow và kiểm tra
 

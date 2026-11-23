@@ -39,9 +39,10 @@ management:
         enabled: true
 vietdoc:
   storage: ${STORAGE_ROOT:./runtime/storage}
+  attempts-root: ${AI_ATTEMPTS_ROOT:./runtime/ai-attempts}
   mode: ${AI_MODE:manual}
   worker-enabled: ${WORKER_ENABLED:true}
-  worker-url: ${AI_WORKER_URL:http://localhost:8090/extract}
+  worker-url: ${AI_WORKER_URL:http://localhost:8090/internal/v1/compute}
   worker-token: ${AI_WORKER_TOKEN:}
   pipeline-manifest: ${PIPELINE_MANIFEST:manual.v1}
   seed-username: ${SEED_USERNAME:}

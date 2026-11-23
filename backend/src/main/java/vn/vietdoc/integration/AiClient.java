@@ -1,9 +1,15 @@
 package vn.vietdoc.integration;
 
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.net.http.HttpClient;
+import java.time.Instant;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.*;
@@ -12,6 +18,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.ResourceAccessException;
 import vn.vietdoc.common.*;
 import vn.vietdoc.contracts.ContractValidator;
 import vn.vietdoc.document.PrivateStorage;
@@ -22,8 +29,15 @@ public class AiClient {
   private final Json json;
   private final ContractValidator validator;
   private final PrivateStorage storage;
-  private final RestClient client;
   private final String endpoint, token;
+  private static final int MAX_SUCCESS_BYTES = 2 * 1024 * 1024;
+  private static final int MAX_ERROR_BYTES = 16 * 1024;
+  private static final ObjectMapper RESPONSE_MAPPER =
+      new ObjectMapper(
+          JsonFactory.builder()
+              .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+              .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(32).build())
+              .build());
 
   public AiClient(
       Json json,
@@ -36,56 +50,11 @@ public class AiClient {
     this.storage = storage;
     this.endpoint = endpoint;
     this.token = token;
-    var factory =
-        new JdkClientHttpRequestFactory(
-            HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
-    factory.setReadTimeout(Duration.ofSeconds(120));
-    this.client = RestClient.builder().requestFactory(factory).build();
   }
 
   public JsonNode extract(Claim claim) throws Exception {
-    if (claim.mode().equals("http")) {
-      var request = new LinkedMultiValueMap<String, Object>();
-      request.add("file", new FileSystemResource(storage.original(claim.documentId())));
-      request.add(
-          "request",
-          json.write(
-              Map.of(
-                  "document_id",
-                  claim.documentId(),
-                  "job_id",
-                  claim.id(),
-                  "run_id",
-                  claim.runId(),
-                  "document_type",
-                  claim.type(),
-                  "schema_version",
-                  claim.type() + ".v1",
-                  "pipeline_manifest_id",
-                  claim.manifest(),
-                  "deadline",
-                  claim.deadline())));
-      return client
-          .post()
-          .uri(endpoint)
-          .contentType(MediaType.MULTIPART_FORM_DATA)
-          .headers(
-              h -> {
-                if (!token.isBlank()) h.setBearerAuth(token);
-              })
-          .body(request)
-          .exchange(
-              (req, res) -> {
-                if (res.getStatusCode().is5xxServerError())
-                  throw new ApiException(503, "AI_UNAVAILABLE", "Dịch vụ AI chưa sẵn sàng.");
-                if (!res.getStatusCode().is2xxSuccessful())
-                  throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Worker AI từ chối yêu cầu.");
-                byte[] bytes = res.getBody().readNBytes(1048577);
-                if (bytes.length > 1048576)
-                  throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Kết quả AI vượt giới hạn.");
-                return json.mapper.readTree(bytes);
-              });
-    }
+    if (claim.mode().equals("http"))
+      throw new IllegalStateException("HTTP compute requires verified asset promotion");
     JsonNode payload = validator.empty(claim.type());
     boolean fixture = false;
     if (claim.mode().equals("demo")) {
@@ -120,5 +89,100 @@ public class AiClient {
     provenance.put("extractor_release_id", fixture ? "fictional-fixture.v1" : "manual.v1");
     provenance.put("normalizer_version", "business.v1");
     return result;
+  }
+
+  /** Validated HTTP envelope; the caller must promote assets before DB completion. */
+  public JsonNode compute(Claim claim) throws IOException {
+    if (token.isBlank())
+      throw new ApiException(502, "AI_CONFIGURATION", "Chưa cấu hình service credential.");
+    long budget = Duration.between(Instant.now(), claim.deadline()).toMillis();
+    if (budget <= 0)
+      throw new ApiException(504, "DEADLINE_EXCEEDED", "Job đã hết thời gian xử lý.");
+    byte[] original;
+    try (var source = Files.newInputStream(storage.original(claim.documentId()))) {
+      original = source.readNBytes(20 * 1024 * 1024 + 1);
+    }
+    if (original.length == 0 || original.length > 20L * 1024 * 1024
+        || !Json.sha256(original).equals(claim.hash()))
+      throw new ApiException(422, "INPUT_INVALID", "File nguồn không khớp hash đã lưu.");
+    budget = Math.min(Duration.between(Instant.now(), claim.deadline()).toMillis(), 180_000);
+    if (budget <= 0)
+      throw new ApiException(504, "DEADLINE_EXCEEDED", "Job đã hết thời gian xử lý.");
+    ObjectNode metadata = json.mapper.createObjectNode();
+    metadata.put("contract_version", 1);
+    metadata.put("job_id", claim.id());
+    metadata.put("run_id", claim.runId());
+    metadata.put("attempt_id", claim.attemptId());
+    metadata.put("document_type", claim.type());
+    metadata.put("schema_version", claim.type() + ".v1");
+    metadata.put("language", "vi");
+    metadata.put("input_sha256", claim.hash());
+    metadata.put("pipeline_manifest_id", claim.manifest());
+    metadata.put("remaining_budget_ms", Math.max(1, budget));
+    validator.computeRequest(metadata);
+    var request = new LinkedMultiValueMap<String, Object>();
+    request.add("request", json.write(metadata));
+    request.add("file", new ByteArrayResource(original) {
+      @Override public String getFilename() { return "document"; }
+    });
+    var factory = new JdkClientHttpRequestFactory(
+        HttpClient.newBuilder().connectTimeout(Duration.ofMillis(Math.min(3_000, budget))).build());
+    factory.setReadTimeout(Duration.ofMillis(Math.min(budget + 5_000, 185_000)));
+    RestClient client = RestClient.builder().requestFactory(factory).build();
+    try {
+      return client.post().uri(endpoint).contentType(MediaType.MULTIPART_FORM_DATA)
+          .headers(h -> h.setBearerAuth(token)).body(request).exchange((req, res) -> {
+            int status = res.getStatusCode().value();
+            int limit = status == 200 ? MAX_SUCCESS_BYTES : MAX_ERROR_BYTES;
+            byte[] bytes = res.getBody().readNBytes(limit + 1);
+            if (bytes.length > limit)
+              throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute response vượt giới hạn.");
+            JsonNode envelope;
+            try (JsonParser parser = RESPONSE_MAPPER.createParser(bytes)) {
+              envelope = RESPONSE_MAPPER.readTree(parser);
+              if (envelope == null || parser.nextToken() != null) throw new JsonParseException(parser, "Trailing JSON");
+            } catch (JsonProcessingException e) {
+              throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute response không phải JSON hợp lệ.");
+            }
+            if (status == 200) {
+              validator.computeResponse(metadata, envelope);
+              return envelope;
+            }
+            validator.computeError(metadata, envelope);
+            throw mappedError(status, envelope.path("code").asText(),
+                res.getHeaders().getFirst("Retry-After"));
+          });
+    } catch (ResourceAccessException e) {
+      throw new ApiException(503, "AI_UNAVAILABLE", "Không kết nối hoặc đọc được compute service.");
+    }
+  }
+
+  private ApiException mappedError(int status, String code, String retryAfter) {
+    if (status == 503 && Set.of("AI_BUSY", "AI_NOT_READY").contains(code))
+      return new ApiException(503, code, "Compute service đang bận hoặc chưa sẵn sàng.",
+          Map.of("retry_after_seconds", boundedRetryAfter(retryAfter)));
+    if (status == 504 && code.equals("COMPUTE_TIMEOUT"))
+      return new ApiException(504, code, "Compute vượt thời gian còn lại.");
+    if ((status == 401 || status == 403) && code.equals("SERVICE_AUTH_FAILED"))
+      return new ApiException(502, code, "Service credential không hợp lệ.");
+    if (status == 413 && code.equals("INPUT_TOO_LARGE")
+        || status == 422 && Set.of("INPUT_INVALID", "PROFILE_EXCEEDED", "MANIFEST_UNAVAILABLE", "OUTPUT_INVALID").contains(code)
+        || status == 500 && Set.of("MODEL_OOM", "MODEL_LOAD_FAILED", "INTERNAL_ERROR").contains(code))
+      return new ApiException(422, code, "Compute từ chối hoặc không xử lý được yêu cầu.");
+    return new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute trả status/code không khớp protocol.");
+  }
+
+  private int boundedRetryAfter(String value) {
+    if (value == null || value.isBlank()) return 0;
+    try {
+      long seconds = Long.parseLong(value.trim());
+      return (int) Math.max(0, Math.min(seconds, 30));
+    } catch (NumberFormatException ignored) {
+      try {
+        long seconds = Duration.between(Instant.now(),
+            ZonedDateTime.parse(value.trim(), DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()).getSeconds();
+        return (int) Math.max(0, Math.min(seconds + 1, 30));
+      } catch (RuntimeException invalid) { return 0; }
+    }
   }
 }

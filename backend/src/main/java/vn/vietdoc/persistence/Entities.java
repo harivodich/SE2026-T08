@@ -104,8 +104,14 @@ public final class Entities {
     @Column(name = "lease_until")
     public Instant leaseUntil;
 
+    @Column(name = "next_attempt_at")
+    public Instant nextAttemptAt;
+
     @Column(name = "lease_token")
     public String leaseToken;
+
+    @Column(name = "attempt_id")
+    public String attemptId;
 
     public int attempts;
 
@@ -134,6 +140,18 @@ public final class Entities {
 
     @Column(name = "result_json", columnDefinition = "text")
     public String resultJson;
+
+    @Column(name = "canonical_key")
+    public String canonicalKey;
+
+    @Column(name = "canonical_hash")
+    public String canonicalHash;
+
+    @Column(name = "canonical_width")
+    public Integer canonicalWidth;
+
+    @Column(name = "canonical_height")
+    public Integer canonicalHeight;
 
     @Column(name = "created_at")
     public Instant createdAt;

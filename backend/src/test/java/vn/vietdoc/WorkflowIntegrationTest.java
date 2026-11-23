@@ -396,8 +396,36 @@ class WorkflowIntegrationTest {
     var current = jobs.claim(j.id());
     assertNotNull(current);
     assertNotEquals(old.token(), current.token());
+    assertNotEquals(old.attemptId(), current.attemptId());
+    assertNotEquals(old.runId(), current.runId());
     assertFalse(jobs.complete(old, ai.extract(old)));
     assertTrue(jobs.complete(current, ai.extract(current)));
+  }
+
+  @Test
+  void busyRetryWaitsAndMintsNewAttemptAndRunWithoutResettingDeadline() throws Exception {
+    var d = documents.upload(owner.id(), sample("receipt", "png"), "receipt", Store.id());
+    var j = jobs.create(d.id(), owner.id(), Store.id());
+    var first = jobs.claim(j.id());
+    var deadline = first.deadline();
+    Instant earliest = Instant.now().plusSeconds(20);
+    jobs.fail(first, "AI_BUSY", "Compute đang bận.", true, 20);
+    assertEquals("RETRYING", jobs.get(j.id(), owner.id()).state());
+    assertEquals(false, new TransactionTemplate(tm).execute(s ->
+        store.job(j.id(), false).nextAttemptAt.isBefore(earliest)));
+    assertNull(jobs.claim(j.id()));
+    assertFalse(jobs.available().contains(j.id()));
+    new TransactionTemplate(tm).execute(s -> {
+      store.job(j.id(), true).nextAttemptAt = Instant.now().minusSeconds(1);
+      return null;
+    });
+    var second = jobs.claim(j.id());
+    assertNotNull(second);
+    assertEquals(deadline, second.deadline());
+    assertNotEquals(first.attemptId(), second.attemptId());
+    assertNotEquals(first.runId(), second.runId());
+    assertFalse(jobs.complete(first, ai.extract(first)));
+    assertTrue(jobs.complete(second, ai.extract(second)));
   }
 
   @Test
@@ -641,12 +669,36 @@ class WorkflowIntegrationTest {
     var job = jobs.create(d.id(), owner.id(), Store.id());
     var claim = jobs.claim(job.id());
     JsonNode expected = ai.extract(claim);
+    var envelope = json.mapper.createObjectNode();
+    envelope.put("contract_version", 1);
+    envelope.put("attempt_id", claim.attemptId());
+    envelope.set("result", expected);
+    String prefix = "attempts/" + claim.id() + "/" + claim.attemptId() + "/";
+    var canonical = envelope.putObject("canonical_page");
+    canonical.put("page", 0);
+    canonical.put("width", 10);
+    canonical.put("height", 10);
+    canonical.put("asset_key", prefix + "canonical.png");
+    canonical.put("sha256", "0".repeat(64));
+    var artifacts = envelope.putArray("artifacts");
+    var page = artifacts.addObject();
+    page.put("kind", "canonical_page");
+    page.put("asset_key", prefix + "canonical.png");
+    page.put("sha256", "0".repeat(64));
+    page.put("size_bytes", 10);
+    page.put("media_type", "image/png");
+    var ocr = artifacts.addObject();
+    ocr.put("kind", "ocr");
+    ocr.put("asset_key", prefix + "ocr.json");
+    ocr.put("sha256", "1".repeat(64));
+    ocr.put("size_bytes", 10);
+    ocr.put("media_type", "application/json");
     var server =
         com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
     java.util.concurrent.atomic.AtomicReference<String> received =
         new java.util.concurrent.atomic.AtomicReference<>();
     server.createContext(
-        "/extract",
+        "/internal/v1/compute",
         exchange -> {
           received.set(
               new String(
@@ -658,7 +710,7 @@ class WorkflowIntegrationTest {
             exchange.close();
             return;
           }
-          byte[] body = json.write(expected).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+          byte[] body = json.write(envelope).getBytes(java.nio.charset.StandardCharsets.UTF_8);
           exchange.getResponseHeaders().set("Content-Type", "application/json");
           exchange.sendResponseHeaders(200, body.length);
           exchange.getResponseBody().write(body);
@@ -671,7 +723,7 @@ class WorkflowIntegrationTest {
               json,
               contracts,
               new PrivateStorage("./target/test-storage", 20000000),
-              "http://127.0.0.1:" + server.getAddress().getPort() + "/extract",
+              "http://127.0.0.1:" + server.getAddress().getPort() + "/internal/v1/compute",
               "test-worker-secret");
       var request =
           new JobService.Claim(
@@ -679,16 +731,20 @@ class WorkflowIntegrationTest {
               claim.documentId(),
               claim.runId(),
               claim.token(),
+              claim.attemptId(),
               claim.type(),
               claim.hash(),
               "http",
               claim.manifest(),
               claim.deadline());
-      JsonNode actual = http.extract(request);
+      JsonNode actual = http.compute(request);
       assertTrue(received.get().contains(claim.id()));
       assertTrue(received.get().contains(claim.manifest()));
+      assertTrue(received.get().contains(claim.attemptId()));
+      assertTrue(received.get().contains("remaining_budget_ms"));
+      assertTrue(received.get().contains("contract_version"));
       assertTrue(received.get().contains("name=\"file\""));
-      assertTrue(jobs.complete(claim, actual));
+      assertTrue(jobs.complete(claim, actual.path("result")));
     } finally {
       server.stop(0);
     }

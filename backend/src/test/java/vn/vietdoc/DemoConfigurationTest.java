@@ -30,10 +30,11 @@ class DemoConfigurationTest {
   }
 
   @Test
-  void httpModeCannotStartBeforeComputeContractIsImplemented() {
+  void httpModeRequiresComputeCredentialAndSharedAttemptMount() {
     assertThrows(IllegalStateException.class, () -> new JobService(
         mock(Store.class), mock(Json.class), mock(ContractValidator.class),
         mock(DocumentService.class), mock(ReviewService.class),
-        "http", "unapproved", 180, 30, 3));
+        "http", "release.v1", 180, 30, 3,
+        "http://localhost:8090/internal/v1/compute", "", "./target", "./runtime/storage"));
   }
 }
