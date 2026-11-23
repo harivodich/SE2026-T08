@@ -2,7 +2,7 @@
 
 Đã có Data D1/D2 generator/validator và D3 evaluator; normalization policy của evaluator được version riêng, vẫn Proposed. AI-1 có loader/preprocess, geometry/evidence, Paddle detector và Tesseract `vie`; OCR artifact v1/v2 opt-in theo [proposal AI-1](../../docs/ocr-input-proposal.md). Entrypoint `recognize_document` chia sẻ deadline và quản lý lifetime ảnh.
 
-AI-2 có compute contracts (`contracts/compute.py`), release verifier (`ml/release_manifest.py`), normalizer `vi-VND.v2`, strict output parser, B0 `vi-label-header-b0.v3` cùng N1/N2 regressions, JSON logging, private FastAPI service shell và env report CLI. Native OCR → extraction → compute response chưa được compose vào service; default vẫn `AI_NOT_READY`. Chưa có model training. Python chỉ computation và offline Data/ML; Java quản lý business state. Docker: [infra](../../infra/README.md).
+AI-2 có compute contracts (`contracts/compute.py`), release verifier (`ml/release_manifest.py`), normalizer `vi-VND.v2`, strict output parser, B0 `vi-label-header-b0.v3` cùng N1/N2 regressions, JSON logging và private FastAPI service. CLI factory đã compose OCR → B0 → attempt artifacts → compute response; readiness cần verified profile/native env/model release. Fixture HTTP đã kiểm; native/Java acceptance còn chờ, xem [handoff W1–W4](../../docs/team/AI-2/2026-11-16-w1-w4-handoff.md). Chưa có model training. Python chỉ computation và offline Data/ML; Java quản lý business state. Docker: [infra](../../infra/README.md).
 
 Core package không cài dependencies. Chọn extra trong môi trường mới, từ repo root:
 

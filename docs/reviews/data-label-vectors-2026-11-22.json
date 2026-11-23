@@ -1,0 +1,79 @@
+{
+  "version": "data-label-vectors.v1",
+  "adapter_version": "vietdoc.field-labels.v1",
+  "consumer_policy": "AI2 must choose and evidence target/mask/loss; no default mapping of obscured/unlabeled to absent",
+  "vectors": [
+    {
+      "sample_id": "d11-receipt-02",
+      "document_type": "receipt",
+      "scope": "in-memory content-only oracle; not renderer/pixel/training verification",
+      "inputs": {
+        "tests/fixtures/d11-receipt-02.gold.json": "731d53e49392391479bbd1857efbdecb30ab48bf04469c81f123f5111bc6ef27",
+        "tests/fixtures/d11-receipt-02.labels.json": "5f093c3f6fb23d433ceba1fa6f296e994bfe6aa68e4d5e4335f57ed9fc7234d9"
+      },
+      "labels": [
+        {
+          "pointer": "/items/0/unit",
+          "value": null,
+          "status": "absent"
+        },
+        {
+          "pointer": "/items/1/quantity",
+          "value": null,
+          "status": "obscured"
+        },
+        {
+          "pointer": "/items/2/unit_price",
+          "value": null,
+          "status": "unlabeled"
+        },
+        {
+          "pointer": "/merchant_address",
+          "value": null,
+          "status": "absent"
+        },
+        {
+          "pointer": "/total_amount",
+          "value": "125500",
+          "status": "present"
+        }
+      ]
+    },
+    {
+      "sample_id": "d11-invoice-02",
+      "document_type": "invoice",
+      "scope": "in-memory content-only oracle; not renderer/pixel/training verification",
+      "inputs": {
+        "tests/fixtures/d11-invoice-02.gold.json": "6c7b424fa1d7c569f639e63f82cf202cf697546ef2a58c7af353c5eeec15840f",
+        "tests/fixtures/d11-invoice-02.labels.json": "fe5333303a123b48fb63ec2287cda927769e91df169b859ebdc873eb846c9aa6"
+      },
+      "labels": [
+        {
+          "pointer": "/buyer_name",
+          "value": null,
+          "status": "absent"
+        },
+        {
+          "pointer": "/items/0/unit",
+          "value": null,
+          "status": "absent"
+        },
+        {
+          "pointer": "/items/1/quantity",
+          "value": null,
+          "status": "obscured"
+        },
+        {
+          "pointer": "/items/2/unit_price",
+          "value": null,
+          "status": "unlabeled"
+        },
+        {
+          "pointer": "/total_amount",
+          "value": "180500",
+          "status": "present"
+        }
+      ]
+    }
+  ]
+}

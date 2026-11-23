@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vietdoc:compute-error:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "attempt_id",
+    "code",
+    "message",
+    "retryable"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": 1
+    },
+    "attempt_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "code": {
+      "enum": [
+        "SERVICE_AUTH_FAILED",
+        "INPUT_TOO_LARGE",
+        "INPUT_INVALID",
+        "PROFILE_EXCEEDED",
+        "MANIFEST_UNAVAILABLE",
+        "OUTPUT_INVALID",
+        "AI_BUSY",
+        "AI_NOT_READY",
+        "MODEL_OOM",
+        "MODEL_LOAD_FAILED",
+        "COMPUTE_TIMEOUT",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "retryable": {
+      "type": "boolean"
+    }
+  }
+}

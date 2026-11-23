@@ -1,0 +1,68 @@
+{
+  "observed_on": "2026-11-22",
+  "scope": "local combined candidate; not hosted CI or acceptance",
+  "data": {
+    "suite": "data",
+    "discovered": 81,
+    "selected": 80,
+    "delegated_to_pdf_job": [
+      "test_data_d21.D21Test.test_pdf_independent_parser_render_and_lossless_image"
+    ],
+    "run_count": 80,
+    "executed": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": [
+      {
+        "test": "test_data_integration.IntegrationDataTest.test_canonical_reference_bytes",
+        "reason": "opt-in canonical bytes: set VIETDOC_CANONICAL_BYTES=1 in declared render environment"
+      }
+    ],
+    "python": "3.12.3",
+    "dependencies": {
+      "Pillow": "10.2.0",
+      "jsonschema": "4.10.3"
+    }
+  },
+  "eval": {
+    "tests": 49,
+    "passed": 49,
+    "seconds": 12.96
+  },
+  "review": {
+    "tests": 7,
+    "passed": 7,
+    "seconds": 183.503
+  },
+  "pdf": {
+    "tests": 1,
+    "passed": 1,
+    "skipped": 0
+  },
+  "unique": {
+    "selected": 137,
+    "passed": 136,
+    "canonical_opt_in_skipped": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  "logs": {
+    "data-tests.log": {
+      "sha256": "a742170966c03178d57b11c632a7679b28e3a588fb6ffe7327e239f9859286b8",
+      "bytes": 11805
+    },
+    "review-tests.log": {
+      "sha256": "65c9264336a6cf3b6bdcec7be21ad2f03903a90f8297d8ce83426dee3e95eeaa",
+      "bytes": 1202
+    },
+    "pdf-tests.log": {
+      "sha256": "0e84f7455f2cd10fc49ae04a3bbb5c1f038dd113f8fd0c27102f3d6cb7c663f6",
+      "bytes": 506
+    },
+    "evaluator-relocated-replay.log": {
+      "sha256": "fcb7fccca4e9b5c8257f3e4fe559c32617cbd44e2dbb65ab07b4d1119b2c862c",
+      "bytes": 772
+    }
+  },
+  "source_inventory": "data-candidate-inventory-2026-11-22.json"
+}

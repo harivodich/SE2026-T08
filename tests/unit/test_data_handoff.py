@@ -87,6 +87,37 @@ class HandoffTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'member size mismatch|member hash mismatch'):
             handoff.verify(self.bundle, self.base/'consumer')
 
+    def test_missing_member_rejected_before_output(self):
+        self.rewrite_archive(lambda members: members[1:])
+        output = self.base / 'consumer'
+        with self.assertRaisesRegex(ValueError, 'missing/duplicate/unknown archive member'):
+            handoff.verify(self.bundle, output)
+        self.assertFalse(output.exists())
+
+    def test_id_alias_rejected_even_with_rebound_manifest_and_archive_hashes(self):
+        name = self.inventory['manifest_path']
+
+        def change(members):
+            result = []
+            for info, content in members:
+                if info.filename == name:
+                    manifest = json.loads(content)
+                    manifest['samples'][0]['sample_id'] = 'D12-receipt-03'
+                    manifest['samples'][0]['base_id'] = 'D12-receipt-03'
+                    content = encoded(manifest)
+                    import hashlib
+                    digest = hashlib.sha256(content).hexdigest()
+                    self.inventory['files'][name] = dict(size=len(content), sha256=digest)
+                    self.inventory['manifest_sha256'] = digest
+                result.append((info, content))
+            return result
+
+        self.rewrite_archive(change)
+        output = self.base / 'consumer'
+        with self.assertRaisesRegex(ValueError, 'D12-receipt-03: sample_id/type mismatch'):
+            handoff.verify(self.bundle, output)
+        self.assertFalse(output.exists())
+
     def test_symlink_member_rejected(self):
         def change(members):
             members[0][0].external_attr = (stat.S_IFLNK | 0o777) << 16
