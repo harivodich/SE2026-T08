@@ -116,6 +116,25 @@ def _memory():
         return None
 
 
+class _StageClock:
+    """Exclusive wall time; excludes run.json and report.json serialization."""
+
+    def __init__(self, case):
+        self.case, self.active, self.started = case, None, None
+
+    def enter(self, stage):
+        now = time.monotonic()
+        if self.active is not None:
+            elapsed = _measured_seconds(now - self.started)
+            previous = self.case["stage_seconds"][self.active]
+            if elapsed is not None and previous is not None:
+                elapsed = _measured_seconds(previous + elapsed)
+            self.case["stage_seconds"][self.active] = elapsed
+        self.active, self.started = stage, now
+        if stage is not None:
+            self.case["stage"] = stage
+
+
 def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=False):
     """One bounded snapshot for validation, sample planning and exact byte hash."""
     root = Path(root).resolve()
@@ -166,6 +185,7 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
         case = {"sample_id": sample_id, "document_type": sample["document_type"],
                 "input_declared_path": asset["path"], "fixture_fallback": fallback,
                 "expected_input_sha256": asset["sha256"], "native_attempted": False,
+                "engine_calls": 0, "stage_seconds": {s: None for s in ("input", "preprocess", "ocr", "export")},
                 "status": "not_run", "stage": "not_started", "error_code": "BATCH_ABORTED",
                 "duration_seconds": 0.0}
         plans.append((case, path))
@@ -188,7 +208,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
     from vietdoc.pipeline.ocr.preview import render_preview
 
     manifest, digest, inputs = plan
-    plans = [(dict(case), path) for case, path in inputs]
+    plans = [(dict(case, stage_seconds=dict(case["stage_seconds"])), path) for case, path in inputs]
     limits = PreprocessLimits() if limits is None else limits
     output_dir = Path(output_dir)
     report = {"kind": "offline D1 OCR handoff; not evaluator or consumer acceptance",
@@ -200,7 +220,9 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
               "versions": {"stage": OCR_STAGE_VERSION, "geometry": GEOMETRY_VERSION, "evidence": EVIDENCE_VERSION,
                            "Pillow": version("Pillow"), "pypdfium2": version("pypdfium2")},
               "profile": {"processed_long_edge": limits.processed_long_edge, "pdf_dpi": limits.pdf_dpi,
-                          "max_pixels": limits.max_pixels, "budget_ms": remaining_budget_ms},
+                          "max_pixels": limits.max_pixels, "max_file_bytes": limits.max_file_bytes,
+                          "timeout_seconds": limits.timeout_seconds, "budget_ms": remaining_budget_ms},
+              "timing_scope": "exclusive wall stages; excludes per-sample run.json and final report.json writes",
               "consumer_acceptance": "pending AI2/Backend; local parser check only",
               "samples": [case for case, _ in plans]}
     try:
@@ -211,26 +233,28 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
         started = time.monotonic()
         case.pop("error_code")
         target = output_dir / case["sample_id"]
+        clock = _StageClock(case)
 
         class ObservedEngine:
             def recognize(self, loaded, *, remaining_budget_ms):
-                case["stage"] = "ocr"
+                clock.enter("ocr")
                 recognize = engine.recognize
                 if not callable(recognize):
                     raise TypeError("OCR engine does not provide a callable port")
                 case["native_attempted"] = True
+                case["engine_calls"] += 1
                 return recognize(loaded, remaining_budget_ms=remaining_budget_ms)
 
         try:
-            case["stage"] = "export"
+            clock.enter("export")
             target.mkdir()
-            case["stage"] = "input"
+            clock.enter("input")
             with path.open("rb") as stream:
                 data = stream.read(limits.max_file_bytes + 1)
-            case["stage"] = "preprocess"
+            clock.enter("preprocess")
             with recognize_document(data, ObservedEngine(), limits=limits, remaining_budget_ms=remaining_budget_ms,
                                     expected_sha256=case["expected_input_sha256"]) as result:
-                case["stage"] = "export"
+                clock.enter("export")
                 loaded, page = result.loaded, result.ocr
                 with BytesIO() as encoded:
                     loaded.canonical.save(encoded, format="PNG")
@@ -252,6 +276,8 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
                             prepared=loaded.metadata.to_dict(), block_count=len(page.blocks),
                             unreadable_count=len(page.unreadable_regions), review_flags=list(page.review_flags),
                             ocr_seconds=_measured_seconds(getattr(engine, "last_inference_seconds", None)), memory_bytes=_memory(),
+                            artifact_paths={name: f"{case['sample_id']}/{name}" for name in
+                                            ("canonical.png", "processed.png", "ocr.json", "prepared.json", "overlay.png", "preview.html")},
                             local_consumer_parse="passed; not AI2/Backend acceptance")
         except FileNotFoundError:
             missing_input = case["stage"] == "input"
@@ -265,6 +291,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
             code = "LOCAL_MEMORY_EXHAUSTED" if isinstance(exc, MemoryError) else "UNEXPECTED_FAILURE"
             case.update(status="failed", error_code=code)
             report.update(run_status="aborted", abort_code=code)
+        clock.enter(None)
         case["duration_seconds"] = _measured_seconds(time.monotonic() - started)
         try:
             _json(target / "run.json", case)
@@ -279,6 +306,7 @@ def _review_plan(plan, output_dir, engine, *, limits=None, remaining_budget_ms=1
             break
     report["counts"] = {"requested": len(plans), "native_attempted": sum(c["native_attempted"] for c in report["samples"]),
                         **{s: sum(c["status"] == s for c in report["samples"]) for s in ("ok", "failed", "not_run")}}
+    report["observed_engine_calls"] = sum(c["engine_calls"] for c in report["samples"])
     try:
         _json(output_dir / "report.json", report)
     except Exception:

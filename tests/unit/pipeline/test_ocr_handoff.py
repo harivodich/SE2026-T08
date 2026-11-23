@@ -8,6 +8,7 @@ from io import BytesIO, StringIO
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
@@ -328,6 +329,10 @@ class HandoffTest(unittest.TestCase):
         self.assertEqual(report["samples"][2]["error_code"], "BATCH_ABORTED")
         self.assertFalse(report["samples"][2]["native_attempted"])
         self.assertEqual(self.engine.recognize.call_count, 2)
+        self.assertEqual(report["observed_engine_calls"], 2)
+        self.assertEqual([s["engine_calls"] for s in report["samples"]], [1, 1, 0])
+        self.assertIsNotNone(report["samples"][1]["stage_seconds"]["ocr"])
+        self.assertTrue(all(value is None for value in report["samples"][2]["stage_seconds"].values()))
         self.engine.close.assert_called_once()
         for text in (json.dumps(payload), json.dumps(report)):
             self.assertNotIn(private, text)
@@ -351,6 +356,8 @@ class HandoffTest(unittest.TestCase):
                 self.assertEqual(report["samples"][0]["stage"], "ocr")
                 self.assertEqual(report["samples"][0]["error_code"], "UNEXPECTED_FAILURE")
                 self.assertFalse(report["samples"][0]["native_attempted"])
+                self.assertEqual(report["observed_engine_calls"], 0)
+                self.assertEqual(report["samples"][0]["engine_calls"], 0)
                 self.assertEqual(report["samples"][1]["error_code"], "BATCH_ABORTED")
                 self.assertNotIn("PRIVATE_TOKEN", json.dumps(report))
 
@@ -370,6 +377,29 @@ class HandoffTest(unittest.TestCase):
         self.assertEqual(report["counts"], {"requested":5,"native_attempted":3,"ok":1,"failed":3,"not_run":1})
         self.assertEqual([s["stage"] for s in report["samples"]], ["input","preprocess","ocr","export","export"])
         self.assertEqual([s.get("error_code") for s in report["samples"]], ["INPUT_ARTIFACT_UNAVAILABLE","INPUT_INVALID","MODEL_OOM","LOCAL_EXPORT_FAILED",None])
+        self.assertEqual(report["observed_engine_calls"], self.engine.recognize.call_count)
+        for case in report["samples"]:
+            self.assertEqual(case["engine_calls"], int(case["native_attempted"]))
+            measured = [v for v in case["stage_seconds"].values() if v is not None]
+            self.assertTrue(all(v >= 0 for v in measured))
+            self.assertLessEqual(sum(measured), case["duration_seconds"] + 1e-9)
+        self.assertIsNone(report["samples"][0]["stage_seconds"]["preprocess"])
+        self.assertIsNone(report["samples"][1]["stage_seconds"]["ocr"])
+        successful = report["samples"][-1]
+        for name, relative in successful["artifact_paths"].items():
+            self.assertEqual(relative, "last/" + name)
+            self.assertTrue((self.root / "stages" / relative).is_file())
+        self.assertEqual(json.loads((self.root / "stages/last/run.json").read_bytes()), successful)
+
+    def test_exclusive_stage_times_do_not_count_native_time_as_preprocess(self):
+        case = {"stage_seconds": {name: None for name in ("input", "preprocess", "ocr", "export")}}
+        # Decode takes two units, OCR five, validation one, export three.
+        clock = handoff._StageClock(case)
+        with patch.object(handoff, "time", SimpleNamespace(monotonic=Mock(side_effect=[1, 3, 8, 9, 12]))):
+            for stage in ("preprocess", "ocr", "preprocess", "export", None):
+                clock.enter(stage)
+        self.assertEqual(case["stage_seconds"], {"input": None, "preprocess": 3, "ocr": 5, "export": 3})
+        self.assertEqual(case["stage"], "export")
 
     def test_per_sample_record_storage_failure_retains_final_accounting(self):
         manifest = self.manifest([self.sample(name, self.data) for name in ("one", "later")])
