@@ -2,10 +2,10 @@
 
 ## Phạm vi đang chạy
 
-Workflow `VietDoc CI` kiểm Data/contracts, AI framework bằng fictional fixtures và Web/Java/package/assets/Docker smoke trên cùng run. Các tests chưa chứng minh OCR/model, Java–Python actual-provider, PostgreSQL hoặc luồng ứng dụng đã hoàn tất. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
+Workflow `VietDoc CI` kiểm Data/contracts, AI framework bằng fictional fixtures, Web/Java/package/assets/Docker smoke và PostgreSQL migration/job lifecycle trên cùng run. Tests PostgreSQL không chứng minh OCR/model hoặc Java–Python actual-provider. Deploy chưa được cấu hình vì chưa có server/registry/credentials được chỉ định.
 
 ```text
-PR → develop: workflow + schemas/gate tests + Data matrix + PDF verification + Data wheel + AI fixtures + Web/Java/package/assets + Docker smoke → ci-gate
+PR → develop: workflow + schemas/gate tests + Data matrix + PDF verification + Data wheel + AI fixtures + Web/Java/package/assets + Docker smoke + PostgreSQL jobs → ci-gate
 PR → main:    các kiểm tra trên + application release checks → ci-gate
 ```
 
@@ -23,10 +23,11 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test,ai1]` + `numpy==2.2.6`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
 | test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
 | docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
+| postgres | postgres-job-lifecycle | PostgreSQL 16.6 container riêng; Flyway v1/v2, concurrent claim, expired lease recovery và stale completion qua `PostgresJobIT` |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
-`ci-gate` nhận kết quả `test` và `docker-smoke` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một trong hai đều chặn develop. Job `ai` chỉ kiểm framework/fixtures; actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness` còn thiếu `backend`, `postgres`, `parity`, `e2e`, `application-artifact` trên main. Thêm các file Java/model không tự làm gate xanh; phải nối executable jobs tương ứng vào `needs` và có kết quả success.
+`ci-gate` nhận kết quả `test`, `docker-smoke` và `postgres` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một job đều chặn develop. Job `ai` chỉ kiểm framework/fixtures; actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness` còn thiếu `backend`, `parity`, `e2e`, `application-artifact` trên main. `postgres` chỉ là DB/job integration, không được dùng để thay actual-provider evidence.
 
 Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Docker smoke phụ thuộc `test`; nếu `test` lỗi khiến Docker bị skip, gate báo cả hai trạng thái. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
 

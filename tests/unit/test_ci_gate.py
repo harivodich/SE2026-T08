@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from scripts.ci import checks
-from scripts.ci.gate import APPLICATION_CHECKS, CORE_CHECKS, WEB_CHECKS, evaluate, target_branch
+from scripts.ci.gate import APPLICATION_CHECKS, CORE_CHECKS, WEB_CHECKS, PG_CHECKS, evaluate, target_branch
 
 
 def results(*names):
@@ -20,18 +20,18 @@ def results(*names):
 
 class CiGateTest(unittest.TestCase):
     def setUp(self):
-        self.develop = results(*(CORE_CHECKS + WEB_CHECKS))
+        self.develop = results(*(CORE_CHECKS + WEB_CHECKS + PG_CHECKS))
         self.develop['release-readiness'] = {'result': 'skipped'}
 
     def test_increment_success_requires_all_core_and_web_jobs(self):
         self.assertEqual(evaluate('ci', 'develop', self.develop), [])
-        for name in CORE_CHECKS + WEB_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS:
             broken = copy.deepcopy(self.develop)
             del broken[name]
             self.assertIn(f'{name}: missing', evaluate('ci', 'develop', broken))
 
     def test_failure_cancel_skip_unknown_and_empty_never_pass(self):
-        for name in CORE_CHECKS + WEB_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS:
             for status in ('failure', 'cancelled', 'skipped', 'neutral', '', None):
                 with self.subTest(name=name, status=status):
                     broken = copy.deepcopy(self.develop)
@@ -49,7 +49,7 @@ class CiGateTest(unittest.TestCase):
 
     def test_current_data_only_increment_is_not_release_ready(self):
         failures = evaluate('release', 'main', self.develop)
-        for name in APPLICATION_CHECKS:
+        for name in set(APPLICATION_CHECKS) - set(PG_CHECKS):
             self.assertIn(f'{name}: missing', failures)
 
     def test_all_application_checks_required_not_only_file_presence(self):
@@ -75,7 +75,7 @@ class CiGateTest(unittest.TestCase):
         headers = list(re.finditer(r'(?m)^  ([a-z][a-z0-9-]+):\s*$', source))
         jobs = {match.group(1): source[match.end():headers[index + 1].start() if index + 1 < len(headers) else None]
                 for index, match in enumerate(headers)}
-        for name in WEB_CHECKS:
+        for name in WEB_CHECKS + PG_CHECKS:
             self.assertIn(name, jobs)
             self.assertRegex(jobs['ci-gate'], rf'(?m)^    needs: \[[^\n]*\b{re.escape(name)}\b[^\n]*\]$')
         self.assertRegex(jobs['docker-smoke'], r'(?m)^    needs: test$')

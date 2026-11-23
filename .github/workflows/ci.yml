@@ -216,9 +216,45 @@ jobs:
         if: always()
         run: docker rm -f vietdoc-web-smoke || true
 
+  postgres:
+    name: postgres-job-lifecycle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16.6
+        env:
+          POSTGRES_DB: vietdoc
+          POSTGRES_USER: vietdoc
+          POSTGRES_PASSWORD: test-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vietdoc -d vietdoc"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      VIETDOC_PG_TEST_URL: jdbc:postgresql://localhost:5432/vietdoc
+      VIETDOC_PG_TEST_USER: vietdoc
+      VIETDOC_PG_TEST_PASSWORD: test-only-password
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Record migration fingerprint
+        run: sha256sum backend/src/main/resources/db/migration/*.sql
+      - name: Run real PostgreSQL Flyway and job concurrency test
+        run: bash mvnw -B -Dtest=PostgresJobIT test
+        working-directory: backend
+
   release-readiness:
     name: release-readiness
-    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke]
+    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres]
     if: >-
       ${{ always() &&
       (github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main') }}
@@ -235,7 +271,7 @@ jobs:
 
   ci-gate:
     name: ci-gate
-    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, release-readiness]
+    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres, release-readiness]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
