@@ -56,11 +56,12 @@ public class DocumentController {
 
   @GetMapping("/documents/{id}/pages/0")
   public ResponseEntity<byte[]> page(
-      @PathVariable String id, @AuthenticationPrincipal Identity user) {
+      @PathVariable String id, @AuthenticationPrincipal Identity user,
+      @RequestParam(name = "revision_id", required = false) String revisionId) {
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_PNG)
         .cacheControl(CacheControl.noStore())
-        .body(documents.page(id, user.id()));
+        .body(documents.page(id, user.id(), revisionId));
   }
 
   @PostMapping("/documents/{id}/jobs")
