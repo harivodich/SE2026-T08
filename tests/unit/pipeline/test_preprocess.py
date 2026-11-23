@@ -43,7 +43,7 @@ def corner_image(orientation):
         return stream.getvalue()
 
 
-def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False, text=False):
+def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False, text=False, security=None):
     """Controlled PDF geometry; optional 7pt digits are a synthetic render oracle."""
     objects = [b"<< /Type /Catalog /Pages 2 0 R >>", b""]
     kids = []
@@ -58,6 +58,15 @@ def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False, text=False):
             content += b"\n0 0 0 rg BT /F1 7 Tf 8 12 Td (80.000) Tj ET"
         objects.extend([page.encode(), f"<< /Length {len(content)} >>\nstream\n".encode() + content + b"\nendstream"])
     objects[1] = f"<< /Type /Pages /Kids [{' '.join(kids)}] /Count {pages} >>".encode()
+    encryption = ""
+    if security is not None:
+        # Blank streams need no encrypted content bytes. Fixed synthetic R2 entries
+        # exercise both password-error and empty-password security-handler paths.
+        if mark or text:
+            raise ValueError("Encrypted fixture supports blank content only")
+        owner, user = security
+        encryption = f" /Encrypt {len(objects) + 1} 0 R /ID [<00112233445566778899aabbccddeeff><00112233445566778899aabbccddeeff>]"
+        objects.append(f"<< /Filter /Standard /V 1 /R 2 /Length 40 /O <{owner}> /U <{user}> /P -4 >>".encode())
     data = bytearray(b"%PDF-1.4\n")
     offsets = [0]
     for number, obj in enumerate(objects, 1):
@@ -67,7 +76,7 @@ def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False, text=False):
     data.extend(f"xref\n0 {len(offsets)}\n0000000000 65535 f \n".encode())
     for offset in offsets[1:]:
         data.extend(f"{offset:010d} 00000 n \n".encode())
-    data.extend(f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    data.extend(f"trailer\n<< /Size {len(offsets)} /Root 1 0 R{encryption} >>\nstartxref\n{xref}\n%%EOF\n".encode())
     return bytes(data)
 
 
@@ -217,6 +226,38 @@ class PreprocessTest(unittest.TestCase):
                 with self.assertRaises(PreprocessError) as caught:
                     _load_pdf(b"%PDF-", PreprocessLimits())
                 self.assertEqual(caught.exception.code, "PROFILE_EXCEEDED")
+
+    def test_real_encrypted_pdfs_are_valid_but_rejected_by_bounded_loader(self):
+        # PDF Standard security revision 2, fixed ID, owner password "owner".
+        # Algorithms 2-4: https://github.com/py-pdf/pypdf/blob/main/pypdf/_encryption.py
+        cases = (
+            ("", "c92422687facee686e373f10b5c7d04738053152f7e2ee30e11c69ec442576ab",
+             "adb43c8d5c0a904ecd6878928abf0a1ef65fa75e1632b2134005fa3b1d844c68"),
+            ("reader", "93fe0d5254ab4c9644693f33c07cb54f587dce1e2682fe9ecea6107a1ef630dd",
+             "957f0931bc330bb01345f392f2d0fa815eb4eeff85ca0de90cb5f460e26ee612"),
+        )
+        for password, owner, user in cases:
+            with self.subTest(empty_password=not password):
+                data = pdf_bytes(security=(owner, user))
+                # Independent positive control: real parser, right password, real render.
+                with pdfium.PdfDocument(data, password=password) as document:
+                    self.assertEqual(len(document), 1)
+                    self.assertEqual(pdfium.raw.FPDF_GetSecurityHandlerRevision(document), 2)
+                    page = document[0]
+                    try:
+                        bitmap = page.render(scale=1)
+                        try:
+                            self.assertEqual((bitmap.width, bitmap.height), (72, 36))
+                        finally:
+                            bitmap.close()
+                    finally:
+                        page.close()
+                if password:
+                    with self.assertRaises(pdfium.PdfiumError) as caught:
+                        pdfium.PdfDocument(data)
+                    self.assertEqual(caught.exception.err_code, pdfium.raw.FPDF_ERR_PASSWORD)
+                # Production disposable decoder, no PdfDocument/security API mocks.
+                self.assert_error("PROFILE_EXCEEDED", data)
 
     def test_limits_reject_bad_configuration(self):
         for field, value in (("max_pixels", 0), ("max_file_bytes", True), ("pdf_dpi", -1), ("processed_long_edge", 1.5), ("timeout_seconds", 0), ("timeout_seconds", float("inf"))):
