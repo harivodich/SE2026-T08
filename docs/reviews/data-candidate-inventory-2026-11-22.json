@@ -1,0 +1,105 @@
+{
+  "observed_on": "2026-11-22",
+  "base": "e040e94bb20509055d06fa0182e05a565e588b94",
+  "candidate_source_anchor": "f269df31ec05d371d51955697170643e15372cf3",
+  "pr_heads": {
+    "10": {
+      "branch": "feature/data-d2-1",
+      "head": "be2c38f6739f2e4f5e2333dbb2618406667fe591"
+    },
+    "12": {
+      "branch": "feature/data-d2-2",
+      "head": "30262311a887d9c7a555cb6fb1533f481a25bd42"
+    },
+    "13": {
+      "branch": "feature/data-d3-1",
+      "head": "e001496ac74b087529630f95a65c674a71170629"
+    },
+    "77": {
+      "branch": "feature/SE-36_validated_label_adapter",
+      "head": "dd85080c28515c0c4c62d45accdc8af88b7f82c4"
+    },
+    "78": {
+      "branch": "feature/duplicate_review_audit",
+      "head": "fc2877e77ea83cc068cda4a8dadbd68d812ef3af"
+    },
+    "80": {
+      "branch": "feature/data_capacity_benchmark",
+      "head": "b36ad65e00155b37b58a0308cb5d8a4094952602"
+    }
+  },
+  "data_inventory": {
+    "discovered": 81,
+    "selected": 80,
+    "mandatory_files": [
+      "test_data_d21.py",
+      "test_data_d22.py",
+      "test_data_integration.py",
+      "test_data_values.py"
+    ],
+    "modules": {
+      "test_data_benchmark": 10,
+      "test_data_d21": 6,
+      "test_data_d22": 10,
+      "test_data_d2_semantics": 5,
+      "test_data_duplicate_review": 8,
+      "test_data_handoff": 11,
+      "test_data_integration": 8,
+      "test_data_label_adapter": 12,
+      "test_data_training_records": 5,
+      "test_data_values": 6
+    },
+    "delegated_pdf": "test_data_d21.D21Test.test_pdf_independent_parser_render_and_lossless_image"
+  },
+  "source_sha256": {
+    "src/vietdoc/data/__init__.py": "d7882a57230b3348e51bb9cc36239e30ab4b4dfb382c7e45e34b53dac3a84a64",
+    "src/vietdoc/data/adapters/__init__.py": "a06b37b14ecea0c999b154c479f7bb011a417effe715c8e6263ba454589b70d9",
+    "src/vietdoc/data/adapters/labels.py": "70f4f4c74f42a3b16bb9de24b06ab8e6a7f41f62f08cf8681298c12242da365a",
+    "src/vietdoc/data/adapters/records.py": "46e8ca69f650b5fd045062d671dff99b9d76d9f4f0fbb2c0b87ff1d19bc25be9",
+    "src/vietdoc/data/benchmark.py": "4048d681e1357193fdb752be21ecc0ab9f394bf510e5feb25cab404e869fcfc9",
+    "src/vietdoc/data/duplicate_review.py": "f40338bc7974af9507245295f39f3602d504ddd855e600e7e5ac3e5f62199412",
+    "src/vietdoc/data/generator/__init__.py": "3efacd0a9327a25390d03e04dd8a142dcbfb335445013d9cb74bdb050bcab977",
+    "src/vietdoc/data/generator/artifact_io.py": "3d68ab4e488e55f7bbdea61cfadbfff4113cecc5bb5eaf7cede9202273aa86f5",
+    "src/vietdoc/data/generator/augmentation.py": "22b59717c1d6bda7c69e6ac54da5aae0c108e0352877218145305d910c155e78",
+    "src/vietdoc/data/generator/d21.py": "e022ab20637068029f5d080636a25d916cd3ec8aea3efe7e6747f341697338ba",
+    "src/vietdoc/data/generator/d22.py": "aa137276eb5b681d5836e1b8869fdd6e3247fe9408c6df3ec6a7057a4395479e",
+    "src/vietdoc/data/generator/handoff.py": "f0cfc93e30bcf907549792ab17e894c1b880e5a20815485f429657d4b5aff39f",
+    "src/vietdoc/data/generator/integration.py": "f22f76e43467fe7b90ed98185e2ba56bcd6c88f6cbb5295e1129dfcb7647c52e",
+    "src/vietdoc/data/generator/pdf.py": "902f70a7f1d4f81080d38a589dc48ef924a148c42275cded19ce2d8a07169144",
+    "src/vietdoc/data/generator/render_environment.py": "9b97f768256c5de3fe15cceb1477a3ae16a8437b0e818215d24d320f0fe0f98a",
+    "src/vietdoc/data/generator/rendering.py": "829215531ce21b8be4b4924f9f4b40fa7d94c5f4712edd2c52c21ce7b09e2b77",
+    "src/vietdoc/data/generator/templates/__init__.py": "c1eb4603d30a405393efbd9bccc5a8f4b81cd35efaaf4187ff943c50ea6aaea3",
+    "src/vietdoc/data/generator/templates/families.py": "bf7d971a34546bdd3867d2b49d099001992ba8d806fa1bfda589866559f73b31",
+    "src/vietdoc/data/generator/values.py": "3938d9a90b8371871c963313c3df5e4cfa26010d7b116e69c3877db9295b1aec",
+    "src/vietdoc/data/manifest.py": "c9bc206cb3c939bc9283c7d400a66cdf708cd0252b5c492557400670fbab30c7",
+    "src/vietdoc/data/splits.py": "adad9a800731b08758fc4eb8f4505ac7366aca22380ed012ecabb1d19e043740",
+    "src/vietdoc/data/validation.py": "34e64745c232da5b7b867298f87d8b5c6d0803ab9a21f2c2980c3de9cbc4c055",
+    "src/vietdoc/evaluation/__init__.py": "1b28dcf8552c97b320a251cae0da1e3c3f1fa8b8cc8a5ebe38c5e222be5d0c7c",
+    "src/vietdoc/evaluation/__main__.py": "1909c22b59f2e7db030ee2aa3ccdd0c807a2ea91330f1525f8fcde8c22c52c79",
+    "src/vietdoc/evaluation/diagnostics.py": "7c562b4acb68ea73d5b71dba875a03307ceda98fef4b267292e7bcc393b4b510",
+    "src/vietdoc/evaluation/evidence.py": "216ce0240bc59c92a9479f8c002bf08d82074b95e6b128e65a8ece294b3e58d3",
+    "src/vietdoc/evaluation/extended.py": "d908f621928b55a7523efa6d4ccbd5c2d67196291afd53dce78e8b6e621df183",
+    "src/vietdoc/evaluation/gold_validation.py": "43a12285ddafe6afa6ae7abc30afe1dcdb87957d3ce760823659c4e99ef01c7b",
+    "src/vietdoc/evaluation/matching.py": "e229100ebde46fb6adcdb2b41a4e896550063440b6100aecfd171042b247cbe7",
+    "src/vietdoc/evaluation/policy.py": "cfc134579a161a3eaa7dfe339b1c707f6ffede6d8344296304b69615a3e813f0",
+    "src/vietdoc/evaluation/scalar_ocr.py": "4352c9246fd969e549afbbc58024b577c4e53d02a9d1d81bcf61cf5859620a3b",
+    "src/vietdoc/evaluation/tables.py": "dc6892e9fb86308eac7c9d77bc17ed3b0c2392bc126ebb5fb65c162761e48825"
+  },
+  "test_sha256": {
+    "tests/unit/test_data_benchmark.py": "db47384dc9178c150d1a39f6e5f8a054ef37702e83e65fe94f129fc9902a6bc7",
+    "tests/unit/test_data_d21.py": "856ec44bc66ee0f050163507158f858461e62c87c3d10d4544728929e7a02ba6",
+    "tests/unit/test_data_d22.py": "eccd92bc8ea005af0a6a167c9db163ae6cb0ba1c299be80a4e9f414278fa5338",
+    "tests/unit/test_data_d2_semantics.py": "bacb599c717886b1cf6d27f3cb5f25c88edf04d8a45475a644f6973cdcccbb07",
+    "tests/unit/test_data_duplicate_review.py": "fdbf8eb1e90030825e8b378d73bd0aa7cdb41992f5f2da898f44589ef44c3341",
+    "tests/unit/test_data_handoff.py": "12da61613c5862adae68a738eff2e8cee613152c29e0072bfabfb02d20788fb3",
+    "tests/unit/test_data_integration.py": "5ef26be02d0431fe6f11d299416cfbc3df28859ab76d241285fb9acdfa48a106",
+    "tests/unit/test_data_label_adapter.py": "c7789f4b54bf75065bfb296615fab027a5d8a3c4eef7ff4dac825db42f31b335",
+    "tests/unit/test_data_training_records.py": "9f88e68d59daa422156878723a4b0120f1512a9a91a507679ff0dc1733b7d31a",
+    "tests/unit/test_data_values.py": "99109e090a2c8da72237c019f39e2418f54788eec856bce0fdf67caef49e8244",
+    "tests/unit/test_evaluation.py": "7eaab1285aacd776c8328777e24282dcbc1fed928b5b080216b32d7c86835be5",
+    "tests/unit/test_evaluation_boundary.py": "ac68c278db3833cc5b957aea6fad02cbe160546416f9443e8aa5995e9400f30b",
+    "tests/unit/test_evaluation_diagnostics.py": "7feb670af824f17eac92ff0823900da0ee4adbfd3c3dd37e1f52769c3c9370e8",
+    "tests/unit/test_evaluation_tables.py": "033d7ec61717e9e63315ded6a558f546595a502831546cb65af18990e3844d06",
+    "tests/unit/test_review_regressions.py": "515e58819a3ce7dce7f9b93a1dce577119384d0a8439ac437e0cb2706f5af4d5"
+  }
+}

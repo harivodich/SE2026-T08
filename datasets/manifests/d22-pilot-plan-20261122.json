@@ -1,0 +1,2223 @@
+{
+  "version": "vietdoc.pilot-plan.v1",
+  "status": "blocked_membership",
+  "scope": "metadata/review planning only; not asset/gold/pixel QA, consumer ACK or training acceptance",
+  "confirmed_groups": [
+    {
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f01-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f02-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f03-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f04-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f05-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f06-b0000"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f07-b0000"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f08-b0000"
+      ],
+      "source_splits": [
+        "final"
+      ],
+      "reasons": [
+        "historical_final_not_train_dev"
+      ]
+    },
+    {
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f09-b0000"
+      ],
+      "source_splits": [
+        "final"
+      ],
+      "reasons": [
+        "historical_final_not_train_dev"
+      ]
+    },
+    {
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f00-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f01-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f02-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f03-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f04-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f05-b0000"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f06-b0000"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f07-b0000"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "source_splits": [
+        "final"
+      ],
+      "reasons": [
+        "historical_final_not_train_dev"
+      ]
+    },
+    {
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "base_ids": [
+        "v0-1-d22-smoke-receipt-f09-b0000"
+      ],
+      "source_splits": [
+        "final"
+      ],
+      "reasons": [
+        "historical_final_not_train_dev"
+      ]
+    }
+  ],
+  "union_reasons": [],
+  "risk_components": [
+    {
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f00-b0000",
+        "v0-1-d22-smoke-invoice-f01-b0000",
+        "v0-1-d22-smoke-invoice-f02-b0000",
+        "v0-1-d22-smoke-invoice-f03-b0000",
+        "v0-1-d22-smoke-invoice-f05-b0000",
+        "v0-1-d22-smoke-invoice-f06-b0000",
+        "v0-1-d22-smoke-invoice-f07-b0000",
+        "v0-1-d22-smoke-invoice-f08-b0000",
+        "v0-1-d22-smoke-receipt-f00-b0000",
+        "v0-1-d22-smoke-receipt-f01-b0000",
+        "v0-1-d22-smoke-receipt-f02-b0000",
+        "v0-1-d22-smoke-receipt-f03-b0000",
+        "v0-1-d22-smoke-receipt-f05-b0000",
+        "v0-1-d22-smoke-receipt-f06-b0000",
+        "v0-1-d22-smoke-receipt-f07-b0000",
+        "v0-1-d22-smoke-receipt-f08-b0000"
+      ],
+      "unresolved_candidate_ids": [
+        "pair-02201d958ff2624140ec888a0ecbdc7a1eb47eded0efd2005f9b4c3dcf28e3d5",
+        "pair-02b4964097a281cebce00574b0eb438cad128d7b0563d02d694f55dfc90edb05",
+        "pair-047a43c17349814a1413b2698279311cd626ca526cde95317581376692d5daa0",
+        "pair-04dfe1a9d97389312c37f5681171d25fbb2f8d4f687cfa7fbe1682e57337ede7",
+        "pair-065410cf1f1e402fbaf1487ac1b4f8f8de7c9a27c420ec2c773d96484cd54749",
+        "pair-07b73bdefd6f5cbf049ca3787fb017f258f7b157b1edff5e1c2703a18067e991",
+        "pair-15c0429aba0e3c6cfa18cf5656394c236873de8f0a51bc5ef3be88145e0a5b28",
+        "pair-20b8305d6a493c3d0c86ed64f3f5711330692011682e1b9af170c3657d930a76",
+        "pair-219953c7ad64d6c9ea7474fa948e4918bdf240117a8682c464b9fa47145a6070",
+        "pair-2237b767a2e51a7cb108e2a323f4371d9aae61627aee66cc7cf539069fe0ce80",
+        "pair-225e6f1413bd1d1725f585ad4193cd7726b1613c780cb553ea0c23b77792db51",
+        "pair-2b12100b740d166dc4fa05b582387de0e93366574c79e8fe60df0244024e08d6",
+        "pair-2b7fd43c4733a3fa083b691e017863d1ae850475eb4ea76ddba0b201b731ee34",
+        "pair-2ca6fa29832aed7042fd67a85e5a04e5c798f3bf569cdfe2a2f6711312c004de",
+        "pair-36e9d8e40c620035dd79bb47ac64ed7d890b0a02e045d7b4348fb3b4c57a2f75",
+        "pair-3c57aced825d4f6be3ff53c1940682abbad08503e1f529e977c094c362016a77",
+        "pair-464fea3413679d6b3d63c218feb9f60036b392e24a337e2c4d4312f982ff84b1",
+        "pair-51ae34a4701e76fd57119df8d1201bd673ee2b19a8d8029fe78e9e40048bfcfb",
+        "pair-54e6ee8687766241573b0a0fe5a16e6d67fb3887aee11e1f70b453982ea6bb17",
+        "pair-59f16e8e837037716d8b290a080c9bbc1ecf2a2a3e5a198410697d6e8f1a2e56",
+        "pair-5ba38a4e90066ff10a19cbeef040e7141c255938669a2c21dd83f9dbdd585267",
+        "pair-5cd1b223f1ca4f69df9c0574f8e98075fc83bb904a7d29af410280bb8478c530",
+        "pair-68bc3a4ede11bd5ced69daa1c73d8d47dc49dbb2e46e8b902ddbee19d4a9b4f2",
+        "pair-6c8accd33fd76a9278997f42ed7c57a790d65c061987d36e2f3efcb5ffd2ad83",
+        "pair-707157d72d76865d7a40b4ea5a7aa6d081d892582336c015eb48512ef8d1c886",
+        "pair-7de538f3dac6c554c0d8c286d6ee8d5bcfe01f2a7eddb79ca77eaf09377345b8",
+        "pair-7f5dea2ce199de389ccd839cd5d1574ffb6d1c630c79c35b36adb332fac72d81",
+        "pair-85cbe728e5e693da84b6d82eb7d53bf73d1dfaad5b185699eb2005203c2655b8",
+        "pair-8605fd6d725cb859228ad6096159cfdb8aea014327b605608006d6258157b74f",
+        "pair-8677729a2cd8b5d7d500426999872d11b8dc62da7b1f00cd64f18b327e233daa",
+        "pair-87c3e3a62701631fdb96baa5f83a2d581a367b4f022ba399db7999066a4362f5",
+        "pair-88f349e12d3c296d468e67445f92b5fe69d63c2be390682e7a100895af8ab484",
+        "pair-89f38bf96eb29eccab8a6984a66d9c6f45945e5cdd824fa715ab5d692518ba16",
+        "pair-8f318fd4144a2a2b79f95eafddb81be95fe2e4c83e24816d1a1dab5a62910294",
+        "pair-8faeca7715a2ce6c05576b2ae81b70fb40ca504920e46f93350645e6729b3788",
+        "pair-92ec201d08943d02678f4db64b2053850733573a951b3468711c1a344f4933f9",
+        "pair-92f51405ba9f4023fc6db0696401917d18307a05dcbe1587765fac7d8ef258b6",
+        "pair-a96f1b1eaf07a66cfce377fb226eb5fbd10a6bcb6d0c8da5948215816018c4b6",
+        "pair-ac139a4db9641e47ed534a14daa2bdd8f8e7175a2813d72bcac3979bf938d426",
+        "pair-b27552b12fe0323e3319eb4378af1f701b20633a1642ea430be6f25658ed1c76",
+        "pair-b5d9db1c8e754ffcf2816ceb6fefc404f8a4e5bbf9c99b0d3716777207192150",
+        "pair-b88b6c8ba194b0c53171c2e8d1667f82c6b4ed82a33a5de2c20ae52dac68fb47",
+        "pair-b937ed0c9e51d42a84937df27165928f497a664426e7db2a420773a18209a80b",
+        "pair-bec3fa161ddcbebe4d38316752a03c48b473d80bd2e4ec574dc947bdbcc40e4e",
+        "pair-c032af8564ec6bcce47dcddf1234e5191869b0d5855231e15cc5891f80862175",
+        "pair-c0c0de61404d2abd38d256692e4e893b0f0435b1597036cc4f388b00f9f3a47f",
+        "pair-c20e152bd2693a6884e10242f849c7e35da859dce24e5a47fc7e2b7d01925327",
+        "pair-c245c2f8c7e6362e136f30fca7df54eb2b81c06eb6fde1a01333c5b409cb7353",
+        "pair-c40c7b2aafdd5e8276ac38788866c5e44fabdb6ec2c777e1d5d68ae509053c80",
+        "pair-c4dc77c6d0c3703a406e4310f3256820b208a62d882963cb45cb0d51e6f9b0e0",
+        "pair-c4fae231aec52352c14827ba0dc7be2589b075f873380ddd88b2237633287404",
+        "pair-c567144d4b435033f27e0098d2f1b35f3be0aa88e6d5b91ff7e54aa75a5b7aa0",
+        "pair-c80dfd39adf17f48fef84c4460df60d71516f6890b63f6be3ff52d362a8bf360",
+        "pair-c87138366eef0d094e8c30da913ee596c6d84109de4c6258aa51f46470b727a6",
+        "pair-c9513d1ec67e2206c8cf5fd8d7547cb00af00d91ac46b3440d18e165621954a9",
+        "pair-cb1cccd2187032a610fe2817cf588d3cbd468cd039e23ad9a9b787192bbb9c9c",
+        "pair-ce45e63422240e4d386b7936a495891db8097b4ae6d5b0ac03a52169e0910733",
+        "pair-cfeda8d344dea0890fc50cc9deef3f34207a24a9f23a9f67d6b0df1160ec1dfe",
+        "pair-de897ae1a211a307b982aa94ab0af0bc8955fb883a3e498dc7b9c83a952ffaa0",
+        "pair-e46b1f87c4bd1ca1c809fe3939df36422175c65a6fa1c6ab901f349ee3470c9d",
+        "pair-e7ea81d8f0828455161749937a3e68009909a8e8bb5b8fbdf54faf56df9e68e9",
+        "pair-f3c59628b875daee9827f969e9430703c1ee332691067dccd6c2a7a5bee03bb1",
+        "pair-f43eec3e8f9d3e5b0c38e84fa8d724e6f33beb27d6a7f8a09d45d24e7aa6d033",
+        "pair-fa8b2d97bdf47dcb73ea5d265da1ac3a92dd74cdcbfdee70cc6915c8e11899c9",
+        "pair-fb5bb4d3692fe70d1263d6e623cbdf0f0ce7edfecff15fcac9f6c2cda3978ed7",
+        "pair-fda67c7c7af293f32036845a70f79b98bfdf7e97c6fb942c1c4476b047e2445b"
+      ]
+    },
+    {
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "base_ids": [
+        "v0-1-d22-smoke-invoice-f04-b0000",
+        "v0-1-d22-smoke-invoice-f09-b0000",
+        "v0-1-d22-smoke-receipt-f04-b0000",
+        "v0-1-d22-smoke-receipt-f09-b0000"
+      ],
+      "unresolved_candidate_ids": [
+        "pair-8184d5143be6f5e9660ecf9ac8cf517ff67251cf80fa46a3661f294f055cd9b0",
+        "pair-8400c6d648d9d782296ac81591cf7194d4eab6b62641ab3978f6741d1dba8187",
+        "pair-ab766efb29a9331406e56ce733801bf064423845a7aa3c1f553d44613eba9c08",
+        "pair-cc34c52bdab9fba3284d49e385f8b3879fa586092828a5176a0d8097f463fa17",
+        "pair-d9b04e2fa18ca3257599aa987921d703cf916eea75af6b83adb07c25c9ccbf94"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    }
+  ],
+  "members": {
+    "train": [],
+    "dev": []
+  },
+  "excluded": [
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-clean",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-crop",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-mild",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+      "document_type": "invoice",
+      "source_split": "final",
+      "group_id": "group-44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+      "component_id": "risk-4fa0c54f917406a0d53d9ce545d9149abeed2828370547c27af668eccba6c260",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-clean",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-crop",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-mild",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    },
+    {
+      "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-unreadable",
+      "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+      "document_type": "receipt",
+      "source_split": "final",
+      "group_id": "group-79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+      "component_id": "risk-f2df5c4aefe57b6f4c75f993db42f79df8ded9af18a017e0b8fc38502c269d4f",
+      "reasons": [
+        "historical_final_not_train_dev",
+        "unresolved_component"
+      ]
+    }
+  ],
+  "counts": {
+    "before": {
+      "base_documents": 20,
+      "samples_including_variants": 80,
+      "bases_by_type_split": {
+        "receipt": {
+          "train": 6,
+          "dev": 2,
+          "final": 2
+        },
+        "invoice": {
+          "train": 6,
+          "dev": 2,
+          "final": 2
+        }
+      },
+      "samples_by_type_split": {
+        "receipt": {
+          "train": 24,
+          "dev": 8,
+          "final": 8
+        },
+        "invoice": {
+          "train": 24,
+          "dev": 8,
+          "final": 8
+        }
+      }
+    },
+    "after": {
+      "base_documents": 0,
+      "samples_including_variants": 0,
+      "bases_by_type_split": {
+        "receipt": {
+          "train": 0,
+          "dev": 0,
+          "final": 0
+        },
+        "invoice": {
+          "train": 0,
+          "dev": 0,
+          "final": 0
+        }
+      },
+      "samples_by_type_split": {
+        "receipt": {
+          "train": 0,
+          "dev": 0,
+          "final": 0
+        },
+        "invoice": {
+          "train": 0,
+          "dev": 0,
+          "final": 0
+        }
+      }
+    }
+  },
+  "missing_type_split_support": [
+    "receipt/train",
+    "receipt/dev",
+    "invoice/train",
+    "invoice/dev"
+  ],
+  "unresolved_candidates": 71,
+  "prerequisites": [
+    "asset/gold/status QA and archive verification",
+    "peer/Lead grouping acceptance",
+    "AI1 OCR cache and AI2 actual reader/ACK"
+  ],
+  "capacity": "model-neutral preparation needs no G0/final host; model-specific size/serialization pending AI2",
+  "inputs": {
+    "manifest": {
+      "name": "d22-smoke-v01.json",
+      "sha256": "eaabf08f5511de0db7bfdf9b7f087716cd0acf197bb00bca9fcb34341f8314db"
+    },
+    "report": {
+      "name": "d22-report-v01.json",
+      "sha256": "5173053cfb5197fe4e6642ed1a903a96b5f41f7ffcf0531c4029ffabc8af0d1e"
+    },
+    "review": {
+      "name": "d22-duplicate-review-20261122-batch01.json",
+      "sha256": "5ba78a451dfffdc4333a336f63a147e8c2f38d987b5756dcd9b77ea075970092"
+    }
+  },
+  "review": {
+    "version": "duplicate-review-v1",
+    "candidates": 81,
+    "dispositions": {
+      "pending": 71,
+      "distinct": 10
+    },
+    "cross_split": {
+      "distinct": 10,
+      "pending": 33
+    },
+    "review_complete": false,
+    "unresolved": 71,
+    "approval": "AI1/AI2 peer review and Lead grouping/split approval required before pilot/freeze"
+  }
+}

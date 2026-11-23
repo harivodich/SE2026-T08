@@ -48,6 +48,15 @@ def assert_disjoint(samples):
             seen[value] = sample['split']
 
 
+def require_clean_representatives(samples):
+    """Every screened base needs one clean representative, including variant-only bases."""
+    counts = defaultdict(int)
+    for sample in samples:
+        counts[sample['base_id']] += sample['quality'] == 'clean'
+    for base, count in sorted(counts.items()):
+        require(count == 1, f'base {base}: requires exactly one clean representative; found {count}')
+
+
 def duplicate_report(samples):
     """Exact hashes + content groups + coarse 64-bit dHash candidate review.
 
@@ -55,6 +64,7 @@ def duplicate_report(samples):
     Never auto-resolve ambiguous pairs or consult model predictions.
     """
     assert_disjoint(samples)
+    require_clean_representatives(samples)
     exact, content = defaultdict(list), defaultdict(list)
     bases = {}
     for sample in samples:

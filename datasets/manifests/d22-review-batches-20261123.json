@@ -1,0 +1,3678 @@
+{
+  "version": "vietdoc.duplicate-batches.v1",
+  "status": "prepared_for_review",
+  "scope": "machine-prepared references only; image/content/lineage inspection and peer verdict still required",
+  "inputs": {
+    "manifest": {
+      "name": "d22-smoke-v01.json",
+      "sha256": "eaabf08f5511de0db7bfdf9b7f087716cd0acf197bb00bca9fcb34341f8314db"
+    },
+    "report": {
+      "name": "d22-report-v01.json",
+      "sha256": "5173053cfb5197fe4e6642ed1a903a96b5f41f7ffcf0531c4029ffabc8af0d1e"
+    },
+    "review": {
+      "name": "d22-duplicate-review-20261122-batch01.json",
+      "sha256": "5ba78a451dfffdc4333a336f63a147e8c2f38d987b5756dcd9b77ea075970092"
+    },
+    "asset_manifest": {
+      "name": "manifest.json",
+      "sha256": "eaabf08f5511de0db7bfdf9b7f087716cd0acf197bb00bca9fcb34341f8314db"
+    }
+  },
+  "review": {
+    "version": "duplicate-review-v1",
+    "candidates": 81,
+    "dispositions": {
+      "pending": 71,
+      "distinct": 10
+    },
+    "cross_split": {
+      "distinct": 10,
+      "pending": 33
+    },
+    "review_complete": false,
+    "unresolved": 71,
+    "approval": "AI1/AI2 peer review and Lead grouping/split approval required before pilot/freeze"
+  },
+  "validated_source_counts": {
+    "samples": 80,
+    "document_types": {
+      "receipt": 40,
+      "invoice": 40
+    },
+    "label_statuses": {
+      "absent": 32,
+      "present": 2845,
+      "obscured": 1323
+    }
+  },
+  "queued_pairs": 71,
+  "queued_by_split": {
+    "cross": 33,
+    "same": 38
+  },
+  "sample_catalog": {
+    "v0-1-d22-smoke-invoice-f00-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f00-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f00-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f00",
+        "source_group": "synthetic-invoice-f00",
+        "assignment_group": "9ae7b4cd95724febff96e6f1121bbb236a00f2ce230ecad38fcedf866db90c20",
+        "split": "train",
+        "value_seed": 633717505680175358,
+        "source_gold_sha256": "e2c01c58bc90eb3127e773773b70e50db04f71e073bb87473848ccd350b02a21",
+        "content_sha256": "1fead1b08930ebd9385d4595c4df57be2bc8c7c7f92ff4dd458d8c26411703cb",
+        "row_count": 0
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.png",
+          "sha256": "252162c90cb1eaac9080a1484f7d25cfafd108b4d600826e8ab36f0221876c24"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.pdf",
+          "sha256": "4a15a1427d3939f90ae30dc575e52c96f9c57475fd81142931117521539a7ce8"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.gold.json",
+          "sha256": "e2c01c58bc90eb3127e773773b70e50db04f71e073bb87473848ccd350b02a21"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.labels.json",
+          "sha256": "f2dc6588bbf789da128ddce55c24ca30b395c17460477a32f17de6272e51cd89"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.regions.json",
+          "sha256": "d4f7b4aa2efc17d28f46b589f65c33a4fb03a97f1880a618df5b2e9276cc1722"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f00-b0000-clean.txt",
+          "sha256": "d22ad1a382b471b4326cb2e3f0e75a7c1e094560bc651a95bced501133a37c69"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f00",
+        "document_type": "invoice",
+        "index": 0,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "description",
+          "quantity",
+          "unit",
+          "unit_price",
+          "line_total"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 8,
+      "label_statuses": {
+        "present": 8
+      }
+    },
+    "v0-1-d22-smoke-invoice-f01-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f01-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f01-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f01",
+        "source_group": "synthetic-invoice-f01",
+        "assignment_group": "1f1824a501e06934eb93d422e3076b6bde5ded82d2cbcda85b72ff6afe9be552",
+        "split": "train",
+        "value_seed": 77230537937761702,
+        "source_gold_sha256": "94725e563c51c705d2542a2aa9ce95aeecb08a7995d9bd348ec01ac41bf9fa6e",
+        "content_sha256": "07e91daa519535ab554c1deda1005941d8a2cbbf062a0907cac77a5e36decdfd",
+        "row_count": 1
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.png",
+          "sha256": "33d9109fc2fcf023dbdce276dbd57da0afcccffed1eb43fffa5d0b99873e670a"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.pdf",
+          "sha256": "2cf1e52f33ff44fbe6f8a50b10985569f76b3b193176250fff7e8de392cc57ef"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.gold.json",
+          "sha256": "94725e563c51c705d2542a2aa9ce95aeecb08a7995d9bd348ec01ac41bf9fa6e"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.labels.json",
+          "sha256": "75cc5419cfde1c385420c035f00a5025122fc1a319c6e09616960606e954ba86"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.regions.json",
+          "sha256": "23fcf00cf215a67ee75d82f036ba7bfaad82a029946d4ae84930d3d4ff515235"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f01-b0000-clean.txt",
+          "sha256": "9c0ec22a1db72e42095f8635acf02ae09571d21f57090ca9a57908a0b4da0afd"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f01",
+        "document_type": "invoice",
+        "index": 1,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "quantity",
+          "description",
+          "unit_price",
+          "unit",
+          "line_total"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 13,
+      "label_statuses": {
+        "present": 13
+      }
+    },
+    "v0-1-d22-smoke-invoice-f02-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f02-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f02-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f02",
+        "source_group": "synthetic-invoice-f02",
+        "assignment_group": "37522b612b96b9971d762724af6297401dd412f2e3deccca03c381b922f3f8d0",
+        "split": "train",
+        "value_seed": 21038063081382275,
+        "source_gold_sha256": "fcb7c06fed52e579101a931d87c059fbe567c95278a683c27a8a66f05622af0a",
+        "content_sha256": "7a2000f25afdf9bb2f4f48d62a2caa9acb6d902e8007d66cbd6866a64abf05f2",
+        "row_count": 3
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.png",
+          "sha256": "a8aad612eb17f6b87725b90bdfba139a2aca83850dcf292291b8563621a57d80"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.pdf",
+          "sha256": "d33ed4d3ee863dad3bf5864ac9a4da1790ce1fb741dc2bf6a8dc3b9bd9231cc8"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.gold.json",
+          "sha256": "fcb7c06fed52e579101a931d87c059fbe567c95278a683c27a8a66f05622af0a"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.labels.json",
+          "sha256": "8c6c58281c0b6fc3882b19424b081e8406f521304c7cb648243bff958d6f537c"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.regions.json",
+          "sha256": "7482b53eed1a9a10153711a48419e022bcd5ce38266592aa1cd4b615c29beae3"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f02-b0000-clean.txt",
+          "sha256": "ade1109bbaacd175e5acc533404382fd4e4ff8a75896bc9bb2328bd5bcddad03"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f02",
+        "document_type": "invoice",
+        "index": 2,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "line_total",
+          "description",
+          "unit",
+          "quantity",
+          "unit_price"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 23,
+      "label_statuses": {
+        "present": 23
+      }
+    },
+    "v0-1-d22-smoke-invoice-f03-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f03-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f03-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f03",
+        "source_group": "synthetic-invoice-f03",
+        "assignment_group": "30a51f7714e535d528af64ec411fe9abc7853e2bd5a745bf0a7db15413ae6181",
+        "split": "train",
+        "value_seed": 546662171891830430,
+        "source_gold_sha256": "7d7cd9afc5687fb2e64173b43ec27a36b57e570dfe079519881bd3bfdc9809d7",
+        "content_sha256": "bc3a08f9d023bac8c0dec8f8361bc94489891a23cc8ff25d6e01b3d97d666be7",
+        "row_count": 12
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.png",
+          "sha256": "5eeadb93f9546883529d875822cc1b29ee7cbf5a4d10789abaf04b39e7f89bce"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.pdf",
+          "sha256": "1baa74b0e218de0c4d21e01b06e857492e54532a9aca94f4a3bf5d9aaa40fce1"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.gold.json",
+          "sha256": "7d7cd9afc5687fb2e64173b43ec27a36b57e570dfe079519881bd3bfdc9809d7"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.labels.json",
+          "sha256": "d230c0fae37f81d82ade3e7eb5b2f24f12a01a6a93380e28a69829eb0abbe00e"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.regions.json",
+          "sha256": "72865a479e7fc64c1fa253ead487006c2f838a0fbf800e59536c6b54ac6ccae0"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f03-b0000-clean.txt",
+          "sha256": "07165ada3ce506af445e39823dd58884cd882c20ddf41e6f3e55e2f5beb1f466"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f03",
+        "document_type": "invoice",
+        "index": 3,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "unit_price",
+          "quantity",
+          "description",
+          "line_total",
+          "unit"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 68,
+      "label_statuses": {
+        "present": 67,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-invoice-f04-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f04-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f04-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f04",
+        "source_group": "synthetic-invoice-f04",
+        "assignment_group": "415a6d35910b7dd60c03dcd902186012d6e1e10fe6abb0dcb2b5af3f737b7bef",
+        "split": "train",
+        "value_seed": 762016110754553806,
+        "source_gold_sha256": "0d5ea7c3d527bcc236bf0a1d555debc9fe693576ee029fde12608d408180d175",
+        "content_sha256": "112a4706ea39deed8dfdfe62e61654e0d339852069f96ea54f2456b834961e5e",
+        "row_count": 30
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.png",
+          "sha256": "49353e30fe2c8a4cc1a4cd0c54922e34f03fa5889616973b7275c5696890c2be"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.pdf",
+          "sha256": "1d7fa22d13459068d0c09f2dd51b08acc484743b9d41d0fa577a691dda1ca7c6"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.gold.json",
+          "sha256": "0d5ea7c3d527bcc236bf0a1d555debc9fe693576ee029fde12608d408180d175"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.labels.json",
+          "sha256": "add0ace58ecf03fb70a09f5bb7a71c1fd8f8174edb946109c162859f0c3a70a1"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.regions.json",
+          "sha256": "cdb5d4670ee000d93a4b1cc73861249f6faba8ed0b13eb93d71b50d692cb3f6f"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f04-b0000-clean.txt",
+          "sha256": "8185299288cc341c1e30e7200bf9b0c246f8b2b2e2ed59cd8dbc51bb4363e7e6"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f04",
+        "document_type": "invoice",
+        "index": 4,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "unit",
+          "line_total",
+          "quantity",
+          "unit_price",
+          "description"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 158,
+      "label_statuses": {
+        "present": 157,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-invoice-f05-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f05-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f05-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f05",
+        "source_group": "synthetic-invoice-f05",
+        "assignment_group": "07b2eafc58c8abb8182c60607eb466a20fa592b32e97f450118ea7e6e832956b",
+        "split": "train",
+        "value_seed": 271474182912626936,
+        "source_gold_sha256": "5fc0bfcf05ea6a858c70b0d8881aa182a459cab60efdd850e8f7b00fff043fa1",
+        "content_sha256": "8e756193f50574b2520935206bf07094989b7234d5992e890947166eb588d0ad",
+        "row_count": 0
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.png",
+          "sha256": "b0eb82956001d0ec72eb075ab5baebc22a17af9ad436b5186c00341613cb1e7e"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.pdf",
+          "sha256": "eb591bba2ea5810a95fa34b00e4f5d802b9c5f311e3d9a22bff437c61928f57c"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.gold.json",
+          "sha256": "5fc0bfcf05ea6a858c70b0d8881aa182a459cab60efdd850e8f7b00fff043fa1"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.labels.json",
+          "sha256": "5cc04212b1569468afbb06f2fe5b0ea0c113f4ad2f927598abd7b580b71d92ca"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.regions.json",
+          "sha256": "a03b38e0522bb48d200b8514a1dcc5146f3957fd9aab45d588b265a0f8930a95"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f05-b0000-clean.txt",
+          "sha256": "6ffce9f5b6e9159e9db90e5940bb01e62b90d08e45e0f5d201252be4df316902"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f05",
+        "document_type": "invoice",
+        "index": 5,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "description",
+          "quantity",
+          "unit",
+          "unit_price",
+          "line_total"
+        ],
+        "vocabulary": "alternate",
+        "split": "train"
+      },
+      "field_count": 8,
+      "label_statuses": {
+        "present": 8
+      }
+    },
+    "v0-1-d22-smoke-invoice-f06-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f06-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f06-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f06",
+        "source_group": "synthetic-invoice-f06",
+        "assignment_group": "7278a2dc91419dd87bb49166b58555ba2da4df773264384274d6d015f09cbb43",
+        "split": "dev",
+        "value_seed": 446570382037905676,
+        "source_gold_sha256": "8f7fd063aa0aa0d34692b43d83bc20247e65d7de4d800d40a7d37a57581381db",
+        "content_sha256": "cb6d4cf5cb3f41ef4642dc249d5ece15220dec9268d503dd068ea0a93e33b379",
+        "row_count": 1
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.png",
+          "sha256": "a42b7d7f39192b5cb06d1e6c3fa1593becb4f9faf6497d34d73e3b67c794f8d7"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.pdf",
+          "sha256": "0d7396e88701c8c4354f5b06021c80c07cfa24e5933eaf4a1483977ac0841c8c"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.gold.json",
+          "sha256": "8f7fd063aa0aa0d34692b43d83bc20247e65d7de4d800d40a7d37a57581381db"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.labels.json",
+          "sha256": "89ce48787e6965b6b095b7c8f7fc71af5bac903c4585432e707b3d4eb131e5d4"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.regions.json",
+          "sha256": "5955779466ba394c41f145ed1097532b6a3c609c984067dbde287c4f6b96be30"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f06-b0000-clean.txt",
+          "sha256": "9bab1f91eb76188a831c9fd9d89760908b4cd12bcd7a1660ce59c35cc810de52"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f06",
+        "document_type": "invoice",
+        "index": 6,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "quantity",
+          "description",
+          "unit_price",
+          "unit",
+          "line_total"
+        ],
+        "vocabulary": "alternate",
+        "split": "dev"
+      },
+      "field_count": 13,
+      "label_statuses": {
+        "present": 13
+      }
+    },
+    "v0-1-d22-smoke-invoice-f07-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f07-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f07-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f07",
+        "source_group": "synthetic-invoice-f07",
+        "assignment_group": "d3dc10d9136120b6fd46bda8cc8332f4cda13dc45ff237092c07a874be888b4e",
+        "split": "dev",
+        "value_seed": 218477617013373144,
+        "source_gold_sha256": "8ece5c942560b25061c9ac9b0322858cb611334d43b0fa386e78d92581945a08",
+        "content_sha256": "42622b4fa9351932a5831dded234bdcfcffd63684d51dbd10599002fe60de397",
+        "row_count": 3
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.png",
+          "sha256": "a2b9581a190ec5ecabcc3f9c7495863ee524608a498baeab323d62ebe2f6839c"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.pdf",
+          "sha256": "6213c9b337cd253822a19e41b83e27ac99e785f30ffd3f077d7cd1c1f8e50d2e"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.gold.json",
+          "sha256": "8ece5c942560b25061c9ac9b0322858cb611334d43b0fa386e78d92581945a08"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.labels.json",
+          "sha256": "b22f8fbfdf19586968cd3f974cc48edafc8c9184744805c77daac94a08f65964"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.regions.json",
+          "sha256": "880f24fab10bcc316755378cfdae09218efae3efb9f3c6fddc906d11cc488287"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f07-b0000-clean.txt",
+          "sha256": "0eb4c4629ffced167501b018a79632457afc74c55e71c1ad74876cb929f3953b"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f07",
+        "document_type": "invoice",
+        "index": 7,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "line_total",
+          "description",
+          "unit",
+          "quantity",
+          "unit_price"
+        ],
+        "vocabulary": "alternate",
+        "split": "dev"
+      },
+      "field_count": 23,
+      "label_statuses": {
+        "present": 22,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-invoice-f08-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f08-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f08-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f08",
+        "source_group": "synthetic-invoice-f08",
+        "assignment_group": "aa787c58787c0bed44b15ce5a45c0eceeb07784047a2756e525f3a1ac55dd300",
+        "split": "final",
+        "value_seed": 16089548860059413,
+        "source_gold_sha256": "5a674b92f9a7f122a6dd5767abf6461e156568dabb34fd0efc0df8ba0dc8266f",
+        "content_sha256": "cf2b9715f027efcc07ef4d0f6db8a4219d708a8c4d8b3f5c6556971712dd77d2",
+        "row_count": 12
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.png",
+          "sha256": "15fc456e1c2544c4f9bee5e880df048783ba531757d181464d1b723ca5a297e6"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.pdf",
+          "sha256": "59ecb1767d78ed4567947ee0d689042c1b622a6808c9236acd2b7989bef10100"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.gold.json",
+          "sha256": "5a674b92f9a7f122a6dd5767abf6461e156568dabb34fd0efc0df8ba0dc8266f"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.labels.json",
+          "sha256": "e38a5ecb49d0fded8ff017bb3cb74943e20d37dc84c27ac2e1c95711b26e5b07"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.regions.json",
+          "sha256": "5b6bb1891e30995ad08f912451e3f7ad571522126ad7bb88537fc82ef7991fa7"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f08-b0000-clean.txt",
+          "sha256": "4c22d43cf1599487f0c8dbf129c79e50562dcb1fa3d03ffb376eebeeaaf0e366"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f08",
+        "document_type": "invoice",
+        "index": 8,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "unit_price",
+          "quantity",
+          "description",
+          "line_total",
+          "unit"
+        ],
+        "vocabulary": "alternate",
+        "split": "final"
+      },
+      "field_count": 68,
+      "label_statuses": {
+        "present": 68
+      }
+    },
+    "v0-1-d22-smoke-invoice-f09-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-invoice-f09-b0000-clean",
+        "base_id": "v0-1-d22-smoke-invoice-f09-b0000",
+        "document_type": "invoice",
+        "family_id": "invoice-f09",
+        "source_group": "synthetic-invoice-f09",
+        "assignment_group": "44a114c7c16c0a284c035752ac29b32d22f49e115d5b8f01390cd9ef6b105264",
+        "split": "final",
+        "value_seed": 365582004707354544,
+        "source_gold_sha256": "8dd5872b772163df35daf974f9494a9aa1ead63f7ac288ad18bc33eb02d9ca1e",
+        "content_sha256": "9d40ecc68a45e96c6e904f5b12ca48ba5f414c650112205c2ab6ce85e67bcc30",
+        "row_count": 30
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.png",
+          "sha256": "af9a5733f57517b32932853b2d0abd9e2ca48b1e68a3ba99d26104319fafc5a8"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.pdf",
+          "sha256": "2e2d687f019b581f607508abffb6faa5722d3726139fb5cb846bd68cfb984c63"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.gold.json",
+          "sha256": "8dd5872b772163df35daf974f9494a9aa1ead63f7ac288ad18bc33eb02d9ca1e"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.labels.json",
+          "sha256": "f2f9f96804ce13ac6d33f6178fcad8f9a83517b31d4aa3bf0a286b4e31a19d3e"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.regions.json",
+          "sha256": "74a697f652ce0e67c3d7f0bd2d95f8793af5e68604a22b84b7217d7750f54ea4"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-invoice-f09-b0000-clean.txt",
+          "sha256": "fc0ee78b960ad0032beb4dab985b9ab0713dae65af9508f74a5533bf55089bb7"
+        }
+      },
+      "family": {
+        "family_id": "invoice-f09",
+        "document_type": "invoice",
+        "index": 9,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "unit",
+          "line_total",
+          "quantity",
+          "unit_price",
+          "description"
+        ],
+        "vocabulary": "alternate",
+        "split": "final"
+      },
+      "field_count": 158,
+      "label_statuses": {
+        "present": 158
+      }
+    },
+    "v0-1-d22-smoke-receipt-f00-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f00-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f00-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f00",
+        "source_group": "synthetic-receipt-f00",
+        "assignment_group": "2838a954cde6ad240b44130ab5a62f735d6e1c31a49d6869f966924be37ab762",
+        "split": "train",
+        "value_seed": 1081097849185230146,
+        "source_gold_sha256": "9e9c9361f6a8cdbf7ea8a9f54cb1d607900dc1f150ad5abcef13f4f865c00d76",
+        "content_sha256": "77e331298f58e427ae3da115bfe7f35238ac3dda07d1f5f5298cf23b90e7fa96",
+        "row_count": 0
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.png",
+          "sha256": "754d410bd899e3aeddc654cd59b7d5e1970e00bad03dcbea9b9aa61273e2fc4b"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.pdf",
+          "sha256": "7beeca6e70f0d77e3be119affc037459f3e6e89b6d2005af5721173ff5f17da9"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.gold.json",
+          "sha256": "9e9c9361f6a8cdbf7ea8a9f54cb1d607900dc1f150ad5abcef13f4f865c00d76"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.labels.json",
+          "sha256": "69b82b2e697e323fedfc2b50f1b7fb182bc6ef199c1434f3ad04efc25f95cd1b"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.regions.json",
+          "sha256": "ceb702122beba42a5e30b77af31bc7cf4cbf51ebd16386e387c93cea52830d35"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f00-b0000-clean.txt",
+          "sha256": "86e94dc9258a920e5999b2a818f74e364adaf523aee384feb82d74082cf3a4f9"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f00",
+        "document_type": "receipt",
+        "index": 0,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "description",
+          "quantity",
+          "unit",
+          "unit_price",
+          "line_total"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 5,
+      "label_statuses": {
+        "present": 4,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-receipt-f01-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f01-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f01-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f01",
+        "source_group": "synthetic-receipt-f01",
+        "assignment_group": "6318797791a26dfd75c883a87143af23f5b588df9e88e7f51b2af38896226f7b",
+        "split": "train",
+        "value_seed": 345318905701577290,
+        "source_gold_sha256": "7714947e8ddb99b9de7af64649888ffd3ca29e522e3911bf23b4bbd79e04bc5b",
+        "content_sha256": "95de0e1b1b962c7b4df8379b0d613723789800d635a3054221b488a210070138",
+        "row_count": 1
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.png",
+          "sha256": "d54bd4fad0ade9c8f713290a60de450782857c9dac1a4b5d551efda34e505f61"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.pdf",
+          "sha256": "7aedb3776dc0eb674d02d0e7f97f1b9efe27023562747644b8dd6cd5ab2a4fd6"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.gold.json",
+          "sha256": "7714947e8ddb99b9de7af64649888ffd3ca29e522e3911bf23b4bbd79e04bc5b"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.labels.json",
+          "sha256": "ec1f6eac9a45bc6ee28d9178595613dfd7c8566968df189e2df2b760808ff93a"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.regions.json",
+          "sha256": "1184773290d21d55277a23fcccfbccb1997eadef8d5dd586467ca89f011552ea"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f01-b0000-clean.txt",
+          "sha256": "603166d0e9d2b58730451cb761b74be0c0f468f4c5fcefd278e5be1802b6feed"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f01",
+        "document_type": "receipt",
+        "index": 1,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "quantity",
+          "description",
+          "unit_price",
+          "unit",
+          "line_total"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 10,
+      "label_statuses": {
+        "present": 9,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-receipt-f02-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f02-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f02-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f02",
+        "source_group": "synthetic-receipt-f02",
+        "assignment_group": "5e3581755284e38836f65b2ff24d435d76c1f8c1542336a2a4a5a5dc0f73885b",
+        "split": "train",
+        "value_seed": 698915885968618034,
+        "source_gold_sha256": "b17b2c37d8cc01e216f391a60b4f1aec3c3ec20c71615cd40ad3d3a35632045a",
+        "content_sha256": "3b5dde3bc7f0ce45b7f8b692bf7b68d208e56cb7d6eb7ee4293f785a40b9d212",
+        "row_count": 3
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.png",
+          "sha256": "d62466717f0370efe770c09aad1939262a36f3141d7aff5aa6f492156e54c36e"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.pdf",
+          "sha256": "77e3d5df22927a6bcd5b316ae5e74555f60d67b6ce942581262bdd24a018ba85"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.gold.json",
+          "sha256": "b17b2c37d8cc01e216f391a60b4f1aec3c3ec20c71615cd40ad3d3a35632045a"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.labels.json",
+          "sha256": "67d66960c58636205909fb8dec9cf16c4746bc497ece8d902a66c90daa5fc303"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.regions.json",
+          "sha256": "7a51770341080b62660060afddcef8087d674823b51369b717c633267e8048ff"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f02-b0000-clean.txt",
+          "sha256": "1e32ce074d8016305f03839bdc42fd28f9e0f3616490e5d6328b9ed0a767f00b"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f02",
+        "document_type": "receipt",
+        "index": 2,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "line_total",
+          "description",
+          "unit",
+          "quantity",
+          "unit_price"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 20,
+      "label_statuses": {
+        "present": 20
+      }
+    },
+    "v0-1-d22-smoke-receipt-f03-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f03-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f03-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f03",
+        "source_group": "synthetic-receipt-f03",
+        "assignment_group": "6300d8ec9694fa2746a7f33cc7ac9fb45d9045b1e4907b1e4af16e4a44622f30",
+        "split": "train",
+        "value_seed": 361618685380485310,
+        "source_gold_sha256": "efbd106fdf689ad6db2f53bbee52dbfacc7786cd6271f587dee2512e53d19fd2",
+        "content_sha256": "68671456f788506b262b2f931c89e77df0aa8cf7b1712bb07d4175a93ac6c47e",
+        "row_count": 12
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.png",
+          "sha256": "64506700ef7561500180f4bf253ceb86f7c86de7324ba675becb2c09775962e4"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.pdf",
+          "sha256": "cffa73801a36274b97bb7c064205c36d9fbcaef2838bc688184ced1264a4107d"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.gold.json",
+          "sha256": "efbd106fdf689ad6db2f53bbee52dbfacc7786cd6271f587dee2512e53d19fd2"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.labels.json",
+          "sha256": "1308e3d47367dc5c24482f7169c327fbb4366c64907118b50af9c62c38811ba6"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.regions.json",
+          "sha256": "c5360672e7232d231175ca3c4fe78ec893594edb62bfcde7004f4eb7335da205"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f03-b0000-clean.txt",
+          "sha256": "dd632fd339f059916a309a93b85b64fdb16c6933036b6cbe90113a4486c209e4"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f03",
+        "document_type": "receipt",
+        "index": 3,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "unit_price",
+          "quantity",
+          "description",
+          "line_total",
+          "unit"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 65,
+      "label_statuses": {
+        "present": 64,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-receipt-f04-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f04-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f04-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f04",
+        "source_group": "synthetic-receipt-f04",
+        "assignment_group": "3681fc69926cdfe347be72ac2abc8748bf378c517c9e12aef1b8da2f826c65b5",
+        "split": "train",
+        "value_seed": 1100018857151135497,
+        "source_gold_sha256": "e21a47b39f71b256efe932e616b3e022e48e8911dcc0a1f1c605b8c816c5bf6b",
+        "content_sha256": "06afaa952097f208eeb3eb8ab2f339cd9fab7d9f353255846e8a53c73639dcd8",
+        "row_count": 30
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.png",
+          "sha256": "e8756107aafd18ad8e4b5251e2ff2fd75a12805456be11b361a947b8ff990710"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.pdf",
+          "sha256": "f19521321e391dcb70c15cffba841dfcd4534fb724c6a89d376bcd83f763be66"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.gold.json",
+          "sha256": "e21a47b39f71b256efe932e616b3e022e48e8911dcc0a1f1c605b8c816c5bf6b"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.labels.json",
+          "sha256": "72826b5f154a082b4cd59b2868af01c5e87400957b78aa1358a252fecb751908"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.regions.json",
+          "sha256": "04df6278886a1c7cb0445175aefe29afeadbd5ce63a88c6cf60618bdeabe40a9"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f04-b0000-clean.txt",
+          "sha256": "4e8ee29b901b65790aaae5570bf4c813651d892308034335caa148ebee998fe9"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f04",
+        "document_type": "receipt",
+        "index": 4,
+        "header": "stacked",
+        "totals": "below table",
+        "columns": [
+          "unit",
+          "line_total",
+          "quantity",
+          "unit_price",
+          "description"
+        ],
+        "vocabulary": "standard",
+        "split": "train"
+      },
+      "field_count": 155,
+      "label_statuses": {
+        "present": 155
+      }
+    },
+    "v0-1-d22-smoke-receipt-f05-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f05-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f05-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f05",
+        "source_group": "synthetic-receipt-f05",
+        "assignment_group": "f76fb7dbe667a48901ad40ed7b2ea6e96968d5e09117be36ec61a087e9c30c25",
+        "split": "train",
+        "value_seed": 378393339712039405,
+        "source_gold_sha256": "991e6222c400ec5d66462afbf71f410298fa832e4041db8da544cfb283cd95d6",
+        "content_sha256": "e31ad923346509d8e4808d500c2c8da1d031117b7db4ab974e28dc1235e49966",
+        "row_count": 0
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.png",
+          "sha256": "7e050b413228aec72c451a5c7afb16f80437094decaad5f7f1ae7fe13a1ced8c"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.pdf",
+          "sha256": "7cf2092b5636c5b2a8938d4dd73466356e1c804aae49bd14ecedf9752e7b6062"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.gold.json",
+          "sha256": "991e6222c400ec5d66462afbf71f410298fa832e4041db8da544cfb283cd95d6"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.labels.json",
+          "sha256": "28bbf284b905a937bf674f79346839505af24d7f4dfde4ca52a18c0012eea03e"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.regions.json",
+          "sha256": "4b6d6c67974d2021b682d6b7bc60a53b37d9b02a3f6e5542e813117197989bd1"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f05-b0000-clean.txt",
+          "sha256": "2bd009d39efa34ec00f0b305ecd445491ff39b0b8ade84506eb46a2b43e45eae"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f05",
+        "document_type": "receipt",
+        "index": 5,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "description",
+          "quantity",
+          "unit",
+          "unit_price",
+          "line_total"
+        ],
+        "vocabulary": "alternate",
+        "split": "train"
+      },
+      "field_count": 5,
+      "label_statuses": {
+        "present": 5
+      }
+    },
+    "v0-1-d22-smoke-receipt-f06-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f06-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f06-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f06",
+        "source_group": "synthetic-receipt-f06",
+        "assignment_group": "71b3ffa2f5271c3774338c38135876197cf17f8b849c8bff388c9e4819d1fc16",
+        "split": "dev",
+        "value_seed": 1143954300839308276,
+        "source_gold_sha256": "a71c9233edacbed37007f62784fce7eaffd8225065491b22c9d5c7eddf790649",
+        "content_sha256": "1a02d0101087ed5bd811d7ebc4fd5e7e529c0c5d5e0616a8c7496d8fbeba8fcd",
+        "row_count": 1
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.png",
+          "sha256": "185d1aa7242fd83e35937efe1049fe22ee7c21b00099a1d5304ad6676aed4652"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.pdf",
+          "sha256": "515da10ee093b67bd524c7d0ae81bba14398ddcfd702d6d66f79de1f60460520"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.gold.json",
+          "sha256": "a71c9233edacbed37007f62784fce7eaffd8225065491b22c9d5c7eddf790649"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.labels.json",
+          "sha256": "661a57f9a05031667b231da83e5cf95884af00a9e796f446820a4ddea6d7aa40"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.regions.json",
+          "sha256": "5d6c1131c6e6f27a99678854795b9308599fc30f339143f700f107174231143d"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f06-b0000-clean.txt",
+          "sha256": "cea76798a77f7de6ec89c9efdde70d10091b20ef1f6d480bf30fd653925e5634"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f06",
+        "document_type": "receipt",
+        "index": 6,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "quantity",
+          "description",
+          "unit_price",
+          "unit",
+          "line_total"
+        ],
+        "vocabulary": "alternate",
+        "split": "dev"
+      },
+      "field_count": 10,
+      "label_statuses": {
+        "present": 10
+      }
+    },
+    "v0-1-d22-smoke-receipt-f07-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f07-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f07-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f07",
+        "source_group": "synthetic-receipt-f07",
+        "assignment_group": "473fab867e3f06cd0a66ebd429fe5e78e6565766f9dc9ddc9f5e09188cc1131d",
+        "split": "dev",
+        "value_seed": 1101017965793782037,
+        "source_gold_sha256": "ce8b80dc5a3f0d085aa6a0daa56b74e971ab4cd758f54a8fd60e8000ec3d1f9a",
+        "content_sha256": "3003849959e05216eda702bd0a01bb1d3ffd22d4420afeb4b3eb2d40668331e1",
+        "row_count": 3
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.png",
+          "sha256": "3c0013936c41000e5f489319a2a803dcd1d16e7eed5a4756a548896ae2d3c932"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.pdf",
+          "sha256": "b0e09ff3c7bab89ca463d374f5692ba8fe0901b48a8007f21d0845301ccae94d"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.gold.json",
+          "sha256": "ce8b80dc5a3f0d085aa6a0daa56b74e971ab4cd758f54a8fd60e8000ec3d1f9a"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.labels.json",
+          "sha256": "08567c1760b4bc22f98136ccc76e20d0db3f76bce4fb8155d87598da20c9c246"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.regions.json",
+          "sha256": "bf180ec502993821bd2a46da1fd330487ffbc25ed8c7365645d5296cc4f01d85"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f07-b0000-clean.txt",
+          "sha256": "ebd21a50a662fa2ed13df3d4736358ba8a39e4c9f17601cb983f24035abb9fea"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f07",
+        "document_type": "receipt",
+        "index": 7,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "line_total",
+          "description",
+          "unit",
+          "quantity",
+          "unit_price"
+        ],
+        "vocabulary": "alternate",
+        "split": "dev"
+      },
+      "field_count": 20,
+      "label_statuses": {
+        "present": 19,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-receipt-f08-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f08-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f08-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f08",
+        "source_group": "synthetic-receipt-f08",
+        "assignment_group": "2b4563fe042ac078f3fed55fc20840377770aafa8453a1c5b4cd11fc6009edc6",
+        "split": "final",
+        "value_seed": 836777344536161765,
+        "source_gold_sha256": "4481b9f3c54dfdd3dc28a08f877960ed793fd479528087177fcce9d7302356ce",
+        "content_sha256": "d9816da119ff5dfad50df4031aad5ffbec25c865a984d6fb3bd09c690398ced4",
+        "row_count": 12
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.png",
+          "sha256": "0d5ea9ed9fa62493708c67f302072925de4c0fdaba5c4015d1a8ae6533b04c1e"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.pdf",
+          "sha256": "1e2b799048a0c1b4e26c54d29cda5866f87cc2aba4a14894c60b5120cd68103c"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.gold.json",
+          "sha256": "4481b9f3c54dfdd3dc28a08f877960ed793fd479528087177fcce9d7302356ce"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.labels.json",
+          "sha256": "dc649d1a9e07d957bdaf4e6de5e884f4b1a9fef139598845563b6f9e29070928"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.regions.json",
+          "sha256": "4066ef441d741e14b0404375de159fc1d70f9419723de4940c799eb83cd2c429"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f08-b0000-clean.txt",
+          "sha256": "29520e31cd02adeca52a4c3b47b0bc14cc9dac1e6895c32944f3606258b04f1c"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f08",
+        "document_type": "receipt",
+        "index": 8,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "unit_price",
+          "quantity",
+          "description",
+          "line_total",
+          "unit"
+        ],
+        "vocabulary": "alternate",
+        "split": "final"
+      },
+      "field_count": 65,
+      "label_statuses": {
+        "present": 64,
+        "absent": 1
+      }
+    },
+    "v0-1-d22-smoke-receipt-f09-b0000": {
+      "lineage": {
+        "sample_id": "v0-1-d22-smoke-receipt-f09-b0000-clean",
+        "base_id": "v0-1-d22-smoke-receipt-f09-b0000",
+        "document_type": "receipt",
+        "family_id": "receipt-f09",
+        "source_group": "synthetic-receipt-f09",
+        "assignment_group": "79c6c8ce081f1499dae1755a26491ed07a4aa435b6e91e7af5ee403bc4036ab3",
+        "split": "final",
+        "value_seed": 766070863672091318,
+        "source_gold_sha256": "a66fd2daf800dd6f804ee3da60779266959ad408a1a76f8ef997e862828cea5e",
+        "content_sha256": "1dbae6fe7afa6e7bd118cc529c97258ccf8dec3906b583f23f8d77d699f9ae89",
+        "row_count": 30
+      },
+      "assets": {
+        "png": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.png",
+          "sha256": "5efcd87ae104d6b66ff185831ac68c6dd22c332746b86bfc5d5fd7f51e9cd742"
+        },
+        "pdf": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.pdf",
+          "sha256": "025478ed352d1b2fc46f3e3a4154efeb00b48cf1e9301ef5a65f16a63ea683b4"
+        },
+        "gold.json": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.gold.json",
+          "sha256": "a66fd2daf800dd6f804ee3da60779266959ad408a1a76f8ef997e862828cea5e"
+        },
+        "labels.json": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.labels.json",
+          "sha256": "362e1a6fb35330a14a246f7b5c8f1083c05102de1c0f093a275dda3072041a5c"
+        },
+        "regions.json": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.regions.json",
+          "sha256": "32f824cd92eeea8df42469c6bef7cc08b5b94320bc11254d0611d90c499377fe"
+        },
+        "txt": {
+          "path": "v0-1-d22-smoke-receipt-f09-b0000-clean.txt",
+          "sha256": "73fbd942bd8b0fc846628862ec8ed7dad3683ae99cf9b9ca9c31bab05527c1d0"
+        }
+      },
+      "family": {
+        "family_id": "receipt-f09",
+        "document_type": "receipt",
+        "index": 9,
+        "header": "two columns",
+        "totals": "above table",
+        "columns": [
+          "unit",
+          "line_total",
+          "quantity",
+          "unit_price",
+          "description"
+        ],
+        "vocabulary": "alternate",
+        "split": "final"
+      },
+      "field_count": 155,
+      "label_statuses": {
+        "present": 155
+      }
+    }
+  },
+  "batches": [
+    {
+      "batch_id": "cross-split-01",
+      "cross_split": true,
+      "pairs": [
+        {
+          "candidate_id": "pair-54e6ee8687766241573b0a0fe5a16e6d67fb3887aee11e1f70b453982ea6bb17",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 5,
+            "content_jaccard": 0.1304,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-5ba38a4e90066ff10a19cbeef040e7141c255938669a2c21dd83f9dbdd585267",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0714,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-5cd1b223f1ca4f69df9c0574f8e98075fc83bb904a7d29af410280bb8478c530",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f00-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-receipt-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-6c8accd33fd76a9278997f42ed7c57a790d65c061987d36e2f3efcb5ffd2ad83",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f03-b0000",
+            "v0-1-d22-smoke-receipt-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f03-b0000",
+              "v0-1-d22-smoke-receipt-f08-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 1,
+            "content_jaccard": 0.1833,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-707157d72d76865d7a40b4ea5a7aa6d081d892582336c015eb48512ef8d1c886",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f02-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-receipt-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 2,
+            "content_jaccard": 0.24,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-7de538f3dac6c554c0d8c286d6ee8d5bcfe01f2a7eddb79ca77eaf09377345b8",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f03-b0000",
+            "v0-1-d22-smoke-invoice-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f03-b0000",
+              "v0-1-d22-smoke-invoice-f08-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.2273,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-8400c6d648d9d782296ac81591cf7194d4eab6b62641ab3978f6741d1dba8187",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f04-b0000",
+            "v0-1-d22-smoke-receipt-f09-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f04-b0000",
+              "v0-1-d22-smoke-receipt-f09-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.1301,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              30,
+              30
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-8605fd6d725cb859228ad6096159cfdb8aea014327b605608006d6258157b74f",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f01-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-receipt-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 6,
+            "content_jaccard": 0.1579,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-8677729a2cd8b5d7d500426999872d11b8dc62da7b1f00cd64f18b327e233daa",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f07-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-87c3e3a62701631fdb96baa5f83a2d581a367b4f022ba399db7999066a4362f5",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-invoice-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f05-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.1053,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "cross-split-02",
+      "cross_split": true,
+      "pairs": [
+        {
+          "candidate_id": "pair-8f318fd4144a2a2b79f95eafddb81be95fe2e4c83e24816d1a1dab5a62910294",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f08-b0000",
+            "v0-1-d22-smoke-receipt-f03-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f03-b0000",
+              "v0-1-d22-smoke-invoice-f08-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.2031,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-8faeca7715a2ce6c05576b2ae81b70fb40ca504920e46f93350645e6729b3788",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f05-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-receipt-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 2,
+            "content_jaccard": 0.0769,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-92ec201d08943d02678f4db64b2053850733573a951b3468711c1a344f4933f9",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f07-b0000",
+            "v0-1-d22-smoke-receipt-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f07-b0000",
+              "v0-1-d22-smoke-receipt-f08-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.1429,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-92f51405ba9f4023fc6db0696401917d18307a05dcbe1587765fac7d8ef258b6",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-invoice-f00-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-a96f1b1eaf07a66cfce377fb226eb5fbd10a6bcb6d0c8da5948215816018c4b6",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f03-b0000",
+            "v0-1-d22-smoke-receipt-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f08-b0000",
+              "v0-1-d22-smoke-invoice-f03-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 2,
+            "content_jaccard": 0.1538,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-ab766efb29a9331406e56ce733801bf064423845a7aa3c1f553d44613eba9c08",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f04-b0000",
+            "v0-1-d22-smoke-invoice-f09-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f04-b0000",
+              "v0-1-d22-smoke-invoice-f09-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.1231,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              30,
+              30
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-ac139a4db9641e47ed534a14daa2bdd8f8e7175a2813d72bcac3979bf938d426",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f02-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-receipt-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.1818,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-b937ed0c9e51d42a84937df27165928f497a664426e7db2a420773a18209a80b",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-invoice-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f01-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 6,
+            "content_jaccard": 0.2381,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-bec3fa161ddcbebe4d38316752a03c48b473d80bd2e4ec574dc947bdbcc40e4e",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f07-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 6,
+            "content_jaccard": 0.0606,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c032af8564ec6bcce47dcddf1234e5191869b0d5855231e15cc5891f80862175",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f01-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-receipt-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "cross-split-03",
+      "cross_split": true,
+      "pairs": [
+        {
+          "candidate_id": "pair-c40c7b2aafdd5e8276ac38788866c5e44fabdb6ec2c777e1d5d68ae509053c80",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 1,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c567144d4b435033f27e0098d2f1b35f3be0aa88e6d5b91ff7e54aa75a5b7aa0",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c80dfd39adf17f48fef84c4460df60d71516f6890b63f6be3ff52d362a8bf360",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f07-b0000",
+            "v0-1-d22-smoke-receipt-f00-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.05,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c87138366eef0d094e8c30da913ee596c6d84109de4c6258aa51f46470b727a6",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f07-b0000",
+            "v0-1-d22-smoke-invoice-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f07-b0000",
+              "v0-1-d22-smoke-invoice-f08-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0962,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c9513d1ec67e2206c8cf5fd8d7547cb00af00d91ac46b3440d18e165621954a9",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-invoice-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f02-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0714,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-cb1cccd2187032a610fe2817cf588d3cbd468cd039e23ad9a9b787192bbb9c9c",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f07-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0417,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-cc34c52bdab9fba3284d49e385f8b3879fa586092828a5176a0d8097f463fa17",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f04-b0000",
+            "v0-1-d22-smoke-receipt-f09-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f09-b0000",
+              "v0-1-d22-smoke-invoice-f04-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.1349,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              30,
+              30
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-ce45e63422240e4d386b7936a495891db8097b4ae6d5b0ac03a52169e0910733",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-invoice-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f01-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 3,
+            "content_jaccard": 0.125,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-cfeda8d344dea0890fc50cc9deef3f34207a24a9f23a9f67d6b0df1160ec1dfe",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f05-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-receipt-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 5,
+            "content_jaccard": 0.1176,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-e7ea81d8f0828455161749937a3e68009909a8e8bb5b8fbdf54faf56df9e68e9",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0769,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "cross-split-04",
+      "cross_split": true,
+      "pairs": [
+        {
+          "candidate_id": "pair-f3c59628b875daee9827f969e9430703c1ee332691067dccd6c2a7a5bee03bb1",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-invoice-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f02-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 6,
+            "content_jaccard": 0.1515,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-f43eec3e8f9d3e5b0c38e84fa8d724e6f33beb27d6a7f8a09d45d24e7aa6d033",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-invoice-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f00-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 5,
+            "content_jaccard": 0.1818,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-fa8b2d97bdf47dcb73ea5d265da1ac3a92dd74cdcbfdee70cc6915c8e11899c9",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-invoice-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f00-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": true,
+            "dhash_distance": 6,
+            "content_jaccard": 0.05,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "same-split-01",
+      "cross_split": false,
+      "pairs": [
+        {
+          "candidate_id": "pair-02201d958ff2624140ec888a0ecbdc7a1eb47eded0efd2005f9b4c3dcf28e3d5",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.0625,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-02b4964097a281cebce00574b0eb438cad128d7b0563d02d694f55dfc90edb05",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f06-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-receipt-f07-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0952,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-047a43c17349814a1413b2698279311cd626ca526cde95317581376692d5daa0",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f00-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-receipt-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.125,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-04dfe1a9d97389312c37f5681171d25fbb2f8d4f687cfa7fbe1682e57337ede7",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-invoice-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f00-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.3333,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-065410cf1f1e402fbaf1487ac1b4f8f8de7c9a27c420ec2c773d96484cd54749",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f07-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f07-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.069,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-07b73bdefd6f5cbf049ca3787fb017f258f7b157b1edff5e1c2703a18067e991",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f01-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-receipt-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0417,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-15c0429aba0e3c6cfa18cf5656394c236873de8f0a51bc5ef3be88145e0a5b28",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-invoice-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f01-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.1111,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-20b8305d6a493c3d0c86ed64f3f5711330692011682e1b9af170c3657d930a76",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-219953c7ad64d6c9ea7474fa948e4918bdf240117a8682c464b9fa47145a6070",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-invoice-f00-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-2237b767a2e51a7cb108e2a323f4371d9aae61627aee66cc7cf539069fe0ce80",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f00-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "same-split-02",
+      "cross_split": false,
+      "pairs": [
+        {
+          "candidate_id": "pair-225e6f1413bd1d1725f585ad4193cd7726b1613c780cb553ea0c23b77792db51",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f00-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-receipt-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-2b12100b740d166dc4fa05b582387de0e93366574c79e8fe60df0244024e08d6",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-invoice-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f00-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.0417,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-2b7fd43c4733a3fa083b691e017863d1ae850475eb4ea76ddba0b201b731ee34",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-receipt-f00-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 3,
+            "content_jaccard": 0.0833,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-2ca6fa29832aed7042fd67a85e5a04e5c798f3bf569cdfe2a2f6711312c004de",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-invoice-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f06-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 3,
+            "content_jaccard": 0.04,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-36e9d8e40c620035dd79bb47ac64ed7d890b0a02e045d7b4348fb3b4c57a2f75",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-receipt-f00-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 3,
+            "content_jaccard": 0.1429,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-3c57aced825d4f6be3ff53c1940682abbad08503e1f529e977c094c362016a77",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-464fea3413679d6b3d63c218feb9f60036b392e24a337e2c4d4312f982ff84b1",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.1875,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-51ae34a4701e76fd57119df8d1201bd673ee2b19a8d8029fe78e9e40048bfcfb",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-receipt-f07-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f07-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0455,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-59f16e8e837037716d8b290a080c9bbc1ecf2a2a3e5a198410697d6e8f1a2e56",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-invoice-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f02-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.087,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-68bc3a4ede11bd5ced69daa1c73d8d47dc49dbb2e46e8b902ddbee19d4a9b4f2",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-receipt-f00-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-invoice-f00-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 3,
+            "content_jaccard": 0.1429,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "same-split-03",
+      "cross_split": false,
+      "pairs": [
+        {
+          "candidate_id": "pair-7f5dea2ce199de389ccd839cd5d1574ffb6d1c630c79c35b36adb332fac72d81",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f01-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f01-b0000",
+              "v0-1-d22-smoke-receipt-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0833,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-8184d5143be6f5e9660ecf9ac8cf517ff67251cf80fa46a3661f294f055cd9b0",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f09-b0000",
+            "v0-1-d22-smoke-receipt-f09-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f09-b0000",
+              "v0-1-d22-smoke-invoice-f09-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 3,
+            "content_jaccard": 0.1102,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              30,
+              30
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-85cbe728e5e693da84b6d82eb7d53bf73d1dfaad5b185699eb2005203c2655b8",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-invoice-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f01-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.1818,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-88f349e12d3c296d468e67445f92b5fe69d63c2be390682e7a100895af8ab484",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-89f38bf96eb29eccab8a6984a66d9c6f45945e5cdd824fa715ab5d692518ba16",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0769,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-b27552b12fe0323e3319eb4378af1f701b20633a1642ea430be6f25658ed1c76",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f01-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 6,
+            "content_jaccard": 0.0833,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-b5d9db1c8e754ffcf2816ceb6fefc404f8a4e5bbf9c99b0d3716777207192150",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f06-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-invoice-f06-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.2,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              1,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-b88b6c8ba194b0c53171c2e8d1667f82c6b4ed82a33a5de2c20ae52dac68fb47",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f07-b0000",
+            "v0-1-d22-smoke-receipt-f06-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f06-b0000",
+              "v0-1-d22-smoke-invoice-f07-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c0c0de61404d2abd38d256692e4e893b0f0435b1597036cc4f388b00f9f3a47f",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f08-b0000",
+            "v0-1-d22-smoke-receipt-f08-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f08-b0000",
+              "v0-1-d22-smoke-invoice-f08-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.1562,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c20e152bd2693a6884e10242f849c7e35da859dce24e5a47fc7e2b7d01925327",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f02-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-receipt-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.1,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    },
+    {
+      "batch_id": "same-split-04",
+      "cross_split": false,
+      "pairs": [
+        {
+          "candidate_id": "pair-c245c2f8c7e6362e136f30fca7df54eb2b81c06eb6fde1a01333c5b409cb7353",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f02-b0000",
+            "v0-1-d22-smoke-receipt-f00-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-invoice-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 7,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              3,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c4dc77c6d0c3703a406e4310f3256820b208a62d882963cb45cb0d51e6f9b0e0",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-invoice-f00-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.125,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-c4fae231aec52352c14827ba0dc7be2589b075f873380ddd88b2237633287404",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f00-b0000",
+            "v0-1-d22-smoke-invoice-f01-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-invoice-f00-b0000",
+              "v0-1-d22-smoke-invoice-f01-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.0833,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              1
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-d9b04e2fa18ca3257599aa987921d703cf916eea75af6b83adb07c25c9ccbf94",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f04-b0000",
+            "v0-1-d22-smoke-receipt-f04-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f04-b0000",
+              "v0-1-d22-smoke-invoice-f04-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 2,
+            "content_jaccard": 0.0992,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              30,
+              30
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-de897ae1a211a307b982aa94ab0af0bc8955fb883a3e498dc7b9c83a952ffaa0",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f03-b0000",
+            "v0-1-d22-smoke-receipt-f03-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f03-b0000",
+              "v0-1-d22-smoke-invoice-f03-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 1,
+            "content_jaccard": 0.2188,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              12,
+              12
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-e46b1f87c4bd1ca1c809fe3939df36422175c65a6fa1c6ab901f349ee3470c9d",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f02-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 4,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-fb5bb4d3692fe70d1263d6e623cbdf0f0ce7edfecff15fcac9f6c2cda3978ed7",
+          "base_ids": [
+            "v0-1-d22-smoke-invoice-f05-b0000",
+            "v0-1-d22-smoke-receipt-f05-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f05-b0000",
+              "v0-1-d22-smoke-invoice-f05-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 1,
+            "content_jaccard": 0.125,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": false,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              0
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        },
+        {
+          "candidate_id": "pair-fda67c7c7af293f32036845a70f79b98bfdf7e97c6fb942c1c4476b047e2445b",
+          "base_ids": [
+            "v0-1-d22-smoke-receipt-f00-b0000",
+            "v0-1-d22-smoke-receipt-f02-b0000"
+          ],
+          "current_disposition": "pending",
+          "screening": {
+            "base_ids": [
+              "v0-1-d22-smoke-receipt-f00-b0000",
+              "v0-1-d22-smoke-receipt-f02-b0000"
+            ],
+            "cross_split": false,
+            "dhash_distance": 5,
+            "content_jaccard": 0.0,
+            "disposition": "pending human review; not proven duplicate"
+          },
+          "mechanical_comparison": {
+            "same_document_type": true,
+            "same_gold": false,
+            "row_counts": [
+              0,
+              3
+            ]
+          },
+          "inspection": {
+            "image": false,
+            "content": false,
+            "lineage": false,
+            "reviewer": null,
+            "verdict": null
+          }
+        }
+      ]
+    }
+  ]
+}

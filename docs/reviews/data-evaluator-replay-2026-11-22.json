@@ -1,0 +1,123 @@
+{
+  "version": "vietdoc.evaluator-replay.v1",
+  "archive_name": "evaluator-replay-20261122.zip",
+  "archive_sha256": "782f24a5d09fb21f13ba3c274799590c85de5b162ab6e53a7e793d1305230955",
+  "archive_bytes": 347021,
+  "packet_index_sha256": "0716aab683ab510ead3b40b4b33265251aabf67493ff80f94c3acf886e41809f",
+  "expected": {
+    "scalar_counts": {
+      "tp": 10,
+      "fp": 2,
+      "fn": 2
+    },
+    "scalar_em": [
+      10,
+      12
+    ],
+    "table": {
+      "matched_cell_accuracy": [
+        9,
+        10
+      ],
+      "e2e_cell_accuracy": [
+        9,
+        30
+      ],
+      "exact_row_accuracy": [
+        1,
+        6
+      ]
+    },
+    "rows": {
+      "missing_gold_rows": 4,
+      "extra_predicted_rows": 2,
+      "predicted_duplicates": 1
+    },
+    "outcomes": {
+      "ok": 1,
+      "failed": 1
+    },
+    "evidence": {
+      "coverage": [
+        1,
+        42
+      ],
+      "geometry_recall": [
+        1,
+        46
+      ]
+    },
+    "calibration_eligible": 0
+  },
+  "files": {
+    "README.md": "513ed3413d44f4b67a590710e883088698d7e0aa86b16cb4b08a11d092e902b1",
+    "docs/label-adapter.md": "b1fb15eb63e09f6af0743caebe0e0a1915d943745f35de24830ea23b4b2da7da",
+    "replay.py": "7e4aa8bf65a1295dc61afc8f84646256f9fc4c1ccc8c67a5490d88d2626736c2",
+    "specs/contracts/business.schema.json": "0948307b0c274d565fbe89b25d69f1692d0d6a4241352939f424ce0eba6b3ded",
+    "src/vietdoc/__init__.py": "328b82131f1720bbd28c0ed13f72cb44886d577a4a840b0e25ea30577d6ac81a",
+    "src/vietdoc/data/BENCHMARK.md": "24cbce6295c886e67ff0102519d2c6bf16bacc1e33373a483fa1e53333a9d991",
+    "src/vietdoc/data/DICTIONARY.md": "e7becb10f217cf132fda6154bf2c1f2c8cd33f9c87746717a7a3a1d998a2ce5a",
+    "src/vietdoc/data/SPEC.md": "be5decc0bb9c0731fc7d05b5eed6a4df67b019893815659318bbbdc5f1d897a3",
+    "src/vietdoc/data/__init__.py": "d7882a57230b3348e51bb9cc36239e30ab4b4dfb382c7e45e34b53dac3a84a64",
+    "src/vietdoc/data/adapters/SPEC.md": "00095eb0b6734867626ac54a7ddc0c977944e909ea797ca0b3d887f0668a5e1d",
+    "src/vietdoc/data/adapters/__init__.py": "a06b37b14ecea0c999b154c479f7bb011a417effe715c8e6263ba454589b70d9",
+    "src/vietdoc/data/adapters/labels.py": "70f4f4c74f42a3b16bb9de24b06ab8e6a7f41f62f08cf8681298c12242da365a",
+    "src/vietdoc/data/adapters/records.py": "46e8ca69f650b5fd045062d671dff99b9d76d9f4f0fbb2c0b87ff1d19bc25be9",
+    "src/vietdoc/data/benchmark.py": "4048d681e1357193fdb752be21ecc0ab9f394bf510e5feb25cab404e869fcfc9",
+    "src/vietdoc/data/duplicate_review.py": "f40338bc7974af9507245295f39f3602d504ddd855e600e7e5ac3e5f62199412",
+    "src/vietdoc/data/generator/HANDOFF-2026-11-07.md": "0bd1d28f7456992670736c799179eaeaa885afe94aca6f066ef280a1bce40945",
+    "src/vietdoc/data/generator/README.md": "2716355285e24adb95ccf5430e5b6239963c212f8f1101b0968839788103baa6",
+    "src/vietdoc/data/generator/SPEC.md": "ccec14744de15234968113c97f61b8149485f450953697780f1ec75b93923f7d",
+    "src/vietdoc/data/generator/__init__.py": "3efacd0a9327a25390d03e04dd8a142dcbfb335445013d9cb74bdb050bcab977",
+    "src/vietdoc/data/generator/artifact_io.py": "3d68ab4e488e55f7bbdea61cfadbfff4113cecc5bb5eaf7cede9202273aa86f5",
+    "src/vietdoc/data/generator/augmentation.py": "22b59717c1d6bda7c69e6ac54da5aae0c108e0352877218145305d910c155e78",
+    "src/vietdoc/data/generator/d21.json": "877db00fb2a2089ac208ca92afeb9f342f0618d6e42eabcad2c82e78cc54785b",
+    "src/vietdoc/data/generator/d21.py": "e022ab20637068029f5d080636a25d916cd3ec8aea3efe7e6747f341697338ba",
+    "src/vietdoc/data/generator/d22.json": "38a01113401555a22b154207861841e20223c568591af011f9464273d4a591f4",
+    "src/vietdoc/data/generator/d22.py": "aa137276eb5b681d5836e1b8869fdd6e3247fe9408c6df3ec6a7057a4395479e",
+    "src/vietdoc/data/generator/fake-values.json": "d959b811a15911c2b66d3fa6f5570b2810c152e4f2ada91cc14635b6c2a10c5c",
+    "src/vietdoc/data/generator/handoff.py": "f0cfc93e30bcf907549792ab17e894c1b880e5a20815485f429657d4b5aff39f",
+    "src/vietdoc/data/generator/integration.py": "f22f76e43467fe7b90ed98185e2ba56bcd6c88f6cbb5295e1129dfcb7647c52e",
+    "src/vietdoc/data/generator/pdf.py": "902f70a7f1d4f81080d38a589dc48ef924a148c42275cded19ce2d8a07169144",
+    "src/vietdoc/data/generator/render_environment.py": "9b97f768256c5de3fe15cceb1477a3ae16a8437b0e818215d24d320f0fe0f98a",
+    "src/vietdoc/data/generator/rendering.py": "829215531ce21b8be4b4924f9f4b40fa7d94c5f4712edd2c52c21ce7b09e2b77",
+    "src/vietdoc/data/generator/templates/SPEC.md": "946fdab75cfa449f13f336d660ed3ee7614fe70476bb7d271394da7357319670",
+    "src/vietdoc/data/generator/templates/__init__.py": "c1eb4603d30a405393efbd9bccc5a8f4b81cd35efaaf4187ff943c50ea6aaea3",
+    "src/vietdoc/data/generator/templates/families.py": "bf7d971a34546bdd3867d2b49d099001992ba8d806fa1bfda589866559f73b31",
+    "src/vietdoc/data/generator/templates/invoice/SPEC.md": "d4912900136c2b274cef2705b5bf8c1e38875ac47745dbd522e1867095e8dce9",
+    "src/vietdoc/data/generator/templates/receipt/SPEC.md": "7361e6f69d85e9fcaeae873b59d3e32c45fed46604abe798a99e0ef366214af2",
+    "src/vietdoc/data/generator/values.py": "3938d9a90b8371871c963313c3df5e4cfa26010d7b116e69c3877db9295b1aec",
+    "src/vietdoc/data/manifest.py": "c9bc206cb3c939bc9283c7d400a66cdf708cd0252b5c492557400670fbab30c7",
+    "src/vietdoc/data/splits.py": "adad9a800731b08758fc4eb8f4505ac7366aca22380ed012ecabb1d19e043740",
+    "src/vietdoc/data/validation.py": "34e64745c232da5b7b867298f87d8b5c6d0803ab9a21f2c2980c3de9cbc4c055",
+    "src/vietdoc/evaluation/D32.md": "c6f7ead6a6b554a184515e6bd3f846c2e3e43b87654b6e2dd55c56a476005195",
+    "src/vietdoc/evaluation/README.md": "0a71c817e9263019488b7eee436191b6e91bf0d2189ef5a7c7d37c8082a68c61",
+    "src/vietdoc/evaluation/SPEC.md": "8e5f9a5c074fb6d0b2b97f101a66a91d67ff8e6c19247099448b89a0a76a4e72",
+    "src/vietdoc/evaluation/__init__.py": "1b28dcf8552c97b320a251cae0da1e3c3f1fa8b8cc8a5ebe38c5e222be5d0c7c",
+    "src/vietdoc/evaluation/__main__.py": "1909c22b59f2e7db030ee2aa3ccdd0c807a2ea91330f1525f8fcde8c22c52c79",
+    "src/vietdoc/evaluation/diagnostics.py": "7c562b4acb68ea73d5b71dba875a03307ceda98fef4b267292e7bcc393b4b510",
+    "src/vietdoc/evaluation/evidence.py": "216ce0240bc59c92a9479f8c002bf08d82074b95e6b128e65a8ece294b3e58d3",
+    "src/vietdoc/evaluation/extended.py": "d908f621928b55a7523efa6d4ccbd5c2d67196291afd53dce78e8b6e621df183",
+    "src/vietdoc/evaluation/gold_validation.py": "43a12285ddafe6afa6ae7abc30afe1dcdb87957d3ce760823659c4e99ef01c7b",
+    "src/vietdoc/evaluation/matching.py": "e229100ebde46fb6adcdb2b41a4e896550063440b6100aecfd171042b247cbe7",
+    "src/vietdoc/evaluation/policy.py": "cfc134579a161a3eaa7dfe339b1c707f6ffede6d8344296304b69615a3e813f0",
+    "src/vietdoc/evaluation/scalar_ocr.py": "4352c9246fd969e549afbbc58024b577c4e53d02a9d1d81bcf61cf5859620a3b",
+    "src/vietdoc/evaluation/tables.py": "dc6892e9fb86308eac7c9d77bc17ed3b0c2392bc126ebb5fb65c162761e48825",
+    "tests/fixtures/d12/canonical-environment.json": "ef43bb048b57dbc86c4c02ab3e8a8265eefba4f89cef19d4e29b10ac77abe668",
+    "tests/fixtures/d12/d12-invoice-04.canonical.png": "0287fe9f2fd3c065a0632f483c720be9fcb159f486de442e626dfb5eb94237fc",
+    "tests/fixtures/d12/d12-invoice-04.gold.json": "b66cb9a0b12c37d83fbdcbdeeb635aa7f70f305a730d1ca9e7f5738225954a20",
+    "tests/fixtures/d12/d12-invoice-04.labels.json": "36025462f6e70f9270d78034a7fcc3095e765b876642ff4e764f0daf36e9a703",
+    "tests/fixtures/d12/d12-invoice-04.png": "46a917aaf05f8a3461c5eaef62e74d82c886267b8452b2be277b0638f2c4dc99",
+    "tests/fixtures/d12/d12-invoice-04.regions.json": "74722d4ec6c4d2ee36a6d537b166b3eedf885a120e4fb9c0bf56b61682c153d6",
+    "tests/fixtures/d12/d12-invoice-04.txt": "f8ddb2a3536c9e04af322856cd0ab06eeeb20e88dd1fab62d20469b2049eadeb",
+    "tests/fixtures/d12/d12-receipt-03.canonical.png": "20080da17f1a570a64164e5684363d1a5a51ccaccf53273eef130c94b0684c7e",
+    "tests/fixtures/d12/d12-receipt-03.gold.json": "7f5cda4bd303de4b6554de60210f6cf674fdcebd8d1a10e153ae5cdf5f710aca",
+    "tests/fixtures/d12/d12-receipt-03.labels.json": "a8fc1dfd1ef767ec5cf3f54bd0d9bfee7c2d3522dea26884f25dd19e9726ed08",
+    "tests/fixtures/d12/d12-receipt-03.png": "a1f0da31052e3be1e3faaa07f95f746838fd345c4fc00bb5220c8104406d95ac",
+    "tests/fixtures/d12/d12-receipt-03.regions.json": "da466b153e459f1b8a0bc374b6c858d1e64921768c411c4d65ffaf3a2a2b41f9",
+    "tests/fixtures/d12/d12-receipt-03.txt": "5abf6572c299a9f2d5a17df0bfb66d96c96cdfc5576147c0a4e1c9379bdbabff",
+    "tests/fixtures/d12/manifest.json": "b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c",
+    "tests/fixtures/d31-known-predictions.json": "7bf35fd664eb564fb5f4dea955e08daa2448008047f61015b11073cbe3c15497",
+    "tests/fixtures/d32-known-predictions.json": "75903c027c8afff22a679c0d858e6819fbc57d48406e5c0eb344314e383ae1e5"
+  }
+}
