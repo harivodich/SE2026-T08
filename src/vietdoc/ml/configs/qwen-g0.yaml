@@ -1,0 +1,221 @@
+# OCR text/layout-only G0 profile. M1.2 loader validates this file; execution remains explicitly disabled.
+config_version: 1
+experiment_id: qwen3-1p7b-g0-ocr-layout-v1
+status: proposed_unmeasured
+reviewed_on: "2026-11-23"
+source_commit: e040e94bb20509055d06fa0182e05a565e588b94
+execution:
+  enabled: false
+  allow_download: false
+  allow_training: false
+  allow_paid_compute: false
+  runtime_activation: false
+
+model:
+  id: Qwen/Qwen3-1.7B
+  revision: 70d244cc86ccca08cf5af4e1e306ecf908b1ad5e
+  revision_status: upstream_metadata_verified_local_bytes_pending
+  class_name: Qwen3ForCausalLM
+  tokenizer_class: AutoTokenizer
+  tokenizer_revision: 70d244cc86ccca08cf5af4e1e306ecf908b1ad5e
+  trust_remote_code: false
+  use_safetensors: true
+  local_files_only: true
+  local_artifact_root: null
+  local_file_hash_manifest: null
+  license:
+    name: Apache-2.0
+    audit_status: apache_2_terms_identified_owner_ack_pending
+    intended_use: project_research_evaluation
+    commercial_use_policy: permitted_subject_to_apache_2_terms
+    source_url: https://huggingface.co/Qwen/Qwen3-1.7B/blob/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/LICENSE
+  required_files:
+    - LICENSE
+    - README.md
+    - config.json
+    - generation_config.json
+    - tokenizer_config.json
+    - tokenizer.json
+    - vocab.json
+    - merges.txt
+    - model.safetensors.index.json
+    - model-00001-of-00002.safetensors
+    - model-00002-of-00002.safetensors
+
+input:
+  modality: ocr_text_layout_and_instruction
+  input_profile: ocr_text_layout_v1
+  document_types: [receipt, invoice]
+  language: vi
+  pages: 1
+  accept_image_input: false
+  visual_tokens_max_proposed: 0
+  chat_template_source: pinned_tokenizer_config
+  add_generation_prompt_at_inference: true
+  max_text_tokens_including_template: 3072
+  max_input_tokens: 3072
+  ocr_context:
+    enabled: true
+    max_tokens_when_enabled: 1024  # Included in the 3072 text budget, not added to it.
+    serialization: ordered_block_id_text_canonical_quad
+    serialization_version: vietdoc_ocr_context_v1  # Proposed adapter format, not a shared schema.
+    source: ai1_observed_ocr_only
+    reading_order: preserve_ai1_order
+    coordinate_frame: ai1_canonical_image
+    include_block_ids: true
+    include_text: true
+    include_canonical_quads: true
+    require_input_canonical_engine_hashes: true
+    require_canonical_metadata_ocr_alignment: true  # Metadata only; no image bytes.
+    preserve_unreadable_and_ambiguity_flags: true
+    exclude_gold_transcript: true
+    missing_or_mismatched_context_policy: reject_and_record
+    empty_ocr_policy: preserve_explicit_no_detections_or_unreadable_status
+    unavailable_geometry_policy: preserve_null_and_reason_no_inferred_quad
+    untrusted_ocr_text_policy: document_data_not_instructions
+  overflow_policy: reject_and_record_no_truncation
+
+output:
+  target: business_payload_only
+  schema_path: specs/contracts/business.schema.json
+  schema_sha256: 0948307b0c274d565fbe89b25d69f1692d0d6a4241352939f424ce0eba6b3ded
+  schema_versions: {receipt: receipt.v1, invoice: invoice.v1}
+  receipt_keys: [merchant_name, merchant_address, transaction_date, transaction_time, total_amount, items]
+  invoice_keys: [invoice_number, issue_date, seller_name, buyer_name, subtotal, tax_amount, discount_amount, total_amount, items]
+  item_keys: [description, quantity, unit, unit_price, line_total]
+  max_items: 30
+  money_quantity_type: decimal_string_or_null
+  raw_schema_validation_required: true
+  parser: vietdoc.pipeline.extraction.output_parser.parse_model_output
+  normalizer_version: vi-VND.v2
+  record_raw_and_normalized_schema_validity_separately: true
+  generate_runtime_ids_evidence_or_confidence: false
+
+environment:
+  status: proposed_not_provisioned
+  os: linux_x86_64
+  python: "3.12"
+  cuda_wheel_family_candidate: cu126
+  dependency_pin_source: pyproject.toml::project.optional-dependencies.train
+  dependency_compatibility: not_verified_for_qwen
+  additional_packages: {bitsandbytes_version: null, pyyaml_version: null}
+  install_or_change_dependencies_in_m1_1: false
+  isolate_from_data_and_ai1_ocr_environments: true
+  reference_gpu: NVIDIA_L4_24GB_or_equivalent_bf16
+  gpu_count: 1
+  requested_host_ram_gib: 32
+  requested_free_disk_gib: 40
+  account_quota_cost_and_driver_validation: pending
+
+profiles:
+  reference_lora:
+    status: proposed_not_run
+    requested_vram_gb: 24
+    dtype: bfloat16
+    quantization: none
+    attention: sdpa
+    device: cuda:0
+    cpu_disk_offload: false
+  constrained_qlora:
+    status: experimental_disabled_until_dependency_and_module_audit
+    requested_vram_gb: 16
+    local_8gib_feasibility: unknown_no_fit_guarantee
+    dtype: bfloat16
+    attention: sdpa
+    device: cuda:0
+    load_in_4bit: true
+    bnb_4bit_quant_type: nf4
+    bnb_4bit_use_double_quant: true
+    bnb_4bit_compute_dtype: bfloat16
+    skip_embeddings_and_lm_head: true
+    verify_converted_module_names_and_dtypes: true
+    prepare_model_for_kbit_training: true
+    cpu_disk_offload: false
+    max_visual_tokens_proposed: 0
+    max_text_tokens_including_template: 1536
+    ocr_context_max_tokens: 512  # Included in the 1536 text budget.
+    max_input_tokens: 1536
+    max_new_tokens: 1024
+    max_sequence_tokens: 2560
+    precision_fallback: require_new_explicit_fp16_profile_if_bf16_unavailable
+
+inference:
+  input_profile: ocr_text_layout_v1
+  require_ocr_context: true
+  fallback_to_image_only: false
+  selected_profile: reference_lora
+  base_model_smoke_without_adapter: true
+  enable_thinking: false
+  unexpected_reasoning_output_policy: reject_and_record
+  do_sample: false
+  num_beams: 1
+  batch_size: 1
+  max_new_tokens: 2048
+  max_sequence_tokens: 5120
+  use_cache: true
+  token_limit_stop_is_truncated_failure: true
+
+peft:
+  method: lora
+  task_type: CAUSAL_LM
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: none
+  # Must be checked against named_modules() for the selected installed Transformers version.
+  target_modules: '.*model\.layers\.[0-9]+\.self_attn\.(q_proj|k_proj|v_proj|o_proj)$'
+  target_module_validation: pending_fail_if_zero_or_any_non_decoder_match
+  freeze_base_embeddings_and_lm_head: true
+  modules_to_save: []
+
+training_g0:
+  input_profile: ocr_text_layout_v1
+  observed_ocr_only: true
+  require_train_inference_serialization_parity: true
+  stage: m1_3_future_only
+  status: not_run
+  seed: 2301
+  micro_batch_size: 1
+  gradient_accumulation_steps: 4
+  max_optimizer_steps: 2
+  learning_rate: 0.0001
+  optimizer: adamw_torch
+  weight_decay: 0.0
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+  use_cache: false
+  max_sequence_tokens: 5120
+  packing: false
+  label_ignore_index: -100
+  loss_target: assistant_business_json_and_eos_only
+  mask_prompt_and_padding: true
+  mask_ocr_context_tokens: true  # OCR is user input, never the supervised target.
+  full_json_supervision_requires: all_field_and_item_statuses_present_or_absent
+  obscured_unlabeled_policy: exclude_and_count_until_verified_span_masking_exists
+  truncation: false
+  dataset_manifest: null
+  dataset_manifest_sha256: null
+  sample_membership_sha256: null
+  independent_dev_and_final_access_in_g0: false
+  checkpoint_requirements:
+    - exact_base_revision_and_file_hashes
+    - adapter_weights_and_config
+    - tokenizer_chat_template_thinking_mode_and_text_budget
+    - ocr_serialization_version_and_canonical_provenance
+    - dataset_membership_serialization_and_schema_hashes
+    - optimizer_scheduler_rng_and_step
+    - clean_process_reload_and_same_input_inference
+
+# The exact disabled proposal below has not run; native smoke used a larger artifact-local budget.
+# See docs/team/AI-2/2026-11-24-qwen3-inference-handoff.md; inference schema passed, semantic quality did not.
+measurements:
+  current_gpu_probe: not_run
+  model_load: not_run
+  inference: not_run
+  peak_vram_gib: null
+  peak_host_ram_gib: null
+  cold_load_seconds: null
+  warm_latency_seconds: null
+  train_step_seconds: null
+  finite_loss_and_parameter_update: not_run
+  checkpoint_reload: not_run

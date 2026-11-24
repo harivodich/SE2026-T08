@@ -1,18 +1,26 @@
 # Hồ sơ công việc AI-2
 
+Model hiện hành theo yêu cầu người dùng ngày 23/11/2026:
+**`Qwen/Qwen3-1.7B` kết hợp PEFT (LoRA/QLoRA)**.
+Đầu vào chỉ OCR text/layout từ AI-1; xem [feasibility hiện hành](qwen-feasibility.md).
+Xem [ADR-0005](../../adr/0005-model-spike.md) và
+[constraints/G0](2026-11-01-model-constraints.md). B0 vẫn là OCR+rules để đối chiếu;
+lựa chọn model không chứng minh model đã chạy hoặc đạt G0.
+
 Thư mục được tạo ngày **29/10/2026** để lưu lại công việc đã làm và giải thích các
 finding. Source đối chiếu ban đầu: `d608cc319e1184a6bcb097e0cffecfced91c8b42`,
 nhánh `feature/AI2-M2_ai_service_docker`.
 
 | Tài liệu | Nội dung |
 |---|---|
+| [M1.2 Qwen3 inference handoff](2026-11-24-qwen3-inference-handoff.md) | OCR adapter/loader/CLI và native Docker:4/4 schema PASS, semantic extraction chưa nghiệm thu; code nền đã merge develop 1f03d8d |
 | [HISTORY.md](HISTORY.md) | Những phần đã có, bản sửa dependency/decimal, checks lịch sử, push và phần còn thiếu |
 | [Batch A: R04/R07/R08/R10](batch-a-r04-r07-r08-r10.md) | Giải thích bốn lỗi, đường đi gây lỗi, hướng sửa đề xuất và regression cases cần có |
 | [Plan sửa bốn lỗi](2026-10-29-four-fixes-plan.md) | Các bước implementation, RED/GREEN và giới hạn kiểm chứng ngày 29/10 |
 | [Strict follow-up plan](2026-11-01-strict-followup-plan.md) | R05/R09/R14, CI R17 và ledger kiểm chứng local ngày 01/11 |
 | [Baseline/export plan](2026-11-01-baseline-export-feasibility-plan.md) | Increment M-N1/M-N2/M-N3, execution ledger và verification |
 | [Baseline handoff](2026-11-01-baseline-handoff.md) | Source/tests, CLI predictions, AI1/Data consumer smokes và gates chưa đóng |
-| [Model constraints](2026-11-01-model-constraints.md) | Hardware/runtime đo thật, candidate metadata và G0 provisioning blockers |
+| [Model constraints](2026-11-01-model-constraints.md) | Hardware/runtime đo thật, lựa chọn Qwen/PEFT và G0 provisioning/profile blockers |
 | [SPEC.md](SPEC.md) | Ownership, boundaries và checks của thư mục |
 
 Đọc [kế hoạch vai trò](../ai-2-extraction.md), [workflow/gates](../workflow.md) và

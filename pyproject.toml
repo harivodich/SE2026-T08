@@ -47,6 +47,7 @@ train = [
 test = [
   "pytest==9.1.1",
   "httpx2==2.16.0",
+  "PyYAML==6.0.3",
   # Local, noneditable wheel smoke in the AI gate (same build pins as Data CI).
   "setuptools==75.8.0",
   "wheel==0.45.1",

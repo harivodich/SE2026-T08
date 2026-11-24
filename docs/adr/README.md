@@ -8,7 +8,7 @@ Tám ADR v1 dưới giữ quyết định của [thiết kế v1](../design/v1/0
 | [0002](0002-durable-jobs.md) | PostgreSQL/outbox/Celery/Redis | Proposed |
 | [0003](0003-revision-approval.md) | Immutable prediction/revision/approval | Proposed |
 | [0004](0004-data-boundary.md) | Synthetic Việt main, public audit | Proposed |
-| [0005](0005-model-spike.md) | OCR baseline và fine-tune extraction | Proposed |
+| [0005](0005-model-spike.md) | OCR baseline; Qwen3-1.7B + PEFT (LoRA/QLoRA), cập nhật chờ review | Proposed; yêu cầu model mới 23/11/2026; chưa đạt G0 |
 | [0006](0006-geometry-confidence.md) | Canonical geometry và calibrated confidence | Proposed |
 | [0007](0007-storage-polling.md) | Private local storage, UI polling | Proposed |
 | [0008](0008-business-contracts.md) | Fixed business schema; Pydantic authority cũ | Proposed v1, xem 0009 |

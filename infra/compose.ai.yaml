@@ -5,6 +5,28 @@
 name: vietdoc-ai
 
 services:
+  # Shared Compose change: Backend review required. Opt-in, never a dependency of serving.
+  model-download:
+    profiles: ["setup"]
+    build:
+      context: ..
+      dockerfile: infra/model-download.Dockerfile
+    image: vietdoc-model-download:dev
+    environment:
+      VIETDOC_QWEN_PROVISION_APPROVAL: ${VIETDOC_QWEN_PROVISION_APPROVAL:-}
+      VIETDOC_QWEN_LICENSE_ACK: ${VIETDOC_QWEN_LICENSE_ACK:-}
+    volumes:
+      - type: bind
+        source: ${VIETDOC_MODELS_DIR:-../artifacts/models}/qwen/qwen3-1.7b
+        target: /provision
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 2
+    mem_limit: 1g
+
   ai-service:
     build:
       context: ..
@@ -15,6 +37,9 @@ services:
       VIETDOC_SERVICE_TOKEN_FILE: /run/secrets/ai_service_token
       VIETDOC_PIPELINE_MANIFEST_ID: ${VIETDOC_PIPELINE_MANIFEST_ID:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
     secrets:
       - ai_service_token
     ports:
@@ -48,12 +73,22 @@ services:
       context: ..
       dockerfile: infra/ai-train.Dockerfile
     image: vietdoc-ai-train:dev
+    environment:
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+      HF_HOME: /tmp/huggingface
+      VIETDOC_CHECKPOINTS_DIR: /checkpoints
     # No network by default: no implicit model/dataset downloads.
     network_mode: none
     volumes: &train-volumes
       - type: bind
         source: ${VIETDOC_MODELS_DIR:-../artifacts/models}
         target: /models
+        read_only: true
+      - type: bind
+        source: ${VIETDOC_CHECKPOINTS_DIR:-../artifacts/models/checkpoints}
+        target: /checkpoints
       - type: bind
         source: ${VIETDOC_DATASETS_DIR:-../datasets}
         target: /datasets

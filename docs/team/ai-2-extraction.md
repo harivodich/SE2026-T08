@@ -2,6 +2,11 @@
 
 Bạn phụ trách model trích xuất và fine-tune, nhận image/OCR context và trả receipt/invoice business payload. Model feasibility bắt đầu ngay tuần 1–2; baseline làm song song để đo cải thiện và tích hợp sớm. Bạn cũng sở hữu training input, model adapter, normalization và confidence; Backend giữ runtime IDs, DB, revisions/approval.
 
+Lựa chọn hiện hành do người dùng chốt ngày 23/11/2026: **`Qwen/Qwen3-1.7B`
+kết hợp PEFT (LoRA/QLoRA)**. Xem [ADR-0005](../adr/0005-model-spike.md).
+B0 vẫn là OCR+rules để đối chiếu; M0 dùng Qwen pretrained, M1 dùng Qwen fine-tuned.
+LoRA hoặc QLoRA và cấu hình cụ thể chốt bằng G0, không tự thay model family.
+
 ## Baseline dùng chung schema, làm song song model spike M1
 
 1. Review business/extraction contracts cùng Backend/AI-1. Các key theo [schema](../../specs/contracts/business.schema.json); mọi key hiện diện, giá trị string/null, items giữ quan hệ từng dòng.
@@ -15,18 +20,20 @@ Xong khi hai types có cùng contract ổn định, Backend nhận được resu
 
 ## Model spike trước khi fine-tune
 
-1. Ghi hardware có thật: GPU/VRAM hoặc CPU, RAM, disk và thời gian chạy được phép. Chọn một model phù hợp để thử, review license và input/output format.
+1. Ghi hardware có thật: GPU/VRAM hoặc CPU, RAM, disk và thời gian chạy được phép. Kiểm Qwen3-1.7B đã chọn: license tại pinned revision và input/output format.
 2. Load/infer trên 20 samples; chạy một train step để đo memory, latency và JSON validity. Model name chưa là cam kết chất lượng.
 3. So pretrained model với baseline trên cùng inputs/evaluator. Nếu image/OCR context vượt budget, có chính sách rõ; không truncate mất rows âm thầm.
-4. Báo Lead phương án chạy được/cost/limitations. Chốt model/tokenizer/processor revision, image resolution, context budget và inference settings trước full training.
+4. Báo Lead phương án chạy được/cost/limitations. Chốt model/tokenizer revision, OCR serialization, context budget và inference settings trước full training.
 
-Model lớn không khả thi thì thử extractor nhỏ/OCR-text model bằng evidence, giữ scope và fine-tune objective. Paid API không là phương án mặc định của dự án.
+Nếu model không khả thi trong resource budget, báo blocker cùng số đo và phương án
+để người dùng/Lead quyết định; không tự chuyển sang extractor nhỏ/OCR-text model.
+Paid API không là phương án mặc định của dự án.
 
 ## Fine-tune extraction
 
 1. Đọc dataset manifest/splits do Data tạo; kiểm schema/version/hash và label coverage.
 2. Xây training input từ type, instruction/schema, image và OCR context theo selected architecture. Target là business JSON; unlabeled fields không dùng như absent gold.
-3. Fine-tune, dùng LoRA/PEFT nếu candidate/spike phù hợp. Config ghi seed, batch, learning rate, image/token budget, epochs/steps và checkpoint rules.
+3. Fine-tune Qwen3-1.7B bằng PEFT: LoRA hoặc QLoRA theo G0. Config ghi seed, batch, learning rate, OCR/text token budget, epochs/steps, target modules, rank/alpha/dropout, precision/quantization và checkpoint rules. Không mặc định full fine-tune.
 4. Chọn checkpoint bằng dev metrics; report loss và business errors. Final holdout chỉ dùng theo protocol của Lead/Data.
 5. Có vòng sửa theo nguyên nhân: OCR sai, mapping sai, table grouping, missing hoặc JSON parse. Giữ experiment count bounded; mỗi vòng có hypothesis và dev comparison.
 6. Export adapter/weights + tokenizer/processor/config + immutable manifest; gọi inference bằng cùng preprocessing đã eval.
@@ -61,7 +68,7 @@ Thứ tự: M1.1 → M1.2 → M1.3; M2.1/M2.2 baseline nhỏ và M2.3 serving W2
 
 ## Roadmap cá nhân theo tuần
 
-Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiểm chứng, chưa phải tính năng hiện đã chạy. Capacity giả định IC 12–16 giờ/tuần, Lead 4–8 giờ/tuần; model/hardware/profile chốt G0. W13–16 là buffer, không tự mở scope.
+Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiểm chứng, chưa phải tính năng hiện đã chạy. Capacity giả định IC 12–16 giờ/tuần, Lead 4–8 giờ/tuần; model đã chọn, hardware feasibility/profile và LoRA/QLoRA config chốt G0. W13–16 là buffer, không tự mở scope.
 
 | Tuần | Công việc | Kết quả cần bàn giao |
 |---|---|---|
@@ -83,25 +90,25 @@ Tuần tính từ kickoff. Kết quả dưới là mục tiêu cần tạo/kiể
 
 Folder: `src/vietdoc/pipeline/extraction/`, `normalization.py`, `confidence.py`, `ml/`; weights/checkpoints ở ignored `artifacts/models/`. B0 là OCR+rules, M0 pretrained extractor, M1 fine-tuned extractor; cả ba cùng business schema. AI-2 owns model tensor/token preprocessing, không giao phần đó sang AI-1 chỉ vì tên có chữ preprocessing.
 
-### M1.1 — hardware, license và model proposal, tuần 1
+### M1.1 — hardware, license và profile Qwen/PEFT, tuần 1
 
 Dependency và effort dự kiến: L1.1 + D1 fake samples/hardware; 3–4h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 Input: hardware thực tế, schema, vài D1 fake samples.
 
 1. Ghi GPU/VRAM/RAM/disk/OS/runtime, thời gian được dùng và privacy/cost constraints.
-2. Chọn một candidate khả thi cho schema/items, kiểm official model card/license/input format và dependencies; tên model trong thiết kế là candidate, không cam kết chất lượng.
-3. Định nghĩa input: selected type/schema instruction và image/OCR context tùy candidate, target JSON business payload, raw output riêng parsed result.
-4. Đề xuất image/token budget, precision/tuning method để smoke, dựa hardware; không hứa model lớn train được trước đo.
+2. Kiểm official model card/license/input format và dependencies của `Qwen/Qwen3-1.7B`; pin exact revision, không dùng remote latest tại runtime.
+3. Định nghĩa input: selected type/schema instruction và chỉ OCR text/layout từ AI-1 qua chat template (không truyền ảnh), cùng profile/serialization khi train và inference; target JSON business payload, raw output riêng parsed result.
+4. Đề xuất OCR/text token budget, precision và PEFT LoRA/QLoRA config để smoke dựa hardware; không hứa train được trước đo hoặc tự đổi model.
 
-Nộp: model/resource proposal và pinned revisions dự định thử. Xong khi Lead hiểu candidate/cost/license/risk; chưa coi là model đã chạy.
+Nộp: resource/profile proposal cho Qwen/PEFT và pinned revisions dự định thử. Xong khi Lead hiểu cost/license/risk; lựa chọn model đã chốt không có nghĩa model đã chạy.
 
 ### M1.2 — load và inference smoke, tuần 1–2
 
 Dependency và effort dự kiến: M1.1 + model access; 4–8h. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Audit dependencies/serialization/remote code trust trước tải/chạy theo quyền task implementation; không thực thi text từ document như instructions.
-2. Load đúng model/tokenizer/processor/chat format, pin revisions/config; giữ model frameworks ngoài contracts.
+2. Load đúng model/tokenizer/chat format, pin revisions/config; giữ model frameworks ngoài contracts.
 3. Chạy integration samples, lưu raw output và parsed payload/issues. Nếu dùng gold transcript để smoke, ghi rõ, không so như production OCR accuracy.
 4. Đo cold load/warm latency/memory/JSON validity/errors. Context overflow phải explicit, không silent drop rows.
 
@@ -113,10 +120,10 @@ Dependency và effort dự kiến: M1.2 + full-label tiny gold; 4–8h. Refine s
 
 1. Dùng tiny full-label gold batch, kiểm input/target tokens/images, collator và loss mask phù hợp model.
 2. Chạy forward/backward/update, kiểm gradients ở parameters intended và state checkpoint thực.
-3. Đo peak memory/train-step time; OOM thì giảm budgets/batch hoặc candidate theo evidence, không retry vô hạn.
-4. Lead xác nhận candidate/config feasible trước full training; không dùng train loss một batch để claim accuracy.
+3. Đo peak memory/train-step time; OOM thì điều chỉnh budgets/batch hoặc LoRA/QLoRA config theo evidence, không retry vô hạn hoặc tự đổi model family.
+4. Lead xác nhận Qwen/PEFT config feasible trước full training; không dùng train loss một batch để claim accuracy.
 
-Nộp: train-step code/config/command/report và candidate decision. Xong G0 khi train thực khả thi trong hardware/quyền cho phép; nếu không, có blocker/alternative rõ.
+Nộp: train-step code/config/command/report và Qwen/PEFT feasibility decision. Xong G0 khi train thực khả thi trong hardware/quyền cho phép; nếu không, có blocker và phương án cần duyệt rõ.
 
 ### M2.1 — rules baseline hai schemas, tuần 1–3
 
@@ -181,7 +188,7 @@ Nộp: training loader/config/tests và decoded batch examples. Xong khi target 
 Dependency và effort dự kiến: M1.3/M3.1/D3.1; 6–10h active + GPU time đo. Refine sau smoke; đây không là SLA/deadline đã cam kết.
 
 1. Chọn tiny train subset có full labels, overfit để kiểm gradients/target masking/JSON learning; đây là training sanity, không evaluation.
-2. Chạy pilot trên train subset lớn hơn theo capacity, LoRA/PEFT nếu G0 phù hợp; log seeds/config/code/data/model revisions.
+2. Chạy pilot Qwen với PEFT LoRA/QLoRA trên train subset lớn hơn theo config đã qua G0; log seeds/config/code/data/model revisions.
 3. Save/checkpoint/reload, inference dùng đúng adapter/processor/settings; không chỉ nhìn loss giảm.
 4. Chấm dev khác train bằng D3, B0/M0/M1 cùng normalizer/evaluator; report fields/items/missing/errors/memory/time.
 
