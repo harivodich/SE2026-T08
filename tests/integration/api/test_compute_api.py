@@ -709,3 +709,79 @@ def test_pipeline_cannot_mutate_ingress_correlation_baseline(make_client, key):
     other = request_meta(attempt_id=str(uuid.uuid4()))
     pipeline.response = response_for(other)
     assert post(client, other).status_code == 200
+
+
+@pytest.mark.parametrize("code", ["AI_BUSY", "AI_NOT_READY"])
+def test_pipeline_compute_failure_retryable_503_includes_retry_after_and_recovers(make_client, code):
+    from vietdoc.pipeline.service import ComputeFailure
+
+    pipeline = StubPipeline(error=ComputeFailure(code))
+    client = make_client(pipeline=pipeline)
+    meta = request_meta()
+    response = post(client, meta)
+    body = assert_error(response, 503, code, True)
+    assert body["attempt_id"] == meta["attempt_id"]
+    assert response.headers.get("Retry-After") == "5"
+
+    other = request_meta(attempt_id=str(uuid.uuid4()))
+    pipeline.error = None
+    pipeline.response = response_for(other)
+    assert post(client, other).status_code == 200
+
+
+@pytest.mark.parametrize("code", ["AI_BUSY", "AI_NOT_READY"])
+def test_b0_pipeline_stage_retryable_503_includes_retry_after(make_client, tmp_path, code):
+    from io import BytesIO
+    from PIL import Image
+    from vietdoc.ml.release_manifest import load_release
+    from vietdoc.pipeline.ocr import OcrError
+    from vietdoc.pipeline.service import B0Pipeline
+
+    write_release(tmp_path / "models")
+    release = load_release(tmp_path / "models", MANIFEST_ID)
+    with Image.new("RGB", (60, 40), "white") as image, BytesIO() as stream:
+        image.save(stream, format="PNG")
+        png_bytes = stream.getvalue()
+
+    class StageFailureEngine:
+        ready = True
+
+        def recognize(self, loaded, *, remaining_budget_ms):
+            raise OcrError(code, "private engine stage busy or not ready")
+
+    client = make_client(pipeline=B0Pipeline(release, StageFailureEngine()), release=False, max_input_bytes=len(png_bytes) + 1024)
+    meta = request_meta(png_bytes)
+    response = post(client, meta, document=png_bytes)
+    body = assert_error(response, 503, code, True)
+    assert body["attempt_id"] == meta["attempt_id"]
+    assert response.headers.get("Retry-After") == "5"
+    assert "private" not in response.text
+
+
+@pytest.mark.parametrize(
+    ("raised_code", "expected_status", "expected_code"),
+    [
+        ("INPUT_INVALID", 422, "INPUT_INVALID"),
+        ("INPUT_TOO_LARGE", 413, "INPUT_TOO_LARGE"),
+        ("PROFILE_EXCEEDED", 422, "PROFILE_EXCEEDED"),
+        ("MANIFEST_UNAVAILABLE", 422, "MANIFEST_UNAVAILABLE"),
+        ("OUTPUT_INVALID", 422, "OUTPUT_INVALID"),
+        ("MODEL_OOM", 500, "MODEL_OOM"),
+        ("MODEL_LOAD_FAILED", 500, "MODEL_LOAD_FAILED"),
+        ("COMPUTE_TIMEOUT", 504, "COMPUTE_TIMEOUT"),
+        ("INTERNAL_ERROR", 500, "INTERNAL_ERROR"),
+        ("UNMAPPED_STAGE_ERROR", 500, "INTERNAL_ERROR"),
+    ],
+)
+def test_pipeline_compute_failure_nonretryable_omits_retry_after(
+    make_client, raised_code, expected_status, expected_code
+):
+    from vietdoc.pipeline.service import ComputeFailure
+
+    pipeline = StubPipeline(error=ComputeFailure(raised_code))
+    client = make_client(pipeline=pipeline)
+    meta = request_meta()
+    response = post(client, meta)
+    body = assert_error(response, expected_status, expected_code, False)
+    assert body["attempt_id"] == meta["attempt_id"]
+    assert "Retry-After" not in response.headers

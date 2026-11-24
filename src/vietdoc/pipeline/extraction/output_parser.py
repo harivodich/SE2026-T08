@@ -136,6 +136,10 @@ def parse_model_output(
     fence = _FENCE.match(text)
     if fence:
         text = fence.group(1).strip()
+    try:
+        raw.encode("utf-8", errors="strict")
+    except UnicodeEncodeError:
+        return ParsedOutput("malformed_json", None, False, fence is not None, "invalid UTF-8")
     if not text.startswith(("{", "[")):
         return ParsedOutput("no_json", None, False, fence is not None, "no standalone JSON value")
     if _too_deep(text):
@@ -148,6 +152,7 @@ def parse_model_output(
             parse_float=_NumberLiteral,
             parse_constant=_reject_constant,
         )
+        json.dumps(data, ensure_ascii=False, allow_nan=False).encode("utf-8", errors="strict")
     except (ValueError, RecursionError):
         return ParsedOutput("malformed_json", None, False, fence is not None, "invalid JSON")
 

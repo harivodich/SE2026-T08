@@ -28,6 +28,18 @@ class InferenceResult:
     provenance: dict = field(default_factory=dict)
 
 
+def _check_utf8(value):
+    if isinstance(value, str):
+        value.encode('utf-8', errors='strict')
+    elif isinstance(value, list):
+        for item in value:
+            _check_utf8(item)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            key.encode('utf-8', errors='strict')
+            _check_utf8(item)
+
+
 class QwenInference:
     def __init__(self,loader):
         self.loader = loader
@@ -51,7 +63,9 @@ class QwenInference:
             # Strict original bytes: a fenced object is not raw JSON. The existing
             # parser has already rejected duplicates/nonfinite/depth violations.
             try:
+                raw.encode('utf-8',errors='strict')
                 original = json.loads(raw,parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
+                _check_utf8(original)
                 raw_json_valid = True
                 raw_schema_valid = Draft202012Validator(selected).is_valid(original)
             except (ValueError,RecursionError):

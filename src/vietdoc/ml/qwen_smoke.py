@@ -34,6 +34,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('config','snapshot','ocr','prepared','provenance','output-dir'):
         parser.add_argument('--'+name,type=Path,required=True)
+    parser.add_argument('--repo-root',type=Path,default=None)
     parser.add_argument('--type',dest='document_type',choices=('receipt','invoice'),required=True)
     parser.add_argument('--timeout-seconds',type=float,default=60)
     parser.add_argument('--repeat',type=int,default=2,help='1..10 sequential generations; retain first and subsequent timings')
@@ -43,7 +44,8 @@ def main(argv=None):
         if (not math.isfinite(args.timeout_seconds) or not 0<args.timeout_seconds<=300
                 or not 1<=args.repeat<=10):
             raise MLFailure('DEADLINE_INVALID','input')
-        config = load_config(args.config)
+        config = load_config(args.config) if args.repo_root is None else load_config(
+            args.config,repository_root=args.repo_root)
         # The checked-in config is deliberately disabled. Only a reviewed local
         # config copy may enable execution; the CLI never modifies that decision.
         if not config.execution_enabled:
@@ -69,7 +71,9 @@ def main(argv=None):
             generations=runs,warm_generation_seconds=[r['seconds'] for r in runs[1:]])
         # Serialize before creating files. Caller must choose ignored, owner-controlled
         # storage; raw output is private and intentionally never printed to stdout.
-        encoded = (json.dumps(report,ensure_ascii=False,allow_nan=False,indent=2)+'\n').encode('utf-8')
+        # ASCII escapes preserve even rejected raw surrogate code points exactly;
+        # never replace raw model output while recording the failure evidence.
+        encoded = (json.dumps(report,ensure_ascii=True,allow_nan=False,indent=2)+'\n').encode('utf-8')
         args.output_dir.mkdir(parents=True,exist_ok=False)
         with (args.output_dir/'report.json').open('xb') as stream:
             stream.write(encoded)

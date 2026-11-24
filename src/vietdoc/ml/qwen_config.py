@@ -2,10 +2,15 @@
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import stat
 
 from vietdoc.ml import model_provision
+
+EXPECTED_SCHEMA_PATH = 'specs/contracts/business.schema.json'
+FORBIDDEN_EXECUTION_FLAGS = ('allow_download', 'allow_training', 'allow_paid_compute')
 
 
 class MLFailure(ValueError):
@@ -13,6 +18,27 @@ class MLFailure(ValueError):
     def __init__(self, code: str, stage: str):
         self.code, self.stage = code, stage
         super().__init__(code)
+
+
+def _validated_schema_path(repository_root: Path, schema_path: object) -> Path:
+    if schema_path != EXPECTED_SCHEMA_PATH or not isinstance(repository_root, (str, os.PathLike)):
+        raise ValueError()
+    root = Path(repository_root).resolve(strict=True)
+    if not root.is_dir():
+        raise ValueError()
+    current = root
+    for part in ('specs', 'contracts', 'business.schema.json'):
+        current = current / part
+        st = current.lstat()
+        if (current.is_symlink() or stat.S_ISLNK(st.st_mode)
+                or getattr(st, 'st_file_attributes', 0) & getattr(stat, 'FILE_ATTRIBUTE_REPARSE_POINT', 0x400)):
+            raise ValueError()
+    if not stat.S_ISREG(st.st_mode) or st.st_size > 1024 * 1024:
+        raise ValueError()
+    resolved = current.resolve(strict=True)
+    if not resolved.is_relative_to(root) or resolved != root / 'specs' / 'contracts' / 'business.schema.json':
+        raise ValueError()
+    return resolved
 
 
 @dataclass(frozen=True)
@@ -33,8 +59,18 @@ class QwenConfig:
     @classmethod
     def from_mapping(cls, data, repository_root: Path):
         try:
-            model, inp, out, infer = (data[k] for k in ('model','input','output','inference'))
-            profile = data['profiles'][infer['selected_profile']]
+            if not isinstance(data, dict):
+                raise ValueError()
+            model, inp, out, infer, execution, profiles = (
+                data[k] for k in ('model','input','output','inference','execution','profiles'))
+            if any(not isinstance(s, dict) for s in (model, inp, out, infer, execution, profiles)):
+                raise ValueError()
+            selected = infer['selected_profile']
+            if not isinstance(selected, str):
+                raise ValueError()
+            profile = profiles[selected]
+            if not isinstance(profile, dict):
+                raise ValueError()
             if (model['id'] != model_provision.MODEL_ID or model['revision'] != model_provision.REVISION
                     or model['tokenizer_revision'] != model['revision']
                     or model['local_files_only'] is not True or model['trust_remote_code'] is not False
@@ -52,14 +88,16 @@ class QwenConfig:
                     or budgets[1] > budgets[0] or budgets[0] + budgets[2] > budgets[3]):
                 raise ValueError()
             device, dtype = profile['device'], profile['dtype']
-            if (not isinstance(device,str) or not re.fullmatch(r'cpu|cuda:[0-9]+',device)
+            if (not isinstance(device,str) or not re.fullmatch(r'cpu|cuda:(?:0|[1-9][0-9]{0,5})',device)
                     or dtype not in ('float32','float16','bfloat16')
                     or device == 'cpu' and dtype != 'float32'):
                 raise ValueError()
-            enabled = data['execution']['enabled']
-            if type(enabled) is not bool or data['execution']['runtime_activation'] is not False:
+            enabled = execution['enabled']
+            if (type(enabled) is not bool or execution['runtime_activation'] is not False
+                    or any(execution.get(flag, False) is not False for flag in FORBIDDEN_EXECUTION_FLAGS)
+                    or not isinstance(out['schema_sha256'], str)):
                 raise ValueError()
-            schema = Path(repository_root) / out['schema_path']
+            schema = _validated_schema_path(repository_root, out['schema_path'])
             digest = hashlib.sha256(schema.read_bytes()).hexdigest()
             if digest != out['schema_sha256']:
                 raise MLFailure('SCHEMA_HASH_MISMATCH','config')
@@ -98,7 +136,9 @@ def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
         UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,mapping)
         data = yaml.load(raw.decode('utf-8'),Loader=UniqueLoader)
         if repository_root is None:
-            repository_root = next(p for p in path.absolute().parents if (p/'specs/contracts').is_dir())
+            repository_root = next((p for p in Path(__file__).resolve().parents if (p/'specs/contracts').is_dir()), None)
+        if repository_root is None:
+            raise ValueError()
         return QwenConfig.from_mapping(data,repository_root)
     except MLFailure:
         raise

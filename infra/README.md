@@ -237,7 +237,7 @@ download thực và hash thực, không lấy fictional bind-mount smoke làm mo
 `infra/qwen-inference.Dockerfile` dùng image riêng `vietdoc-qwen-inference:m12-cu126`;
 không cài hoặc sửa `.venv`, không chứa model weights/OCR runtime/credentials. Giữ
 Torch2.14.1, Transformers5.20.2, safetensors0.8.0 và contract pins hiện có;
-PyYAML6.0.3 chỉ là tooling trong image này. Build cần mạng để lấy packages, runtime
+PyYAML6.0.3 dùng cho CLI config trong image và extra `test` để kiểm runtime YAML thật. Build cần mạng để lấy packages, runtime
 mặc định offline. Không thay B0/service production profile.
 
 ```powershell

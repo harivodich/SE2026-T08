@@ -69,6 +69,21 @@ def _deadline(deadline):
         raise MLFailure('TIMEOUT','generation')
 
 
+def _parse_eos_token_ids(gen_cfg, vocab_size: int) -> tuple[int, ...]:
+    if not isinstance(gen_cfg, dict) or 'eos_token_id' not in gen_cfg:
+        raise MLFailure('TOKENIZER_INCOMPATIBLE', 'load')
+    raw = gen_cfg['eos_token_id']
+    if type(raw) is int:
+        values = [raw]
+    elif isinstance(raw, list) and raw:
+        values = raw
+    else:
+        raise MLFailure('TOKENIZER_INCOMPATIBLE', 'load')
+    if any(type(i) is not int or not 0 <= i < vocab_size for i in values):
+        raise MLFailure('TOKENIZER_INCOMPATIBLE', 'load')
+    return tuple(dict.fromkeys(values))
+
+
 class QwenLoader:
     """One model instance, single capacity slot; close/load/generate cannot overlap.
 
@@ -82,6 +97,7 @@ class QwenLoader:
         self._factory = runtime_factory or _runtime
         self._lock = threading.Lock()
         self.model = self.tokenizer = self.runtime = None
+        self.eos_token_ids = ()
         self.state = 'unloaded'
         self.load_metrics = {}
         self.provenance = {}
@@ -113,6 +129,7 @@ class QwenLoader:
                 raise MLFailure('EXECUTION_DISABLED','load')
             started = time.monotonic()
             self.state = 'loading'
+            self.eos_token_ids = ()
             self.load_metrics = {}
             self.provenance = {}
             try:
@@ -124,11 +141,13 @@ class QwenLoader:
                     raise MLFailure('MODEL_NOT_VERIFIED','load') from None
                 local = json.loads((self.snapshot/'config.json').read_text(encoding='utf-8'))
                 if (local.get('model_type')!='qwen3' or local.get('architectures')!=['Qwen3ForCausalLM']
-                        or type(local.get('vocab_size')) is not int
+                        or type(local.get('vocab_size')) is not int or local['vocab_size'] <= 0
                         or type(local.get('max_position_embeddings')) is not int
                         or self.config.max_sequence_tokens > local['max_position_embeddings']):
                     raise MLFailure('MODEL_INCOMPATIBLE','load')
-                index = json.loads((self.snapshot/'model.safetensors.index.json').read_text())
+                gen_cfg = json.loads((self.snapshot/'generation_config.json').read_text(encoding='utf-8'))
+                eos_ids = _parse_eos_token_ids(gen_cfg, local['vocab_size'])
+                index = json.loads((self.snapshot/'model.safetensors.index.json').read_text(encoding='utf-8'))
                 weight_bytes = index['metadata']['total_size']
                 host_free = _host_memory()
                 # CPU float32 needs twice the stored BF16 weight bytes, before activations.
@@ -143,7 +162,8 @@ class QwenLoader:
                     if not rt.torch.cuda.is_available() or ordinal >= rt.torch.cuda.device_count():
                         raise MLFailure('DEVICE_UNAVAILABLE','load')
                     with rt.torch.cuda.device(device):
-                        if self.config.dtype=='bfloat16' and not rt.torch.cuda.is_bf16_supported():
+                        if (self.config.dtype=='bfloat16'
+                                and not rt.torch.cuda.is_bf16_supported(including_emulation=False)):
                             raise MLFailure('DTYPE_UNSUPPORTED','load')
                         gpu_free,_ = rt.torch.cuda.mem_get_info()
                     if gpu_free < lower_bound:
@@ -151,14 +171,22 @@ class QwenLoader:
                 kw = dict(local_files_only=True,trust_remote_code=False,revision=self.config.revision)
                 self.tokenizer = rt.tokenizer.from_pretrained(str(self.snapshot),**kw)
                 if (not isinstance(self.tokenizer.chat_template,str) or not self.tokenizer.chat_template
-                        or self.tokenizer.eos_token_id is None or self.tokenizer.pad_token_id is None
+                        or type(self.tokenizer.eos_token_id) is not int
+                        or type(self.tokenizer.pad_token_id) is not int
                         or not 0 < len(self.tokenizer) <= local['vocab_size']):
                     raise MLFailure('TOKENIZER_INCOMPATIBLE','load')
                 vocab = self.tokenizer.get_vocab()
                 if (not isinstance(vocab,dict) or len(vocab)!=len(self.tokenizer)
-                        or any(type(i) is not int or not 0<=i<local['vocab_size'] for i in vocab.values())
-                        or self.tokenizer.eos_token_id not in vocab.values()
-                        or self.tokenizer.pad_token_id not in vocab.values()):
+                        or any(type(i) is not int or not 0<=i<local['vocab_size'] for i in vocab.values())):
+                    raise MLFailure('TOKENIZER_INCOMPATIBLE','load')
+                vocab_ids = set(vocab.values())
+                if (self.tokenizer.eos_token_id not in vocab_ids
+                        or self.tokenizer.pad_token_id not in vocab_ids
+                        or self.tokenizer.eos_token_id not in eos_ids
+                        or any(i not in vocab_ids for i in eos_ids)
+                        or ('pad_token_id' in gen_cfg
+                            and (type(gen_cfg['pad_token_id']) is not int
+                                 or gen_cfg['pad_token_id'] != self.tokenizer.pad_token_id))):
                     raise MLFailure('TOKENIZER_INCOMPATIBLE','load')
                 declared = json.loads((self.snapshot/'tokenizer_config.json').read_text(encoding='utf-8'))
                 if self.tokenizer.chat_template != declared.get('chat_template'):
@@ -169,6 +197,7 @@ class QwenLoader:
                 eos = eos if isinstance(eos,list) else [eos]
                 if (self.model.config.model_type!='qwen3'
                         or self.model.get_input_embeddings().num_embeddings != local['vocab_size']
+                        or any(type(i) is not int for i in eos)
                         or self.tokenizer.eos_token_id not in eos):
                     raise MLFailure('TOKENIZER_INCOMPATIBLE','load')
                 self.model.to(device)
@@ -183,6 +212,7 @@ class QwenLoader:
                     model_manifest_sha256=hashlib.sha256((self.snapshot/'manifest.json').read_bytes()).hexdigest(),
                     inventory_sha256=hashlib.sha256((self.snapshot/'inventory.json').read_bytes()).hexdigest(),
                     versions=dict(rt.versions),device=device,dtype=self.config.dtype)
+                self.eos_token_ids = eos_ids
                 self.state = 'ready'
             except Exception as error:
                 oom_type = getattr(getattr(self.runtime,'torch',None),'OutOfMemoryError',MemoryError)
@@ -206,6 +236,7 @@ class QwenLoader:
 
     def _release(self):
         self.model = self.tokenizer = None
+        self.eos_token_ids = ()
         self.provenance = {}
         # Do not empty a shared process CUDA cache or promise immediate GPU release.
         self.runtime = None
@@ -233,7 +264,7 @@ class QwenLoader:
                 # A fresh config avoids model defaults enabling sampling, forced tokens or extra output.
                 generation_config = rt.generation_config(do_sample=False,num_beams=1,
                     max_new_tokens=self.config.max_new_tokens,use_cache=True,
-                    eos_token_id=self.tokenizer.eos_token_id,pad_token_id=self.tokenizer.pad_token_id,
+                    eos_token_id=list(self.eos_token_ids),pad_token_id=self.tokenizer.pad_token_id,
                     return_dict_in_generate=False)
                 with rt.torch.inference_mode():
                     self.generation_attempts += 1
@@ -248,8 +279,7 @@ class QwenLoader:
                 new = tokens[len(prefix):]
                 count = len(new)
                 # No EOS implies length/cooperative stop; never infer successful completion from JSON alone.
-                eos = self.tokenizer.eos_token_id
-                finish = 'stop' if new and new[-1]==eos else 'length'
+                finish = 'stop' if new and new[-1] in self.eos_token_ids else 'length'
                 if count > self.config.max_new_tokens or not new:
                     raise MLFailure('MODEL_OUTPUT_INVALID','generation')
                 text = self.tokenizer.decode(new[:-1] if finish=='stop' else new,
