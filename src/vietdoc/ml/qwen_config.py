@@ -138,6 +138,12 @@ def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
         if repository_root is None:
             repository_root = next((p for p in Path(__file__).resolve().parents if (p/'specs/contracts').is_dir()), None)
         if repository_root is None:
+            contracts_root = os.environ.get('VIETDOC_CONTRACTS_DIR')
+            if contracts_root:
+                candidate = Path(contracts_root).resolve()
+                if candidate.name == 'contracts' and candidate.parent.name == 'specs':
+                    repository_root = candidate.parent.parent
+        if repository_root is None:
             raise ValueError()
         return QwenConfig.from_mapping(data,repository_root)
     except MLFailure:
