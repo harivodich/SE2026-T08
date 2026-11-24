@@ -101,6 +101,8 @@ export class ApiClient {
   }
 
   page(documentId, options = {}) {
-    return this.request(`/documents/${encodeURIComponent(documentId)}/pages/0`, options);
+    const { revisionId, ...requestOptions } = options;
+    const revision = revisionId ? `?revision_id=${encodeURIComponent(revisionId)}` : "";
+    return this.request(`/documents/${encodeURIComponent(documentId)}/pages/0${revision}`, requestOptions);
   }
 }

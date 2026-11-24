@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import vn.vietdoc.common.ApiException;
 import vn.vietdoc.integration.AiClient;
+import vn.vietdoc.document.ArtifactPromoter;
 
 @Component
 @ConditionalOnProperty(name = "vietdoc.worker-enabled", havingValue = "true")
@@ -16,21 +17,25 @@ public class JobWorker {
   private static final Logger log = LoggerFactory.getLogger(JobWorker.class);
   private final JobService jobs;
   private final AiClient client;
+  private final ArtifactPromoter promoter;
   private final AtomicBoolean busy = new AtomicBoolean();
   private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private volatile JobService.Claim current;
 
-  public JobWorker(JobService jobs, AiClient client) {
+  public JobWorker(JobService jobs, AiClient client, ArtifactPromoter promoter) {
     this.jobs = jobs;
     this.client = client;
+    this.promoter = promoter;
   }
 
   @Scheduled(fixedDelay = 1000)
   public void poll() {
+    boolean acquired = false;
+    JobService.Claim claim = null;
     try {
       jobs.recover();
       if (!busy.compareAndSet(false, true)) return;
-      JobService.Claim claim = null;
+      acquired = true;
       for (String id : jobs.available()) {
         claim = jobs.claim(id);
         if (claim != null) break;
@@ -43,7 +48,10 @@ public class JobWorker {
       JobService.Claim captured = claim;
       executor.submit(() -> process(captured));
     } catch (Exception e) {
-      if (current == null) busy.set(false);
+      if (acquired) {
+        if (claim != null && current == claim) current = null;
+        busy.set(false);
+      }
       log.warn("worker_poll error_type={}", e.getClass().getSimpleName());
     }
   }
@@ -61,15 +69,25 @@ public class JobWorker {
   }
 
   private void process(JobService.Claim c) {
+    boolean promotedAsset = false;
     try {
-      jobs.complete(c, client.extract(c));
+      if (c.mode().equals("http")) {
+        var envelope = client.compute(c);
+        var promoted = promoter.promote(c, envelope);
+        promotedAsset = true;
+        if (!jobs.complete(c, envelope.path("result"), promoted))
+          log.warn("promotion_orphan job_id={} run_id={} reason=stale_completion", c.id(), c.runId());
+      } else jobs.complete(c, client.extract(c));
     } catch (ApiException e) {
+      if (promotedAsset) log.warn("promotion_orphan job_id={} run_id={} reason=completion_error", c.id(), c.runId());
       jobs.fail(
           c,
           e.code.equals("CONTRACT_INVALID") ? "MODEL_OUTPUT_INVALID" : e.code,
           e.getMessage(),
-          e.status == 503);
+          e.status == 503,
+          e.details.get("retry_after_seconds") instanceof Number delay ? delay.intValue() : 0);
     } catch (Exception e) {
+      if (promotedAsset) log.warn("promotion_orphan job_id={} run_id={} reason=completion_error", c.id(), c.runId());
       log.warn("compute job_id={} error_type={}", c.id(), e.getClass().getSimpleName());
       jobs.fail(
           c,

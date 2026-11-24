@@ -26,3 +26,20 @@ test("browser API uses same-origin session and CSRF without exposing bearer auth
     globalThis.fetch = previousFetch;
   }
 });
+
+test("canonical page request is pinned to the selected revision", async () => {
+  const previousFetch = globalThis.fetch;
+  const previousDocument = globalThis.document;
+  const calls = [];
+  globalThis.document = { querySelector: () => null };
+  globalThis.fetch = async (url) => {
+    calls.push(url);
+    return { ok: true, status: 200, headers: new Headers({ "Content-Type": "image/png" }),
+      blob: async () => new Blob(["png"]) };
+  };
+  try {
+    const client = new ApiClient();
+    await client.page("document-id", { revisionId: "revision-id" });
+    assert.equal(calls[0], "/api/v1/documents/document-id/pages/0?revision_id=revision-id");
+  } finally { globalThis.fetch = previousFetch; globalThis.document = previousDocument; }
+});

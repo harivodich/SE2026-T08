@@ -76,15 +76,17 @@ public class DocumentService {
   private final Store store;
   private final Json json;
   private final PrivateStorage storage;
+  private final ArtifactPromoter promoter;
   private final ContractValidator validator;
   private final TransactionTemplate uploadTransaction;
 
   public DocumentService(
-      Store store, Json json, PrivateStorage storage, ContractValidator validator,
+      Store store, Json json, PrivateStorage storage, ArtifactPromoter promoter, ContractValidator validator,
       PlatformTransactionManager transactionManager) {
     this.store = store;
     this.json = json;
     this.storage = storage;
+    this.promoter = promoter;
     this.validator = validator;
     this.uploadTransaction = new TransactionTemplate(transactionManager);
   }
@@ -190,7 +192,22 @@ public class DocumentService {
 
   @Transactional(readOnly = true)
   public byte[] page(String id, String user) {
-    store.owned(id, user, false);
+    return page(id, user, null);
+  }
+
+  @Transactional(readOnly = true)
+  public byte[] page(String id, String user, String revisionId) {
+    Document d = store.owned(id, user, false);
+    Revision revision = revisionId == null ?
+        d.headRevisionId == null ? null : store.revision(d.headRevisionId, d) :
+        store.revision(revisionId, d);
+    if (revision != null) {
+      ExtractionRun run = store.run(revision.runId, d);
+      if (run.canonicalKey != null)
+        return promoter.readCanonical(run.id,
+            new ArtifactPromoter.Promoted(run.canonicalKey, run.canonicalHash,
+                run.canonicalWidth, run.canonicalHeight));
+    }
     return storage.readPage(id);
   }
 

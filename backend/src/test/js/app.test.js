@@ -6,7 +6,7 @@ import * as domain from "../../main/resources/static/domain.js";
 
 const source = readFileSync(new URL("../../main/resources/static/app.js", import.meta.url), "utf8")
   .replace(/import \{[\s\S]*?\} from "\.\/(?:api|domain)\.js";/g, "")
-  + "\nglobalThis.hooks = { state, openDocument, refreshDocuments, pollJob, rerun, saveReview, approve, adoptCandidate, uploadAndProcess, login, logout, apiFailure, updateBoundValue, render };";
+  + "\nglobalThis.hooks = { state, openDocument, previewRevision, refreshDocuments, pollJob, rerun, saveReview, approve, adoptCandidate, uploadAndProcess, login, logout, apiFailure, updateBoundValue, render };";
 
 class ApiError extends Error {
   constructor(status, code = "") { super("API error"); this.status = status; this.code = code; }
@@ -53,7 +53,7 @@ async function harness(routes = {}) {
     document(id) { return routes.document(id); }
     revisions(id) { return routes.revisions?.(id) ?? Promise.resolve({ items: [] }); }
     runs(id) { return routes.runs?.(id) ?? Promise.resolve({ items: [] }); }
-    page(id) { return routes.page?.(id) ?? Promise.resolve({ url: id }); }
+    page(id, options) { return routes.page?.(id, options) ?? Promise.resolve({ url: id }); }
     listDocuments() { return routes.listDocuments(); }
     save(id, body) { return routes.save(id, body); }
     request(path) { return routes.request?.(path) ?? Promise.resolve({ state: "QUEUED" }); }
@@ -149,6 +149,83 @@ test("late detail and image responses cannot replace the selected document", asy
   assert.equal(app.state.selectedId, "B");
   assert.equal(app.state.document.id, "B");
   assert.equal(app.state.imageUrl, "B");
+});
+
+test("viewer requests the selected revision and refreshes canonical after first job", async () => {
+  const pending = doc("A", 1);
+  pending.head = null;
+  pending.head_revision_id = null;
+  pending.job = { id: "job", state: "QUEUED" };
+  const finished = doc("A", 2);
+  finished.job = { id: "job", state: "SUCCEEDED" };
+  let reads = 0;
+  const pages = [];
+  const app = await harness({
+    document: async () => ++reads === 1 ? pending : finished,
+    page: async (_id, options) => {
+      pages.push(options.revisionId);
+      return { url: options.revisionId || "original" };
+    },
+    listDocuments: async () => ({ items: [finished] }),
+    request: async () => finished.job,
+  });
+  await app.openDocument("A");
+  assert.equal(app.state.imageUrl, "original");
+  await app.pollJob();
+  assert.equal(app.state.imageUrl, finished.head_revision_id);
+  assert.deepEqual(pages, [null, finished.head_revision_id]);
+});
+
+test("history preview pins its own image and data, then returns to current revision", async () => {
+  const current = doc("A", 2, "200");
+  current.head.field_metadata = [{ path: "/total_amount", source_regions: [
+    { page: 0, quad: [[0.1, 0.1], [0.2, 0.1], [0.2, 0.2], [0.1, 0.2]] },
+  ] }];
+  const old = { ...doc("A", 1, "100").head, id: "A-r1", origin: "prediction",
+    created_at: "2026-10-23T00:00:00Z", field_metadata: [{ path: "/total_amount", source_regions: [
+      { page: 0, quad: [[0.3, 0.3], [0.4, 0.3], [0.4, 0.4], [0.3, 0.4]] },
+    ] }], state: "DRAFT" };
+  const requested = [];
+  const app = await harness({
+    document: async () => current,
+    revisions: async () => ({ items: [current.head, old] }),
+    page: async (_id, options) => {
+      requested.push(options.revisionId);
+      return { url: options.revisionId };
+    },
+    listDocuments: async () => ({ items: [current] }),
+  });
+  await app.openDocument("A");
+  await app.previewRevision("A-r1");
+  assert.equal(app.state.previewRevisionId, "A-r1");
+  assert.equal(app.state.imageUrl, "A-r1");
+  assert.match(app.root.innerHTML, /Revision lịch sử/);
+  assert.match(app.root.innerHTML, /100/);
+  assert.match(app.root.innerHTML, /300,300 400,300 400,400 300,400/);
+  assert.doesNotMatch(app.root.innerHTML, /100,100 200,100 200,200 100,200/);
+  assert.equal(app.state.payload.total_amount, "200");
+  await app.previewRevision("A-r2");
+  assert.equal(app.state.previewRevisionId, null);
+  assert.equal(app.state.imageUrl, "A-r2");
+  assert.match(app.root.innerHTML, /100,100 200,100 200,200 100,200/);
+  assert.deepEqual(requested, ["A-r2", "A-r1", "A-r2"]);
+});
+
+test("unsaved edits prevent switching to a historical revision", async () => {
+  const current = doc("A", 2);
+  let reads = 0;
+  const app = await harness({
+    document: async () => current,
+    revisions: async () => ({ items: [{ ...doc("A", 1).head, id: "A-r1" }] }),
+    page: async () => { reads++; return { url: "page" }; },
+    listDocuments: async () => ({ items: [current] }),
+  });
+  await app.openDocument("A");
+  app.state.payload.total_amount = "300";
+  await app.previewRevision("A-r1");
+  assert.equal(reads, 1);
+  assert.equal(app.state.previewRevisionId, null);
+  assert.equal(app.state.payload.total_amount, "300");
 });
 
 test("reselecting a loaded document preserves payload and review draft without refetching", async () => {

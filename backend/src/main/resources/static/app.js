@@ -22,6 +22,7 @@ const state = {
   remoteDocument: null,
   revisions: [],
   runs: [],
+  previewRevisionId: null,
   payload: null,
   rowIds: [],
   changedPaths: new Set(),
@@ -76,6 +77,7 @@ function setEditorDocument(document) {
   autosaveBlocked = false;
   pendingReviewReason = false;
   state.document = document;
+  state.previewRevisionId = null;
   state.editorBase = document.head ? {
     id: document.head_revision_id, version: document.version,
     payload: copy(document.head.payload),
@@ -250,6 +252,7 @@ function clearSession() {
   state.payload = null;
   state.revisions = [];
   state.runs = [];
+  state.previewRevisionId = null;
   state.changedPaths.clear();
   state.changedItemFields.clear();
   state.selectedId = null;
@@ -269,6 +272,14 @@ function stopPolling() {
 function releaseImage() {
   if (state.imageUrl) URL.revokeObjectURL(state.imageUrl);
   state.imageUrl = "";
+}
+
+async function refreshImage(id, revisionId, session, navigation, signal) {
+  const image = await api().page(id, { revisionId, signal });
+  if (!currentView(session, navigation, id) || state.editorBase?.id !== revisionId) return;
+  releaseImage();
+  state.imageUrl = URL.createObjectURL(image);
+  render({ passive: true });
 }
 
 async function start() {
@@ -380,11 +391,13 @@ async function openDocument(id, { force = false, transferFrom = null } = {}) {
     state.rowIds = [];
     state.revisions = [];
     state.runs = [];
+    state.previewRevisionId = null;
     releaseImage();
-    const [document, revisions, runs, image] = await Promise.all([
+    const [document, revisions, runs] = await Promise.all([
       api().document(id, { signal }), api().revisions(id, { signal }),
-      api().runs(id, { signal }), api().page(id, { signal }),
+      api().runs(id, { signal }),
     ]);
+    const image = await api().page(id, { revisionId: document.head_revision_id, signal });
     if (!currentView(session, navigation, id)) return;
     setEditorDocument(document);
     state.reviewReason = "Đã đối chiếu với ảnh nguồn";
@@ -398,6 +411,26 @@ async function openDocument(id, { force = false, transferFrom = null } = {}) {
     else clearInterval(jobTimer);
   } catch (error) { if (currentView(session, navigation, id) && error.name !== "AbortError") apiFailure(error); }
   finally { releaseBusy(owner); }
+}
+
+async function previewRevision(revisionId) {
+  const current = state.document;
+  if (!current || state.busy || autosaveFlight || remoteChanged() || hasUnsavedReview()) return;
+  const selected = revisionId === current.head_revision_id ? null :
+    state.revisions.find((revision) => revision.id === revisionId);
+  if (revisionId !== current.head_revision_id && !selected) return;
+  const session = sessionGeneration, navigation = navigationGeneration;
+  const owner = beginBusy("preview");
+  try {
+    const image = await api().page(current.id, { revisionId });
+    if (!currentView(session, navigation, current.id) ||
+        state.editorBase?.id !== current.head_revision_id) return;
+    releaseImage();
+    state.imageUrl = URL.createObjectURL(image);
+    state.previewRevisionId = selected?.id || null;
+  } catch (error) {
+    if (currentView(session, navigation, current.id)) apiFailure(error);
+  } finally { releaseBusy(owner); }
 }
 
 function startJobPolling() {
@@ -424,7 +457,10 @@ async function pollJob() {
       ]);
       const changed = await api().document(id);
       if (!currentView(session, navigation, id) || state.document?.job?.id !== job.id) return;
-      if (!state.editorBase && changed.head) setEditorDocument(changed);
+      if (!state.editorBase && changed.head) {
+        setEditorDocument(changed);
+        await refreshImage(id, changed.head_revision_id, session, navigation);
+      }
       else if (isNewerRemote(changed))
         state.remoteDocument = changed;
       else state.document.job = changed.job;
@@ -519,6 +555,7 @@ async function adoptCandidate(runId) {
     if (!currentView(session, navigation, id)) return;
     setEditorDocument(updated);
     state.message = { text: "Candidate được lưu thành revision mới; prediction và bản sửa cũ vẫn còn trong lịch sử.", kind: "success" };
+    await refreshImage(id, updated.head_revision_id, session, navigation);
     const revisions = await api().revisions(document.id);
     if (!currentView(session, navigation, id)) return;
     state.revisions = revisions.items || [];
@@ -748,12 +785,45 @@ function renderWelcome() {
 
 function renderWorkspace(document) {
   const status = documentStatus(document);
-  return `<div class="viewer-side"><div class="viewer-toolbar"><strong>Ảnh chứng từ gốc</strong><span class="pill">Trang 1 / 1</span></div>
-      <div class="image-stage">${state.imageUrl ? `<img class="document-image" src="${escapeHtml(state.imageUrl)}" alt="Ảnh chứng từ ${escapeHtml(document.filename)}" />` : '<div class="loading">Đang tải ảnh…</div>'}</div>
+  const revision = state.previewRevisionId ?
+    state.revisions.find((item) => item.id === state.previewRevisionId) : document.head;
+  return `<div class="viewer-side"><div class="viewer-toolbar"><strong>Ảnh chứng từ${state.previewRevisionId ? " · Revision lịch sử" : ""}</strong><span class="pill">Trang 1 / 1</span></div>
+      <div class="image-stage">${state.imageUrl ? `<div class="image-frame"><img class="document-image" src="${escapeHtml(state.imageUrl)}" alt="Ảnh chứng từ ${escapeHtml(document.filename)}" />${renderSourceOverlay(revision?.field_metadata || [])}</div>` : '<div class="loading">Đang tải ảnh…</div>'}</div>
     </div><div class="review-side">${renderReview(document, status)}</div>`;
 }
 
+function renderSourceOverlay(metadata) {
+  const polygons = [];
+  for (const field of metadata) for (const region of field.source_regions || []) {
+    const quad = region.quad;
+    if (region.page !== 0 || !Array.isArray(quad) || quad.length !== 4 ||
+        !quad.every(point => Array.isArray(point) && point.length === 2 &&
+          point.every(value => Number.isFinite(value) && value >= 0 && value <= 1))) continue;
+    const points = quad.map(point => `${Math.round(point[0] * 1000)},${Math.round(point[1] * 1000)}`).join(" ");
+    polygons.push(`<polygon points="${points}"><title>${escapeHtml(field.path)}</title></polygon>`);
+  }
+  return polygons.length ? `<svg class="source-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="Vùng bằng chứng trên ảnh canonical">${polygons.join("")}</svg>` : "";
+}
+
+function syncOverlayFrame() {
+  const frame = root.querySelector(".image-frame");
+  const image = frame?.querySelector(".document-image");
+  if (!image?.complete || !image.clientWidth || !image.clientHeight) return;
+  frame.style.width = "";
+  frame.style.height = "";
+  frame.style.width = `${image.clientWidth}px`;
+  frame.style.height = `${image.clientHeight}px`;
+}
+
+root.addEventListener("load", (event) => {
+  if (event.target.matches?.(".document-image")) syncOverlayFrame();
+}, true);
+window.addEventListener?.("resize", syncOverlayFrame);
+
 function renderReview(document, status) {
+  const preview = state.previewRevisionId &&
+    state.revisions.find((revision) => revision.id === state.previewRevisionId);
+  if (preview) return renderRevisionPreview(document, preview);
   const head = document.head;
   const payload = currentPayload();
   const fields = document.document_type === "receipt" ? RECEIPT_FIELDS : INVOICE_FIELDS;
@@ -780,8 +850,30 @@ function renderReview(document, status) {
         ${renderReviewActions(document, warnings, blockers, allWarningsChecked)}
       ` : `<div class="empty-state">${active ? "Đang chờ runner xử lý. Kết quả sẽ tự xuất hiện ở đây." : "Chưa có prediction. Có thể xếp job vào hàng đợi."}${!active ? '<div class="action-row" style="justify-content:center"><button class="btn btn-primary" data-action="rerun" ' + (state.busy ? "disabled" : "") + '>Chạy xử lý</button></div>' : ""}</div>`}
       ${candidates.length ? renderCandidates(candidates) : ""}
+      ${renderRevisionHistory(document)}
       ${renderExport(document, approvedRevisions, selectedExportId)}
     </div>`;
+}
+
+function renderRevisionHistory(document) {
+  const older = state.revisions.filter((revision) => revision.id !== document.head_revision_id);
+  if (!older.length) return "";
+  return `<div class="section-heading"><h3>Lịch sử revision</h3></div>${older.map((revision) =>
+    `<div class="revision-info"><span>${escapeHtml(revision.id.slice(0, 8))} · ${escapeHtml(revision.origin)} · ${formatDate(revision.created_at)}</span><button class="btn btn-secondary btn-small" data-preview-revision="${escapeHtml(revision.id)}" ${state.busy || autosaveFlight || remoteChanged() || hasUnsavedReview() ? "disabled" : ""}>Xem ảnh và dữ liệu</button></div>`).join("")}`;
+}
+
+function renderRevisionPreview(document, revision) {
+  const fields = document.document_type === "receipt" ? RECEIPT_FIELDS : INVOICE_FIELDS;
+  const payload = revision.payload || {};
+  return `<div class="review-toolbar"><div><div class="eyebrow">Revision lịch sử</div><h2>${escapeHtml(revision.id.slice(0, 8))}</h2></div><button class="btn btn-secondary btn-small" data-preview-revision="${escapeHtml(document.head_revision_id)}" ${state.busy ? "disabled" : ""}>Về revision hiện tại</button></div>
+    <div class="review-scroll"><div class="revision-info">Run ${escapeHtml(revision.run_id.slice(0, 8))} · ${escapeHtml(revision.state)} · ${formatDate(revision.created_at)}</div>
+      <div class="field-grid">${fields.map(([key, label]) => `<div class="field"><strong>${escapeHtml(label)}</strong><div>${escapeHtml(payload[key] ?? "Chưa xác định")}</div></div>`).join("")}</div>
+      <div class="section-heading"><h3>Dòng hàng (${(payload.items || []).length})</h3></div>
+      ${(payload.items || []).map((item, index) => `<div class="revision-info"><span>Dòng ${index + 1}</span><span>${escapeHtml(Object.values(item).filter(value => value != null).join(" · "))}</span></div>`).join("")}
+      <div class="section-heading"><h3>Metadata nguồn (${(revision.field_metadata || []).length})</h3></div>
+      ${(revision.field_metadata || []).map((entry) => `<div class="revision-info"><span>${escapeHtml(entry.path)} · ${escapeHtml(entry.value_origin)}</span><span>${(entry.source_regions || []).length} vùng nguồn</span></div>`).join("")}
+      <div class="section-heading"><h3>Điểm cần đối chiếu (${(revision.issues || []).length})</h3></div>
+      ${(revision.issues || []).map((issue) => `<div class="issue issue-${issue.severity === "blocking" ? "blocking" : issue.severity === "warning" ? "warning" : "info"}"><strong>${escapeHtml(issue.code)}</strong>${escapeHtml(issue.message)}</div>`).join("")}</div>`;
 }
 
 function renderField(key, label, kind, value) {
@@ -884,7 +976,9 @@ root.addEventListener("change", (event) => {
 root.addEventListener("click", (event) => {
   const open = event.target.closest("[data-open]");
   if (open) return openDocument(open.dataset.open);
-  if (state.busy && event.target.closest("[data-remove-item], [data-adopt-run], [data-review-field]")) return;
+  if (state.busy && event.target.closest("[data-remove-item], [data-adopt-run], [data-review-field], [data-preview-revision]")) return;
+  const preview = event.target.closest("[data-preview-revision]");
+  if (preview) return previewRevision(preview.dataset.previewRevision);
   const reviewedField = event.target.closest("[data-review-field]");
   if (reviewedField) {
     state.changedPaths.add(`/${reviewedField.dataset.reviewField}`);

@@ -3,6 +3,8 @@ package vn.vietdoc.job;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.LockModeType;
 import java.time.Instant;
+import java.nio.file.*;
+import java.net.URI;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.vietdoc.common.*;
 import vn.vietdoc.contracts.ContractValidator;
 import vn.vietdoc.document.DocumentService;
+import vn.vietdoc.document.ArtifactPromoter.Promoted;
 import vn.vietdoc.persistence.*;
 import vn.vietdoc.persistence.Entities.*;
 import vn.vietdoc.review.ReviewService;
@@ -21,6 +24,7 @@ public class JobService {
       String documentId,
       String runId,
       String token,
+      String attemptId,
       String type,
       String hash,
       String mode,
@@ -45,7 +49,11 @@ public class JobService {
       @Value("${vietdoc.pipeline-manifest}") String manifest,
       @Value("${vietdoc.job-deadline-seconds}") int deadlineSeconds,
       @Value("${vietdoc.lease-seconds}") int leaseSeconds,
-      @Value("${vietdoc.max-attempts}") int maxAttempts) {
+      @Value("${vietdoc.max-attempts}") int maxAttempts,
+      @Value("${vietdoc.worker-url}") String workerUrl,
+      @Value("${vietdoc.worker-token}") String workerToken,
+      @Value("${vietdoc.attempts-root}") String attemptsRoot,
+      @Value("${vietdoc.storage}") String javaStorageRoot) {
     this.store = store;
     this.json = json;
     this.validator = validator;
@@ -58,9 +66,19 @@ public class JobService {
     this.maxAttempts = maxAttempts;
     if (!Set.of("manual", "demo", "http").contains(mode))
       throw new IllegalStateException("AI_MODE must be manual, demo or http");
-    if (mode.equals("http"))
-      throw new IllegalStateException(
-          "AI_MODE=http is unavailable until the shared compute contract and canonical assets are implemented");
+    if (mode.equals("http")) {
+      URI uri = URI.create(workerUrl);
+      if (!Set.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null
+          || !"/internal/v1/compute".equals(uri.getPath()) || uri.getQuery() != null
+          || uri.getUserInfo() != null || workerToken.isBlank())
+        throw new IllegalStateException("AI_MODE=http requires a fixed compute URL and service token");
+      Path attempts = Path.of(attemptsRoot).toAbsolutePath().normalize();
+      Path committed = Path.of(javaStorageRoot).toAbsolutePath().normalize();
+      if (attempts.startsWith(committed) || committed.startsWith(attempts))
+        throw new IllegalStateException("AI attempts and Java storage must be separate roots");
+      if (!Files.isDirectory(attempts, LinkOption.NOFOLLOW_LINKS))
+        throw new IllegalStateException("AI_MODE=http requires a mounted attempts directory");
+    }
   }
 
   @Transactional
@@ -103,6 +121,7 @@ public class JobService {
     j.createdAt = Instant.now();
     j.updatedAt = j.createdAt;
     j.deadline = j.createdAt.plusSeconds(deadlineSeconds);
+    j.nextAttemptAt = j.createdAt;
     j.attempts = 0;
     j.requestKey = key;
     j.pipelineManifest = manifest;
@@ -145,8 +164,10 @@ public class JobService {
     return store
         .em()
         .createQuery(
-            "select j.id from Job j where j.state in ('QUEUED','RETRYING') order by j.createdAt",
+            "select j.id from Job j where j.state in ('QUEUED','RETRYING')"
+                + " and (j.nextAttemptAt is null or j.nextAttemptAt<=:now) order by j.createdAt",
             String.class)
+        .setParameter("now", Instant.now())
         .setMaxResults(10)
         .getResultList();
   }
@@ -158,14 +179,23 @@ public class JobService {
     Job j = store.job(id, true);
     if (!Set.of("QUEUED", "RETRYING").contains(j.state) || !Objects.equals(d.activeJobId, j.id))
       return null;
+    if (j.nextAttemptAt != null && j.nextAttemptAt.isAfter(Instant.now())) return null;
+    if (j.attempts >= maxAttempts) {
+      terminal(d, j, "FAILED", "ATTEMPTS_EXHAUSTED", "Job đã dùng hết số lần thử.");
+      return null;
+    }
     if (j.deadline.isBefore(Instant.now())) {
       terminal(d, j, "FAILED", "DEADLINE_EXCEEDED", "Job vượt thời gian xử lý; hãy chạy lại.");
       return null;
     }
     j.state = "RUNNING";
+    j.nextAttemptAt = null;
     j.stage = "EXTRACTION";
     j.attempts++;
+    // A recovered/retried compute attempt must never reuse an earlier result identity.
+    j.resultRunId = Store.id();
     j.leaseToken = Store.id();
+    j.attemptId = Store.id();
     j.leaseUntil = Instant.now().plusSeconds(leaseSeconds);
     j.updatedAt = Instant.now();
     return new Claim(
@@ -173,6 +203,7 @@ public class JobService {
         d.id,
         j.resultRunId,
         j.leaseToken,
+        j.attemptId,
         d.documentType,
         d.fileHash,
         j.mode,
@@ -193,6 +224,11 @@ public class JobService {
 
   @Transactional
   public boolean complete(Claim claim, JsonNode result) {
+    return complete(claim, result, null);
+  }
+
+  @Transactional
+  public boolean complete(Claim claim, JsonNode result, Promoted promoted) {
     Document d = store.locked(claim.documentId);
     Job j = store.job(claim.id, true);
     if (!valid(j, claim)) return false;
@@ -203,6 +239,16 @@ public class JobService {
     run.documentId = d.id;
     run.jobId = j.id;
     run.resultJson = json.write(result);
+    if (j.mode.equals("http") && promoted == null)
+      throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Thiếu canonical asset đã xác minh.");
+    if (promoted != null) {
+      if (!j.mode.equals("http") || !promoted.canonicalKey().startsWith("promoted/" + claim.runId() + "/"))
+        throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Canonical asset không thuộc run hiện hành.");
+      run.canonicalKey = promoted.canonicalKey();
+      run.canonicalHash = promoted.canonicalHash();
+      run.canonicalWidth = promoted.width();
+      run.canonicalHeight = promoted.height();
+    }
     run.createdAt = Instant.now();
     store.em().persist(run);
     review.initial(d, run);
@@ -213,17 +259,27 @@ public class JobService {
 
   @Transactional
   public void fail(Claim claim, String code, String message, boolean retryable) {
+    fail(claim, code, message, retryable, 0);
+  }
+
+  @Transactional
+  public void fail(Claim claim, String code, String message, boolean retryable, int retryAfterSeconds) {
     Document d = store.locked(claim.documentId);
     Job j = store.job(claim.id, true);
     if (!valid(j, claim)) return;
-    if (retryable && j.attempts < maxAttempts && j.deadline.isAfter(Instant.now().plusSeconds(5))) {
+    Instant now = Instant.now();
+    long delaySeconds = Math.max(Math.min(30, 1L << Math.min(j.attempts, 5)),
+        Math.max(0, Math.min(retryAfterSeconds, 30)));
+    if (retryable && j.attempts < maxAttempts && j.deadline.isAfter(now.plusSeconds(delaySeconds + 2))) {
       j.state = "RETRYING";
       j.stage = "WAITING";
       j.errorCode = code;
       j.errorMessage = message;
       j.leaseToken = null;
+      j.attemptId = null;
       j.leaseUntil = null;
-      j.updatedAt = Instant.now();
+      j.nextAttemptAt = now.plusSeconds(delaySeconds);
+      j.updatedAt = now;
     } else terminal(d, j, "FAILED", code, message);
     store.audit(d, null, "JOB_ERROR", Map.of("job_id", j.id, "code", code, "retryable", retryable));
   }
@@ -257,18 +313,24 @@ public class JobService {
         j.state = "RETRYING";
         j.stage = "WAITING";
         j.leaseToken = null;
+        j.attemptId = null;
         j.leaseUntil = null;
+        j.nextAttemptAt = now;
         j.updatedAt = now;
       }
     }
   }
 
   private boolean valid(Job j, Claim c) {
+    Instant now = Instant.now();
     return j.state.equals("RUNNING")
+        && Objects.equals(j.documentId, c.documentId)
+        && Objects.equals(j.resultRunId, c.runId)
         && Objects.equals(j.leaseToken, c.token)
+        && Objects.equals(j.attemptId, c.attemptId)
         && j.leaseUntil != null
-        && j.leaseUntil.isAfter(Instant.now())
-        && j.deadline.isAfter(Instant.now());
+        && j.leaseUntil.isAfter(now)
+        && j.deadline.isAfter(now);
   }
 
   private void terminal(Document d, Job j, String state, String code, String message) {
@@ -277,7 +339,9 @@ public class JobService {
     j.errorCode = code;
     j.errorMessage = message;
     j.leaseToken = null;
+    j.attemptId = null;
     j.leaseUntil = null;
+    j.nextAttemptAt = null;
     j.updatedAt = Instant.now();
     if (Objects.equals(d.activeJobId, j.id)) {
       d.activeJobId = null;
