@@ -43,18 +43,30 @@ def corner_image(orientation):
         return stream.getvalue()
 
 
-def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False):
-    """Tiny PDF with a known red bottom-left region, no text/gold predictions."""
+def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False, text=False, security=None):
+    """Controlled PDF geometry; optional 7pt digits are a synthetic render oracle."""
     objects = [b"<< /Type /Catalog /Pages 2 0 R >>", b""]
     kids = []
     for _ in range(pages):
         page_id = len(objects) + 1
         kids.append(f"{page_id} 0 R")
         content_id = page_id + 1
-        page = f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {width} {height}] /Rotate {rotation} /Resources << >> /Contents {content_id} 0 R >>"
+        resources = "/Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >>" if text else ""
+        page = f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {width} {height}] /Rotate {rotation} /Resources << {resources} >> /Contents {content_id} 0 R >>"
         content = f"1 0 0 rg 0 0 {width / 2} {height / 2} re f".encode() if mark else b""
+        if text:
+            content += b"\n0 0 0 rg BT /F1 7 Tf 8 12 Td (80.000) Tj ET"
         objects.extend([page.encode(), f"<< /Length {len(content)} >>\nstream\n".encode() + content + b"\nendstream"])
     objects[1] = f"<< /Type /Pages /Kids [{' '.join(kids)}] /Count {pages} >>".encode()
+    encryption = ""
+    if security is not None:
+        # Blank streams need no encrypted content bytes. Fixed synthetic R2 entries
+        # exercise both password-error and empty-password security-handler paths.
+        if mark or text:
+            raise ValueError("Encrypted fixture supports blank content only")
+        owner, user = security
+        encryption = f" /Encrypt {len(objects) + 1} 0 R /ID [<00112233445566778899aabbccddeeff><00112233445566778899aabbccddeeff>]"
+        objects.append(f"<< /Filter /Standard /V 1 /R 2 /Length 40 /O <{owner}> /U <{user}> /P -4 >>".encode())
     data = bytearray(b"%PDF-1.4\n")
     offsets = [0]
     for number, obj in enumerate(objects, 1):
@@ -64,7 +76,7 @@ def pdf_bytes(pages=1, width=72, height=36, rotation=0, mark=False):
     data.extend(f"xref\n0 {len(offsets)}\n0000000000 65535 f \n".encode())
     for offset in offsets[1:]:
         data.extend(f"{offset:010d} 00000 n \n".encode())
-    data.extend(f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    data.extend(f"trailer\n<< /Size {len(offsets)} /Root 1 0 R{encryption} >>\nstartxref\n{xref}\n%%EOF\n".encode())
     return bytes(data)
 
 
@@ -215,6 +227,38 @@ class PreprocessTest(unittest.TestCase):
                     _load_pdf(b"%PDF-", PreprocessLimits())
                 self.assertEqual(caught.exception.code, "PROFILE_EXCEEDED")
 
+    def test_real_encrypted_pdfs_are_valid_but_rejected_by_bounded_loader(self):
+        # PDF Standard security revision 2, fixed ID, owner password "owner".
+        # Algorithms 2-4: https://github.com/py-pdf/pypdf/blob/main/pypdf/_encryption.py
+        cases = (
+            ("", "c92422687facee686e373f10b5c7d04738053152f7e2ee30e11c69ec442576ab",
+             "adb43c8d5c0a904ecd6878928abf0a1ef65fa75e1632b2134005fa3b1d844c68"),
+            ("reader", "93fe0d5254ab4c9644693f33c07cb54f587dce1e2682fe9ecea6107a1ef630dd",
+             "957f0931bc330bb01345f392f2d0fa815eb4eeff85ca0de90cb5f460e26ee612"),
+        )
+        for password, owner, user in cases:
+            with self.subTest(empty_password=not password):
+                data = pdf_bytes(security=(owner, user))
+                # Independent positive control: real parser, right password, real render.
+                with pdfium.PdfDocument(data, password=password) as document:
+                    self.assertEqual(len(document), 1)
+                    self.assertEqual(pdfium.raw.FPDF_GetSecurityHandlerRevision(document), 2)
+                    page = document[0]
+                    try:
+                        bitmap = page.render(scale=1)
+                        try:
+                            self.assertEqual((bitmap.width, bitmap.height), (72, 36))
+                        finally:
+                            bitmap.close()
+                    finally:
+                        page.close()
+                if password:
+                    with self.assertRaises(pdfium.PdfiumError) as caught:
+                        pdfium.PdfDocument(data)
+                    self.assertEqual(caught.exception.err_code, pdfium.raw.FPDF_ERR_PASSWORD)
+                # Production disposable decoder, no PdfDocument/security API mocks.
+                self.assert_error("PROFILE_EXCEEDED", data)
+
     def test_limits_reject_bad_configuration(self):
         for field, value in (("max_pixels", 0), ("max_file_bytes", True), ("pdf_dpi", -1), ("processed_long_edge", 1.5), ("timeout_seconds", 0), ("timeout_seconds", float("inf"))):
             with self.subTest(field=field, value=value), self.assertRaises(ValueError):
@@ -227,6 +271,81 @@ class PreprocessTest(unittest.TestCase):
         self.assertEqual(limits.max_pixels, 20_000_000)
         self.assertGreater((1500 * 200 / 72) * (2600 * 200 / 72), limits.max_pixels)
         self.assert_error("PROFILE_EXCEEDED", pdf_bytes(width=1500, height=2600), limits=limits)
+
+    def test_pdf_profile_rejection_never_renders_and_lower_dpi_is_explicit(self):
+        # Controlled MediaBox reproducer, not Data's missing representative PDF.
+        data = pdf_bytes(width=1500, height=2600, text=True)
+        with patch.object(pdfium.PdfPage, "render", side_effect=AssertionError("must reject before render")) as render:
+            with self.assertRaises(PreprocessError) as caught:
+                _load_pdf(data, PreprocessLimits())
+            self.assertEqual(caught.exception.code, "PROFILE_EXCEEDED")
+            render.assert_not_called()
+        # An explicit diagnostic override does not change the default profile.
+        with load_document(data, limits=PreprocessLimits(pdf_dpi=72)) as loaded:
+            self.assertEqual(loaded.canonical.size, (1500, 2600))
+            self.assertEqual(loaded.processed.size, (1154, 2000))
+        self.assertEqual(PreprocessLimits().pdf_dpi, 200)
+
+    def test_rotated_pdf_small_text_matches_source_character_geometry(self):
+        from vietdoc.pipeline.geometry import processed_quad
+        from vietdoc.pipeline.ocr.paddle_adapter import _to_page
+
+        # PDF character boxes precede raster/OCR; expected rotation is calculated
+        # here without calling the pipeline's projection/ordering implementation.
+        for rotation in (0, 90, 180, 270):
+            data = pdf_bytes(rotation=rotation, text=True)
+            with self.subTest(rotation=rotation), pdfium.PdfDocument(data) as document:
+                page = document[0]
+                try:
+                    self.assertEqual(page.get_mediabox(), (0, 0, 72, 36))
+                    self.assertEqual(page.get_rotation(), rotation)
+                    textpage = page.get_textpage()
+                    try:
+                        self.assertEqual(textpage.get_text_range(), "80.000")
+                        boxes = [textpage.get_charbox(i) for i in range(6)]
+                    finally:
+                        textpage.close()
+                finally:
+                    page.close()
+                left, bottom = min(b[0] for b in boxes), min(b[1] for b in boxes)
+                right, top = max(b[2] for b in boxes), max(b[3] for b in boxes)
+                corners = ((left, bottom), (right, bottom), (right, top), (left, top))
+                transforms = {
+                    0: lambda x, y: (x / 72, 1 - y / 36),
+                    90: lambda x, y: (y / 36, x / 72),
+                    180: lambda x, y: (1 - x / 72, y / 36),
+                    270: lambda x, y: (1 - y / 36, 1 - x / 72),
+                }
+                normalized = [transforms[rotation](x, y) for x, y in corners]
+                expected = (min(p[0] for p in normalized), min(p[1] for p in normalized),
+                            max(p[0] for p in normalized), max(p[1] for p in normalized))
+                with load_document(data, limits=PreprocessLimits(processed_long_edge=73)) as loaded:
+                    self.assertEqual(loaded.canonical.size, (100, 200) if rotation % 180 else (200, 100))
+                    self.assertEqual(loaded.processed.size, (36, 73) if rotation % 180 else (73, 36))
+                    self.assertEqual(loaded.metadata.page, 0)
+                    left, top, right, bottom = expected
+                    oracle = ((left, top), (right, top), (right, bottom), (left, bottom))
+                    pw, ph = loaded.processed.size
+                    detected = [[x * pw, y * ph] for x, y in oracle]
+                    ocr = _to_page({"rec_texts": ["80.000"], "rec_scores": [.91],
+                                    "rec_polys": [detected]}, loaded.metadata)
+                    ocr.validate_against(loaded.metadata)
+                    block = ocr.blocks[0]
+                    self.assertEqual((block.block_id, block.text, block.score), ("p0-b0001", "80.000", .91))
+                    for measured_point, oracle_point in zip(block.quad, oracle):
+                        for measured, reference in zip(measured_point, oracle_point):
+                            self.assertAlmostEqual(measured, reference, places=14)
+                    for actual_point, detected_point in zip(processed_quad(block.quad, loaded.metadata), detected):
+                        for measured, reference in zip(actual_point, detected_point):
+                            self.assertAlmostEqual(measured, reference, delta=1e-7)
+                    with loaded.canonical.convert("L") as gray:
+                        with gray.point(lambda value: 255 if value < 128 else 0) as ink:
+                            actual = ink.getbbox()
+                    self.assertIsNotNone(actual)
+                    width, height = loaded.canonical.size
+                    for measured, reference in zip(actual, (expected[0] * width, expected[1] * height,
+                                                            expected[2] * width, expected[3] * height)):
+                        self.assertAlmostEqual(measured, reference, delta=1.5)
 
 
 if __name__ == "__main__":
