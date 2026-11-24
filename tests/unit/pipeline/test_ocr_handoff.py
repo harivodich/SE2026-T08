@@ -8,6 +8,7 @@ from io import BytesIO, StringIO
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
@@ -328,6 +329,10 @@ class HandoffTest(unittest.TestCase):
         self.assertEqual(report["samples"][2]["error_code"], "BATCH_ABORTED")
         self.assertFalse(report["samples"][2]["native_attempted"])
         self.assertEqual(self.engine.recognize.call_count, 2)
+        self.assertEqual(report["observed_engine_calls"], 2)
+        self.assertEqual([s["engine_calls"] for s in report["samples"]], [1, 1, 0])
+        self.assertIsNotNone(report["samples"][1]["stage_seconds"]["ocr"])
+        self.assertTrue(all(value is None for value in report["samples"][2]["stage_seconds"].values()))
         self.engine.close.assert_called_once()
         for text in (json.dumps(payload), json.dumps(report)):
             self.assertNotIn(private, text)
@@ -351,6 +356,8 @@ class HandoffTest(unittest.TestCase):
                 self.assertEqual(report["samples"][0]["stage"], "ocr")
                 self.assertEqual(report["samples"][0]["error_code"], "UNEXPECTED_FAILURE")
                 self.assertFalse(report["samples"][0]["native_attempted"])
+                self.assertEqual(report["observed_engine_calls"], 0)
+                self.assertEqual(report["samples"][0]["engine_calls"], 0)
                 self.assertEqual(report["samples"][1]["error_code"], "BATCH_ABORTED")
                 self.assertNotIn("PRIVATE_TOKEN", json.dumps(report))
 
@@ -370,6 +377,29 @@ class HandoffTest(unittest.TestCase):
         self.assertEqual(report["counts"], {"requested":5,"native_attempted":3,"ok":1,"failed":3,"not_run":1})
         self.assertEqual([s["stage"] for s in report["samples"]], ["input","preprocess","ocr","export","export"])
         self.assertEqual([s.get("error_code") for s in report["samples"]], ["INPUT_ARTIFACT_UNAVAILABLE","INPUT_INVALID","MODEL_OOM","LOCAL_EXPORT_FAILED",None])
+        self.assertEqual(report["observed_engine_calls"], self.engine.recognize.call_count)
+        for case in report["samples"]:
+            self.assertEqual(case["engine_calls"], int(case["native_attempted"]))
+            measured = [v for v in case["stage_seconds"].values() if v is not None]
+            self.assertTrue(all(v >= 0 for v in measured))
+            self.assertLessEqual(sum(measured), case["duration_seconds"] + 1e-9)
+        self.assertIsNone(report["samples"][0]["stage_seconds"]["preprocess"])
+        self.assertIsNone(report["samples"][1]["stage_seconds"]["ocr"])
+        successful = report["samples"][-1]
+        for name, relative in successful["artifact_paths"].items():
+            self.assertEqual(relative, "last/" + name)
+            self.assertTrue((self.root / "stages" / relative).is_file())
+        self.assertEqual(json.loads((self.root / "stages/last/run.json").read_bytes()), successful)
+
+    def test_exclusive_stage_times_do_not_count_native_time_as_preprocess(self):
+        case = {"stage_seconds": {name: None for name in ("input", "preprocess", "ocr", "export")}}
+        # Decode takes two units, OCR five, validation one, export three.
+        clock = handoff._StageClock(case)
+        with patch.object(handoff, "time", SimpleNamespace(monotonic=Mock(side_effect=[1, 3, 8, 9, 12]))):
+            for stage in ("preprocess", "ocr", "preprocess", "export", None):
+                clock.enter(stage)
+        self.assertEqual(case["stage_seconds"], {"input": None, "preprocess": 3, "ocr": 5, "export": 3})
+        self.assertEqual(case["stage"], "export")
 
     def test_per_sample_record_storage_failure_retains_final_accounting(self):
         manifest = self.manifest([self.sample(name, self.data) for name in ("one", "later")])
@@ -688,6 +718,148 @@ class D1GeometryHandshakeTest(unittest.TestCase):
                     for point, oracle in zip(actual, expected):
                         for value, reference in zip(point, oracle):
                             self.assertAlmostEqual(value, reference, places=14)
+
+
+class DiagnosticReplayTest(unittest.TestCase):
+    """Portable CLI/preflight; Data file validation is a separately tested boundary."""
+
+    def setUp(self):
+        temporary = TemporaryDirectory(prefix="ai1 replay ")
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name)
+        self.data_root = self.base / "reference data"
+        self.data_root.mkdir()
+        self.manifest = self.data_root / "manifest.json"
+        self.manifest.write_text(json.dumps({"version": "fixture-only", "samples": [{"sample_id": "tiny"}]}), encoding="utf-8")
+        self.digest = sha256(self.manifest.read_bytes()).hexdigest()
+        self.input_root = self.base / "OCR artifacts"
+        self.source = self.input_root / "native/tiny-measured-1/ocr.json"
+        self.source.parent.mkdir(parents=True)
+        fixture = Path(__file__).resolve().parents[2] / "fixtures/ocr-page-proposal.json"
+        page = OcrPage.from_dict(json.loads(fixture.read_text(encoding="utf-8"))["ocr_page"])
+        self.source.write_text(json.dumps(page.to_dict(), ensure_ascii=False), encoding="utf-8")
+        self.output = self.base / "new results"
+
+    def score(self, root, manifest, predictions):
+        # Real stdlib scoring core, with the Data-owned file validator isolated.
+        from vietdoc.evaluation.scalar_ocr import evaluate
+
+        self.assertEqual(root, self.data_root)
+        self.assertEqual(manifest, self.manifest)
+        artifact = json.loads(predictions.read_bytes())
+        self.assertEqual(artifact["dataset_manifest_sha256"], self.digest)
+        self.assertEqual(artifact["predictions"][0]["payload"], {})
+        sample = {"sample_id": "tiny", "document_type": "receipt", "gold": {}, "labels": {},
+                  "transcript": "Tổng tiền 45.000", "transcript_scope": "full_page"}
+        return evaluate([sample], artifact)
+
+    def call(self, *, manifest="manifest.json", digest=None, evaluator=None):
+        from vietdoc.pipeline.ocr import diagnose
+
+        output, errors = StringIO(), StringIO()
+        args = ["--data-root", str(self.data_root), "--manifest", str(manifest),
+                "--manifest-sha256", self.digest if digest is None else digest,
+                "--input-root", str(self.input_root), "--output-dir", str(self.output), "--groups", "png"]
+        with patch.object(diagnose, "evaluate_files", side_effect=evaluator or self.score) as scorer:
+            with redirect_stdout(output), patch("sys.stderr", errors):
+                status = diagnose.main(args)
+        return status, errors.getvalue(), scorer
+
+    def test_explicit_roots_accept_relative_and_absolute_manifest_with_real_scoring(self):
+        for index, manifest in enumerate(("manifest.json", self.manifest)):
+            self.output = self.base / f"new results {index}"
+            with self.subTest(manifest=str(manifest)):
+                status, errors, scorer = self.call(manifest=manifest)
+                self.assertEqual(status, 0, errors)
+                scorer.assert_called_once()
+                path = self.output / "diagnostic-png"
+                report = json.loads((path / "report.json").read_bytes())
+                self.assertEqual((report["ocr"]["all"]["cer"]["numerator"],
+                                  report["ocr"]["all"]["cer"]["denominator"]), (0, 16))
+                self.assertIn("PROVISIONAL", report["diagnostic_status"])
+                self.assertFalse(report["business_metrics_applicable"])
+                predictions = json.loads((path / "predictions.json").read_bytes())
+                self.assertEqual(predictions["source_ocr_sha256"], {"tiny": sha256(self.source.read_bytes()).hexdigest()})
+
+    def test_wrong_manifest_pin_rejects_before_output_and_scoring(self):
+        status, errors, scorer = self.call(digest="0" * 64)
+        self.assertEqual((status, errors.strip()), (2, "REPLAY_INPUT_INVALID"))
+        self.assertFalse(self.output.exists())
+        scorer.assert_not_called()
+
+    def test_manifest_outside_data_root_rejects_before_output_and_scoring(self):
+        outside = self.base / "outside.json"
+        outside.write_bytes(self.manifest.read_bytes())
+        status, errors, scorer = self.call(manifest=outside)
+        self.assertEqual((status, errors.strip()), (2, "REPLAY_INPUT_INVALID"))
+        self.assertFalse(self.output.exists())
+        scorer.assert_not_called()
+
+    def test_missing_ocr_input_rejects_before_output_and_scoring(self):
+        self.source.rename(self.base / "withheld.json")
+        status, errors, scorer = self.call()
+        self.assertEqual((status, errors.strip()), (2, "REPLAY_IO_ERROR"))
+        self.assertFalse(self.output.exists())
+        scorer.assert_not_called()
+
+    def test_existing_output_preserves_user_file(self):
+        self.output.mkdir()
+        sentinel = self.output / "keep.txt"
+        sentinel.write_bytes(b"user content")
+        status, errors, scorer = self.call()
+        self.assertEqual((status, errors.strip()), (2, "OUTPUT_EXISTS"))
+        self.assertEqual(sentinel.read_bytes(), b"user content")
+        self.assertEqual(tuple(self.output.iterdir()), (sentinel,))
+        scorer.assert_not_called()
+
+    def test_data_validation_failure_is_nonzero_without_success_report(self):
+        status, errors, scorer = self.call(evaluator=ValueError("fixture asset hash mismatch"))
+        self.assertEqual((status, errors.strip()), (2, "REPLAY_INPUT_INVALID"))
+        scorer.assert_called_once()
+        self.assertFalse((self.output / "diagnostic-png/report.json").exists())
+
+    def test_invalid_ocr_rejects_before_any_output_or_scoring(self):
+        original = self.source.read_bytes()
+        cases = ("version", "score", "quad", "status", "v2-status", "v2-flags", "unicode", "utf16",
+                 "nan", "overflow", "duplicate-key")
+        for case in cases:
+            with self.subTest(case=case):
+                page = json.loads(original)
+                if case.startswith("v2-"):
+                    fixture = Path(__file__).resolve().parents[2] / "fixtures/ocr-artifact-v2.json"
+                    page = json.loads(fixture.read_bytes())["cases"][0]["expected"]
+                if case == "version": page["artifact_version"] = 99
+                elif case == "score": page["blocks"][0]["score"] = 1.1
+                elif case == "quad": page["blocks"][0]["quad"] = [[0, 0]] * 4
+                elif case == "status": page["recognition_status"] = "complete"
+                elif case == "v2-status": page["recognition_status"] = "complete"
+                elif case == "v2-flags": page["review_flags"] = []
+                elif case == "unicode": page["blocks"][0]["text"] = "\ud800"
+                elif case == "nan": page["blocks"][0]["score"] = float("nan")
+                raw = json.dumps(page).encode("utf-8")
+                if case == "utf16": raw = json.dumps(page).encode("utf-16")
+                elif case == "overflow": raw = raw.replace(b'"score": null', b'"score": 1e999')
+                elif case == "duplicate-key": raw = raw.replace(b'"page": 0', b'"page": 0, "page": 0')
+                if case in ("overflow", "duplicate-key"):
+                    self.assertNotEqual(raw, json.dumps(page).encode("utf-8"))
+                self.source.write_bytes(raw)
+                status, errors, scorer = self.call()
+                self.assertEqual((status, errors.strip()), (2, "REPLAY_INPUT_INVALID"))
+                self.assertFalse(self.output.exists())
+                scorer.assert_not_called()
+
+    def test_all_groups_preflight_before_output(self):
+        from vietdoc.pipeline.ocr import diagnose
+
+        target = self.input_root / "native/tiny-pdf-proposal-0/ocr.json"
+        target.parent.mkdir()
+        target.write_bytes(b'{"artifact_version":99}')
+        with patch.object(diagnose, "evaluate_files") as scorer:
+            with self.assertRaises(ValueError):
+                diagnose.replay(self.data_root, self.manifest, self.digest, self.input_root,
+                                self.output, ["png", "pdf"])
+        self.assertFalse(self.output.exists())
+        scorer.assert_not_called()
 
 
 if __name__ == "__main__":

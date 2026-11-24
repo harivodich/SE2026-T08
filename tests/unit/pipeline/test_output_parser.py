@@ -212,3 +212,42 @@ def test_brackets_inside_strings_do_not_count_as_nesting():
 def test_valid_json_over_depth_limit_is_rejected_on_every_platform():
     result = parse('{"a": ' * 9 + "1" + "}" * 9)
     assert result.status == "malformed_json" and result.reason == "nesting too deep"
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        json.dumps(receipt(merchant_name="Cửa \ud800 hàng"), ensure_ascii=False),
+        json.dumps(receipt(merchant_name="Cửa \udc00 hàng"), ensure_ascii=False),
+        json.dumps(receipt(merchant_name="PLACEHOLDER"), ensure_ascii=False).replace("PLACEHOLDER", r"Cửa \ud800 hàng"),
+        json.dumps(receipt(merchant_name="PLACEHOLDER"), ensure_ascii=False).replace("PLACEHOLDER", r"Cửa \udfff hàng"),
+        json.dumps(receipt(items=[receipt()["items"][0] | {"description": "Cà phê \ud800"}]), ensure_ascii=False),
+        json.dumps(receipt(items=[receipt()["items"][0] | {"description": "PLACEHOLDER"}]), ensure_ascii=False).replace(
+            "PLACEHOLDER", r"Cà phê \udc00"
+        ),
+    ],
+    ids=[
+        "scalar-literal-high-surrogate",
+        "scalar-literal-low-surrogate",
+        "scalar-escaped-high-surrogate",
+        "scalar-escaped-low-surrogate",
+        "item-literal-surrogate",
+        "item-escaped-surrogate",
+    ],
+)
+def test_strict_unicode_rejects_lone_surrogates_in_scalar_and_item_text(raw):
+    result = parse(raw)
+    assert result.status == "malformed_json" and result.payload is None and not result.raw_json_valid
+
+
+@pytest.mark.parametrize("escaped_pair", [False, True], ids=["literal-nonbmp", "escaped-surrogate-pair"])
+def test_strict_unicode_accepts_valid_vietnamese_and_non_bmp(escaped_pair):
+    merchant = "Cửa hàng Phở Đắk Lắk 😀"
+    item_desc = "Cà phê sữa đá 𠀀"
+    payload = receipt(merchant_name=merchant, items=[receipt()["items"][0] | {"description": item_desc}])
+    raw = json.dumps(payload, ensure_ascii=escaped_pair)
+    result = parse(raw)
+    assert result.status == "ok" and result.raw_json_valid
+    assert result.payload["merchant_name"] == merchant
+    assert result.payload["items"][0]["description"] == item_desc
+    CONTRACTS.validate(BUSINESS_SCHEMA, result.payload)

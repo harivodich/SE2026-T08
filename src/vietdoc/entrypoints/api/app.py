@@ -387,7 +387,8 @@ def create_app(settings: Settings | None = None, pipeline: ComputePipeline | Non
                      "MODEL_LOAD_FAILED": 500, "AI_BUSY": 503, "AI_NOT_READY": 503,
                      "COMPUTE_TIMEOUT": 504, "INTERNAL_ERROR": 500}
             code = error.code if error.code in codes else "INTERNAL_ERROR"
-            return fail(codes[code], code, "Compute stage failed", code in {"AI_BUSY", "AI_NOT_READY"}, attempt_id)
+            retryable = code in {"AI_BUSY", "AI_NOT_READY"}
+            return fail(codes[code], code, "Compute stage failed", retryable, attempt_id, retry_after=retryable)
         except Exception:
             log.error("compute_failed", extra=ids)
             return fail(500, "INTERNAL_ERROR", "Compute failed", False, attempt_id)

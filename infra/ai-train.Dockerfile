@@ -12,7 +12,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HUB_OFFLINE=1
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    HF_HUB_DISABLE_IMPLICIT_TOKEN=1
 WORKDIR /app
 COPY pyproject.toml ./
 # Torch first from the chosen wheel index so the train extra does not pull PyPI's default build.
@@ -25,10 +27,11 @@ COPY specs/contracts ./specs/contracts
 RUN pip install --no-deps . && rm -rf build src/*.egg-info \
  && groupadd --gid 10001 app \
  && useradd --uid 10001 --gid app --create-home --shell /usr/sbin/nologin app \
- && mkdir -p /models /datasets /artifacts/evaluation \
- && chown app:app /models /artifacts/evaluation
+ && mkdir -p /models /datasets /checkpoints /artifacts/evaluation \
+ && chown app:app /models /checkpoints /artifacts/evaluation
 ENV VIETDOC_CONTRACTS_DIR=/app/specs/contracts \
     VIETDOC_MODELS_DIR=/models \
-    HF_HOME=/models/.hf-cache
+    VIETDOC_CHECKPOINTS_DIR=/checkpoints \
+    HF_HOME=/tmp/huggingface
 USER app
 CMD ["python", "-m", "vietdoc.entrypoints.cli.env_report"]
