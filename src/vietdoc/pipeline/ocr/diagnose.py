@@ -6,13 +6,33 @@ from pathlib import Path
 import re
 import sys
 
-from vietdoc.evaluation.scalar_ocr import evaluate_files
+from vietdoc.contracts.ocr import OcrPage
+from vietdoc.evaluation.scalar_ocr import dataset_version, evaluate_files
 
 GROUPS = ("png", "pdf", "paired-baseline", "paired-candidate")
 
 
+def _encode(value):
+    return json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+
+
+def _read(snapshot):
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("DUPLICATE_JSON_KEY")
+            result[key] = value
+        return result
+
+    value = json.loads(snapshot.decode("utf-8"), object_pairs_hook=unique)
+    # Reject nonfinite numbers (including overflow) and lone surrogates anywhere.
+    _encode(value)
+    return value
+
+
 def _write(path, value):
-    encoded = json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+    encoded = _encode(value)
     with path.open("xb") as stream:
         stream.write(encoded)
 
@@ -26,7 +46,7 @@ def replay(data_root, manifest_path, expected_hash, input_root, output_dir, grou
     snapshot = manifest_path.read_bytes()
     if not re.fullmatch(r"[0-9a-f]{64}", expected_hash) or sha256(snapshot).hexdigest() != expected_hash:
         raise ValueError("MANIFEST_HASH_MISMATCH")
-    manifest = json.loads(snapshot)
+    manifest = _read(snapshot)
     if not groups or len(groups) != len(set(groups)) or any(g not in GROUPS for g in groups):
         raise ValueError("INVALID_GROUPS")
     plans = []
@@ -44,21 +64,29 @@ def replay(data_root, manifest_path, expected_hash, input_root, output_dir, grou
             if not path.is_relative_to(input_root):
                 raise ValueError("OCR_INPUT_OUTSIDE_ROOT")
             data = path.read_bytes()
-            page = json.loads(data)
+            page = OcrPage.from_dict(_read(data))
             pins[sid] = sha256(data).hexdigest()
-            versions.add(page["ocr_version"])
+            versions.add(page.ocr_version)
             # Never copy business gold into an OCR-only diagnostic prediction.
-            records.append({"sample_id": sid, "status": "ok", "payload": {},
-                            "ocr_text": "\n".join(b["text"] for b in page["blocks"])})
+            record = {"sample_id": sid,
+                      "status": "failed" if page.recognition_status == "unreadable" else "ok",
+                      "payload": {}, "ocr_text": "\n".join(b.text for b in page.blocks),
+                      "ocr_diagnostics": {**page.to_dict(), "artifact_version": page.artifact_version,
+                          "recognition_status": page.recognition_status, "review_flags": list(page.review_flags)}}
+            if record["status"] == "failed":
+                record["error"] = "OCR_UNREADABLE_REGIONS"
+            records.append(record)
         if len(versions) != 1:
             raise ValueError("OCR_VERSION_MISMATCH")
         plans.append((name, {"artifact_version": "vietdoc.predictions.v1",
-            "dataset_manifest_sha256": expected_hash, "dataset_version": manifest["version"],
+            "dataset_manifest_sha256": expected_hash, "dataset_version": dataset_version(manifest),
             "model_version": "ppocrv5-det-tess-vie-diagnostic",
             "normalizer_version": "ocr-only-no-business-normalizer", "ocr_version": versions.pop(),
             "predictions": records, "source_ocr_sha256": pins, "business_metrics_applicable": False,
             "diagnostic_status": "PROVISIONAL: tiny integration set; reading-order protocol not accepted"}))
     # All requested OCR inputs and the declared manifest hash pass before output.
+    for _, artifact in plans:
+        _encode(artifact)
     output_dir.mkdir(parents=True, exist_ok=False)
     for name, artifact in plans:
         directory = output_dir / ("diagnostic-" + name)
@@ -68,6 +96,9 @@ def replay(data_root, manifest_path, expected_hash, input_root, output_dir, grou
         report = evaluate_files(data_root, manifest_path, prediction_path)
         report["diagnostic_status"] = artifact["diagnostic_status"]
         report["business_metrics_applicable"] = False
+        report["source_ocr_states"] = {r["sample_id"]: {k: r["ocr_diagnostics"][k]
+            for k in ("artifact_version", "recognition_status", "review_flags")}
+            for r in artifact["predictions"]}
         _write(directory / "report.json", report)
         print(name, json.dumps({k: {m: v[m] for m in ("cer", "wer")} for k, v in report["ocr"].items()}))
 
@@ -89,7 +120,7 @@ def main(argv=None):
     except OSError:
         print("REPLAY_IO_ERROR", file=sys.stderr)
         return 2
-    except (ValueError, KeyError, TypeError):
+    except (ValueError, KeyError, TypeError, RecursionError):
         print("REPLAY_INPUT_INVALID", file=sys.stderr)
         return 2
     return 0

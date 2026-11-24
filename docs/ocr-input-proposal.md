@@ -988,3 +988,52 @@ Root `full20-verified` trong evidence hiện đã tồn tại. Khi chạy lại 
 chọn root mới và cập nhật `$assetRoot`; khi chỉ replay, dùng root đã verify và bỏ
 bước verify. Bỏ `--sample-ids` để chạy đủ20. Đọc report/counts, hashes và overlays;
 ghi environment/commands/PASS/FAIL/NOT_RUN của người chạy lại trước khi ACK.
+
+## PR89 review delta — 2026-11-24
+
+F01/F02 được sửa riêng tại offline `ocr.diagnose`, giữ closure geometry/PDF,
+handoff instrumentation và pretrained provider. CLI dùng evaluator helper
+`dataset_version(manifest)`; manifest format version và dataset identity không
+còn bị gộp. OCR snapshots phải là UTF-8 JSON không duplicate keys, nonfinite
+numbers hoặc lone surrogates và qua `OcrPage.from_dict` trước khi tạo output.
+Toàn bộ groups được preflight; overwrite, manifest pin và path guards giữ nguyên.
+
+Mapping diagnostic dùng outcomes hiện có của scalar evaluator:
+
+| Source OCR | Prediction outcome | Text / diagnostics |
+|---|---|---|
+| Legacy v1 hoặc v2 complete, kể cả blank không detection | `ok` | Giữ readable text; source version/status/flags explicit |
+| v2 partial | `ok` | Giữ toàn bộ readable text, unreadable regions, scores/quads và flags; `ok` không có nghĩa recognition complete |
+| v2 all-unreadable | `failed`, `OCR_UNREADABLE_REGIONS` | Không gọi blank success; sample vẫn trong CER/WER denominator, `missing_or_failed_ocr` tăng |
+| Unsupported version / invalid OCR | Reject trước output | Không tạo prediction/report để chấm input không hợp lệ |
+
+`predictions[*].ocr_diagnostics` là source diagnostics nội bộ của replay,
+không phải wire OcrPage schema mới. Report thêm `source_ocr_states` theo sample ID;
+prediction vẫn `payload={}`, business metrics không applicable và diagnostic
+vẫn PROVISIONAL. Không đổi evaluator policy, shared schemas, Java, service
+default v1, longedge2000 hoặc PDF200DPI.
+
+Regression và evidence tại ignored `artifacts/evaluation/ai1-pr89-fix-20261124/`:
+
+- AI fixture gate: **829 PASS /484 subtests**, một Windows symlink skip đúng
+  policy, `policy_failures=[]`; `ai.log`, `ai.xml`.
+- Actual Data renderer/file evaluator: D1 hợp lệ và freshly rendered D2.2
+  5 bases/10 images, dataset version khác format; CLI normal và `-O` PASS.
+  Partial/unreadable/blank và unsupported99 qua public replay; 4 tests PASS.
+  `tests/unit/test_data_ocr_replay.py` được Data CI matrix tự thu thập.
+- Negative control chạy 3 regression bằng đúng source CLI cũ `36434a8`:
+  fail assertions dataset version, missing diagnostics, unreadable accounting
+  và unsupported99; **0 setup/import errors,0 skip**. Bản sửa PASS.
+- Full Data gate local có lỗi Windows privilege `WinError1314` tại symlink
+  trong test pre-existing `test_data_d21.D21Test.test_manifest_tampering`;
+  focused repro xác nhận cùng lỗi ngoài vùng sửa. Không bỏ test hoặc đổi OS
+  settings để che lỗi. Hosted CI trên head mới phải được kiểm tra riêng.
+- Native inference **NOT_RUN trong delta này**. ZIP cũ SHA256
+  `a3f3b398ec3c37f3dafdbb2b1842cff39cdae1a334a435371093f2f1ea4b90aa`
+  vẫn 169 members: 168 payload hashes/sizes khớp inventory, inventory member
+  byte-exact; cả 6 core source pins khớp. Không cần chạy lại model vì chỉ sửa
+  diagnostic replay. Packet accessibility, independent verification và
+  AI2/Backend ACK vẫn phải ghi nhận riêng trước nghiệm thu milestone native20.
+- Replay score từ 20 raw OCR đã pin bằng CLI sửa PASS: CER796/14628,
+  WER472/3437, support20; giữ nguyên integration diagnostic cũ, không gọi
+  official dev baseline. Output mới `native20-rescore/`, không sửa packet cũ.

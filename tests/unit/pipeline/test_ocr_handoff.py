@@ -818,6 +818,49 @@ class DiagnosticReplayTest(unittest.TestCase):
         scorer.assert_called_once()
         self.assertFalse((self.output / "diagnostic-png/report.json").exists())
 
+    def test_invalid_ocr_rejects_before_any_output_or_scoring(self):
+        original = self.source.read_bytes()
+        cases = ("version", "score", "quad", "status", "v2-status", "v2-flags", "unicode", "utf16",
+                 "nan", "overflow", "duplicate-key")
+        for case in cases:
+            with self.subTest(case=case):
+                page = json.loads(original)
+                if case.startswith("v2-"):
+                    fixture = Path(__file__).resolve().parents[2] / "fixtures/ocr-artifact-v2.json"
+                    page = json.loads(fixture.read_bytes())["cases"][0]["expected"]
+                if case == "version": page["artifact_version"] = 99
+                elif case == "score": page["blocks"][0]["score"] = 1.1
+                elif case == "quad": page["blocks"][0]["quad"] = [[0, 0]] * 4
+                elif case == "status": page["recognition_status"] = "complete"
+                elif case == "v2-status": page["recognition_status"] = "complete"
+                elif case == "v2-flags": page["review_flags"] = []
+                elif case == "unicode": page["blocks"][0]["text"] = "\ud800"
+                elif case == "nan": page["blocks"][0]["score"] = float("nan")
+                raw = json.dumps(page).encode("utf-8")
+                if case == "utf16": raw = json.dumps(page).encode("utf-16")
+                elif case == "overflow": raw = raw.replace(b'"score": null', b'"score": 1e999')
+                elif case == "duplicate-key": raw = raw.replace(b'"page": 0', b'"page": 0, "page": 0')
+                if case in ("overflow", "duplicate-key"):
+                    self.assertNotEqual(raw, json.dumps(page).encode("utf-8"))
+                self.source.write_bytes(raw)
+                status, errors, scorer = self.call()
+                self.assertEqual((status, errors.strip()), (2, "REPLAY_INPUT_INVALID"))
+                self.assertFalse(self.output.exists())
+                scorer.assert_not_called()
+
+    def test_all_groups_preflight_before_output(self):
+        from vietdoc.pipeline.ocr import diagnose
+
+        target = self.input_root / "native/tiny-pdf-proposal-0/ocr.json"
+        target.parent.mkdir()
+        target.write_bytes(b'{"artifact_version":99}')
+        with patch.object(diagnose, "evaluate_files") as scorer:
+            with self.assertRaises(ValueError):
+                diagnose.replay(self.data_root, self.manifest, self.digest, self.input_root,
+                                self.output, ["png", "pdf"])
+        self.assertFalse(self.output.exists())
+        scorer.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
