@@ -33,6 +33,7 @@ class AiClientTest {
   private final AtomicReference<String> received = new AtomicReference<>();
   private final AtomicInteger calls = new AtomicInteger();
   private int status = 200;
+  private String contentType = "application/json";
   private String retryAfter;
   private byte[] body;
 
@@ -55,10 +56,10 @@ class AiClientTest {
     server.createContext("/internal/v1/compute", exchange -> {
       calls.incrementAndGet();
       received.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.ISO_8859_1));
-      exchange.getResponseHeaders().set("Content-Type", "application/json");
+      exchange.getResponseHeaders().set("Content-Type", contentType);
       if (retryAfter != null) exchange.getResponseHeaders().set("Retry-After", retryAfter);
-      exchange.sendResponseHeaders(status, body.length);
-      exchange.getResponseBody().write(body);
+      exchange.sendResponseHeaders(status, body.length == 0 ? -1 : body.length);
+      if (body.length > 0) exchange.getResponseBody().write(body);
       exchange.close();
     });
     server.start();
@@ -130,6 +131,68 @@ class AiClientTest {
 
     status = 503;
     assertEquals("MODEL_OUTPUT_INVALID", assertThrows(ApiException.class, () -> client.compute(claim)).code);
+  }
+
+  @Test
+  void mapsTransientGatewayInvalidEnvelopesToUnavailableWithBoundedRetryAfter() {
+    status = 503;
+    contentType = "text/plain";
+    retryAfter = "120";
+    body = "Service Unavailable".getBytes(StandardCharsets.UTF_8);
+    ApiException plainText503 = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(503, plainText503.status);
+    assertEquals("AI_UNAVAILABLE", plainText503.code);
+    assertEquals(30, plainText503.details.get("retry_after_seconds"));
+
+    status = 502;
+    contentType = "text/html";
+    retryAfter = "12";
+    body = "<html><body>502 Bad Gateway</body></html>".getBytes(StandardCharsets.UTF_8);
+    ApiException html502 = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(503, html502.status);
+    assertEquals("AI_UNAVAILABLE", html502.code);
+    assertEquals(12, html502.details.get("retry_after_seconds"));
+
+    status = 504;
+    contentType = "text/plain";
+    retryAfter = null;
+    body = new byte[0];
+    ApiException empty504 = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(503, empty504.status);
+    assertEquals("AI_UNAVAILABLE", empty504.code);
+    assertEquals(0, empty504.details.get("retry_after_seconds"));
+
+    status = 503;
+    contentType = "application/json";
+    retryAfter = "90";
+    body = "{\"detail\":\"Service Unavailable\"}".getBytes(StandardCharsets.UTF_8);
+    ApiException genericJson503 = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(503, genericJson503.status);
+    assertEquals("AI_UNAVAILABLE", genericJson503.code);
+    assertEquals(30, genericJson503.details.get("retry_after_seconds"));
+
+    status = 502;
+    contentType = "text/html";
+    retryAfter = "45";
+    body = new byte[16 * 1024 + 128];
+    ApiException oversized502 = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(503, oversized502.status);
+    assertEquals("AI_UNAVAILABLE", oversized502.code);
+    assertEquals(30, oversized502.details.get("retry_after_seconds"));
+  }
+
+  @Test
+  void rejectsValidProtocolErrorWithWrongAttemptIdEvenOnTransientStatus() {
+    ObjectNode error = (ObjectNode) fixture("compute-error");
+    error.put("attempt_id", "77777777-7777-4777-8777-777777777777");
+    error.put("code", "AI_BUSY");
+    status = 503;
+    contentType = "application/json";
+    retryAfter = "10";
+    body = json.write(error).getBytes(StandardCharsets.UTF_8);
+    ApiException failure = assertThrows(ApiException.class, () -> client.compute(claim));
+    assertEquals(422, failure.status);
+    assertEquals("CONTRACT_INVALID", failure.code);
   }
 
   @Test

@@ -9,7 +9,7 @@ import tempfile
 
 import pytest
 
-from scripts.ci.gate import CORE_CHECKS, WEB_CHECKS, evaluate
+from scripts.ci.gate import CORE_CHECKS, PG_CHECKS, WEB_CHECKS, evaluate
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = """
@@ -46,7 +46,7 @@ def test_ai_runner_propagates_real_pytest_result_to_gate(tmp_path, source, succe
         path.write_text(source, encoding="utf-8")
     result = run_probe(path)
     assert (result.returncode == 0) is success, result.stdout + result.stderr
-    needs = {name: {"result": "success"} for name in CORE_CHECKS + WEB_CHECKS}
+    needs = {name: {"result": "success"} for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS}
     needs["release-readiness"] = {"result": "skipped"}
     needs["ai"] = {"result": "success" if result.returncode == 0 else "failure"}
     assert (evaluate("ci", "develop", needs) == []) is success

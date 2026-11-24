@@ -30,6 +30,8 @@ public class AiClient {
   private final ContractValidator validator;
   private final PrivateStorage storage;
   private final String endpoint, token;
+  private final HttpClient httpClient =
+      HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
   private static final int MAX_SUCCESS_BYTES = 2 * 1024 * 1024;
   private static final int MAX_ERROR_BYTES = 16 * 1024;
   private static final ObjectMapper RESPONSE_MAPPER =
@@ -125,35 +127,67 @@ public class AiClient {
     request.add("file", new ByteArrayResource(original) {
       @Override public String getFilename() { return "document"; }
     });
-    var factory = new JdkClientHttpRequestFactory(
-        HttpClient.newBuilder().connectTimeout(Duration.ofMillis(Math.min(3_000, budget))).build());
+    var factory = new JdkClientHttpRequestFactory(httpClient);
     factory.setReadTimeout(Duration.ofMillis(Math.min(budget + 5_000, 185_000)));
     RestClient client = RestClient.builder().requestFactory(factory).build();
     try {
       return client.post().uri(endpoint).contentType(MediaType.MULTIPART_FORM_DATA)
           .headers(h -> h.setBearerAuth(token)).body(request).exchange((req, res) -> {
             int status = res.getStatusCode().value();
+            boolean transientGateway = status == 502 || status == 503 || status == 504;
+            String retryAfter = res.getHeaders().getFirst("Retry-After");
             int limit = status == 200 ? MAX_SUCCESS_BYTES : MAX_ERROR_BYTES;
             byte[] bytes = res.getBody().readNBytes(limit + 1);
-            if (bytes.length > limit)
+            if (bytes.length > limit) {
+              if (transientGateway) throw unavailable(retryAfter);
               throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute response vượt giới hạn.");
+            }
             JsonNode envelope;
             try (JsonParser parser = RESPONSE_MAPPER.createParser(bytes)) {
               envelope = RESPONSE_MAPPER.readTree(parser);
-              if (envelope == null || parser.nextToken() != null) throw new JsonParseException(parser, "Trailing JSON");
+              if (envelope == null || envelope.isMissingNode() || parser.nextToken() != null)
+                throw new JsonParseException(parser, "Trailing JSON");
             } catch (JsonProcessingException e) {
+              if (transientGateway) throw unavailable(retryAfter);
               throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute response không phải JSON hợp lệ.");
             }
             if (status == 200) {
               validator.computeResponse(metadata, envelope);
               return envelope;
             }
-            validator.computeError(metadata, envelope);
-            throw mappedError(status, envelope.path("code").asText(),
-                res.getHeaders().getFirst("Retry-After"));
+            try {
+              validator.computeError(metadata, envelope);
+            } catch (ApiException e) {
+              if (transientGateway && !isValidProtocolEnvelopeWithWrongAttempt(metadata, envelope))
+                throw unavailable(retryAfter);
+              throw e;
+            }
+            throw mappedError(status, envelope.path("code").asText(), retryAfter);
           });
     } catch (ResourceAccessException e) {
       throw new ApiException(503, "AI_UNAVAILABLE", "Không kết nối hoặc đọc được compute service.");
+    }
+  }
+
+  private ApiException unavailable(String retryAfter) {
+    return new ApiException(
+        503,
+        "AI_UNAVAILABLE",
+        "Compute service tạm thời không khả dụng.",
+        Map.of("retry_after_seconds", boundedRetryAfter(retryAfter)));
+  }
+
+  private boolean isValidProtocolEnvelopeWithWrongAttempt(ObjectNode metadata, JsonNode envelope) {
+    if (!envelope.isObject() || !envelope.path("attempt_id").isTextual()) return false;
+    String attemptId = envelope.path("attempt_id").asText();
+    if (attemptId.equals(metadata.path("attempt_id").asText())) return false;
+    ObjectNode probe = metadata.deepCopy();
+    probe.put("attempt_id", attemptId);
+    try {
+      validator.computeError(probe, envelope);
+      return true;
+    } catch (ApiException invalid) {
+      return false;
     }
   }
 

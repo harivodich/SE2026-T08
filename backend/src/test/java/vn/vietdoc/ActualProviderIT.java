@@ -113,7 +113,7 @@ class ActualProviderIT {
     assertNotNull(current.head());
     ObjectNode payload = current.head().payload().deepCopy();
     if (payload.path("total_amount").isNull())
-      payload.put("total_amount", type.equals("receipt") ? "45000" : "80000");
+      payload.put("total_amount", type.equals("receipt") ? "45000" : "110000");
     List<String> rowIds = new ArrayList<>();
     current.head().rowIds().forEach(value -> rowIds.add(value.asText()));
     var saved = review.save(document.id(), owner.id(), new Requests.Save(

@@ -113,40 +113,58 @@ public class ArtifactPromoter {
   }
 
   public byte[] readCanonical(String runId, Promoted asset) {
+    if (asset == null || runId == null || !runId.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,99}"))
+      throw storageUnavailable();
     String prefix = "promoted/" + runId + "/";
-    String name = filename(asset.canonicalKey(), prefix);
+    String name = safeFilename(asset.canonicalKey(), prefix);
+    if (name == null) throw storageUnavailable();
     Path directory = committedRoot.resolve(runId);
     try {
-      regularDirectory(committedRoot);
-      regularDirectory(directory);
+      regularCommittedDirectory(committedRoot);
+      regularCommittedDirectory(directory);
       Path path = directory.resolve(name);
       if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS) || Files.isSymbolicLink(path))
-        invalid();
+        throw storageUnavailable();
       byte[] bytes;
       try (InputStream in = Files.newInputStream(path, LinkOption.NOFOLLOW_LINKS)) {
         bytes = in.readNBytes(50 * 1024 * 1024 + 1);
       }
       if (bytes.length > 50L * 1024 * 1024
-          || !vn.vietdoc.common.Json.sha256(bytes).equals(asset.canonicalHash())) invalid();
+          || !vn.vietdoc.common.Json.sha256(bytes).equals(asset.canonicalHash()))
+        throw storageUnavailable();
       return bytes;
     } catch (IOException e) {
-      throw new ApiException(503, "STORAGE_UNAVAILABLE", "Ảnh canonical không khả dụng.");
+      throw storageUnavailable();
     }
   }
 
   private String filename(String key, String prefix) {
-    if (!key.startsWith(prefix)) { invalid(); return ""; }
-    String name = key.substring(prefix.length());
-    // The current Python AttemptWriter publishes flat, exclusive filenames.
-    if (!name.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,99}") || name.equals("promotion.properties"))
-      invalid();
+    String name = safeFilename(key, prefix);
+    if (name == null) { invalid(); return ""; }
     return name;
   }
 
-  private void regularDirectory(Path path) throws IOException {
+  private String safeFilename(String key, String prefix) {
+    if (key == null || !key.startsWith(prefix)) return null;
+    String name = key.substring(prefix.length());
+    // The current Python AttemptWriter publishes flat, exclusive filenames.
+    if (!name.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,99}") || name.equals("promotion.properties"))
+      return null;
+    return name;
+  }
+
+  private void regularDirectory(Path path) {
+    if (!isRegularDirectory(path)) invalid();
+  }
+
+  private void regularCommittedDirectory(Path path) {
+    if (!isRegularDirectory(path)) throw storageUnavailable();
+  }
+
+  private boolean isRegularDirectory(Path path) {
     for (Path part = path; part != null; part = part.getParent())
-      if (Files.isSymbolicLink(part)) invalid();
-    if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) invalid();
+      if (Files.isSymbolicLink(part)) return false;
+    return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
   }
 
   private String copyChecked(Path source, Path target, long expectedSize) throws IOException {
@@ -185,7 +203,8 @@ public class ArtifactPromoter {
         if (decoded == null || decoded.getWidth() != width || decoded.getHeight() != height)
           invalid();
       } finally { reader.dispose(); }
-    } catch (IOException e) { invalid(); }
+    } catch (ApiException e) { throw e; }
+      catch (IOException | RuntimeException e) { invalid(); }
   }
 
   private void verifyOcr(Path file, int width, int height, JsonNode metadata) {
@@ -223,5 +242,9 @@ public class ArtifactPromoter {
 
   private void invalid() {
     throw new ApiException(422, "MODEL_OUTPUT_INVALID", "Compute artifact không khớp khai báo hoặc path không an toàn.");
+  }
+
+  private ApiException storageUnavailable() {
+    return new ApiException(503, "STORAGE_UNAVAILABLE", "Ảnh canonical không khả dụng.");
   }
 }

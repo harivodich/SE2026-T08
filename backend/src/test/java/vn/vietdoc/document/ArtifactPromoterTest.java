@@ -10,7 +10,19 @@ import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageReaderSpi;
+import javax.imageio.stream.ImageInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -116,6 +128,78 @@ class ArtifactPromoterTest {
     }
     assertEquals("MODEL_OUTPUT_INVALID", assertThrows(ApiException.class,
         () -> promoter.promote(claim, envelope)).code);
+  }
+
+  @Test
+  void returnsStorageUnavailableWhenCommittedCanonicalIsCorruptedDeletedOrUnsafe() throws Exception {
+    var promoted = promoter.promote(claim, envelope);
+    Path committed = temporary.resolve("java/promoted").resolve(claim.runId()).resolve("canonical.png");
+
+    Files.write(committed, new byte[] {9, 8, 7});
+    ApiException corrupted = assertThrows(ApiException.class,
+        () -> promoter.readCanonical(claim.runId(), promoted));
+    assertEquals(503, corrupted.status);
+    assertEquals("STORAGE_UNAVAILABLE", corrupted.code);
+
+    Files.delete(committed);
+    ApiException deleted = assertThrows(ApiException.class,
+        () -> promoter.readCanonical(claim.runId(), promoted));
+    assertEquals(503, deleted.status);
+    assertEquals("STORAGE_UNAVAILABLE", deleted.code);
+
+    var traversal = new ArtifactPromoter.Promoted(
+        "promoted/" + claim.runId() + "/../canonical.png", promoted.canonicalHash(), 2, 3);
+    ApiException unsafe = assertThrows(ApiException.class,
+        () -> promoter.readCanonical(claim.runId(), traversal));
+    assertEquals(503, unsafe.status);
+    assertEquals("STORAGE_UNAVAILABLE", unsafe.code);
+  }
+
+  @Test
+  void rejectsPngDecoderRuntimeExceptionAsModelOutputInvalid() {
+    AtomicBoolean invoked = new AtomicBoolean();
+    ImageReaderSpi throwingSpi = new ImageReaderSpi(
+        "vietdoc-test", "1.0", new String[] {"png"}, new String[] {"png"},
+        new String[] {"image/png"}, ImageReader.class.getName(),
+        new Class<?>[] {ImageInputStream.class}, null,
+        false, null, null, null, null, false, null, null, null, null) {
+      @Override public boolean canDecodeInput(Object source) {
+        return source instanceof ImageInputStream;
+      }
+      @Override public ImageReader createReaderInstance(Object extension) {
+        return new ImageReader(this) {
+          @Override public int getNumImages(boolean allowSearch) { return 1; }
+          @Override public int getWidth(int imageIndex) { return 2; }
+          @Override public int getHeight(int imageIndex) { return 3; }
+          @Override public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) {
+            return List.<ImageTypeSpecifier>of().iterator();
+          }
+          @Override public IIOMetadata getStreamMetadata() { return null; }
+          @Override public IIOMetadata getImageMetadata(int imageIndex) { return null; }
+          @Override public BufferedImage read(int imageIndex, ImageReadParam param) {
+            invoked.set(true);
+            throw new IllegalArgumentException("Corrupt PNG decoder state");
+          }
+        };
+      }
+      @Override public String getDescription(Locale locale) { return "test throwing png reader"; }
+    };
+    IIORegistry registry = IIORegistry.getDefaultInstance();
+    List<ImageReaderSpi> existing = new ArrayList<>();
+    registry.getServiceProviders(ImageReaderSpi.class, false).forEachRemaining(existing::add);
+    registry.registerServiceProvider(throwingSpi, ImageReaderSpi.class);
+    try {
+      for (ImageReaderSpi provider : existing)
+        registry.setOrdering(ImageReaderSpi.class, throwingSpi, provider);
+      ApiException failure = assertThrows(ApiException.class,
+          () -> promoter.promote(claim, envelope));
+      assertTrue(invoked.get());
+      assertEquals(422, failure.status);
+      assertEquals("MODEL_OUTPUT_INVALID", failure.code);
+      assertFalse(Files.exists(temporary.resolve("java/promoted").resolve(claim.runId())));
+    } finally {
+      registry.deregisterServiceProvider(throwingSpi, ImageReaderSpi.class);
+    }
   }
 
   private void put(int index, byte[] bytes) throws Exception {

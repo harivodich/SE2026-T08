@@ -30,10 +30,12 @@ public class JobWorker {
 
   @Scheduled(fixedDelay = 1000)
   public void poll() {
+    boolean acquired = false;
+    JobService.Claim claim = null;
     try {
       jobs.recover();
       if (!busy.compareAndSet(false, true)) return;
-      JobService.Claim claim = null;
+      acquired = true;
       for (String id : jobs.available()) {
         claim = jobs.claim(id);
         if (claim != null) break;
@@ -46,7 +48,10 @@ public class JobWorker {
       JobService.Claim captured = claim;
       executor.submit(() -> process(captured));
     } catch (Exception e) {
-      if (current == null) busy.set(false);
+      if (acquired) {
+        if (claim != null && current == claim) current = null;
+        busy.set(false);
+      }
       log.warn("worker_poll error_type={}", e.getClass().getSimpleName());
     }
   }
