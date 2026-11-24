@@ -607,3 +607,433 @@ cần chốt render profile có version trước PDF handoff; PNG tiếp tục d
 Commands/helper ở [Python README](../src/vietdoc/README.md#chạy-ocr-ai-1), checks ở
 [tests README](../tests/README.md). Local parser/golden tests không thay actual
 AI-2 parse result, Backend approval/viewer, Java E2E hoặc shared wire acceptance.
+
+## Checkpoint C/D/E/F/G1 — 2026-11-15
+
+Base đã nhận: `develop@b9bd7f478bb5037e3a14a1ca90375d462497d90f` (PR4,
+PR81, PR82 đã merge). Increment này bổ sung regression/oracle và bằng chứng
+offline; không đổi loader, engine, shared schema, default long edge2000 hoặc
+artifact v1. Các phần lịch sử phía trên giữ nguyên provenance của lần chạy cũ.
+
+### Geometry và PDF profile (C)
+
+- `test_geometry.py`: JPEG thật đủ8 EXIF orientations, original/canonical dimensions
+  riêng; canonical301×199 → processed113×75. Hai vùng fixture giữ text, IDs,
+  scores, normalized corners và inverse round trip; không là recognition gold.
+- `test_preprocess.py`: PDF vector với chữ7pt `80.000`, đủ rotation0/90/180/270.
+  Oracle dùng source character boxes + công thức rotation độc lập. Loader thật
+  render200DPI ra200×100 hoặc100×200; resize73×36 hoặc36×73. Ink bbox lệch tối đa
+  1.5 raster pixels; OCR boundary double giữ text/ID/score/quad và round trip.
+- Reject MediaBox1500×2600pt ở200DPI trước `PdfPage.render`: dự kiến4167×7223
+  =30,098,241pixels, vượt20MP. Diagnostic override72DPI render1500×2600; đây không
+  là thay đổi default hoặc profile Data đã chấp nhận.
+
+Phương án physical size đã đo: chuyển hai PNG tiny Data thành **PDF ảnh** tại
+200DPI, MediaBox540×936pt. Loader ở default200DPI render1500×2600px, processed
+1154×2000; native OCR thành công cả hai loại. Raw text theo block order trùng PNG
+tương ứng, gồm cả lỗi còn tồn tại. Đã mở Poppler renders và canonical overlays.
+Không chứng minh vector-font PDF đại diện hoặc mọi chữ nhỏ đều đọc đúng; Data
+cần giao PDF đại diện và chốt units/profile ở #42.
+
+Artifact local ignored: `artifacts/evaluation/ai1-remaining-20261115/`.
+`viewer-valid.html`, `viewer-unavailable.html`, `viewer-handoff.json` cung cấp
+canonical bytes/hash1500×2600, metadata và29 vùng. Case unavailable giữ raw text,
+IDs/scores, đặt quad=null + reason `NO_VERIFIED_MAPPING`. Backend cần gắn đúng
+run/revision, kiểm hash/frame/promotion và trả acceptance; chưa gọi C4 Done.
+Case hash/frame sai đã có trong `tests/fixtures/ocr-d1-canonical-assets.json`.
+
+### Oracle, exporter review và lỗi quan sát (D)
+
+Đã chạy lại15 known-score tests của Data trong env Data riêng: NFC/diacritics,
+whitespace/case, tiền, insert/delete/substitute, empty reference/prediction,
+QA/unknown scope và failure accounting. Regression AI1 mới dùng wrapped description
+`Áo / Đỏ` và hai numeric cells: renderer draw-call join `Áo Đỏ 2 8`, OCR row join
+`Áo 2 8 Đỏ`. Mọi token đúng nhưng WER=2/4. Giữ policy
+`d31-canonical-nfc-v1-proposed`; không reorder OCR cho khớp gold.
+
+Exporter AI2 `pipeline/extraction/predictions.py` đã xuất `vietdoc.predictions.v1`
+và companion diagnostics, nhưng gọi extraction trước khi ghi record. Chưa thay
+exporter của AI2 hoặc tạo OCR-only contract mới khi outcome convention chưa chốt.
+Wrapper offline AI1 `pipeline/ocr/diagnose.py` tái dùng evaluator hiện có và chỉ
+phục vụ diagnostic. Nó dùng payload={}, raw blocks join theo order hiện hành;
+không đưa business gold vào predictions. Scalar metrics trong report **không áp dụng**.
+
+Chẩn đoán tiny2 mẫu, scope/order còn Proposed; **không phải baseline dev chính thức**:
+
+| Type | CER edits/reference chars | WER edits/reference words | Support |
+|---|---|---|---|
+| Receipt |38/426|10/97|1|
+| Invoice |37/478|9/106|1|
+| Tổng |75/904|19/203|2|
+
+Reports giữ evaluator version/source hash, exact manifest/asset/prediction hashes,
+denominators/exclusions và đầy đủ errors. `diagnostic-png/` và `diagnostic-pdf/`
+có cùng OCR counts. Đây là5 ví dụ lỗi để Data/AI2 phân loại tiếp:
+
+| Case | Expected / actual | Stage hoặc giả thuyết cần kiểm |
+|---|---|---|
+| Receipt header |`SL` / `sL`|Recognition/case; không sửa raw text|
+| Receipt unit |`hộp` / `nộp`|Recognition crop resolution; có region, chưa kết luận detector bỏ chữ|
+| Invoice header |`SL` / `SsL`|Recognition; có thể ảnh hưởng table grouping của AI2|
+| Receipt wrapped description |Continuation trước numeric cells / sau numeric cells|Order protocol khác nhau, không quy hết thành glyph error|
+| Invoice wrapped description |Continuation trước numeric cells / sau numeric cells|Cùng vấn đề order; cần Data/Lead chốt oracle|
+
+Full D1 B3/B4 vẫn chờ `d12-handoff.zip`, `inventory.json`, `SHA256SUMS` từ Data;
+không dùng hai tiny samples để đóng20 unique IDs. D3 chính thức cần dev split và
+scope/order được Data/Lead chấp nhận; D2 production adapter còn cần AI2/Data thống nhất.
+
+### Một biến preprocessing opt-in (E, diagnostic)
+
+Protocol lưu trước chạy ở `paired/protocol.json`: chỉ đổi long edge2000→2600;
+giữ input/model, canonical image, cap và budget. Mỗi profile/type có1 warm-up +3
+lượt đo, đảo profile order ở lượt chẵn. Có16/16 outcomes ok, raw text ổn định giữa
+ba lượt mỗi profile/type; geometry validate đạt. Regression giữ canonical pixel
+hash và evidence frame giống nhau ở default/opt-in.
+
+| Type | CER trước → sau | WER trước → sau | Median wall trước → sau (s) |
+|---|---|---|---|
+| Receipt |38/426 →37/426|10/97 →9/97|1.785 →1.815|
+| Invoice |37/478 →37/478|9/106 →9/106|1.860 →1.903|
+
+Receipt sửa `nộp→hộp`; invoice `SsL→sL`, vẫn chưa khớp `SL`. Numeric cell tokens
+và totals quan sát được giữ nguyên; downstream extraction/items chưa đo. Parent
+lifetime peak working set528MiB, không gồm decode child. Kết luận: **giữ default
+2000**, candidate2600 chỉ là cấu hình opt-in đã có sẵn, chưa promote. Support2 và
+order chưa Accepted không đủ chốt E trên dev; không tune tiếp nhiều profile trên
+hai mẫu này. Paired outputs/versions/protocol/latency nằm trong `paired/` và
+`diagnostic-paired-*`; giữ cả những lỗi không cải thiện.
+
+### Resource và tái lập (F)
+
+Native run dùng Windows11, i7-12700H14C/20T, RAM16GiB, adapter CPU4; pinned model
+set `ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d`, runtime/model/source hashes ở
+`native/protocol.json`. Engine load8.628s (một cold load). Có11/11 outcomes ok:
+2 warm-up,6 measured,1 blank PNG4000×4999 gần cap,2 PDF proposal. Receipt/invoice
+wall median1.797/1.938s, max1.908/1.949s; native median1.490/1.557s.
+Parent RSS sample mỗi10ms max671MiB; OS lifetime peak working set710MiB. Decode
+subprocess không được tính; không công bố p95 từ3 samples, service SLA hoặc GPU quota.
+
+Guards/deadline/cleanup/fatal/storage regressions có trong fixture gate; real
+encrypted-PDF E2E, native hang/restart và service concurrent capacity chưa được
+chứng minh ở đây. F4 vẫn cần người khác/máy thứ hai replay. Các local runner và
+protocol/report ở artifact root; cần giao cả runner+inputs/pins khi team tái lập.
+
+### Migration matrix chuẩn bị trước quyết định #63 (G1)
+
+| Input/outcome | Legacy v1 | Opt-in v2 |
+|---|---|---|
+| Complete readable |Giữ blocks/text/IDs/quads/scores|Complete, cùng readable data|
+| Mixed readable/empty |Adapter reject page|Partial; giữ readable blocks + unreadable IDs/reasons|
+| All detections empty |Adapter reject page|Unreadable; không bịa readable text|
+| No detections |Complete với blocks rỗng|Complete, cả hai arrays rỗng|
+| Unsupported version |Reject|Reject|
+| Invalid score/geometry, provider/OOM/timeout |Typed failure|Typed failure; empty text không che lỗi|
+
+Regression thực: `test_ocr_contracts.py`, `test_paddle_adapter.py`,
+`test_ocr_handoff.py`, `test_evidence.py`, `test_ocr_consumer.py`. Missing total
+không thành absent; Backend vẫn phải chứng minh server-side approve blocker.
+Đọc artifact lịch sử theo version gốc, không downgrade partial v2 để bỏ diagnostics.
+Rollback chỉ đổi config lượt chạy **mới**: `--artifact-version 1` thay opt-in2.
+Chưa đổi default: G2/G3 chờ AI2/Backend acceptance và Lead #63.
+
+### Kiểm chứng checkpoint này
+
+- Review trước commit ở `artifacts/evaluation/ai1-commit-review-20261115/`:
+  fixture gate **745 passed,459 subtests,1 allowed Windows symlink skip**,
+  policy_failures=[],exit0; JUnit/log `fixture.xml` / `fixture.log`.
+- Focused preprocess/geometry:37 passed,85 subtests,0skip; handoff/replay:
+  43 passed,86 subtests,0skip. Evaluation Data49 tests và actual replay integration6
+  tests PASS trong env Data riêng. Fixture/native/Data `pip check` đạt.
+  Workflow lint trước đó đạt (3 suppressions hiện có); workflows không thay đổi.
+  `git diff --check` đạt.
+- Native resource11/11 + paired16/16 là benchmark trước đó. Lượt review trước
+  commit đã chạy lại **suite native3 methods,32 subtests,0skip**, dùng model/font
+  đã pin, có fresh OCR/geometry overlays. Không phải20 documents full D1.
+- Build wheel và cài vào target riêng: module replay được import từ wheel,
+  chạy cả4 nhóm với cwd ngoài source và không dựa vào contracts env discovery;
+  metrics/accounting khớp4/4. Không đổi default profile hoặc evaluator policy.
+- Hosted CI trên increment này chưa chạy; kiểm tra local không thay acceptance
+  còn chờ ở trên.
+
+Commands đã dùng: fixture env `python -m scripts.ci.ai
+--allow-windows-symlink-skip --junitxml <artifact-root>/fixture-final.xml`;
+Data env `python -m unittest discover -s <byte-exact-checkout>/tests/unit
+-p test_evaluation.py -v`. Byte-exact checkout được export bằng `git archive` từ
+base ở đầu checkpoint để tránh checkout CRLF làm sai hash assets lịch sử.
+
+Native prerequisites/env theo [Python README](../src/vietdoc/README.md#chạy-ocr-ai-1).
+Native probe runners `measure.py`, `paired.py` nằm trong artifact root,
+không thuộc production API. Để native replay, copy `measure.py`/`paired.py` vào
+root **mới** dưới `artifacts/evaluation/`, giữ depth giống bản này, đặt `PYTHONPATH`
+tới repo/src rồi chạy bằng native venv. Runner tạo output độc quyền và không ghi
+đè lượt cũ. Scoring dùng Data env, root có fixtures **và** `specs/contracts/` để
+Data verifier kiểm schema/asset hashes. Scoring CLI được version trong
+`src/vietdoc/pipeline/ocr/diagnose.py`; gọi `python -m vietdoc.pipeline.ocr.diagnose`.
+CLI nhận đường dẫn qua tham số, không phụ thuộc vị trí script, cwd hoặc thư mục
+của lần review cũ. `diagnose.py` local trong artifact root chỉ còn là launcher.
+`--manifest` tương đối theo `--data-root` hoặc tuyệt đối bên trong root đó;
+`--manifest-sha256` phải là pin đã bàn giao, không tính lại từ input bất kỳ để bỏ
+qua mismatch. `--input-root` chứa native/paired artifacts; `--output-dir` phải mới.
+
+Ví dụ replay cả4 nhóm từ artifact bundle hiện có, không chạy native lần nữa.
+Chạy từ repo root; `$dataPython` là executable của env Data đã provision:
+
+```powershell
+$repo = (Resolve-Path '.').Path
+$artifactRoot = Join-Path $repo 'artifacts/evaluation/ai1-remaining-20261115'
+$replayRoot = Join-Path $repo 'artifacts/evaluation/ai1-score-replay-01'
+New-Item -ItemType Directory -Path $replayRoot -ErrorAction Stop
+$replayZip = Join-Path $replayRoot 'reference.zip'
+git archive --format=zip "--output=$replayZip" `
+    b9bd7f478bb5037e3a14a1ca90375d462497d90f tests/fixtures/d12 specs/contracts
+if ($LASTEXITCODE -ne 0) { throw 'Reference export failed' }
+$dataRoot = Join-Path $replayRoot 'reference'
+Expand-Archive -LiteralPath $replayZip -DestinationPath $dataRoot
+$env:PYTHONPATH = Join-Path $repo 'src'
+& $dataPython -m vietdoc.pipeline.ocr.diagnose `
+    --data-root $dataRoot --manifest 'tests/fixtures/d12/manifest.json' `
+    --manifest-sha256 b9fcb952f95f86e0c2c3bc1420acf2e43e1a47d1ed3c51ed5170dd3200ef989c `
+    --input-root $artifactRoot --output-dir (Join-Path $replayRoot 'results') `
+    --groups png pdf paired-baseline paired-candidate
+if ($LASTEXITCODE -ne 0) { throw 'Diagnostic replay failed; inspect the fresh output' }
+```
+
+Đổi tên `$replayRoot` cho lần sau; không xóa/ghi đè kết quả cũ. Sai manifest pin
+hoặc thiếu OCR input bị chặn trước output; Data evaluator vẫn reject asset hash
+sai. Lỗi scoring sau khi tạo output có thể giữ predictions chẩn đoán dở dang,
+trả exit nonzero và không có report thành công cho nhóm lỗi; dùng output root mới khi chạy lại.
+Regression integration:6 tests PASS trong env Data, gồm launcher chuyển vị trí/cwd,
+đường dẫn có spaces, manifest tương đối/tuyệt đối,4 nhóm metrics, sai pin/asset,
+missing input và bảo toàn output hiện có. Evidence ở `fix-replay-01/`.
+Suite fixture có thêm6 regression trong `test_ocr_handoff.py`, kiểm CLI/preflight,
+source pins, không bịa business payload và real stdlib scoring core. File-boundary
+validator của Data được isolate trong fixture env; integration ở env Data gọi
+validator thật.
+
+Giao native probe runners/protocol/inputs pins khi yêu cầu người khác tái lập;
+những probe/output artifacts đó vẫn local ignored, chưa phát hành qua GitHub.
+Scoring CLI và fixture regression nằm trong source của increment này. Local
+results không thay chữ ký acceptance của AI2/Data/Backend/Lead.
+
+## Checkpoint giao việc O1/O2 — 2026-11-23
+
+Đối chiếu `AI1-giao-viec.md` v2. Candidate kiểm chứng dùng
+`develop@1f03d8d120f7c3052fbc440d2779a030148a837e` (đã gồm PR83 và PR88),
+hai commit AI1 `f9e1465` / `537d34d`, cùng delta source/tests của lượt này.
+Checkout kiểm chứng riêng ở `.verification/ai1-20261123`; nhánh feature và hai
+commit local được giữ nguyên. Source hashes thực chạy nằm trong protocol, không
+coi base SHA là toàn bộ source candidate. Chưa có commit/push/hosted CI cho delta này.
+
+### O1-B — receiver verify và native20 thực
+
+Đã nhận [full20 của Data](https://github.com/harivodich/SE2026-T08/issues/22#issuecomment-6711644580).
+Outer transfer SHA256 `f3b17ce81d7bb83a2417ab8aa402082c5a304508c7b72756503b13f184b3a84a`.
+Ba inner files khớp exact size/hash của receipt Data. Verifier hiện hành chạy
+trong env Data Python3.12.10/Pillow10.2.0/jsonschema4.10.3, xuất sang root mới:
+**20 IDs, 10 receipt/10 invoice, 204 rows, 102 members**. Manifest SHA256
+`093b8f772d19e5357ee6209f3358f44d7a072f457aaef64507f38081c0e70e9a`.
+Không render/repack gold hoặc dùng fixture fallback.
+
+| Native20 accounting | Kết quả |
+|---|---:|
+| Requested / native attempted |20 /20|
+| OK /failed /NOT_RUN |20 /0 /0|
+| Engine port calls quan sát độc lập /report |20 /20|
+| Model load /engine closed sau batch |1 /true|
+
+`handoff.py` bổ sung additive fields trong local report v2: `stage_seconds`
+cho input/preprocess/OCR/export, `engine_calls`, `observed_engine_calls`,
+`artifact_paths`, byte cap và decode timeout trong profile. Stage không chạy
+giữ null. Timings là exclusive wall time; OCR gồm kiểm tra output của stage,
+không cộng lại vào preprocess. Không tính ghi `run.json`/`report.json` vào các
+stage này. Fatal/storage failures và NOT_RUN vẫn giữ denominator và mã lỗi cũ.
+Đây là local report, không đổi shared wire schema hoặc business state.
+
+Native env Python3.13.7, pretrained model set
+`ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d`, runtime/model hashes trong
+`native20-protocol.json`. Profile giữ artifact v1, long edge2000, PDF200DPI,
+20MiB/20MP, decode15s và budget180000ms mỗi sample. Windows11/i7-12700H,
+20 logical CPUs/RAM16GiB, CPU4. Cold load7.422s; total batch wall64.661s.
+
+| Type | Support | Median sample wall(s) | Max(s) |
+|---|---:|---:|---:|
+| Receipt |10|2.267|4.788|
+| Invoice |10|2.509|4.950|
+
+Parent lifetime peak working set543080448bytes; post-sample RSS đầu/cuối
+374648832/380379136bytes. Đây là một batch tuần tự20 tài liệu khác nhau;
+không là chứng minh leak-free dài hạn, child-process peak, service capacity hay
+hard cancellation của native inference. Không đổi cơ chế cooperative deadline.
+
+### O1-A/C/F — packet và actual consumer readback local
+
+Artifact root local ignored: `artifacts/evaluation/ai1-20261123/`.
+
+| Artifact | Nội dung /trạng thái |
+|---|---|
+| `native20/report.json`, `native20-execution.json` |20 records và counter độc lập, model close, actual stage timings|
+| `native20-cache-index.json` |ID→OCR/prepared/canonical/overlay/preview/run paths, hashes và versions; integration cache|
+| `consumer-readback.json` |Actual AI2 B0 + BoundEvidence trên20 outputs native;6 partial/blank fixture cases qua hai types|
+| `consumer-packet.json` |33 cases; verdict producer/local AI2, expected outcomes/IDs/reasons, owner ACK và Backend NOT_RUN|
+| `geometry-example.json` |Numeric forward/inverse, encoded canonical hash/dimensions và overlay|
+| `stress-and-disposition.json` |Measured limits và critical-field disposition|
+| `ai1-handoff.zip`, `packet-inventory.json` |Portable local packet, exact member hashes; chưa gửi hoặc được consumer ACK|
+
+Native readback **20/20 PASS** về input/canonical hashes, RGB pixels/dimensions,
+typed OCR/prepared pairing, canonical quad round-trip và actual B0 execution.
+Max round-trip error5.7732e-13pixel, tolerance1e-7pixel. Đã mở overlay
+`d12-receipt-01` và `d12-invoice-01`; không có failure/frame mismatch trong batch.
+
+Numeric example: `d12-receipt-01`, `p0-b0015`, text `Tổng thanh toán: 37.500 đ`,
+score0.94. Canonical1500×2600, processed1154×2000. Processed corner(740,235)
+→ canonical(961.8717504333,305.5); inverse diagonal(1500/1154,1.3,1).
+Quads giữ cyclic point order của region; normalized coordinates thuộc canonical.
+Encoded canonical SHA256 `526259bdc0bb7561b9d7b51189e49f607a0bb1658f195e7171facb0abbee7ca3`.
+
+Actual local AI2 readback nhận mixed-empty-whitespace/all-unreadable/no-detection
+ở cả receipt/invoice,6/6 PASS: readable IDs và unreadable reasons được giữ;
+required total vẫn null/unknown, không suy thành absent. Scoped `80.000` giữ
+`p0-b0004`; unscoped partial/repeated values abstain. Packet có crossed geometry,
+unsupported version, wrong frame/hash và required-total-missing cases. Hash
+verification/Java viewer/approval semantics chưa được gọi PASS từ B0 object adapter.
+
+**Giới hạn critical field:** actual B0 nhận total values ở20/20 samples, nhưng
+`/total_amount.source_regions` rỗng cả20 với `SOURCE_OCCURRENCE_UNRESOLVED`.
+Raw amount nằm trong OCR block ghép label+amount; existing guard không sinh
+substring geometry. Raw OCR region có quad hợp lệ và được overlay. Giữ closure
+occurrence guard của PR4; AI2/Lead cần xem serialization/evidence semantics,
+Backend cần thể hiện highlight unavailable. Đây không là field-quality PASS.
+
+Producer/AI2-local verdict khác owner ACK. AI2 cần nhận packet và trả case verdict;
+Backend cần thử DTO, canonical promotion/viewer zoom và required-field blocker.
+Current `ManagedPipeline` chỉ nhận pinned profile artifact v1; runtime HTTP opt-in
+v2 và quyết định default #63 vẫn chưa nghiệm thu. Không sửa wiring của AI2.
+
+### O1-D/E và O2 — phần đã đo và dependency còn thiếu
+
+Existing replay CLI đã chấm20 OCR snapshots byte-exact qua evaluator Data thật,
+payload={} và `business_metrics_applicable=false`. Kết quả **integration diagnostic**,
+policy/order vẫn Proposed, không phải accepted dev baseline:
+
+| Type | CER edits/chars | WER edits/words | Support |
+|---|---:|---:|---:|
+| Receipt |384/6843|222/1619|10|
+| Invoice |412/7785|250/1818|10|
+| All |796/14628|472/3437|20|
+
+Outputs: `integration-ocr-diagnostic/diagnostic-png/{predictions,report}.json`.
+Replay input layout chỉ copy exact native OCR bytes; index pins originals. Không
+dùng D1 metrics để chọn preprocess. Thử long edge2000→2600 trước đây giữ trạng
+thái tiny diagnostic; default vẫn2000. PR88 đã merge nhưng pilot plan vẫn có71
+pending duplicate pairs,80 samples quarantine,0 eligible train/dev members.
+
+| Increment | Trạng thái sau lượt này /input cần tiếp |
+|---|---|
+| O1-A |Packet producer và local actual AI2 sẵn; AI2/Backend owner ACK pending|
+| O1-B |Receiver verify20 +native20 +readback/overlays PASS; cần giao packet và AI2 B0 ACK|
+| O1-C |Numeric geometry và regressions sẵn; cần Backend viewer ACK, Data oracle/profile ACK|
+| O1-D |Harness/known-score/integration diagnostic có; Data/Lead giao accepted train/dev IDs/assets/split/order để build cache và baseline|
+| O1-E |Tiny comparison trước đây có; dev comparison/critical coverage chờ O1-D và AI2|
+| O1-F |Producer/offline partial semantics PASS; actual HTTP v2/Backend blockers/owner verdict chưa có|
+| O2-A |Chờ Lead #63 và consumer acceptance; chưa đổi default|
+| O2-B |Chờ AI2 dev failure packet, accepted cache generation và candidate freeze #59|
+| O2-C |Native batch/resource evidence có; repeated-job leak/hang isolation/slot/fence acceptance còn mở đúng owner|
+| O2-D |Runbook/portable packet sẵn; peer clean subset replay và tổng nghiệm thu chưa có|
+
+### Checks và replay
+
+Recheck phát hiện và sửa metadata của packet case `unsupported-version`:
+`artifact_version=99` khớp payload cố ý ngoài supported versions; expected outcome
+vẫn là error. Kiểm consistency cả33 cases, negative control trên bản lỗi, rebuild
+ZIP/inventory/checksums và readback toàn169 members. Bản trước sửa được giữ ở
+`packet-history-v1/`; receipt sửa lỗi ở `packet-fix-verification.json`.
+OCR source/model/outputs không đổi; không tính việc rebuild packet là native run mới.
+
+- Combined candidate AI gate: **827 passed,473 subtests,1 allowed Windows symlink
+  skip**, policy_failures=[],exit0. `combined-final.log` /`combined-final.xml`.
+- Focused handoff44 tests/86 subtests PASS; geometry/PDF38 tests/87 subtests PASS.
+  Encrypted-file test dùng hai PDF trắng thật, empty/nonempty user password:
+  parser mở/render được với password đúng, production decoder từ chối
+  PROFILE_EXCEEDED. Không mock security API trong test mới, không cài thêm package.
+- Native suite thực **3 tests/32 subtests PASS,0 skip**; output mới ở
+  `native-formats/`, `native-geometry/`. Bộ synthetic32 subtests này tách khỏi
+  native20 manifest run ở trên.
+- Data evaluator49 tests PASS; fixture/native/Data `pip check` PASS.
+- Hosted CI, Java/viewer/HTTP-v2 acceptance và peer reproduction: NOT_RUN.
+
+Từ source candidate có hashes đã pin, chọn đường dẫn output mới cho mỗi lần.
+Model/env setup và license/hash pins giữ runbook ở `tests/README.md`.
+
+```powershell
+$repo = (Get-Location).Path
+$env:PYTHONPATH = Join-Path $repo 'src'
+$ocrPython = Join-Path $repo 'artifacts/models/.venv-ai1/Scripts/python.exe'
+$dataPython = Join-Path $repo 'artifacts/models/.venv-ai1-data/Scripts/python.exe'
+$evidence = Join-Path $repo 'artifacts/evaluation/ai1-20261123'
+$assetRoot = Join-Path $evidence 'full20-verified'
+# Receiver verify vào root mới; inner bundle cần đúng ba file pinned của Data.
+& $dataPython -B -m vietdoc.data.generator.handoff verify `
+  --bundle (Join-Path $evidence 'received-full20') --output $assetRoot
+if ($LASTEXITCODE -ne 0) { throw 'Full20 verification failed' }
+# Replay subset sạch: dùng verified asset root có sẵn và output chưa tồn tại.
+& $ocrPython -B -m vietdoc.pipeline.ocr.handoff --root $assetRoot `
+  --manifest (Join-Path $assetRoot 'datasets/manifests/d12-integration-v2.json') `
+  --model-root (Join-Path $repo 'artifacts/models/ocr-v1') `
+  --artifact-version 1 --sample-ids d12-receipt-01 d12-invoice-01 `
+  --output-dir (Join-Path $evidence 'peer-subset-new')
+if ($LASTEXITCODE -ne 0) { throw 'Native subset failed; inspect records' }
+```
+
+Root `full20-verified` trong evidence hiện đã tồn tại. Khi chạy lại receiver verify,
+chọn root mới và cập nhật `$assetRoot`; khi chỉ replay, dùng root đã verify và bỏ
+bước verify. Bỏ `--sample-ids` để chạy đủ20. Đọc report/counts, hashes và overlays;
+ghi environment/commands/PASS/FAIL/NOT_RUN của người chạy lại trước khi ACK.
+
+## PR89 review delta — 2026-11-24
+
+F01/F02 được sửa riêng tại offline `ocr.diagnose`, giữ closure geometry/PDF,
+handoff instrumentation và pretrained provider. CLI dùng evaluator helper
+`dataset_version(manifest)`; manifest format version và dataset identity không
+còn bị gộp. OCR snapshots phải là UTF-8 JSON không duplicate keys, nonfinite
+numbers hoặc lone surrogates và qua `OcrPage.from_dict` trước khi tạo output.
+Toàn bộ groups được preflight; overwrite, manifest pin và path guards giữ nguyên.
+
+Mapping diagnostic dùng outcomes hiện có của scalar evaluator:
+
+| Source OCR | Prediction outcome | Text / diagnostics |
+|---|---|---|
+| Legacy v1 hoặc v2 complete, kể cả blank không detection | `ok` | Giữ readable text; source version/status/flags explicit |
+| v2 partial | `ok` | Giữ toàn bộ readable text, unreadable regions, scores/quads và flags; `ok` không có nghĩa recognition complete |
+| v2 all-unreadable | `failed`, `OCR_UNREADABLE_REGIONS` | Không gọi blank success; sample vẫn trong CER/WER denominator, `missing_or_failed_ocr` tăng |
+| Unsupported version / invalid OCR | Reject trước output | Không tạo prediction/report để chấm input không hợp lệ |
+
+`predictions[*].ocr_diagnostics` là source diagnostics nội bộ của replay,
+không phải wire OcrPage schema mới. Report thêm `source_ocr_states` theo sample ID;
+prediction vẫn `payload={}`, business metrics không applicable và diagnostic
+vẫn PROVISIONAL. Không đổi evaluator policy, shared schemas, Java, service
+default v1, longedge2000 hoặc PDF200DPI.
+
+Regression và evidence tại ignored `artifacts/evaluation/ai1-pr89-fix-20261124/`:
+
+- AI fixture gate: **829 PASS /484 subtests**, một Windows symlink skip đúng
+  policy, `policy_failures=[]`; `ai.log`, `ai.xml`.
+- Actual Data renderer/file evaluator: D1 hợp lệ và freshly rendered D2.2
+  5 bases/10 images, dataset version khác format; CLI normal và `-O` PASS.
+  Partial/unreadable/blank và unsupported99 qua public replay; 4 tests PASS.
+  `tests/unit/test_data_ocr_replay.py` được Data CI matrix tự thu thập.
+- Negative control chạy 3 regression bằng đúng source CLI cũ `36434a8`:
+  fail assertions dataset version, missing diagnostics, unreadable accounting
+  và unsupported99; **0 setup/import errors,0 skip**. Bản sửa PASS.
+- Full Data gate local có lỗi Windows privilege `WinError1314` tại symlink
+  trong test pre-existing `test_data_d21.D21Test.test_manifest_tampering`;
+  focused repro xác nhận cùng lỗi ngoài vùng sửa. Không bỏ test hoặc đổi OS
+  settings để che lỗi. Hosted CI trên head mới phải được kiểm tra riêng.
+- Native inference **NOT_RUN trong delta này**. ZIP cũ SHA256
+  `a3f3b398ec3c37f3dafdbb2b1842cff39cdae1a334a435371093f2f1ea4b90aa`
+  vẫn 169 members: 168 payload hashes/sizes khớp inventory, inventory member
+  byte-exact; cả 6 core source pins khớp. Không cần chạy lại model vì chỉ sửa
+  diagnostic replay. Packet accessibility, independent verification và
+  AI2/Backend ACK vẫn phải ghi nhận riêng trước nghiệm thu milestone native20.
+- Replay score từ 20 raw OCR đã pin bằng CLI sửa PASS: CER796/14628,
+  WER472/3437, support20; giữ nguyên integration diagnostic cũ, không gọi
+  official dev baseline. Output mới `native20-rescore/`, không sửa packet cũ.
