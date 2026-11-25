@@ -13,6 +13,9 @@ nhánh `feature/AI2-M2_ai_service_docker`.
 
 | Tài liệu | Nội dung |
 |---|---|
+| [D22 dev acceptance 26/11](2026-11-26-model-dev-acceptance.md) | Full epoch/reload và B0/M0/M1 đã chạy; 363 Linux tests đạt; model raw-schema 0/16, chưa nghiệm thu V1 |
+| [Task hoàn thiện V1](../ai2-v1-completion-2026-11-26.md) | Lỗi đo được, thứ tự sửa và ACK/handoff sớm; không làm lại G0 đã có evidence |
+| [Dependency hiện hành](../cross-role-unblock-2026-11-26.md) | Việc làm ngay của bốn role và gate cuối cần packet/ACK thật |
 | [M1.2 Qwen3 inference handoff](2026-11-24-qwen3-inference-handoff.md) | OCR adapter/loader/CLI và native Docker:4/4 schema PASS, semantic extraction chưa nghiệm thu; code nền đã merge develop 1f03d8d |
 | [HISTORY.md](HISTORY.md) | Những phần đã có, bản sửa dependency/decimal, checks lịch sử, push và phần còn thiếu |
 | [Batch A: R04/R07/R08/R10](batch-a-r04-r07-r08-r10.md) | Giải thích bốn lỗi, đường đi gây lỗi, hướng sửa đề xuất và regression cases cần có |

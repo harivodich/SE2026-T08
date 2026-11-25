@@ -24,6 +24,8 @@ from vietdoc.pipeline.preprocess import PreprocessError, PreprocessLimits
 
 HANDOFF_REPORT_VERSION = "vietdoc.ocr-handoff.v2"
 MAX_MANIFEST_BYTES = 1024 * 1024
+DEFAULT_MAX_MANIFEST_SAMPLES = 20
+MAX_MANIFEST_SAMPLES = 200
 
 
 class HandoffError(ValueError):
@@ -135,7 +137,8 @@ class _StageClock:
             self.case["stage"] = stage
 
 
-def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=False):
+def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=False,
+                      max_manifest_samples=DEFAULT_MAX_MANIFEST_SAMPLES):
     """One bounded snapshot for validation, sample planning and exact byte hash."""
     root = Path(root).resolve()
     with Path(manifest_path).open("rb") as stream:
@@ -149,8 +152,10 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
     except (ValueError, RecursionError):
         raise ValueError("Invalid manifest JSON") from None
     samples = manifest.get("samples") if isinstance(manifest, dict) else None
-    if not isinstance(samples, list) or not samples or len(samples) > 20:
-        raise ValueError("Expected 1..20 D1 integration samples")
+    if type(max_manifest_samples) is not int or not 1 <= max_manifest_samples <= MAX_MANIFEST_SAMPLES:
+        raise ValueError("Invalid manifest sample limit")
+    if not isinstance(samples, list) or not samples or len(samples) > max_manifest_samples:
+        raise ValueError(f"Expected 1..{max_manifest_samples} manifest samples")
     if not isinstance(manifest.get("version"), str) or not manifest["version"].strip():
         raise ValueError("Manifest must declare its version")
     for key in ("font_sha256", "config_sha256"):
@@ -193,13 +198,16 @@ def _prepare_manifest(root, manifest_path, *, sample_ids=None, fixture_fallback=
 
 
 def review_manifest(root, manifest_path, output_dir, engine, *, sample_ids=None,
-                    limits=None, remaining_budget_ms=180_000, fixture_fallback=False):
+                    limits=None, remaining_budget_ms=180_000, fixture_fallback=False,
+                    max_manifest_samples=DEFAULT_MAX_MANIFEST_SAMPLES):
     """Offline handoff with caller-owned engine; no model load or business state.
 
     Preflight validates one bounded manifest snapshot before output/inference.
     Tiny-fixture fallback is opt-in and still uses the manifest's exact hash.
     """
-    plan = _prepare_manifest(root, manifest_path, sample_ids=sample_ids, fixture_fallback=fixture_fallback)
+    plan = _prepare_manifest(root, manifest_path, sample_ids=sample_ids,
+                             fixture_fallback=fixture_fallback,
+                             max_manifest_samples=max_manifest_samples)
     return _review_plan(plan, output_dir, engine, limits=limits, remaining_budget_ms=remaining_budget_ms)
 
 
@@ -324,13 +332,16 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--sample-ids", nargs="+")
+    parser.add_argument("--max-manifest-samples", type=int, default=DEFAULT_MAX_MANIFEST_SAMPLES,
+                        help="Maximum samples in the immutable manifest (default 20; D22 80; bounded to 200).")
     parser.add_argument("--fixture-fallback", action="store_true")
     parser.add_argument("--artifact-version", type=int, choices=(1,2), default=1)
     args = parser.parse_args()
     engine, stage, report_written = None, "input", False
     try:
         plan = _prepare_manifest(args.root, args.manifest, sample_ids=args.sample_ids,
-                                 fixture_fallback=args.fixture_fallback)
+                                 fixture_fallback=args.fixture_fallback,
+                                 max_manifest_samples=args.max_manifest_samples)
         stage = "engine_load"
         engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
         engine.load()

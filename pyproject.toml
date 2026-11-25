@@ -37,6 +37,7 @@ serve = [
 train = [
   "jsonschema==4.26.0",
   "referencing==0.37.0",
+  "PyYAML==6.0.3",
   "torch==2.14.1",
   "transformers==5.20.2",
   "peft==0.21.2",
