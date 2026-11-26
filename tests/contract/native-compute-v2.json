@@ -1,0 +1,698 @@
+{
+  "artifact_version": "vietdoc.native-compute-v2-fixtures.v1",
+  "scope": "Recorded actual native OCR B0/v2 HTTP envelopes; parser interoperability, not live PostgreSQL or model quality acceptance",
+  "dataset_manifest_sha256": "99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d",
+  "producer_source_archive_sha256": "227af01871dcf3d2662337f9e342b637462c292e708fd69be01acc092b00d7bf",
+  "pipeline_manifest_sha256": "50da993783b4d31b15bce96e6a57390726b14cf3fd7772d89d1ef8975c4eec00",
+  "cases": [
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-unreadable",
+      "request": {
+        "contract_version": 1,
+        "job_id": "fd5e7fa7-14a6-427b-92e9-e6f420deadf7",
+        "run_id": "db15100c-01f7-4dbc-a9ff-ba8dd5176469",
+        "attempt_id": "1c86ad73-9606-4e4f-a51d-a5115b8b9ce8",
+        "document_type": "receipt",
+        "schema_version": "receipt.v1",
+        "language": "vi",
+        "input_sha256": "bdfe3982894a4bb62f5170026bf520c6c3583dd81048b7c2b7fddcb60737d2ef",
+        "pipeline_manifest_id": "b0-native-v2-20261126-final",
+        "remaining_budget_ms": 180000
+      },
+      "status": 200,
+      "response": {
+        "contract_version": 1,
+        "attempt_id": "1c86ad73-9606-4e4f-a51d-a5115b8b9ce8",
+        "result": {
+          "run_id": "db15100c-01f7-4dbc-a9ff-ba8dd5176469",
+          "job_id": "fd5e7fa7-14a6-427b-92e9-e6f420deadf7",
+          "document_type": "receipt",
+          "schema_version": "receipt.v1",
+          "language": "vi",
+          "payload": {
+            "merchant_name": null,
+            "merchant_address": null,
+            "transaction_date": null,
+            "transaction_time": null,
+            "total_amount": null,
+            "items": []
+          },
+          "field_metadata": [
+            {
+              "path": "/merchant_name",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/merchant_address",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/transaction_date",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/transaction_time",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/total_amount",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            }
+          ],
+          "issues": [
+            {
+              "id": "OCR_UNREADABLE_REGIONS:/",
+              "code": "OCR_UNREADABLE_REGIONS",
+              "severity": "warning",
+              "paths": [
+                "/"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/merchant_name",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/merchant_name"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/merchant_address",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/merchant_address"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/transaction_date",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/transaction_date"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/transaction_time",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/transaction_time"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/total_amount",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/total_amount"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "TABLE_NOT_LOCATED:/items",
+              "code": "TABLE_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/items"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            }
+          ],
+          "provenance": {
+            "pipeline_manifest_id": "b0-native-v2-20261126-final",
+            "ocr_version": "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d;paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v4;pixel-edge-projective-relative-rows.v3",
+            "extractor_release_id": "vi-label-header-b0.v3",
+            "normalizer_version": "vi-VND.v2"
+          }
+        },
+        "canonical_page": {
+          "page": 0,
+          "width": 1500,
+          "height": 2600,
+          "asset_key": "attempts/fd5e7fa7-14a6-427b-92e9-e6f420deadf7/1c86ad73-9606-4e4f-a51d-a5115b8b9ce8/canonical.png",
+          "sha256": "6754c31f5692a029b32a0a3c659836316ceeb74774cc06e2d0cb307fa9e09f23"
+        },
+        "artifacts": [
+          {
+            "kind": "canonical_page",
+            "asset_key": "attempts/fd5e7fa7-14a6-427b-92e9-e6f420deadf7/1c86ad73-9606-4e4f-a51d-a5115b8b9ce8/canonical.png",
+            "sha256": "6754c31f5692a029b32a0a3c659836316ceeb74774cc06e2d0cb307fa9e09f23",
+            "size_bytes": 911133,
+            "media_type": "image/png"
+          },
+          {
+            "kind": "ocr",
+            "asset_key": "attempts/fd5e7fa7-14a6-427b-92e9-e6f420deadf7/1c86ad73-9606-4e4f-a51d-a5115b8b9ce8/ocr.json",
+            "sha256": "8664f384039bc672b9f4db4deb3546c860a59c6347949ae7336256aadc43306f",
+            "size_bytes": 857,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "transform",
+            "asset_key": "attempts/fd5e7fa7-14a6-427b-92e9-e6f420deadf7/1c86ad73-9606-4e4f-a51d-a5115b8b9ce8/prepared.json",
+            "sha256": "bc67ceefe40700ab33c05b4df82245458934f4d73e67f0256fb43b4536749649",
+            "size_bytes": 343,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "raw_prediction",
+            "asset_key": "attempts/fd5e7fa7-14a6-427b-92e9-e6f420deadf7/1c86ad73-9606-4e4f-a51d-a5115b8b9ce8/diagnostics.json",
+            "sha256": "1e572206419542792c8776334c3bd2ea703119052f9a1744d0ec718c959d2e89",
+            "size_bytes": 4145,
+            "media_type": "application/json"
+          }
+        ]
+      },
+      "recognition_status": "partial",
+      "readable_blocks": 1,
+      "unreadable_regions": 1
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0001-unreadable",
+      "request": {
+        "contract_version": 1,
+        "job_id": "0f46b6c5-0acc-4473-9549-4602f7cced3e",
+        "run_id": "18e4764f-dce9-40af-a42a-149cbecb584e",
+        "attempt_id": "24545d01-0133-463e-9a99-a97863d912fc",
+        "document_type": "invoice",
+        "schema_version": "invoice.v1",
+        "language": "vi",
+        "input_sha256": "08b855a4421bee2461fff9d7785c242360c79abaca61e1a4fe56c9a3f6ce2bec",
+        "pipeline_manifest_id": "b0-native-v2-20261126-final",
+        "remaining_budget_ms": 180000
+      },
+      "status": 200,
+      "response": {
+        "contract_version": 1,
+        "attempt_id": "24545d01-0133-463e-9a99-a97863d912fc",
+        "result": {
+          "run_id": "18e4764f-dce9-40af-a42a-149cbecb584e",
+          "job_id": "0f46b6c5-0acc-4473-9549-4602f7cced3e",
+          "document_type": "invoice",
+          "schema_version": "invoice.v1",
+          "language": "vi",
+          "payload": {
+            "invoice_number": null,
+            "issue_date": null,
+            "seller_name": null,
+            "buyer_name": null,
+            "subtotal": null,
+            "tax_amount": null,
+            "discount_amount": null,
+            "total_amount": null,
+            "items": []
+          },
+          "field_metadata": [
+            {
+              "path": "/invoice_number",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/issue_date",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/seller_name",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/buyer_name",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/subtotal",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/tax_amount",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/discount_amount",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/total_amount",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "OCR_UNREADABLE_REGIONS",
+                "SOURCE_OCR_INCOMPLETE",
+                "FIELD_NOT_LOCATED"
+              ]
+            }
+          ],
+          "issues": [
+            {
+              "id": "OCR_UNREADABLE_REGIONS:/",
+              "code": "OCR_UNREADABLE_REGIONS",
+              "severity": "warning",
+              "paths": [
+                "/"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/invoice_number",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/invoice_number"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/issue_date",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/issue_date"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/seller_name",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/seller_name"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/buyer_name",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/buyer_name"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/subtotal",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/subtotal"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/tax_amount",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/tax_amount"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/discount_amount",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/discount_amount"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "FIELD_NOT_LOCATED:/total_amount",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/total_amount"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "TABLE_NOT_LOCATED:/items",
+              "code": "TABLE_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/items"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            }
+          ],
+          "provenance": {
+            "pipeline_manifest_id": "b0-native-v2-20261126-final",
+            "ocr_version": "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d;paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v4;pixel-edge-projective-relative-rows.v3",
+            "extractor_release_id": "vi-label-header-b0.v3",
+            "normalizer_version": "vi-VND.v2"
+          }
+        },
+        "canonical_page": {
+          "page": 0,
+          "width": 1500,
+          "height": 2600,
+          "asset_key": "attempts/0f46b6c5-0acc-4473-9549-4602f7cced3e/24545d01-0133-463e-9a99-a97863d912fc/canonical.png",
+          "sha256": "2c906287282fe4065b5428fe1382e1f73ec297ddd5c83c24a06c5c2b4145a58e"
+        },
+        "artifacts": [
+          {
+            "kind": "canonical_page",
+            "asset_key": "attempts/0f46b6c5-0acc-4473-9549-4602f7cced3e/24545d01-0133-463e-9a99-a97863d912fc/canonical.png",
+            "sha256": "2c906287282fe4065b5428fe1382e1f73ec297ddd5c83c24a06c5c2b4145a58e",
+            "size_bytes": 904319,
+            "media_type": "image/png"
+          },
+          {
+            "kind": "ocr",
+            "asset_key": "attempts/0f46b6c5-0acc-4473-9549-4602f7cced3e/24545d01-0133-463e-9a99-a97863d912fc/ocr.json",
+            "sha256": "23e1d5023e9d737f1e10e7e067c505a1a8904a058e855a8df3cd3e17eae10d35",
+            "size_bytes": 1123,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "transform",
+            "asset_key": "attempts/0f46b6c5-0acc-4473-9549-4602f7cced3e/24545d01-0133-463e-9a99-a97863d912fc/prepared.json",
+            "sha256": "bc67ceefe40700ab33c05b4df82245458934f4d73e67f0256fb43b4536749649",
+            "size_bytes": 343,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "raw_prediction",
+            "asset_key": "attempts/0f46b6c5-0acc-4473-9549-4602f7cced3e/24545d01-0133-463e-9a99-a97863d912fc/diagnostics.json",
+            "sha256": "7bb15692407ccf2b85ae09b2ad3742d4e715922d4120edc2063a56ee599958c8",
+            "size_bytes": 5569,
+            "media_type": "application/json"
+          }
+        ]
+      },
+      "recognition_status": "partial",
+      "readable_blocks": 2,
+      "unreadable_regions": 1
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-clean",
+      "request": {
+        "contract_version": 1,
+        "job_id": "5730408b-af9d-49b5-b555-be0ba2c52f61",
+        "run_id": "cb2bf0e7-63eb-447b-8d56-465231a3d685",
+        "attempt_id": "495d3e17-fa17-48ad-96a8-0fdddc43b2fd",
+        "document_type": "receipt",
+        "schema_version": "receipt.v1",
+        "language": "vi",
+        "input_sha256": "cf8818f295186420ca3b7d4de7919877e1af5292d8d590fe0a17066acadffc26",
+        "pipeline_manifest_id": "b0-native-v2-20261126-final",
+        "remaining_budget_ms": 180000
+      },
+      "status": 200,
+      "response": {
+        "contract_version": 1,
+        "attempt_id": "495d3e17-fa17-48ad-96a8-0fdddc43b2fd",
+        "result": {
+          "run_id": "cb2bf0e7-63eb-447b-8d56-465231a3d685",
+          "job_id": "5730408b-af9d-49b5-b555-be0ba2c52f61",
+          "document_type": "receipt",
+          "schema_version": "receipt.v1",
+          "language": "vi",
+          "payload": {
+            "merchant_name": "Quày Hư Cầu Lá Biếc",
+            "merchant_address": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+            "transaction_date": "2026-09-11",
+            "transaction_time": null,
+            "total_amount": "0",
+            "items": []
+          },
+          "field_metadata": [
+            {
+              "path": "/merchant_name",
+              "raw_value": "Quày Hư Cầu Lá Biếc",
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "SOURCE_OCCURRENCE_UNRESOLVED",
+                "CONFIDENCE_UNCALIBRATED"
+              ]
+            },
+            {
+              "path": "/merchant_address",
+              "raw_value": "Lô GIẢ-LẬP, khu phố Hư Cấu",
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "SOURCE_OCCURRENCE_UNRESOLVED",
+                "CONFIDENCE_UNCALIBRATED"
+              ]
+            },
+            {
+              "path": "/transaction_date",
+              "raw_value": "11/09/2026",
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "SOURCE_OCCURRENCE_UNRESOLVED",
+                "CONFIDENCE_UNCALIBRATED"
+              ]
+            },
+            {
+              "path": "/transaction_time",
+              "raw_value": null,
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "CONFIDENCE_UNCALIBRATED",
+                "FIELD_NOT_LOCATED"
+              ]
+            },
+            {
+              "path": "/total_amount",
+              "raw_value": "0 đ",
+              "value_origin": "prediction",
+              "source_regions": [],
+              "ocr_score": null,
+              "confidence": null,
+              "confidence_method": null,
+              "review_flags": [
+                "SOURCE_OCCURRENCE_UNRESOLVED",
+                "CONFIDENCE_UNCALIBRATED"
+              ]
+            }
+          ],
+          "issues": [
+            {
+              "id": "FIELD_NOT_LOCATED:/transaction_time",
+              "code": "FIELD_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/transaction_time"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            },
+            {
+              "id": "TABLE_NOT_LOCATED:/items",
+              "code": "TABLE_NOT_LOCATED",
+              "severity": "warning",
+              "paths": [
+                "/items"
+              ],
+              "message": "Baseline diagnostic; review source and unresolved values."
+            }
+          ],
+          "provenance": {
+            "pipeline_manifest_id": "b0-native-v2-20261126-final",
+            "ocr_version": "ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d;paddleocr=3.3.2;paddlex=3.3.13;paddle=3.3.1;tesserocr=2.12.0;tesseract=5.5.3;cv=4.10.0.84;shapely=2.2.0;clipper=1.4.0;meantextconf/100;cpu4.cooperative.v4;pixel-edge-projective-relative-rows.v3",
+            "extractor_release_id": "vi-label-header-b0.v3",
+            "normalizer_version": "vi-VND.v2"
+          }
+        },
+        "canonical_page": {
+          "page": 0,
+          "width": 1500,
+          "height": 2600,
+          "asset_key": "attempts/5730408b-af9d-49b5-b555-be0ba2c52f61/495d3e17-fa17-48ad-96a8-0fdddc43b2fd/canonical.png",
+          "sha256": "70ee406872ec8fed084a4b0a09dfc87f94b84d2577664a69e119e7658bea8c28"
+        },
+        "artifacts": [
+          {
+            "kind": "canonical_page",
+            "asset_key": "attempts/5730408b-af9d-49b5-b555-be0ba2c52f61/495d3e17-fa17-48ad-96a8-0fdddc43b2fd/canonical.png",
+            "sha256": "70ee406872ec8fed084a4b0a09dfc87f94b84d2577664a69e119e7658bea8c28",
+            "size_bytes": 48766,
+            "media_type": "image/png"
+          },
+          {
+            "kind": "ocr",
+            "asset_key": "attempts/5730408b-af9d-49b5-b555-be0ba2c52f61/495d3e17-fa17-48ad-96a8-0fdddc43b2fd/ocr.json",
+            "sha256": "f706d79bd8bde4ce4e4ab8e2a214a4d62f48ca175a8544ef5844ac3b8218ef79",
+            "size_bytes": 3149,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "transform",
+            "asset_key": "attempts/5730408b-af9d-49b5-b555-be0ba2c52f61/495d3e17-fa17-48ad-96a8-0fdddc43b2fd/prepared.json",
+            "sha256": "bc67ceefe40700ab33c05b4df82245458934f4d73e67f0256fb43b4536749649",
+            "size_bytes": 343,
+            "media_type": "application/json"
+          },
+          {
+            "kind": "raw_prediction",
+            "asset_key": "attempts/5730408b-af9d-49b5-b555-be0ba2c52f61/495d3e17-fa17-48ad-96a8-0fdddc43b2fd/diagnostics.json",
+            "sha256": "7c1f5038832f36a5b7728ee629c487bf1c22c11a7ba890267cd4736bebcc5dad",
+            "size_bytes": 3421,
+            "media_type": "application/json"
+          }
+        ]
+      },
+      "recognition_status": "complete",
+      "readable_blocks": 11,
+      "unreadable_regions": 0
+    }
+  ]
+}

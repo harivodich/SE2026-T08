@@ -291,6 +291,15 @@ public class ReviewService {
           .contains(issue.path("code").asText())) continue;
       boolean keep = true;
       ArrayNode mapped = json.mapper.createArrayNode();
+      if (java.util.stream.StreamSupport.stream(issue.path("paths").spliterator(), false)
+          .anyMatch(path -> path.asText().equals("/"))) {
+        // Document scope dominates narrower paths, including paths to deleted
+        // rows. Collapse the redundant paths instead of clearing the warning.
+        ObjectNode copy = issue.deepCopy();
+        copy.putArray("paths").add("/");
+        merge(result, copy);
+        continue;
+      }
       for (JsonNode p : issue.path("paths")) {
         String path = p.asText(), newPath = path;
         if (path.startsWith("/items/")) {

@@ -81,7 +81,11 @@ public class ContractValidator {
     Set<String> ids = new HashSet<>();
     for (JsonNode issue : result.path("issues")) {
       if (!ids.add(issue.path("id").asText())) invalid("/issues", "Issue ID bị trùng.");
-      for (JsonNode p : issue.path("paths")) pointer(result.get("payload"), p.asText());
+      for (JsonNode p : issue.path("paths")) {
+        // Issue-only document scope used by Python OCR/model warnings. It is
+        // not a field pointer and must not become a reviewed/metadata path.
+        if (!p.asText().equals("/")) pointer(result.get("payload"), p.asText());
+      }
     }
   }
 

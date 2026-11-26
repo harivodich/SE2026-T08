@@ -87,3 +87,11 @@ thu hồi reservation; worker tới muộn sau reclaim không gọi pipeline. Kh
 ## Cross-language acceptance
 
 Cùng tiny fixtures parse Java và Python; decimal strings/null/unknown keys/type/schema/geometry/assets/ids/version/error cases. Hai phía smoke HTTP thật; cố ý mismatch attempt/hash/provenance/path để reject. Golden fixtures không là OCR accuracy hay app E2E bằng provider thật.
+## Cảnh báo phạm vi toàn chứng từ
+
+Trong `result.issues[].paths`, giá trị `/` là scope toàn chứng từ mà Python
+đang dùng cho cảnh báo OCR/model. Java chấp nhận scope này, giữ cảnh báo qua
+các lần sửa trường và yêu cầu acknowledge khi approve. Đây là quy ước riêng
+cho issue, không phải JSON Pointer tới field: `field_metadata[].path` và
+`reviewed_paths` vẫn phải trỏ tới trường thực có trong payload. Thiếu trường
+bắt buộc vẫn chặn approve dù đã acknowledge cảnh báo nguồn.

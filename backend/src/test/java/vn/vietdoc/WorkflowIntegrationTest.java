@@ -308,6 +308,39 @@ class WorkflowIntegrationTest {
   }
 
   @Test
+  void partialOcrPreservesReadableFieldsAndWarningButCannotBypassMissingTotal() throws Exception {
+    var uploaded = documents.upload(owner.id(), sample("receipt", "png"), "receipt", Store.id());
+    var job = jobs.create(uploaded.id(), owner.id(), Store.id());
+    var claim = jobs.claim(job.id());
+    ObjectNode prediction = ai.extract(claim).deepCopy();
+    ObjectNode payload = (ObjectNode) prediction.path("payload");
+    String readableMerchant = payload.path("merchant_name").asText();
+    payload.putNull("total_amount");
+    prediction.putArray("field_metadata");
+    ObjectNode unreadable = ((ArrayNode) prediction.path("issues")).addObject();
+    unreadable.put("id", "OCR_UNREADABLE_REGIONS:/");
+    unreadable.put("code", "OCR_UNREADABLE_REGIONS");
+    unreadable.put("severity", "warning");
+    unreadable.putArray("paths").add("/").add("/total_amount");
+    unreadable.put("message", "Một vùng nguồn chưa đọc được; cần đối chiếu ảnh.");
+    assertTrue(jobs.complete(claim, prediction));
+
+    var missing = documents.get(uploaded.id(), owner.id());
+    assertEquals(readableMerchant, missing.head().payload().path("merchant_name").asText());
+    assertTrue(warnings(missing).contains("OCR_UNREADABLE_REGIONS:/"));
+    assertEquals("APPROVAL_BLOCKED", assertThrows(ApiException.class, () -> approve(missing)).code);
+
+    var corrected = review.save(uploaded.id(), owner.id(), edit(missing, "45000"));
+    assertTrue(warnings(corrected).contains("OCR_UNREADABLE_REGIONS:/"));
+    assertEquals("REVIEW_CONFIRMATION_REQUIRED", assertThrows(ApiException.class, () ->
+        review.approve(corrected.id(), owner.id(), new Requests.Approve(
+            corrected.headRevisionId(), corrected.version(), true, List.of(), "Đã sửa tổng"))).code);
+    assertEquals("APPROVED", approve(corrected).head().state());
+    assertTrue(documents.runs(uploaded.id(), owner.id()).items().get(0).result()
+        .path("payload").path("total_amount").isNull());
+  }
+
+  @Test
   void missingTotalAndUnacknowledgedWarningsCannotApprove() throws Exception {
     var d = extracted("receipt");
     ObjectNode payload = d.head().payload().deepCopy();

@@ -2,19 +2,23 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Protocol
-from dataclasses import asdict
-from io import BytesIO
+import hashlib
 import logging
 import time
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass
+from io import BytesIO
+from pathlib import Path
+from typing import Any, Protocol
 
 from vietdoc.contracts.compute import ComputeContracts
 from vietdoc.entrypoints.api.output import encode_output
 from vietdoc.ml.release_manifest import Release
-from vietdoc.pipeline.attempt_artifacts import ArtifactError, AttemptWriter, check_deadline
+from vietdoc.pipeline.attempt_artifacts import (
+    ArtifactError,
+    AttemptWriter,
+    check_deadline,
+)
 from vietdoc.pipeline.extraction.baseline import BASELINE_VERSION, extract_baseline
 from vietdoc.pipeline.extraction.evidence_adapter import BoundEvidence
 from vietdoc.pipeline.extraction.ocr_input import BaselineError
@@ -47,14 +51,29 @@ class ComputeFailure(ValueError):
         super().__init__(code)
 
 
+class Extractor(Protocol):
+    """Explicit caller-owned extractor; never selected from request data."""
+    version: str
+
+    def load(self) -> None: ...
+    def close(self) -> None: ...
+    def ready_reasons(self) -> list[str]: ...
+    def extract(self, page, prepared, request, *, deadline: float): ...
+
+
 class B0Pipeline:
     """One loaded engine, owned by the composition lifecycle; no model downloads."""
-    def __init__(self, release: Release, engine, contracts: ComputeContracts | None = None):
+    def __init__(self, release: Release, engine, contracts: ComputeContracts | None = None,
+                 *, extractor: Extractor | None = None, ocr_artifact_version: int = 1):
+        if type(ocr_artifact_version) is not int or ocr_artifact_version not in (1, 2):
+            raise ValueError("Unsupported OCR artifact version")
         self.release, self.engine = release, engine
         self.contracts = contracts or ComputeContracts()
+        self.extractor, self.ocr_artifact_version = extractor, ocr_artifact_version
 
     def ready_reasons(self) -> list[str]:
-        return [] if self.engine.ready else ["MODEL_LOAD_FAILED"]
+        reasons = [] if self.engine.ready else ["MODEL_LOAD_FAILED"]
+        return reasons + (self.extractor.ready_reasons() if self.extractor else [])
 
     def run(self, job: ComputeInput) -> dict[str, Any]:
         from vietdoc.pipeline.ocr import OcrError, recognize_document
@@ -84,21 +103,34 @@ class B0Pipeline:
                                     remaining_budget_ms=max(0, int((job.deadline - time.monotonic()) * 1000)),
                                     expected_sha256=job.request["input_sha256"]) as stage:
                 check_deadline(job.deadline)
-                if stage.ocr.artifact_version != 1:
-                    raise ComputeFailure("OUTPUT_INVALID")  # runtime v2 requires cross-role acceptance
+                if stage.ocr.artifact_version != self.ocr_artifact_version:
+                    raise ComputeFailure("OUTPUT_INVALID")
                 extraction_started = time.monotonic()
-                result = extract_baseline(stage.ocr, job.request["document_type"], prepared=stage.loaded.metadata,
-                                          evidence_matcher=BoundEvidence(stage.ocr, stage.loaded.metadata))
+                with BytesIO() as image:
+                    stage.loaded.canonical.save(image, format="PNG")
+                    canonical_bytes = image.getvalue()
+                if self.extractor is None:
+                    result = extract_baseline(stage.ocr, job.request["document_type"], prepared=stage.loaded.metadata,
+                                              evidence_matcher=BoundEvidence(stage.ocr, stage.loaded.metadata))
+                else:
+                    entries = [dict(path=f.path, sha256=f.sha256, size_bytes=f.size_bytes)
+                               for f in self.release.files if f.path.startswith("ocr/")]
+                    profile = next(f for f in self.release.files if f.path == "pipeline.json")
+                    source = dict(input_sha256=job.request["input_sha256"],
+                                  canonical_sha256=hashlib.sha256(canonical_bytes).hexdigest(),
+                                  engine_sha256=hashlib.sha256(encode_output(entries)).hexdigest(),
+                                  profile_sha256=profile.sha256)
+                    result = self.extractor.extract(stage.ocr, stage.loaded.metadata,
+                                                    dict(job.request, ocr_provenance=source),
+                                                    deadline=job.deadline)
                 check_deadline(job.deadline)
                 timings["extract_normalize_evidence_ms"] = round((time.monotonic() - extraction_started) * 1000, 3)
                 envelope = {key: job.request[key] for key in ("run_id", "job_id", "document_type", "schema_version", "language")}
                 envelope.update(payload=result.payload, field_metadata=result.field_metadata, issues=result.issues,
                                 provenance=dict(pipeline_manifest_id=self.release.manifest_id,
-                                                ocr_version=stage.ocr.ocr_version, extractor_release_id=BASELINE_VERSION,
-                                                normalizer_version=POLICY_VERSION))
-                with BytesIO() as image:
-                    stage.loaded.canonical.save(image, format="PNG")
-                    canonical_bytes = image.getvalue()
+                                                ocr_version=stage.ocr.ocr_version,
+                                                extractor_release_id=self.extractor.version if self.extractor else BASELINE_VERSION,
+                                                normalizer_version=getattr(self.extractor, "normalizer_version", POLICY_VERSION)))
                 check_deadline(job.deadline)
                 publication_started = time.monotonic()
                 writer = AttemptWriter(job.attempt_dir, job.request["job_id"], job.request["attempt_id"], job.deadline)
@@ -126,6 +158,8 @@ class B0Pipeline:
                     "attempt_id": job.request["attempt_id"], "stage_ms": timings,
                     "duration_ms": round((time.monotonic() - started) * 1000, 3)})
                 return response
+        except ComputeFailure:
+            raise
         except (OcrError, PreprocessError, ArtifactError) as error:
             raise ComputeFailure(error.code) from None
         except MemoryError:
