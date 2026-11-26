@@ -9,6 +9,7 @@ import sys
 CORE_CHECKS = ('workflow', 'contracts', 'data', 'data-pdf', 'package', 'ai')
 WEB_CHECKS = ('test', 'docker-smoke')
 PG_CHECKS = ('postgres',)
+BUILD_CHECKS = ('backend', 'parity', 'application-artifact')
 APPLICATION_CHECKS = ('backend', 'postgres', 'parity', 'e2e', 'application-artifact')
 
 
@@ -43,7 +44,7 @@ def evaluate(mode: str, branch: str, needs: dict) -> list[str]:
         return failed_checks(needs, CORE_CHECKS + WEB_CHECKS + APPLICATION_CHECKS)
     if mode != 'ci':
         raise ValueError(f'Unknown gate: {mode}')
-    required = CORE_CHECKS + WEB_CHECKS + PG_CHECKS + (('release-readiness',) if branch == 'main' else ())
+    required = CORE_CHECKS + WEB_CHECKS + PG_CHECKS + BUILD_CHECKS + (('release-readiness',) if branch == 'main' else ())
     failures = failed_checks(needs, required)
     if branch == 'develop':
         release = needs.get('release-readiness')
@@ -65,7 +66,7 @@ def main() -> int:
     lines = [f'{args.mode} gate on {branch}: {"FAIL" if failures else "PASS"}']
     lines.extend(f'- {failure}' for failure in failures)
     if args.mode == 'ci' and branch == 'develop' and not failures:
-        lines.append('Data/contracts/AI fixtures, Web/Java smoke and PostgreSQL jobs verified; this is not application release readiness.')
+        lines.append('Data/contracts/AI fixtures, Web/Java, PostgreSQL, parity and tested JAR verified; this is not model/final release acceptance.')
     if args.mode == 'release' and failures:
         lines.append('Wire executable application jobs into release-readiness.needs before releasing.')
     output = '\n'.join(lines) + '\n'

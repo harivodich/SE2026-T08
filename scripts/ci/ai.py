@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SUITES = (
     "tests/unit/pipeline", "tests/unit/ml", "tests/contract", "tests/architecture",
     "tests/integration/api", "tests/unit/test_ci_gate.py", "tests/unit/test_ci_ai.py",
+    "tests/unit/test_ci_release.py", "tests/unit/test_preserve_pr_history.py",
 )
 REQUIRED_FILES = (
     "tests/unit/pipeline/test_evidence_adapter.py",
@@ -32,6 +33,7 @@ REQUIRED_FILES = (
     "tests/unit/pipeline/test_evidence.py", "tests/unit/pipeline/test_paddle_adapter.py",
     "tests/unit/pipeline/test_ocr_handoff.py", "tests/unit/pipeline/test_ocr_preview.py",
     "tests/contract/test_ocr_contracts.py",
+    "tests/unit/test_ci_release.py", "tests/unit/test_preserve_pr_history.py",
 )
 SYMLINK_TEST = "tests/unit/ml/test_release_manifest.py::test_symlinked_file_is_rejected"
 

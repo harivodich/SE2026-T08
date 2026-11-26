@@ -185,6 +185,149 @@ jobs:
           for asset in templates/index.html static/app.js static/api.js static/domain.js static/styles.css; do
             grep -Fx "BOOT-INF/classes/$asset" jar-contents.txt
           done
+      - name: Bind tested JAR and strict JUnit evidence to this source
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: >-
+          python3 -m scripts.ci.application capture
+          --jar backend/target/vietdoc-backend-1.0.0.jar
+          --reports backend/target/surefire-reports
+          --receipt backend/target/build-receipt.json --sha "$SOURCE_SHA"
+      - name: Upload the tested Java application, not a rebuilt copy
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: java-application-${{ github.sha }}
+          path: |
+            backend/target/vietdoc-backend-1.0.0.jar
+            backend/target/build-receipt.json
+            backend/target/surefire-reports/TEST-*.xml
+          if-no-files-found: error
+          retention-days: 7
+
+  backend:
+    name: backend-release-evidence
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: java-application-${{ github.sha }}
+          path: backend/target
+      - name: Reject missing, failed or skipped backend evidence and changed artifact
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: >-
+          python3 -m scripts.ci.application verify
+          --jar backend/target/vietdoc-backend-1.0.0.jar
+          --reports backend/target/surefire-reports
+          --receipt backend/target/build-receipt.json --sha "$SOURCE_SHA"
+
+  parity:
+    name: java-python-contract-parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Validate corpus through the real Java consumer
+        run: bash mvnw -B -Dtest=ContractParityTest test
+        working-directory: backend
+      - name: Install the Python contract consumer
+        run: python -m pip install ".[contracts]"
+      - name: Compare Python outcomes to actual Java results and independent oracles
+        run: python -m scripts.ci.parity
+
+  application-artifact:
+    name: tested-application-artifact-smoke
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: java-application-${{ github.sha }}
+          path: backend/target
+      - name: Verify and boot the exact tested JAR without rebuilding
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: >-
+          python3 -m scripts.ci.application smoke
+          --jar backend/target/vietdoc-backend-1.0.0.jar
+          --reports backend/target/surefire-reports
+          --receipt backend/target/build-receipt.json --sha "$SOURCE_SHA"
+
+  e2e:
+    name: actual-native-provider-and-v1-acceptance
+    needs: [test, backend, parity]
+    if: >-
+      ${{ github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16.6
+        env:
+          POSTGRES_DB: vietdoc_native_e2e
+          POSTGRES_USER: integration
+          POSTGRES_PASSWORD: isolated-ci-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U integration -d vietdoc_native_e2e"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      VIETDOC_PG_TEST_USER: integration
+      VIETDOC_PG_TEST_PASSWORD: isolated-ci-test-only
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: java-application-${{ github.sha }}
+          path: backend/target
+      - name: Install native CPU runtime with pinned OCR dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1 libgl1 postgresql-client-16
+          python -m pip install ".[serve,ai1-ocr]"
+      - name: Run real Java, PostgreSQL, native OCR and review/export
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: >-
+          python -m scripts.ci.native_e2e
+          --jar backend/target/vietdoc-backend-1.0.0.jar
+          --run-root "$RUNNER_TEMP/vietdoc-native-e2e"
+          --pg-bin /usr/lib/postgresql/16/bin
+          --database-url jdbc:postgresql://127.0.0.1:5432/vietdoc_native_e2e --sha "$SOURCE_SHA"
+      - name: Require frozen final quality and actual candidate evidence too
+        run: python -m scripts.ci.acceptance
 
   docker-smoke:
     needs: test
@@ -256,7 +399,7 @@ jobs:
 
   release-readiness:
     name: release-readiness
-    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres]
+    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres, backend, parity, e2e, application-artifact]
     if: >-
       ${{ always() &&
       (github.event.pull_request.base.ref == 'main' || github.ref == 'refs/heads/main') }}
@@ -273,7 +416,7 @@ jobs:
 
   ci-gate:
     name: ci-gate
-    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres, release-readiness]
+    needs: [workflow, contracts, data, data-pdf, package, ai, test, docker-smoke, postgres, backend, parity, application-artifact, release-readiness]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
