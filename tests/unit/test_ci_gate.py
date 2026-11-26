@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from scripts.ci import checks
-from scripts.ci.gate import APPLICATION_CHECKS, CORE_CHECKS, WEB_CHECKS, PG_CHECKS, evaluate, target_branch
+from scripts.ci.gate import APPLICATION_CHECKS, BUILD_CHECKS, CORE_CHECKS, WEB_CHECKS, PG_CHECKS, evaluate, target_branch
 
 
 def results(*names):
@@ -20,18 +20,18 @@ def results(*names):
 
 class CiGateTest(unittest.TestCase):
     def setUp(self):
-        self.develop = results(*(CORE_CHECKS + WEB_CHECKS + PG_CHECKS))
+        self.develop = results(*(CORE_CHECKS + WEB_CHECKS + PG_CHECKS + BUILD_CHECKS))
         self.develop['release-readiness'] = {'result': 'skipped'}
 
     def test_increment_success_requires_all_core_and_web_jobs(self):
         self.assertEqual(evaluate('ci', 'develop', self.develop), [])
-        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS + BUILD_CHECKS:
             broken = copy.deepcopy(self.develop)
             del broken[name]
             self.assertIn(f'{name}: missing', evaluate('ci', 'develop', broken))
 
     def test_failure_cancel_skip_unknown_and_empty_never_pass(self):
-        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS:
+        for name in CORE_CHECKS + WEB_CHECKS + PG_CHECKS + BUILD_CHECKS:
             for status in ('failure', 'cancelled', 'skipped', 'neutral', '', None):
                 with self.subTest(name=name, status=status):
                     broken = copy.deepcopy(self.develop)
@@ -49,7 +49,7 @@ class CiGateTest(unittest.TestCase):
 
     def test_current_data_only_increment_is_not_release_ready(self):
         failures = evaluate('release', 'main', self.develop)
-        for name in set(APPLICATION_CHECKS) - set(PG_CHECKS):
+        for name in set(APPLICATION_CHECKS) - set(PG_CHECKS) - set(BUILD_CHECKS):
             self.assertIn(f'{name}: missing', failures)
 
     def test_all_application_checks_required_not_only_file_presence(self):
@@ -80,6 +80,22 @@ class CiGateTest(unittest.TestCase):
             self.assertRegex(jobs['ci-gate'], rf'(?m)^    needs: \[[^\n]*\b{re.escape(name)}\b[^\n]*\]$')
         self.assertRegex(jobs['docker-smoke'], r'(?m)^    needs: test$')
         self.assertFalse((Path(__file__).resolve().parents[2] / '.github/workflows/web-backend.yml').exists())
+
+    def test_release_jobs_are_wired_and_use_tested_artifact_and_actual_provider(self):
+        source = (Path(__file__).resolve().parents[2] / '.github/workflows/ci.yml').read_text(encoding='utf8')
+        headers = list(re.finditer(r'(?m)^  ([a-z][a-z0-9-]+):\s*$', source))
+        jobs = {m.group(1): source[m.end():headers[i + 1].start() if i + 1 < len(headers) else None]
+                for i, m in enumerate(headers)}
+        for name in APPLICATION_CHECKS:
+            self.assertIn(name, jobs)
+            self.assertRegex(jobs['release-readiness'], rf'(?m)^    needs: \[[^\n]*\b{re.escape(name)}\b[^\n]*\]$')
+        self.assertIn('scripts.ci.application capture', jobs['test'])
+        self.assertIn('scripts.ci.application smoke', jobs['application-artifact'])
+        self.assertNotIn('mvn', jobs['application-artifact'])
+        self.assertIn('scripts.ci.parity', jobs['parity'])
+        self.assertIn('scripts.ci.native_e2e', jobs['e2e'])
+        self.assertIn('scripts.ci.acceptance', jobs['e2e'])
+        self.assertIn('postgres:16.6', jobs['e2e'])
 
     def test_ai_and_pdf_success_are_required_on_develop_and_main(self):
         for branch in ('develop', 'main'):

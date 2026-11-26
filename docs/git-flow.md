@@ -16,6 +16,8 @@
 
 Policy Lead hiện hành: chỉ `harivodich` quyết định merge hai branch này. Lead có PR-only bypass review để merge PR do chính mình tạo mà không bị ép nhờ teammate approve; GitHub không hỗ trợ tác giả tự Approve. Required CI ở ruleset riêng không bypass, theo [runbook CI/CD](cicd.md); quyền bỏ approval không bỏ được CI.
 
+VietDoc dùng **Create a merge commit** cho PR vào `develop` và release vào `main`, để giữ SHA/author/lịch sử commit gốc. Repo đã tắt Squash/Rebase merge và tắt tự xóa branch sau merge. Không squash/rebase PR bảo toàn lịch sử; nhánh release chỉ được nhận sau kiểm tree/code diff, ancestry và CI. History-only merge ghi rõ mục đích, không có nghĩa code cũ hoặc PR chưa merge được nhận lại.
+
 `Commit trực tiếp` ở đây nghĩa là push commit thẳng lên branch dùng chung. Commit trên branch feature/bug/hotfix của mình được phép.
 
 Luồng branch chính:
@@ -79,7 +81,7 @@ Ngoại lệ bootstrap VietDoc: khi Lead đang hoàn thiện khung và yêu cầ
 3. Mở MR từ branch task vào `develop`. Mô tả MR nêu Jira key, mục tiêu, acceptance, cách kiểm tra, ảnh hưởng schema/migration/model và rủi ro liên quan.
 4. Lead là reviewer quyết định; có thể nhờ consumer/developer khác góp ý. Tác giả không tự approve. Với PR do Lead tạo, không yêu cầu một teammate approve để Lead merge. Xử lý hoặc phản hồi comment trước khi duyệt cuối.
 5. Sau khi review chéo hoàn tất, Lead của dự án kiểm tra thiết kế, hợp đồng, phạm vi và kết quả CI. Chỉ merge khi Lead approve và các required checks đều pass.
-6. Bật xóa tự động branch task sau khi merge. Không xóa `main` hoặc `develop`.
+6. Với VietDoc, giữ branch task cho đến khi xác minh commit gốc reachable từ release/main hoặc archive ref đã được duyệt. Không tự xóa branch để dọn giao diện; không xóa `main` hoặc `develop`.
 
 Bug do QA log trong giai đoạn test dùng cùng quy trình, nhưng tên branch có tiền tố `bug/` và luôn tách từ `develop`.
 

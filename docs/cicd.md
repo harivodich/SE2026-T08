@@ -24,12 +24,43 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
 | docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
 | postgres | postgres-job-lifecycle | PostgreSQL 16.6 container riêng; Flyway v1/v2, concurrent claim, expired lease recovery và stale completion qua `PostgresJobIT` |
+| backend | backend-release-evidence | Kiểm JUnit đủ mandatory classes, không failure/error/skip; source SHA, JAR và packaged asset/schema/migration hashes phải khớp build receipt |
+| parity | java-python-contract-parity | Cùng16 shared positive/negative cases qua Java consumer, Python validator và oracle; Java corpus hash phải khớp |
+| application-artifact | tested-application-artifact-smoke | Download đúng JAR của job test trong cùng run, verify receipt rồi boot/CSRF/static/401; không rebuild |
+| e2e | actual-native-provider-and-v1-acceptance | Main: PostgreSQL riêng + Java JAR + native OCR/B0 + edit/approve/export, sau đó bắt buộc packet final/model quality. B0 smoke không thay candidate-model acceptance |
 | release-readiness | release-readiness | Main candidate phải có các application jobs thực sự thành công |
 | ci-gate | ci-gate | Tổng hợp required jobs; missing/failure/cancelled/skipped của job bắt buộc đều fail |
 
-`ci-gate` nhận kết quả `test`, `docker-smoke` và `postgres` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một job đều chặn develop. Job `ai` chỉ kiểm framework/fixtures; actual-provider evidence vẫn cần ở integration/parity/E2E gates. `release-readiness` còn thiếu `backend`, `parity`, `e2e`, `application-artifact` trên main. `postgres` chỉ là DB/job integration, không được dùng để thay actual-provider evidence.
+`ci-gate` nhận `test`, `docker-smoke`, `postgres`, `backend`, `parity`, `application-artifact` qua `needs` cùng workflow; failure, cancel, skip hoặc thiếu một job bắt buộc đều chặn develop. Job `ai` chỉ kiểm framework/fixtures. Bốn application jobs đã được nối vào `release-readiness` trên main; chỉ wiring đầy đủ chưa đủ release: `e2e` còn từ chối khi thiếu frozen quality/actual-model packet. `postgres` riêng không thay actual-provider evidence.
 
 Trên develop, chỉ `release-readiness` được skip có chủ đích vì chưa phải main candidate; chính trạng thái skip này cũng được aggregator kiểm. Trên main nó bắt buộc success. Docker smoke phụ thuộc `test`; nếu `test` lỗi khiến Docker bị skip, gate báo cả hai trạng thái. Không thay `always()` ở aggregator bằng điều kiện mặc định khiến prerequisite failure làm aggregator skip và bị GitHub coi là đạt.
+
+Job `e2e` chỉ chạy cho main candidate; không nằm trong required develop jobs. Aggregator develop vẫn đòi đúng `release-readiness=skipped`; main aggregator đòi release-readiness success. Kiểm artifact/checks không lấy build từ workflow/ref khác. `java-application-${github.sha}` chứa JAR, JUnit XML và receipt của chính run; giữ7ngày và không upload logs/token/data/model weights.
+
+### Điều kiện final/model vẫn phải có thật
+
+`python -m scripts.ci.acceptance` đọc `docs/reviews/v1-acceptance/index.json` do Lead lắp sau nghiệm thu. Không có file này thì trả `V1_NOT_READY`, không tự tạo file accepted. Packet cần:
+
+- `version=1`, `status=accepted`, `final_status=completed`, `candidate_id`; source fingerprint đủ toàn bộ runtime `src/vietdoc`, `backend/src/main`, `specs/contracts` (trừ Markdown/cache), từ `scripts.ci.acceptance.fingerprint`.
+- `reports`: tên→`path` tương đối trong packet/`sha256`; ít nhất `policy`, quality reports và `candidate_e2e`, giữ nguyên cấu trúc report gốc. Hash mismatch, linked/path escape hoặc source đổi đều fail.
+- `policy.status=frozen`, `final_open_permitted=true`, `minimums` được Lead nhận **trước mở final**. Không dùng threshold đề xuất hay tự hạ target để CI xanh.
+- `checks`: đúng10 ID `receipt|invoice` × `raw_schema_validity|present_scalar_em|total_em|matched_cell_accuracy|exact_row_accuracy`, mỗi check trỏ `report`, `value_pointer`, `support_pointer` vào report gốc. Null/zero support, bool-as-count, rate ngoài[0,1] hoặc thấp hơn minimum đều fail.
+- `candidate_e2e`: actual native provider/PostgreSQL, đúng `candidate_id`, extractor `qwen-local`, PASS receipt/invoice; baseline B0/demo/fixture không được thay. Đây là verifier packet nhận được, không chứng thực một JSON tự khai là kết quả đo thật. Lead vẫn phải review/replay raw evidence, freeze/splits/exposure, calibrated/null confidence và limitations trước nhận packet.
+
+Runner native B0 thực có thể chạy độc lập trước khi AI2 đạt chất lượng:
+
+```sh
+VIETDOC_PG_TEST_USER=integration VIETDOC_PG_TEST_PASSWORD=<isolated-test-only> \
+python -m scripts.ci.native_e2e --jar backend/target/vietdoc-backend-1.0.0.jar \
+  --run-root /tmp/vietdoc-new-owned-run --database-url jdbc:postgresql://127.0.0.1:15436/isolated_db \
+  --sha <tested-source-sha> --pg-bin /usr/lib/postgresql/16/bin
+```
+
+Không trỏ vào DB nhóm/production. Không gửi password vào args/logs/report. Nếu có model OCR đúng pin trên volume, dùng `--models <models-dir> --manifest-id <release-id>` để không tải lại. Windows Application Control có thể chặn native DLL; không đổi native tests thành fixtures để nhận PASS.
+
+`--pg-bin` bật pg_dump/createdb/pg_restore trong cluster test: dừng Java, backup DB và committed storage, restore DB mới, restart cùng JAR/worker-disabled, login và đối chiếu approved head/canonical/export bytes. Không `drop`/ghi đè DB hiện hữu. Đây là same-version restore, không tự chứng minh downgrade của migration/code chưa có.
+
+Candidate thật dùng thêm `--candidate-settings <pinned-settings.json>`: `config`, `config-sha256`, `snapshot`, `snapshot-manifest-sha256`; adapter cần cả `run-dir` và `run-manifest-sha256`, OCRv2 có `ocr-artifact-version: "2"`. Chỉ forward các option đã định nghĩa vào server `qwen-local`, không arbitrary commands, không tải model hay fallback B0. Lead lắp packet sau khi nhận đúng artifacts AI2, không giao IC chờ một API mới.
 
 Data dùng pins Pillow 10.2.0/jsonschema 4.10.3 trong `pyproject.toml`; `.github/ci-constraints.txt` pin transitive/build tools cho CI. Schema/gate tests dùng environment riêng với `.github/contract-requirements.txt`, jsonschema 4.26.0 + referencing local registry. Validator 4.10.3 đã tái hiện lỗi nested URN `$ref` giữa các shared schemas; không đổi renderer dependency để xử lý lỗi đó.
 
