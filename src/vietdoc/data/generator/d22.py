@@ -32,8 +32,14 @@ def source_hashes():
 
 
 def validate_config(config):
-    require(set(config) == {'version', 'dataset_version', 'bases_per_family', 'rows', 'font_sha256',
-                            'augmentations', 'dev_min_clean_per_type', 'source_aliases'}, 'config keys')
+    keys = {'version', 'dataset_version', 'bases_per_family', 'rows', 'font_sha256',
+            'augmentations', 'dev_min_clean_per_type', 'source_aliases'}
+    require(set(config) in (keys, keys | {'family_ids'}), 'config keys')
+    if 'family_ids' in config:
+        ids = config['family_ids']
+        require(isinstance(ids, list) and ids and all(isinstance(x, str) for x in ids)
+                and len(ids) == len(set(ids)) and set(ids) <= {f['family_id'] for f in catalog()},
+                'family_ids must be nonempty, unique catalog IDs')
     require(config['version'] == VERSION, 'unsupported generator/config version')
     require(isinstance(config['dataset_version'], str), 'dataset version must be string')
     sample_id(config['dataset_version'].replace('.', '-'))
@@ -62,6 +68,8 @@ def plan(config, seed):
     require(type(seed) is int and 0 <= seed < 2**63, 'seed range')
     records = []
     for family in catalog():
+        if family['family_id'] not in config.get('family_ids', [f['family_id'] for f in catalog()]):
+            continue
         for index in range(config['bases_per_family']):
             base = f"{config['dataset_version'].replace('.', '-')}-{family['family_id']}-b{index:04}"
             records.append(dict(base_id=base, family_id=family['family_id'], document_type=family['document_type'],
@@ -209,7 +217,7 @@ def provenance(root, config, seed, font):
 
 def build(root, output, config_path=DEFAULT_CONFIG, seed=2202, font=FONT, base_limit=40):
     config = validate_config(read_json(config_path))
-    require(20 * config['bases_per_family'] <= base_limit, 'clean base limit exceeded; use reviewed capacity before raising --base-limit')
+    require(len(plan(config, seed)) <= base_limit, 'clean base limit exceeded; use reviewed capacity before raising --base-limit')
     require(sha(font) == config['font_sha256'], 'font hash mismatch')
     metadata = provenance(root, config, seed, font)
     output.mkdir(parents=True, exist_ok=False)

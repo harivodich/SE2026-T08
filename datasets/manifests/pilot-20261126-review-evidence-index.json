@@ -1,0 +1,42 @@
+{
+  "manifest_sha256": "99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d",
+  "contact_sheets": [
+    {
+      "file": "pilot-contact-0.png",
+      "sha256": "ec6bd7d845f93b313fa67aa56e60b381a5d9591d130c2c6bd4d759ffc44e996d"
+    },
+    {
+      "file": "pilot-contact-1.png",
+      "sha256": "666339639eb13ed563df39a4edd005ac81728191201c3241c4121a6991a182ee"
+    },
+    {
+      "file": "pilot-contact-3.png",
+      "sha256": "5bed2f08f050174a6174c3860e233fff50a99725b3a737cefc5f94e265ff0154"
+    },
+    {
+      "file": "pilot-contact-12.png",
+      "sha256": "534ff9ca1bc38148099f6b1fb10c2d8a9515efa76e09ee737d1f8240c133c123"
+    },
+    {
+      "file": "pilot-contact-30.png",
+      "sha256": "cab996ebc7963fb67bcf98d64de544a98d1b9d7e5728745f64faaece5a0917ee"
+    }
+  ],
+  "review": {
+    "version": "duplicate-review-v1",
+    "candidates": 410,
+    "dispositions": {
+      "distinct": 410
+    },
+    "cross_split": {
+      "distinct": 186
+    },
+    "review_complete": true,
+    "unresolved": 0,
+    "approval": "AI1/AI2 peer review and Lead grouping/split approval required before pilot/freeze"
+  },
+  "human_approval": false,
+  "lead_decision": "proposed for PR review/merge; not final-release acceptance",
+  "pair_evidence_sha256": "6900bb4542683d7af99eb33fa0377b843350db0a02e7732f3372623adb302d0c",
+  "pair_evidence_file": "pilot-pair-evidence.json (external handoff archive)"
+}

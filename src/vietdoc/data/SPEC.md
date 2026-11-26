@@ -38,6 +38,13 @@ metadata-only holdout preflight rejects known exposure even after ID renaming.
 Unknown legacy lineage stays null. No final asset access, independence certification,
 per-person access authentication or final-open authority.
 
+`pilot_packet.py`: bounded non-final D22 inputs with unchanged canonical manifest
+and `training-records.v1`, exact render verification, decoded-pixel hashes, pending
+duplicate review and safe fresh-root archive receiver. Explicit family selection
+in D22 config is optional; omitted means the original 20-family generation.
+Packet contains quarantined inputs for OCR/QA work and never grants training
+clearance or human/Lead approval. See [pilot packet commands](PILOT-PACKET.md).
+
 ## Ranh giới và dữ liệu
 
 Không predictions làm gold hoặc random variant splits qua tập Scope chung: receipt/invoice tiếng Việt, chữ in một trang; prediction/revision bất biến, human approve trước export. File đích chưa có logic là task cần implement, không tự thêm fake implementation.

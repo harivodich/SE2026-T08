@@ -86,6 +86,27 @@ class AiClientTest {
   }
 
   @Test
+  void partialOcrWarningAndMissingRequiredValueSurviveHttpTransport() throws Exception {
+    ObjectNode result = (ObjectNode) success.path("result");
+    ((ObjectNode) result.path("payload")).putNull("total_amount");
+    ObjectNode warning = ((com.fasterxml.jackson.databind.node.ArrayNode) result.path("issues"))
+        .addObject();
+    warning.put("id", "OCR_UNREADABLE_REGIONS:/");
+    warning.put("code", "OCR_UNREADABLE_REGIONS");
+    warning.put("severity", "warning");
+    warning.putArray("paths").add("/");
+    warning.put("message", "Một vùng nguồn chưa đọc được; cần đối chiếu ảnh.");
+    body = json.write(success).getBytes(StandardCharsets.UTF_8);
+
+    JsonNode receivedResult = client.compute(claim).path("result");
+    assertTrue(receivedResult.path("payload").path("total_amount").isNull());
+    assertEquals(result.path("payload").path("merchant_name"),
+        receivedResult.path("payload").path("merchant_name"));
+    assertEquals(warning, receivedResult.path("issues").get(0));
+    assertTrue(receivedResult.path("field_metadata").isEmpty());
+  }
+
+  @Test
   void rejectsWrongCorrelationAndProvenance() {
     success.put("attempt_id", "77777777-7777-4777-8777-777777777777");
     body = json.write(success).getBytes(StandardCharsets.UTF_8);

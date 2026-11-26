@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,6 +97,40 @@ class ComputeContractTest {
       ((ObjectNode) badArtifact.path("artifacts").get(1)).put("sha256", invalidHash);
       assertInvalid(() -> validator.computeResponse(request, badArtifact));
     }
+  }
+
+  @Test
+  void recordedNativeReceiptInvoicePartialEnvelopesValidateAcrossLanguages() throws Exception {
+    JsonNode packet = mapper.readTree(Files.readString(shared("tests/contract/native-compute-v2.json")));
+    assertEquals(3, packet.path("cases").size());
+    int partial = 0;
+    for (JsonNode item : packet.path("cases")) {
+      validator.computeResponse(item.path("request"), item.path("response"));
+      assertEquals(200, item.path("status").asInt());
+      if (item.path("recognition_status").asText().equals("partial")) {
+        partial++;
+        assertTrue(item.path("readable_blocks").asInt() > 0);
+        assertTrue(item.path("unreadable_regions").asInt() > 0);
+        assertTrue(java.util.stream.StreamSupport.stream(
+                item.path("response").path("result").path("issues").spliterator(), false)
+            .anyMatch(issue -> issue.path("code").asText().equals("OCR_UNREADABLE_REGIONS")));
+      }
+    }
+    assertEquals(2, partial);
+  }
+
+  @Test
+  void documentIssueScopeDoesNotAuthorizeAnInvalidFieldPointer() {
+    ObjectNode issue = ((ArrayNode) response.path("result").path("issues")).addObject();
+    issue.put("id", "OCR_UNREADABLE_REGIONS:/");
+    issue.put("code", "OCR_UNREADABLE_REGIONS");
+    issue.put("severity", "warning");
+    issue.putArray("paths").add("/");
+    issue.put("message", "Source contains an unreadable region.");
+    validator.computeResponse(request, response);
+    assertInvalid(() -> validator.pointer(response.path("result").path("payload"), "/"));
+    issue.putArray("paths").add("/not_a_field");
+    assertInvalid(() -> validator.computeResponse(request, response));
   }
 
   @Test

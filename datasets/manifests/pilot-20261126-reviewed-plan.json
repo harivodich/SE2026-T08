@@ -1,0 +1,4985 @@
+{
+  "version": "vietdoc.pilot-plan.v1",
+  "status": "prepared_not_approved",
+  "scope": "metadata/review planning only; not asset/gold/pixel QA, consumer ACK or training acceptance",
+  "confirmed_groups": [
+    {
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001",
+        "v0-2-pilot-20261126-invoice-f00-b0002",
+        "v0-2-pilot-20261126-invoice-f00-b0003",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001",
+        "v0-2-pilot-20261126-invoice-f01-b0002",
+        "v0-2-pilot-20261126-invoice-f01-b0003",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001",
+        "v0-2-pilot-20261126-invoice-f06-b0002",
+        "v0-2-pilot-20261126-invoice-f06-b0003",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001",
+        "v0-2-pilot-20261126-invoice-f07-b0002",
+        "v0-2-pilot-20261126-invoice-f07-b0003",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001",
+        "v0-2-pilot-20261126-receipt-f00-b0002",
+        "v0-2-pilot-20261126-receipt-f00-b0003",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001",
+        "v0-2-pilot-20261126-receipt-f01-b0002",
+        "v0-2-pilot-20261126-receipt-f01-b0003",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "source_splits": [
+        "train"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001",
+        "v0-2-pilot-20261126-receipt-f06-b0002",
+        "v0-2-pilot-20261126-receipt-f06-b0003",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    },
+    {
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001",
+        "v0-2-pilot-20261126-receipt-f07-b0002",
+        "v0-2-pilot-20261126-receipt-f07-b0003",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "source_splits": [
+        "dev"
+      ],
+      "reasons": []
+    }
+  ],
+  "union_reasons": [
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-invoice-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f00"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f01"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f06"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0002"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0003"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "assignment_group",
+      "evidence": "5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "family_id",
+      "evidence": "receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    },
+    {
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "relation": "source_group",
+      "evidence": "synthetic-receipt-f07"
+    }
+  ],
+  "risk_components": [
+    {
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f00-b0000",
+        "v0-2-pilot-20261126-invoice-f00-b0001",
+        "v0-2-pilot-20261126-invoice-f00-b0002",
+        "v0-2-pilot-20261126-invoice-f00-b0003",
+        "v0-2-pilot-20261126-invoice-f00-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f01-b0000",
+        "v0-2-pilot-20261126-invoice-f01-b0001",
+        "v0-2-pilot-20261126-invoice-f01-b0002",
+        "v0-2-pilot-20261126-invoice-f01-b0003",
+        "v0-2-pilot-20261126-invoice-f01-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f06-b0000",
+        "v0-2-pilot-20261126-invoice-f06-b0001",
+        "v0-2-pilot-20261126-invoice-f06-b0002",
+        "v0-2-pilot-20261126-invoice-f06-b0003",
+        "v0-2-pilot-20261126-invoice-f06-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "base_ids": [
+        "v0-2-pilot-20261126-invoice-f07-b0000",
+        "v0-2-pilot-20261126-invoice-f07-b0001",
+        "v0-2-pilot-20261126-invoice-f07-b0002",
+        "v0-2-pilot-20261126-invoice-f07-b0003",
+        "v0-2-pilot-20261126-invoice-f07-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f00-b0000",
+        "v0-2-pilot-20261126-receipt-f00-b0001",
+        "v0-2-pilot-20261126-receipt-f00-b0002",
+        "v0-2-pilot-20261126-receipt-f00-b0003",
+        "v0-2-pilot-20261126-receipt-f00-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f01-b0000",
+        "v0-2-pilot-20261126-receipt-f01-b0001",
+        "v0-2-pilot-20261126-receipt-f01-b0002",
+        "v0-2-pilot-20261126-receipt-f01-b0003",
+        "v0-2-pilot-20261126-receipt-f01-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f06-b0000",
+        "v0-2-pilot-20261126-receipt-f06-b0001",
+        "v0-2-pilot-20261126-receipt-f06-b0002",
+        "v0-2-pilot-20261126-receipt-f06-b0003",
+        "v0-2-pilot-20261126-receipt-f06-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    },
+    {
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "base_ids": [
+        "v0-2-pilot-20261126-receipt-f07-b0000",
+        "v0-2-pilot-20261126-receipt-f07-b0001",
+        "v0-2-pilot-20261126-receipt-f07-b0002",
+        "v0-2-pilot-20261126-receipt-f07-b0003",
+        "v0-2-pilot-20261126-receipt-f07-b0004"
+      ],
+      "unresolved_candidate_ids": []
+    }
+  ],
+  "decisions": [
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f00-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f00-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "component_id": "risk-e1b35ed001a026d1175d3684ace5fc50675c096d7ef8dbefa611ac2fb93d673c",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0000",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0001",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0002",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0003",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f01-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f01-b0004",
+      "document_type": "invoice",
+      "source_split": "train",
+      "group_id": "group-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "component_id": "risk-723d95c0f030323d552ed7360b834c06850b81c48851c3914d7e6b266505456a",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f06-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f06-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "component_id": "risk-6a218c6190689993d34777553ff663fcedc6d475cd27f1be25954e0c2e7dedbc",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0000",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0001",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0002",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0003",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-invoice-f07-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-invoice-f07-b0004",
+      "document_type": "invoice",
+      "source_split": "dev",
+      "group_id": "group-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "component_id": "risk-c56e33bc48f32caf5daa586be93d56667e03246b01104fde7705bd58dbdae317",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f00-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f00-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "component_id": "risk-ab0cef6096a830d1719685ea3ef8e767bcc519c39a4dd990fa449713e960ecd4",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0000",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0001",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0002",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0003",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f01-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f01-b0004",
+      "document_type": "receipt",
+      "source_split": "train",
+      "group_id": "group-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "component_id": "risk-c44c0799a8097f3bbc47ae793c871adff37e3f93510efabdad91ecbfbd2f5d18",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f06-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f06-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "component_id": "risk-2528097729a6ed90c5930e3c8c25fec93ae7660b84180f5cfb5926807366ddf1",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0000-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0000-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0000-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0000-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0000",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0001-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0001-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0001-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0001-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0001",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0002-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0002-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0002-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0002-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0002",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0003-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0003-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0003-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0003-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0003",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0004-clean",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0004-crop",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0004-mild",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    },
+    {
+      "sample_id": "v0-2-pilot-20261126-receipt-f07-b0004-unreadable",
+      "base_id": "v0-2-pilot-20261126-receipt-f07-b0004",
+      "document_type": "receipt",
+      "source_split": "dev",
+      "group_id": "group-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "component_id": "risk-5ef8e9caab37c33b4a2c2e04aa0a74a70e0afacc2f73ab5f3b2db80938223147",
+      "reasons": []
+    }
+  ],
+  "members": {
+    "train": [
+      "v0-2-pilot-20261126-invoice-f00-b0000-clean",
+      "v0-2-pilot-20261126-invoice-f00-b0000-crop",
+      "v0-2-pilot-20261126-invoice-f00-b0000-mild",
+      "v0-2-pilot-20261126-invoice-f00-b0000-unreadable",
+      "v0-2-pilot-20261126-invoice-f00-b0001-clean",
+      "v0-2-pilot-20261126-invoice-f00-b0001-crop",
+      "v0-2-pilot-20261126-invoice-f00-b0001-mild",
+      "v0-2-pilot-20261126-invoice-f00-b0001-unreadable",
+      "v0-2-pilot-20261126-invoice-f00-b0002-clean",
+      "v0-2-pilot-20261126-invoice-f00-b0002-crop",
+      "v0-2-pilot-20261126-invoice-f00-b0002-mild",
+      "v0-2-pilot-20261126-invoice-f00-b0002-unreadable",
+      "v0-2-pilot-20261126-invoice-f00-b0003-clean",
+      "v0-2-pilot-20261126-invoice-f00-b0003-crop",
+      "v0-2-pilot-20261126-invoice-f00-b0003-mild",
+      "v0-2-pilot-20261126-invoice-f00-b0003-unreadable",
+      "v0-2-pilot-20261126-invoice-f00-b0004-clean",
+      "v0-2-pilot-20261126-invoice-f00-b0004-crop",
+      "v0-2-pilot-20261126-invoice-f00-b0004-mild",
+      "v0-2-pilot-20261126-invoice-f00-b0004-unreadable",
+      "v0-2-pilot-20261126-invoice-f01-b0000-clean",
+      "v0-2-pilot-20261126-invoice-f01-b0000-crop",
+      "v0-2-pilot-20261126-invoice-f01-b0000-mild",
+      "v0-2-pilot-20261126-invoice-f01-b0000-unreadable",
+      "v0-2-pilot-20261126-invoice-f01-b0001-clean",
+      "v0-2-pilot-20261126-invoice-f01-b0001-crop",
+      "v0-2-pilot-20261126-invoice-f01-b0001-mild",
+      "v0-2-pilot-20261126-invoice-f01-b0001-unreadable",
+      "v0-2-pilot-20261126-invoice-f01-b0002-clean",
+      "v0-2-pilot-20261126-invoice-f01-b0002-crop",
+      "v0-2-pilot-20261126-invoice-f01-b0002-mild",
+      "v0-2-pilot-20261126-invoice-f01-b0002-unreadable",
+      "v0-2-pilot-20261126-invoice-f01-b0003-clean",
+      "v0-2-pilot-20261126-invoice-f01-b0003-crop",
+      "v0-2-pilot-20261126-invoice-f01-b0003-mild",
+      "v0-2-pilot-20261126-invoice-f01-b0003-unreadable",
+      "v0-2-pilot-20261126-invoice-f01-b0004-clean",
+      "v0-2-pilot-20261126-invoice-f01-b0004-crop",
+      "v0-2-pilot-20261126-invoice-f01-b0004-mild",
+      "v0-2-pilot-20261126-invoice-f01-b0004-unreadable",
+      "v0-2-pilot-20261126-receipt-f00-b0000-clean",
+      "v0-2-pilot-20261126-receipt-f00-b0000-crop",
+      "v0-2-pilot-20261126-receipt-f00-b0000-mild",
+      "v0-2-pilot-20261126-receipt-f00-b0000-unreadable",
+      "v0-2-pilot-20261126-receipt-f00-b0001-clean",
+      "v0-2-pilot-20261126-receipt-f00-b0001-crop",
+      "v0-2-pilot-20261126-receipt-f00-b0001-mild",
+      "v0-2-pilot-20261126-receipt-f00-b0001-unreadable",
+      "v0-2-pilot-20261126-receipt-f00-b0002-clean",
+      "v0-2-pilot-20261126-receipt-f00-b0002-crop",
+      "v0-2-pilot-20261126-receipt-f00-b0002-mild",
+      "v0-2-pilot-20261126-receipt-f00-b0002-unreadable",
+      "v0-2-pilot-20261126-receipt-f00-b0003-clean",
+      "v0-2-pilot-20261126-receipt-f00-b0003-crop",
+      "v0-2-pilot-20261126-receipt-f00-b0003-mild",
+      "v0-2-pilot-20261126-receipt-f00-b0003-unreadable",
+      "v0-2-pilot-20261126-receipt-f00-b0004-clean",
+      "v0-2-pilot-20261126-receipt-f00-b0004-crop",
+      "v0-2-pilot-20261126-receipt-f00-b0004-mild",
+      "v0-2-pilot-20261126-receipt-f00-b0004-unreadable",
+      "v0-2-pilot-20261126-receipt-f01-b0000-clean",
+      "v0-2-pilot-20261126-receipt-f01-b0000-crop",
+      "v0-2-pilot-20261126-receipt-f01-b0000-mild",
+      "v0-2-pilot-20261126-receipt-f01-b0000-unreadable",
+      "v0-2-pilot-20261126-receipt-f01-b0001-clean",
+      "v0-2-pilot-20261126-receipt-f01-b0001-crop",
+      "v0-2-pilot-20261126-receipt-f01-b0001-mild",
+      "v0-2-pilot-20261126-receipt-f01-b0001-unreadable",
+      "v0-2-pilot-20261126-receipt-f01-b0002-clean",
+      "v0-2-pilot-20261126-receipt-f01-b0002-crop",
+      "v0-2-pilot-20261126-receipt-f01-b0002-mild",
+      "v0-2-pilot-20261126-receipt-f01-b0002-unreadable",
+      "v0-2-pilot-20261126-receipt-f01-b0003-clean",
+      "v0-2-pilot-20261126-receipt-f01-b0003-crop",
+      "v0-2-pilot-20261126-receipt-f01-b0003-mild",
+      "v0-2-pilot-20261126-receipt-f01-b0003-unreadable",
+      "v0-2-pilot-20261126-receipt-f01-b0004-clean",
+      "v0-2-pilot-20261126-receipt-f01-b0004-crop",
+      "v0-2-pilot-20261126-receipt-f01-b0004-mild",
+      "v0-2-pilot-20261126-receipt-f01-b0004-unreadable"
+    ],
+    "dev": [
+      "v0-2-pilot-20261126-invoice-f06-b0000-clean",
+      "v0-2-pilot-20261126-invoice-f06-b0000-crop",
+      "v0-2-pilot-20261126-invoice-f06-b0000-mild",
+      "v0-2-pilot-20261126-invoice-f06-b0000-unreadable",
+      "v0-2-pilot-20261126-invoice-f06-b0001-clean",
+      "v0-2-pilot-20261126-invoice-f06-b0001-crop",
+      "v0-2-pilot-20261126-invoice-f06-b0001-mild",
+      "v0-2-pilot-20261126-invoice-f06-b0001-unreadable",
+      "v0-2-pilot-20261126-invoice-f06-b0002-clean",
+      "v0-2-pilot-20261126-invoice-f06-b0002-crop",
+      "v0-2-pilot-20261126-invoice-f06-b0002-mild",
+      "v0-2-pilot-20261126-invoice-f06-b0002-unreadable",
+      "v0-2-pilot-20261126-invoice-f06-b0003-clean",
+      "v0-2-pilot-20261126-invoice-f06-b0003-crop",
+      "v0-2-pilot-20261126-invoice-f06-b0003-mild",
+      "v0-2-pilot-20261126-invoice-f06-b0003-unreadable",
+      "v0-2-pilot-20261126-invoice-f06-b0004-clean",
+      "v0-2-pilot-20261126-invoice-f06-b0004-crop",
+      "v0-2-pilot-20261126-invoice-f06-b0004-mild",
+      "v0-2-pilot-20261126-invoice-f06-b0004-unreadable",
+      "v0-2-pilot-20261126-invoice-f07-b0000-clean",
+      "v0-2-pilot-20261126-invoice-f07-b0000-crop",
+      "v0-2-pilot-20261126-invoice-f07-b0000-mild",
+      "v0-2-pilot-20261126-invoice-f07-b0000-unreadable",
+      "v0-2-pilot-20261126-invoice-f07-b0001-clean",
+      "v0-2-pilot-20261126-invoice-f07-b0001-crop",
+      "v0-2-pilot-20261126-invoice-f07-b0001-mild",
+      "v0-2-pilot-20261126-invoice-f07-b0001-unreadable",
+      "v0-2-pilot-20261126-invoice-f07-b0002-clean",
+      "v0-2-pilot-20261126-invoice-f07-b0002-crop",
+      "v0-2-pilot-20261126-invoice-f07-b0002-mild",
+      "v0-2-pilot-20261126-invoice-f07-b0002-unreadable",
+      "v0-2-pilot-20261126-invoice-f07-b0003-clean",
+      "v0-2-pilot-20261126-invoice-f07-b0003-crop",
+      "v0-2-pilot-20261126-invoice-f07-b0003-mild",
+      "v0-2-pilot-20261126-invoice-f07-b0003-unreadable",
+      "v0-2-pilot-20261126-invoice-f07-b0004-clean",
+      "v0-2-pilot-20261126-invoice-f07-b0004-crop",
+      "v0-2-pilot-20261126-invoice-f07-b0004-mild",
+      "v0-2-pilot-20261126-invoice-f07-b0004-unreadable",
+      "v0-2-pilot-20261126-receipt-f06-b0000-clean",
+      "v0-2-pilot-20261126-receipt-f06-b0000-crop",
+      "v0-2-pilot-20261126-receipt-f06-b0000-mild",
+      "v0-2-pilot-20261126-receipt-f06-b0000-unreadable",
+      "v0-2-pilot-20261126-receipt-f06-b0001-clean",
+      "v0-2-pilot-20261126-receipt-f06-b0001-crop",
+      "v0-2-pilot-20261126-receipt-f06-b0001-mild",
+      "v0-2-pilot-20261126-receipt-f06-b0001-unreadable",
+      "v0-2-pilot-20261126-receipt-f06-b0002-clean",
+      "v0-2-pilot-20261126-receipt-f06-b0002-crop",
+      "v0-2-pilot-20261126-receipt-f06-b0002-mild",
+      "v0-2-pilot-20261126-receipt-f06-b0002-unreadable",
+      "v0-2-pilot-20261126-receipt-f06-b0003-clean",
+      "v0-2-pilot-20261126-receipt-f06-b0003-crop",
+      "v0-2-pilot-20261126-receipt-f06-b0003-mild",
+      "v0-2-pilot-20261126-receipt-f06-b0003-unreadable",
+      "v0-2-pilot-20261126-receipt-f06-b0004-clean",
+      "v0-2-pilot-20261126-receipt-f06-b0004-crop",
+      "v0-2-pilot-20261126-receipt-f06-b0004-mild",
+      "v0-2-pilot-20261126-receipt-f06-b0004-unreadable",
+      "v0-2-pilot-20261126-receipt-f07-b0000-clean",
+      "v0-2-pilot-20261126-receipt-f07-b0000-crop",
+      "v0-2-pilot-20261126-receipt-f07-b0000-mild",
+      "v0-2-pilot-20261126-receipt-f07-b0000-unreadable",
+      "v0-2-pilot-20261126-receipt-f07-b0001-clean",
+      "v0-2-pilot-20261126-receipt-f07-b0001-crop",
+      "v0-2-pilot-20261126-receipt-f07-b0001-mild",
+      "v0-2-pilot-20261126-receipt-f07-b0001-unreadable",
+      "v0-2-pilot-20261126-receipt-f07-b0002-clean",
+      "v0-2-pilot-20261126-receipt-f07-b0002-crop",
+      "v0-2-pilot-20261126-receipt-f07-b0002-mild",
+      "v0-2-pilot-20261126-receipt-f07-b0002-unreadable",
+      "v0-2-pilot-20261126-receipt-f07-b0003-clean",
+      "v0-2-pilot-20261126-receipt-f07-b0003-crop",
+      "v0-2-pilot-20261126-receipt-f07-b0003-mild",
+      "v0-2-pilot-20261126-receipt-f07-b0003-unreadable",
+      "v0-2-pilot-20261126-receipt-f07-b0004-clean",
+      "v0-2-pilot-20261126-receipt-f07-b0004-crop",
+      "v0-2-pilot-20261126-receipt-f07-b0004-mild",
+      "v0-2-pilot-20261126-receipt-f07-b0004-unreadable"
+    ]
+  },
+  "excluded": [],
+  "counts": {
+    "before": {
+      "base_documents": 40,
+      "samples_including_variants": 160,
+      "bases_by_type_split": {
+        "receipt": {
+          "train": 10,
+          "dev": 10,
+          "final": 0
+        },
+        "invoice": {
+          "train": 10,
+          "dev": 10,
+          "final": 0
+        }
+      },
+      "samples_by_type_split": {
+        "receipt": {
+          "train": 40,
+          "dev": 40,
+          "final": 0
+        },
+        "invoice": {
+          "train": 40,
+          "dev": 40,
+          "final": 0
+        }
+      }
+    },
+    "after": {
+      "base_documents": 40,
+      "samples_including_variants": 160,
+      "bases_by_type_split": {
+        "receipt": {
+          "train": 10,
+          "dev": 10,
+          "final": 0
+        },
+        "invoice": {
+          "train": 10,
+          "dev": 10,
+          "final": 0
+        }
+      },
+      "samples_by_type_split": {
+        "receipt": {
+          "train": 40,
+          "dev": 40,
+          "final": 0
+        },
+        "invoice": {
+          "train": 40,
+          "dev": 40,
+          "final": 0
+        }
+      }
+    }
+  },
+  "missing_type_split_support": [],
+  "unresolved_candidates": 0,
+  "prerequisites": [
+    "asset/gold/status QA and archive verification",
+    "peer/Lead grouping acceptance",
+    "AI1 OCR cache and AI2 actual reader/ACK"
+  ],
+  "capacity": "model-neutral preparation needs no G0/final host; model-specific size/serialization pending AI2",
+  "inputs": {
+    "manifest": {
+      "name": "manifest.json",
+      "sha256": "99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d"
+    },
+    "report": {
+      "name": "report.json",
+      "sha256": "e4615b4f29044c325724e2525a9e383e385d1166d35292e7476689ec211923e0"
+    },
+    "review": {
+      "name": "pilot-20261126-reviewed-dispositions.json",
+      "sha256": "186406c9189ac22a60f353ce1adb86493bf906577910aad288458ae1e226589e"
+    }
+  },
+  "review": {
+    "version": "duplicate-review-v1",
+    "candidates": 410,
+    "dispositions": {
+      "distinct": 410
+    },
+    "cross_split": {
+      "distinct": 186
+    },
+    "review_complete": true,
+    "unresolved": 0,
+    "approval": "AI1/AI2 peer review and Lead grouping/split approval required before pilot/freeze"
+  }
+}
