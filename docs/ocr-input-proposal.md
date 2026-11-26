@@ -1037,3 +1037,101 @@ Regression và evidence tại ignored `artifacts/evaluation/ai1-pr89-fix-2026112
 - Replay score từ 20 raw OCR đã pin bằng CLI sửa PASS: CER796/14628,
   WER472/3437, support20; giữ nguyên integration diagnostic cũ, không gọi
   official dev baseline. Output mới `native20-rescore/`, không sửa packet cũ.
+
+## Pilot160 — O1 increment, 2026-11-26
+
+Task hiện hành: `GUI_AI1.zip`, `01_CONG_VIEC.md` O1–O5; bước này chỉ nhận
+inputs và audit native outputs đã có. PR89 đã merge; nhánh mới từ
+`develop@277ce86` (PR93). Không chạy lại native, đổi model/default hoặc train.
+`adaptive-engineering`/`software-architect` không có trong skill catalog; dùng
+inspect → criteria → smallest change → verify → diff review.
+
+Outer inventory24/24 size/hash PASS, giữ25 ZIP members trong ignored
+`artifacts/evaluation/ai1-v1-20261126/received/`. Data receiver hiện hành verify
+968 members/960 assets vào root mới `verified-data/`; không sửa reviewed plan,
+gold, splits hoặc source trong packet. Native archive được pin
+`4c8de673d14633c00ed2c12bdf9c27e5a21414ab7a1f61f36e1ce97b95f22c00`,
+chỉ giải nén1620 regular members với safe paths/bounds, không thực thi source cũ.
+
+Tool mới `python -m vietdoc.pipeline.ocr.audit` nhận manifest/report/cache-index
+SHA256 từ handoff, reuse actual Data validator/scorer và OCR contracts. Tool kiểm
+đủ IDs/raw input pins/report-run/canonical encoded+RGB pixels/processed frames/
+OCR-prepared/cache provenance/profile trước output mới; giữ failed/not_run và
+all-unreadable trong denominator, không suy fields absent. Groups gồm type,
+base/family, augmentation variant, row_count và split; mỗi sample có evidence path.
+Numeric/marks/order mismatches là triage signals, không gán nguyên nhân detection
+hay model mapping khi chưa có matching policy/labels phù hợp.
+
+Public CLI đã chạy toàn160; `audit-final/report.json` và `summary.md` ở ignored
+root nêu trên. Accounting160 requested/160 attempted/160 execution-ok,
+0 failed/0 not_run; recognition **144 complete/12 partial/4 unreadable**,
+**15 no-detection** đếm riêng (thuộc complete, không cộng thêm160). Roundtrip max
+3.3306690738754696e-13pixel, tolerance1e-7. Cả7 core source files byte-exact với
+`source-host.tar.gz`. Model ZIP có4/4 native files đúng hash/size; `pipeline.json`
+trong declared engine inventory không có ở model ZIP, nên chưa chứng nhận full
+runtime release hoặc activation từ riêng archive này.
+
+| Slice | Samples | CER edits/reference | WER edits/reference |
+|---|---:|---:|---:|
+| receipt | 80 | 1192/32130 | 1165/7349 |
+| invoice | 80 | 1199/37431 | 1229/8331 |
+| clean | 40 | 840/26915 | 865/6043 |
+| mild | 40 | 923/26915 | 1010/6043 |
+| crop | 40 | 433/15731 | 443/3594 |
+| unreadable variant | 40 | 195/0 → null | 76/0 → null |
+
+Reading-order/evaluator policy vẫn Proposed. Unreadable variants có40 empty
+transcripts: zero denominator trả null, không gọi100% accuracy và không dùng
+empty transcription làm gold cho obscured business fields. Native execution-ok
+khác recognition complete/field correctness; producer report không thay owner ACK.
+
+Case ưu tiên dev `v0-2-pilot-20261126-receipt-f06-b0002-mild`:12 hàng,
+quantity `0,5` đọc thành `05`, lỗi dấu trong title/product; đã xem overlay trên
+canonical frame. Giả thuyết cho increment tiếp: một explicit longedge2600 profile
+giữ nguyên engine/dtype/threads và cùng dev membership để kiểm small glyphs/
+digits của12/30-row pages. **Chưa benchmark giả thuyết, không đổi default2000
+hoặc cache AI2 đang dùng.** Detection recall/precision, causal skew/crop attribution,
+total/item evidence quality và independent consumer acceptance còn chưa đo.
+
+Lệnh trên checkout hiện hành sau receiver (output phải mới):
+
+```powershell
+$env:PYTHONPATH='src'
+$base='artifacts/evaluation/ai1-v1-20261126'
+$native="$base/native-received"
+python -m vietdoc.pipeline.ocr.audit --data-root "$base/verified-data" `
+  --manifest "$base/verified-data/dataset/manifest.json" `
+  --manifest-sha256 99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d `
+  --handoff-root "$native/native-ocr-v2" `
+  --report-sha256 ef23e8f63b8e18a86736d5fa2a9d98b6b1d79dac8b638969c55a5aaa4f8244ec `
+  --index "$native/ocr-train/index.json" ef2c79ddf623f5ea3c27025a32e39bd0c9b367259791fb3601dcb9a3a77c9dc7 `
+  --index "$native/ocr-dev/index.json" 9de82517d20370787794d5b43e9827b5d3e879844ef39859fe087fdced2522fd `
+  --output-dir "$base/peer-audit-new"
+```
+
+Review follow-up sửa hai guard: đối chiếu cache canonical dimensions/encoded hash/
+pixel hash/size với ảnh đã verify; đối chiếu counts và excluded IDs/reasons với
+native report cho từng split export. JSON đầu vào phải là object; report array,
+null hoặc scalar trả exit2 với diagnostic cố định, không traceback/output.
+Không đổi bridge producer contract hoặc kết quả OCR.
+
+Recheck actual Data boundary trên160 mẫu PASS, giữ nguyên counts/recognition/
+per-sample metrics/slices/geometry so với audit trước. Evidence mới ở
+`audit-fixed-20261126/report.json` và `verification.json` trong ignored root;
+report SHA256 `bb1a83d04dfc351f55cde8792f61a1dc4bc3988fce453aded6952e2851ae00e4`.
+Hai negative controls dùng bản sao index đã repin (width999 và exported999)
+đều bị từ chối trước output; subprocess CLI với report `[]` trả exit2, không
+traceback/output. Packet gốc giữ nguyên pins. Đây là replay audit, không chạy
+lại native inference.
+
+Focused handoff/audit/bridge **146 tests/125 subtests PASS**; mở rộng thêm OCR
+contract/geometry **186 tests/314 subtests PASS**; audit chạy Python `-O`
+**15 tests PASS**. Sau khi bổ sung đúng `PyYAML==6.0.3` và
+`torch==2.14.1+cpu` vào fixture env riêng, `pip check` PASS. Full AI gate local:
+`python -m scripts.ci.ai --allow-windows-symlink-skip --junitxml=artifacts/evaluation/ai1-v1-20261126/ai-full-pr.xml`
+**1266 tests/518 subtests PASS**, 1 symlink test skip đúng ngoại lệ Windows,
+1267 collected, policy_failures=[], exit0; log/XML ở ignored root.
+Đây là local fixture gate, hosted CI phải kiểm tra trên head PR sau push.
+Native OCR inference và actual-provider backend/live E2E NOT_RUN ở increment
+này; không suy acceptance O2–O5 từ fixture gate. Evidence lớn vẫn ignored,
+packet nguồn người dùng cung cấp được giữ nguyên.
