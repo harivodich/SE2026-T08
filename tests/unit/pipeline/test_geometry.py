@@ -224,6 +224,44 @@ class GeometryTest(unittest.TestCase):
 
 
 class ReadingOrderTest(unittest.TestCase):
+    def test_thirty_row_oracle_preserves_last_row_identity_and_repeated_amount_scope(self):
+        # Independent drawing schedule: 30 rows, left description then right
+        # amount, alternating text heights. Expected identities precede sorting.
+        drawing = [(f"row-{row}-{column}", rectangle(x, 10 + 30 * row, width,
+                     18 if row % 2 == 0 and column == "description" else 10))
+                   for row in range(30) for column, x, width in
+                   (("description", 8, 160), ("amount", 280, 116))]
+        expected_ids = [name for name, _ in drawing]
+        shuffled = drawing[1::2][::-1] + drawing[::2][::-1]
+        for scale in (.5, 1):
+            with self.subTest(scale=scale):
+                polygons = [(np.asarray(quad) * scale).tolist() for _, quad in shuffled]
+                order = reading_order(polygons)
+                self.assertEqual([shuffled[i][0] for i in order], expected_ids)
+                self.assertEqual(len(set(order)), 60)
+                sorted_polygons = _sort_polygons(polygons)
+                # Text/score below are recognizer doubles, not native accuracy.
+                texts = ["Trà sen" if i % 2 == 0 else "80.000" for i in range(60)]
+                metadata = PreparedPage(0, ImageInfo(400, 1000, "RGB", "uint8"),
+                    ImageInfo(int(400 * scale), int(1000 * scale), "RGB", "uint8"),
+                    "fictional-order-oracle.v1", "available",
+                    ((1 / scale, 0, 0), (0, 1 / scale, 0), (0, 0, 1)), None)
+                page = _to_page(dict(rec_texts=texts, rec_scores=[.8] * 60,
+                                     rec_polys=sorted_polygons), metadata)
+                self.assertEqual([b.block_id for b in page.blocks], [f"p0-b{i:04d}" for i in range(1, 61)])
+                ambiguous = match_evidence(page, EvidenceRequest("/items/29/line_total", "80.000"), prepared=metadata)
+                self.assertEqual(ambiguous.status, "ambiguous")
+                self.assertEqual(len(ambiguous.candidate_block_ids), 30)
+                self.assertEqual(ambiguous.to_field_metadata()["source_regions"], [])
+                matched = match_evidence(page, EvidenceRequest("/items/29/line_total", "80.000", ("p0-b0060",)), prepared=metadata)
+                self.assertEqual(matched.status, "matched")
+                self.assertEqual([b.block_id for b in matched.blocks], ["p0-b0060"])
+                # Hand calculation: row29 starts at y=10+30*29=880, bottom890.
+                np.testing.assert_allclose(matched.blocks[0].quad,
+                    ((.7, .88), (.99, .88), (.99, .89), (.7, .89)), rtol=0, atol=1e-15)
+                self.assertEqual(matched.blocks[0].text, "80.000")
+                self.assertIsNone(matched.to_field_metadata()["confidence"])
+
     def test_wrapped_table_order_is_distinct_from_recognition_accuracy(self):
         from vietdoc.evaluation.scalar_ocr import evaluate
 
