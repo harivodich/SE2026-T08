@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import Mock, patch
 
-from PIL import Image
+from PIL import Image, PngImagePlugin
 
 from vietdoc.contracts.ocr import OcrPage
 from vietdoc.data.manifest import encoded, read_json, sha
@@ -16,6 +16,8 @@ from vietdoc.ml.ocr_handoff import export_handoff
 from vietdoc.pipeline.ocr import audit as module
 from vietdoc.pipeline.ocr import OcrError
 from vietdoc.pipeline.ocr.handoff import review_manifest
+from vietdoc.pipeline.ocr.triage import build_ledger
+from vietdoc.pipeline.ocr import triage as triage_module
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
 
@@ -282,6 +284,176 @@ class NativeAuditTest(unittest.TestCase):
             status = module.main(args)
         self.assertEqual(status, 2)
         self.assertEqual(errors.getvalue().strip(), "AUDIT_INPUT_INVALID_OR_IO_ERROR")
+        self.assertFalse(self.output.exists())
+
+
+class TriageLedgerTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        temporary = TemporaryDirectory()
+        cls.addClassCleanup(temporary.cleanup)
+        cls.base = Path(temporary.name)
+        cls.source = cls.base / "data"
+        cls.source.mkdir()
+        samples = []
+        for i in range(8):
+            sid = f"case-{i}"
+            png = cls.source / (sid + ".png")
+            with Image.new("RGB", (100, 100), "white") as image:
+                image.save(png)
+            transcript = cls.source / (sid + ".txt")
+            transcript.write_text("Independent annotation", encoding="utf-8")
+            regions = cls.source / (sid + ".regions.json")
+            regions.write_bytes(encoded(dict(convention="fictional", regions=[])))
+            assets = {key: dict(path=path.name, sha256=sha(path)) for key, path in
+                      (("png", png), ("txt", transcript), ("regions.json", regions))}
+            samples.append(dict(sample_id=sid, document_type="receipt" if i < 4 else "invoice",
+                base_id=sid, family_id="fictional", split="dev", row_count=(0, 12, 30, 30)[i % 4],
+                augmentation=dict(name=("clean", "mild", "crop", "unreadable")[i % 4]), assets=assets))
+        cls.manifest = cls.source / "manifest.json"
+        cls.manifest.write_bytes(encoded(dict(version="fictional", samples=samples)))
+        page = OcrPage.from_dict(read_json(FIXTURES / "ocr-artifact-v2.json")["cases"][0]["expected"])
+        engine = Mock(load_seconds=0.1, last_inference_seconds=0.02)
+        engine.recognize.return_value = page
+        cls.native = cls.base / "native"
+        review_manifest(cls.source, cls.manifest, cls.native, engine)
+        release = cls.base / "release"
+        release.mkdir()
+        model = release / "fictional.bin"
+        model.write_bytes(b"fixture only")
+        engine_manifest = release / "manifest.json"
+        engine_manifest.write_bytes(encoded(dict(manifest_version=1, pipeline_manifest_id="fixture.v1",
+            files=[dict(path=model.name, sha256=sha(model), size_bytes=model.stat().st_size)])))
+        cls.cache = cls.base / "cache"
+        export_handoff(cls.native, engine_manifest, cls.cache)
+        cls.gold = [dict(sample_id=s["sample_id"], document_type=s["document_type"], gold={}, labels={},
+            transcript="Independent annotation", transcript_scope="full_page") for s in samples]
+
+    def setUp(self):
+        temporary = TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.case = Path(temporary.name)
+        self.output = self.case / "output"
+
+    def run_ledger(self, **overrides):
+        index = self.cache / "index.json"
+        options = dict(sample_ids=[f"case-{i}" for i in range(8)], data_root=self.source,
+            manifest=self.manifest, manifest_sha256=sha(self.manifest), handoff_root=self.native,
+            report_sha256=sha(self.native / "report.json"), indices=[(index, sha(index))], output_dir=self.output)
+        options.update(overrides)
+        with patch.object(module, "load_bundle", return_value=(read_json(self.manifest), self.gold, [],
+                                                               {"status": "fixture-only"})):
+            return build_ledger(**options)
+
+    def test_keeps_expected_and_observed_separate_without_causal_or_pairing_claim(self):
+        result = self.run_ledger()
+        self.assertEqual(len(result["cases"]), 8)
+        for case in result["cases"]:
+            original = read_json(self.native / case["sample_id"] / "ocr.json")
+            self.assertEqual(case["observed"], original)
+            self.assertEqual(case["expected"]["transcript"], "Independent annotation")
+            self.assertNotEqual(case["observed"]["blocks"][0]["text"], case["expected"]["transcript"])
+            self.assertEqual(case["diagnosis"]["stage"], "unknown")
+            self.assertEqual(case["diagnosis"]["certainty"], "unclassified")
+            verification = case["overlay_verification"]
+            self.assertEqual(verification["sha256"], sha(self.native / case["evidence"]["overlay"]))
+            self.assertEqual(verification["method"], "draw_overlay-rgb-exact.v1")
+        self.assertEqual(read_json(self.output / "triage.json"), result)
+        self.assertEqual(read_json(self.output / "report.json")["counts"]["requested"], 8)
+
+    def test_duplicate_train_unknown_and_missing_coverage_reject_before_output(self):
+        for ids in (["case-0"] * 8, [f"case-{i}" for i in range(7)] + ["unknown"]):
+            with self.subTest(ids=ids), self.assertRaises(ValueError):
+                self.run_ledger(sample_ids=ids)
+            self.assertFalse(self.output.exists())
+        for mutation in ("train", "coverage"):
+            manifest = read_json(self.manifest)
+            if mutation == "train": manifest["samples"][0]["split"] = "train"
+            else:
+                for s in manifest["samples"]: s["row_count"] = 1
+            path = self.case / "manifest.json"
+            path.write_bytes(encoded(manifest))
+            with self.subTest(mutation=mutation), self.assertRaisesRegex(ValueError, "TRIAGE_REQUIRES_EXPOSED_DEV|TRIAGE_COVERAGE_MISSING"):
+                self.run_ledger(manifest=path, manifest_sha256=sha(path))
+            self.assertFalse(self.output.exists())
+
+    def test_corrupt_cache_and_annotation_leave_no_packet(self):
+        native = self.case / "native"
+        shutil.copytree(self.native, native)
+        (native / "case-0/ocr.json").write_bytes(b"{}")
+        with self.assertRaisesRegex(ValueError, "CACHE_NATIVE_MISMATCH"):
+            self.run_ledger(handoff_root=native)
+        self.assertFalse(self.output.exists())
+        data = self.case / "data"
+        shutil.copytree(self.source, data)
+        (data / "case-0.txt").write_bytes(b"changed")
+        with self.assertRaisesRegex(ValueError, "ANNOTATION_PIN_MISMATCH"):
+            self.run_ledger(data_root=data, manifest=data / "manifest.json")
+        self.assertFalse(self.output.exists())
+        self.assertEqual(sorted(p.name for p in self.case.iterdir()), ["data", "native"])
+
+    def test_existing_packet_is_preserved(self):
+        self.output.mkdir()
+        path = self.output / "keep.txt"
+        path.write_bytes(b"user")
+        with self.assertRaisesRegex(ValueError, "OUTPUT_EXISTS"):
+            self.run_ledger()
+        self.assertEqual(path.read_bytes(), b"user")
+
+    def test_missing_corrupt_wrong_pixels_or_frame_overlay_never_publishes(self):
+        for mutation in ("missing", "corrupt", "wrong_pixels", "wrong_size", "wrong_mode"):
+            native = self.case / mutation
+            shutil.copytree(self.native, native)
+            overlay = native / "case-0/overlay.png"
+            if mutation == "missing":
+                overlay.rename(native / "case-0/withheld.png")
+            elif mutation == "corrupt":
+                overlay.write_bytes(b"not a PNG")
+            else:
+                with Image.new("RGBA" if mutation == "wrong_mode" else "RGB",
+                               (90, 100) if mutation == "wrong_size" else (100, 100), "black") as image:
+                    image.save(overlay)
+            error = {"missing": "missing asset", "wrong_pixels": "OVERLAY_CONTENT_MISMATCH",
+                     "wrong_size": "OVERLAY_FRAME_MISMATCH", "wrong_mode": "OVERLAY_FRAME_MISMATCH"}
+            with self.subTest(mutation=mutation):
+                if mutation == "corrupt":
+                    with self.assertRaises(Image.UnidentifiedImageError):
+                        self.run_ledger(handoff_root=native)
+                else:
+                    with self.assertRaisesRegex(ValueError, error[mutation]):
+                        self.run_ledger(handoff_root=native)
+                self.assertFalse(self.output.exists())
+                self.assertFalse(any(p.name.startswith("tmp") for p in self.case.iterdir()))
+
+    def test_equivalent_overlay_png_encoding_is_accepted_with_actual_hash(self):
+        native = self.case / "native"
+        shutil.copytree(self.native, native)
+        path = native / "case-0/overlay.png"
+        before = sha(path)
+        with Image.open(path) as image:
+            copy = image.copy()
+        with copy:
+            metadata = PngImagePlugin.PngInfo()
+            metadata.add_text("note", "same RGB pixels, independent encoder")
+            copy.save(path, pnginfo=metadata, compress_level=0)
+        self.assertNotEqual(sha(path), before)
+        result = self.run_ledger(handoff_root=native)
+        self.assertEqual(result["cases"][0]["overlay_verification"]["sha256"], sha(path))
+
+    def test_overlay_changed_after_snapshot_is_rejected_before_publish(self):
+        native = self.case / "native"
+        shutil.copytree(self.native, native)
+        path = native / "case-0/overlay.png"
+        render = triage_module.draw_overlay
+
+        def render_then_mutate(*args):
+            result = render(*args)
+            path.write_bytes(b"changed after snapshot")
+            return result
+
+        with patch.object(triage_module, "draw_overlay", side_effect=render_then_mutate):
+            with self.assertRaisesRegex(ValueError, "SOURCE_CHANGED_DURING_TRIAGE"):
+                self.run_ledger(handoff_root=native)
         self.assertFalse(self.output.exists())
 
 

@@ -1135,3 +1135,108 @@ contract/geometry **186 tests/314 subtests PASS**; audit chạy Python `-O`
 Native OCR inference và actual-provider backend/live E2E NOT_RUN ở increment
 này; không suy acceptance O2–O5 từ fixture gate. Evidence lớn vẫn ignored,
 packet nguồn người dùng cung cấp được giữ nguyên.
+
+## R1 — Dev triage và oracle, 2026-11-26
+
+Task: `AI1-ke-hoach-hoan-thien-V1-sau-PR97.md`. Khi bắt đầu, PR97 còn mở ở
+`a875753`, PR98 đã merge; `origin/develop=4af6b88`. Tiếp tục trên branch97
+theo kế hoạch; trạng thái head/base và CI bàn giao được cập nhật tại PR97.
+Không làm lại O1; R2–R6 chưa được nghiệm thu từ kết quả bên dưới.
+
+`python -m vietdoc.pipeline.ocr.triage` xuất packet gồm full audit `report.json`
+và ledger `triage.json`. CLI bắt buộc pin manifest/report/index như audit97,
+kiểm full population trước khi lấy 8–12 dev IDs; reject duplicate/unknown/train
+IDs hoặc thiếu coverage hai type, bốn variants, các mức 0/12/30 hàng.
+Annotation/transcript và observed OCR giữ riêng; không ghép regions theo index,
+không đưa gold vào OCR hoặc tự kết luận nguyên nhân từ CER. Thư mục đích phải
+mới và parent đã tồn tại; failure không publish packet thành công.
+
+Canary cố định **12 IDs**, prefix `v0-2-pilot-20261126-`, lấy tích Descartes của
+type `receipt`, `invoice` với sáu suffix dưới đây. Không chọn lại membership sau
+khi xem candidate; full paired experiment tiếp theo vẫn dùng cùng 80 dev IDs.
+
+| Suffix sau type | Hàng | Vai trò triage |
+|---|---:|---|
+| `f07-b0003-clean` | 0 | Clean control, title/spacing và total zero |
+| `f06-b0002-mild` | 12 | Quantity/dấu, có case receipt đã giao |
+| `f07-b0002-clean` | 30 | Dense-page clean control |
+| `f07-b0002-mild` | 30 | Cùng base dense-page, giữ degradation |
+| `f06-b0002-crop` | 12 | Visible-only support, không suy fields bị cắt là absent |
+| `f06-b0004-unreadable` | 0 | Empty-reference/no-detection control |
+
+Packet local: `artifacts/evaluation/ai1-v1-20261126/r1-triage-12/`;
+triage SHA256 `e571386cfcee1b8a930cf8ceba94cc3e5f379c620dccf6ef203d9bcf97ec5d5c`.
+Đã chạy actual Data validator/full160 audit bằng CLI này, xuất đúng12 cases.
+`review-notes.json` riêng ghi manual inspection, source/canonical pins, block IDs,
+focus crop bounds, certainty, impact và phép kiểm tiếp. Contact sheet12 case và
+canonical/processed crops bốn case trọng điểm ở ignored root; không upload raw pilot.
+
+| Case (rút prefix) | Expected → actual | Region | Kết luận có giới hạn |
+|---|---|---|---|
+| receipt-f06-b0002-mild | `0,5` → `05` | `p0-b0017` | Có detection tại vùng; cần tách crop/recognizer |
+| invoice-f06-b0002-mild | `1` → `4` | `p0-b0021` | Glyph nhìn thấy trong canonical/processed; nguyên nhân chưa chốt |
+| invoice-f07-b0002-clean | `0,5` → `05` | `p0-b0024` | Lỗi xảy ra cả clean, không chỉ augmentation mild |
+| invoice-f07-b0002-mild | `0,5` → `05` | `p0-b0024` | Giữ cùng focus region cho paired comparison |
+
+Các total block được kiểm ở bốn case trên giữ đúng digits theo annotation; không
+gán lỗi total/extraction khi chưa có evidence. Hai crop cases có52 OCR blocks;
+header/quantity column bị cắt không là detector miss. Hai unreadable controls
+không có detection, recognition `complete`; không đổi thành all-unreadable,
+không gọi empty-reference accuracy100%. Bbox overlap chỉ giúp tìm candidate để
+xem bằng mắt, không là accepted matching policy/recall/precision.
+
+Oracle C03/C04: reuse wrapped-table known-score WER2/4, two-column/jitter/tall-row,
+EXIF/resize/projective và evidence scope tests hiện có. Bổ sung đúng gap30 hàng
+trong `ReadingOrderTest`: drawing schedule độc lập, detector order bị đảo,
+hai scale, amount lặp30 lần; phải giữ đủ60 region, thiếu context abstain,
+context hàng29 trả `p0-b0060` với quad tính tay
+`[(.7,.88),(.99,.88),(.99,.89),(.7,.89)]`. Đây là fixture oracle, không phải
+native quality. Policy `d31-canonical-nfc-v1-proposed` giữ nguyên: NFC,
+whitespace collapse, case/digits/dấu giữ nguyên; renderer draw order khác OCR
+row order được báo riêng, không sort hypothesis để cải thiện CER.
+
+Lệnh tái lập ledger dùng các tham số pin/root trong phần Pilot160, đổi module
+thành `vietdoc.pipeline.ocr.triage`, output thành root mới và thêm12 lần
+`--sample-id <full-ID>` theo bảng cố định trên. `--help` đã kiểm thực tế.
+Oracle và regression chạy được trên fresh checkout với fixture env:
+
+```powershell
+python -m pytest tests/unit/pipeline/test_ocr_audit.py tests/unit/pipeline/test_geometry.py tests/unit/pipeline/test_evidence.py tests/unit/pipeline/test_paddle_adapter.py -q
+```
+
+Kết quả focused:126 tests/172 subtests PASS. Full local AI gate trên R1:
+1273 tests/524 subtests PASS, 1 symlink skip theo ngoại lệ Windows,
+1274 collected, policy_failures=[], exit0. Log/XML `r1-full-ai.*` ở ignored
+root; chưa là hosted CI trên base sau PR98. Packet/evidence paths/source hash
+recheck PASS; CLI duplicate selection trả exit2, không output. Chưa chạy native candidate2600,
+chưa xác nhận causal resize, chưa nhận policy C03/C04 hoặc consumer ACK.
+R3 cần preregister điều kiện giữ/bỏ và runtime/resource pins trước native run;
+giữ baseline2000/B0-v1/cache cũ. Thí nghiệm có kết quả âm vẫn hợp lệ.
+
+### R1 review fix — Overlay verification
+
+Review phát hiện exporter có thể publish đường dẫn overlay thiếu/hỏng hoặc PNG
+hợp lệ nhưng sai nội dung. Bản sửa đọc snapshot PNG có byte cap, kiểm RGB/single
+frame/dimensions, đối chiếu decoded pixels với `draw_overlay` từ canonical đã pin
+và typed OCR đúng case. Sai pixels/frame hoặc thiếu/hỏng ảnh đều reject; chỉ
+khác PNG compression/metadata nhưng cùng pixels vẫn hợp lệ. Không sửa packet
+nguồn hoặc tự sửa ảnh sai. Canonical/overlay được rehash trước publish để phát
+hiện thay đổi sau snapshot. Ledger ghi encoded/RGB hashes, dimensions, size,
+renderer source hash và Pillow version cho từng overlay đã verify.
+
+Regression mới gồm missing/corrupt/wrong pixels/wrong size/wrong mode,
+PNG encoding tương đương và đổi bytes sau snapshot; audit/triage focused
+22 tests/37 subtests PASS. Packet cũ `r1-triage-12` giữ làm lịch sử trước fix;
+replay mới ở `r1-triage-overlay-verified/`, không overwrite report cũ.
+Đối chiếu overlay là kiểm rendering evidence với phiên bản renderer đã ghi;
+không thay kiểm native detector localization hoặc chứng nhận OCR đúng text.
+
+Actual Data/full160 replay PASS, verify12/12 overlay; annotations/OCR/accounting
+không đổi. Negative control trên bản sao native packet (PNG đúng kích thước nhưng
+sai pixels) trả CLI exit2, không output, staging cleanup PASS; inputs gốc giữ hash.
+Receipt `r1-triage-overlay-verified/verification.json`, triage SHA256
+`c67024acfed45e40844138cc41d2bec230096afeeabd2cb1a3334bf4fd181643`.
+Full AI gate sau fix:1276 tests/529 subtests PASS, 1 permitted Windows symlink
+skip,1277 collected, policy_failures=[], exit0 (`r1-overlay-ai.log/.xml`).
+Native inference NOT_RUN. Các số local trên được đo trước tích hợp PR98;
+hosted CI phải kiểm trên head bàn giao mới, không kế thừa kết quả CI head cũ.
