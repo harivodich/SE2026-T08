@@ -53,10 +53,14 @@ Runner native B0 thực có thể chạy độc lập trước khi AI2 đạt ch
 VIETDOC_PG_TEST_USER=integration VIETDOC_PG_TEST_PASSWORD=<isolated-test-only> \
 python -m scripts.ci.native_e2e --jar backend/target/vietdoc-backend-1.0.0.jar \
   --run-root /tmp/vietdoc-new-owned-run --database-url jdbc:postgresql://127.0.0.1:15436/isolated_db \
-  --sha <tested-source-sha>
+  --sha <tested-source-sha> --pg-bin /usr/lib/postgresql/16/bin
 ```
 
 Không trỏ vào DB nhóm/production. Không gửi password vào args/logs/report. Nếu có model OCR đúng pin trên volume, dùng `--models <models-dir> --manifest-id <release-id>` để không tải lại. Windows Application Control có thể chặn native DLL; không đổi native tests thành fixtures để nhận PASS.
+
+`--pg-bin` bật pg_dump/createdb/pg_restore trong cluster test: dừng Java, backup DB và committed storage, restore DB mới, restart cùng JAR/worker-disabled, login và đối chiếu approved head/canonical/export bytes. Không `drop`/ghi đè DB hiện hữu. Đây là same-version restore, không tự chứng minh downgrade của migration/code chưa có.
+
+Candidate thật dùng thêm `--candidate-settings <pinned-settings.json>`: `config`, `config-sha256`, `snapshot`, `snapshot-manifest-sha256`; adapter cần cả `run-dir` và `run-manifest-sha256`, OCRv2 có `ocr-artifact-version: "2"`. Chỉ forward các option đã định nghĩa vào server `qwen-local`, không arbitrary commands, không tải model hay fallback B0. Lead lắp packet sau khi nhận đúng artifacts AI2, không giao IC chờ một API mới.
 
 Data dùng pins Pillow 10.2.0/jsonschema 4.10.3 trong `pyproject.toml`; `.github/ci-constraints.txt` pin transitive/build tools cho CI. Schema/gate tests dùng environment riêng với `.github/contract-requirements.txt`, jsonschema 4.26.0 + referencing local registry. Validator 4.10.3 đã tái hiện lỗi nested URN `$ref` giữa các shared schemas; không đổi renderer dependency để xử lý lỗi đó.
 

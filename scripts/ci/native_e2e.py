@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import signal
 import socket
 import subprocess
@@ -17,6 +18,7 @@ import sys
 import time
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPCookieProcessor, Request, build_opener
+from urllib.parse import urlsplit
 import uuid
 
 from scripts.ci.application import require, sha
@@ -86,7 +88,7 @@ class Client:
         return json.loads(self.request(method, path, expected, **kwargs))
 
 
-def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id='ci-native-b0-v1', candidate_settings=None):
+def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id='ci-native-b0-v1', candidate_settings=None, pg_bin=None):
     require(database_url.startswith('jdbc:postgresql://127.0.0.1:') or
             database_url.startswith('jdbc:postgresql://localhost:'), 'Use isolated loopback PostgreSQL only')
     require(candidate_settings is None or models is not None, 'Candidate model release must be provisioned explicitly')
@@ -109,6 +111,7 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
         process = subprocess.Popen(argv, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
                                    start_new_session=os.name != 'nt')
         processes.append(process)
+        return process
     def wait(client, path):
         deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
@@ -133,7 +136,8 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
                    STORAGE_ROOT=str(storage), AI_ATTEMPTS_ROOT=str(attempts), AI_MODE='http',
                    AI_WORKER_URL=f'http://127.0.0.1:{ai_port}/internal/v1/compute', AI_WORKER_TOKEN=token,
                    PIPELINE_MANIFEST=manifest_id, SEED_USERNAME='ci-native-owner', SEED_PASSWORD=password)
-        start([java, '-Duser.timezone=UTC', '-Dserver.address=127.0.0.1', '-jar', str(jar.resolve())], env, 'java')
+        java_command = [java, '-Duser.timezone=UTC', '-Dserver.address=127.0.0.1', '-jar', str(jar.resolve())]
+        java_process = start(java_command, env, 'java')
         wait(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health')
         client = Client(f'http://127.0.0.1:{web_port}/api/v1')
         client.csrf = client.json('GET', '/auth/csrf')['token']
@@ -192,7 +196,57 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
                     'Approved export is not deterministic')
             Client(client.base).request('GET', f'/documents/{did}/pages/0', 401)
             result['cases'].append(dict(type=kind, input_sha256=sha(sample), export_sha256=exported['sha256'],
-                                        ocr_version=provenance['ocr_version'], state=job['state']))
+                                        ocr_version=provenance['ocr_version'], state=job['state'],
+                                        document_id=did, export_id=exported['id'], revision_id=approved['head_revision_id'],
+                                        canonical_sha256=hashlib.sha256(canonical).hexdigest()))
+        result['backup_restore'] = dict(status='NOT_RUN', reason='--pg-bin was not supplied')
+        if pg_bin is not None:
+            parsed = urlsplit(database_url.removeprefix('jdbc:'))
+            database = parsed.path.removeprefix('/')
+            require(database.replace('_', '').isalnum() and len(database) <= 48 and not parsed.query,
+                    'Use a simple isolated database name for restore rehearsal')
+            java_process.terminate()
+            try:
+                java_process.wait(timeout=20)
+            except subprocess.TimeoutExpired:
+                java_process.kill()
+                java_process.wait(timeout=5)
+            processes.remove(java_process)
+            restored_database = database + '_restore'
+            pg_env = dict(os.environ, PGHOST=parsed.hostname, PGPORT=str(parsed.port or 5432),
+                          PGUSER=os.environ['VIETDOC_PG_TEST_USER'], PGPASSWORD=os.environ['VIETDOC_PG_TEST_PASSWORD'])
+            dump = run_root / 'database.backup'
+            for tool, arguments in [('pg_dump', ['--format=custom', '--file', str(dump), database]),
+                                    ('createdb', [restored_database]),
+                                    ('pg_restore', ['--exit-on-error', '--no-owner', '--dbname', restored_database, str(dump)])]:
+                outcome = subprocess.run([str(pg_bin / tool), *arguments], env=pg_env,
+                                         capture_output=True, timeout=90)
+                require(outcome.returncode == 0, 'Isolated PostgreSQL ' + tool + ' failed')
+            restored_storage = run_root / 'restored-java-storage'
+            shutil.copytree(storage, restored_storage)
+            original_files = {p.relative_to(storage).as_posix(): sha(p) for p in storage.rglob('*') if p.is_file()}
+            copied_files = {p.relative_to(restored_storage).as_posix(): sha(p)
+                            for p in restored_storage.rglob('*') if p.is_file()}
+            require(original_files and original_files == copied_files, 'Committed-storage backup changed bytes')
+            restored_env = dict(env, DATABASE_URL=database_url.rsplit('/', 1)[0] + '/' + restored_database,
+                                STORAGE_ROOT=str(restored_storage), WORKER_ENABLED='false')
+            start(java_command, restored_env, 'java-restored')
+            wait(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health')
+            replay = Client(client.base)
+            replay.csrf = replay.json('GET', '/auth/csrf')['token']
+            replay.json('POST', '/auth/session', payload=dict(username='ci-native-owner', password=password))
+            replay.csrf = replay.json('GET', '/auth/csrf')['token']
+            for case in result['cases']:
+                document = replay.json('GET', f'/documents/{case["document_id"]}')
+                require(document['head_revision_id'] == case['revision_id'], 'Restored approved head changed')
+                canonical = replay.request('GET', f'/documents/{case["document_id"]}/pages/0')
+                exported = replay.request('GET', f'/exports/{case["export_id"]}/download')
+                require(hashlib.sha256(canonical).hexdigest() == case['canonical_sha256'] and
+                        hashlib.sha256(exported).hexdigest() == case['export_sha256'],
+                        'Restored business assets/exports changed bytes')
+            result['backup_restore'] = dict(status='PASS', documents=len(result['cases']),
+                                            storage_files=len(original_files), same_jar_sha256=sha(jar),
+                                            scope='Actual isolated DB+storage restore; same application version, not downgrade compatibility')
         result['status'] = 'PASS'
         (run_root / 'summary.json').write_text(json.dumps(result, indent=2), encoding='utf8')
         return result
@@ -218,10 +272,11 @@ def main():
     parser.add_argument('--models', type=Path)
     parser.add_argument('--manifest-id', default='ci-native-b0-v1')
     parser.add_argument('--candidate-settings', type=Path, help='Explicit pinned qwen-local config; no silent B0 fallback')
+    parser.add_argument('--pg-bin', type=Path, help='PostgreSQL client directory; enables actual isolated backup/restore')
     parser.add_argument('--java', default='java')
     args = parser.parse_args()
     result = run(args.jar, args.run_root.resolve(), args.database_url, args.java, args.sha,
-                 args.models, args.manifest_id, args.candidate_settings)
+                 args.models, args.manifest_id, args.candidate_settings, args.pg_bin)
     print(json.dumps(result))
 
 

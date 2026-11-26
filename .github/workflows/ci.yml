@@ -315,7 +315,7 @@ jobs:
       - name: Install native CPU runtime with pinned OCR dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgomp1 libgl1
+          sudo apt-get install -y libgomp1 libgl1 postgresql-client-16
           python -m pip install ".[serve,ai1-ocr]"
       - name: Run real Java, PostgreSQL, native OCR and review/export
         env:
@@ -324,6 +324,7 @@ jobs:
           python -m scripts.ci.native_e2e
           --jar backend/target/vietdoc-backend-1.0.0.jar
           --run-root "$RUNNER_TEMP/vietdoc-native-e2e"
+          --pg-bin /usr/lib/postgresql/16/bin
           --database-url jdbc:postgresql://127.0.0.1:5432/vietdoc_native_e2e --sha "$SOURCE_SHA"
       - name: Require frozen final quality and actual candidate evidence too
         run: python -m scripts.ci.acceptance

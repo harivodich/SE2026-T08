@@ -11,6 +11,14 @@ from scripts.ci import acceptance, application, native_e2e
 
 
 class NativeCommandTest(unittest.TestCase):
+    def test_remote_database_is_rejected_before_creating_runtime_files(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw) / 'should-not-exist'
+            with self.assertRaisesRegex(ValueError, 'loopback PostgreSQL'):
+                native_e2e.run(Path('missing.jar'), root, 'jdbc:postgresql://production.example:5432/business',
+                               'java', 'a' * 40)
+            self.assertFalse(root.exists())
+
     def test_default_is_actual_runtime_and_candidate_never_silently_falls_back(self):
         command, extractor = native_e2e.compute_command(18090)
         self.assertEqual(extractor, 'b0')

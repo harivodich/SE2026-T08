@@ -9,6 +9,7 @@ Source nền `develop` `277ce863c5c15c64aaaea2b7dbebe87e5afb7a7b`, tree `73acb1a
 3. Parity Java/Python cùng16 positive/negative cases, so actual outcomes với oracle và corpus SHA. Cần reject đúng kiểu/version/ID/budget/hash/money/required/unknown fields; corpus không chứng minh mọi input khả dĩ.
 4. Runner E2E reusable: Java JAR→PostgreSQL→OCR/B0 thật→review/approve/export. Hai type, PDF/PNG, stale save409, unapproved export409, anonymous401, export deterministic và isolation khỏi attempt đã bị sửa. Không dùng prediction làm gold; total sửa trong bước review được ghi rõ, không tính là accuracy model.
 5. Runner có nhánh `--candidate-settings` để chạy **qwen-local có pins thật** qua existing candidate server. Thiếu config/snapshot/adapter pin hoặc extra command options bị reject; không fallback B0. Chưa chạy candidate này thành công chỉ từ việc có runner.
+6. `--pg-bin` thực hiện backup DB và committed storage sau khi dừng Java cho snapshot nhất quán; restore sang DB mới, khởi động lại đúng JAR, login rồi so approved heads/canonical/export hashes. Native CI main bật bước này; không đọc/sửa DB nhóm.
 
 ## Lịch sử đã phục hồi trong candidate local
 
@@ -34,6 +35,7 @@ Nếu có unresolved, phải làm rõ integration/revert trước. `--historical
 - Java full build trên Windows:57tests, có1symlink test skip do quyền Windows. Không dùng bộ này làm strict release proof.
 - Linux chạy nguyên test classes với Maven-resolved test dependencies:57/57Java,0skip; PostgreSQL job integration1/1. JAR cùng SHA `0de505a94b320e6f78f49da62ff1695a40e59485726b390c4010b4c070e04a36` qua receipt validation và actual smoke.
 - Native B0 receipt/invoice actual end-to-end đã chạy trên nvit-train trong folder test riêng. Không chạy fine-tune mới và không nhận M0/M1 từ kết quả B0.
+- Diễn tập backup/restore thực:2documents và14committed-storage files, approved revision/canonical bytes/export checksum giữ nguyên sau restart. Chỉ chứng minh restore cùng version; không gọi là downgrade compatibility của release tương lai.
 - Workflow qua actionlint/zizmor trên Linux; không có findings mới. Hosted CI trên head publish cuối vẫn bắt buộc trước merge.
 
 Các số là phạm vi lượt kiểm tương ứng, không cộng unit/subtest/native cases thành model accuracy. Report đầy đủ, bundle/hash, snapshot diff và replay receipt ở gói evidence ngoài Git của Lead; không commit logs, weights, DB hoặc raw outputs.
@@ -45,7 +47,7 @@ Các số là phạm vi lượt kiểm tương ứng, không cộng unit/subtest
 | Model/candidate đạt raw serving/schema và quality, GPU/profile thực, immutable pins | AI2 #57/#59; Lead chạy ghép | Runner/parity/artifact/native B0 đã có, không đợi để implement chúng |
 | Metric oracle ACK, policy/targets frozen, final membership chưa lộ và final report | Data/AI1 theo packet; Lead #53/#54/#61 | Hoàn thiện oracles/runner trên train/dev/tiny fixtures ngay; không mở final hoặc bịa accepted packet |
 | Actual candidate-model end-to-end với pins tương ứng | Lead sau AI2 handoff, Backend runner | Dùng `native_e2e --candidate-settings` cùng models release đã provision; không tải/thay weights âm thầm |
-| Restore/rollback rehearsal của release đúng artifact/migration/data version | Lead sau artifact/candidate freeze; Backend cung cấp runner | PostgreSQL claim recovery đã test, nhưng không tự gọi nó là đủ mọi backup/restore case |
+| Rollback sang artifact/version trước của release cuối | Lead sau artifact/candidate freeze; Backend cung cấp migration policy | Backup/restore cùng version đã chạy; downgrade compatibility phải kiểm khi có artifact/version đích thật |
 | Publication và hosted check của final head | User cho phép commit/push/PR riêng, Lead thực hiện khi có quyền | Source/tooling và local/Linux acceptance chuẩn bị được ngay; không giả hosted PASS |
 
 Main gate sẽ báo `V1_NOT_READY` nếu chưa có accepted packet ở `docs/reviews/v1-acceptance/index.json`. Đây là thiếu actual acceptance input, khác với thiếu executable CI job trước đây. Code hoàn thành chưa tự đóng #95/#96 hay gọi main đã release: cần đúng publication/review/merge và postmerge smoke theo workflow.
