@@ -1,12 +1,19 @@
 # AI2 — hoàn thiện model và tích hợp đến nghiệm thu V1
 
+**Bổ sung gói 26/11:** pilot40 base/160 variants và native OCR160/160 đã có,
+không còn phải chờ Data/AI1 tạo đầu vào cho run tiếp. Nhận gói AI2 nhẹ, reviewed
+plan và token profile mới sau Lead duyệt PR hỗ trợ. Xem
+[evidence/giới hạn](role-unblock-acceptance-2026-11-26.md) và
+[lệnh serving opt-in](compute-candidate-handoff-2026-11-26.md). Phần D22 bên dưới
+là kết quả lịch sử, không bị ghi đè bởi pilot mới.
+
 Ngày bắt đầu lượt nghiệm thu: 25/11/2026; công việc tiếp tục qua ngày 26/11. Đây là phần việc tiếp theo, thay cho các yêu cầu G0 cũ đã được thực hiện; không yêu cầu làm lại phần đã có bằng chứng. Kết quả dev đo trong lượt hiện tại được ghi ở `AI-2/2026-11-26-model-dev-acceptance.md` cùng thư mục khi hoàn tất.
 
 ## Ưu tiên ngay sau khi nhận file
 
 **Chưa promote M1.** Lượt host đã hoàn tất: M0 raw-schema 0/16, normalized 6/16; M1 raw-schema 0/16, normalized 4/16. Replay qua `QwenInference` hiện hành nhận 0/16 ở cả hai model. Scalar M1 17/48 so M0 15/48 nhưng table end-to-end giảm 37/112 → 13/112; total không cải thiện (đều 3/8). Một output M1 bị cắt ở 1.280 tokens. 363 tests đạt chỉ xác nhận implementation, không thay quality acceptance.
 
-Làm nhóm B trước C: đọc raw outputs và `scalar-errors.csv`, sửa schema/duplicate keys/canonical format, header-as-item/quantity-price mapping, abstention/evidence trên crop/unreadable. Kiểm decoded targets/masks và tiny-train generation trước khi chọn một hypothesis cho run #2. Không bỏ strict gate hoặc tăng epoch/budget vô điều kiện. Case cụ thể, IDs và acceptance chi tiết ở `AI-2/2026-11-26-model-dev-acceptance.md`. Nhóm D/E và tests có thể làm song song theo ownership trong khi chờ packet Data lớn hơn; không để tất cả việc dừng theo dataset.
+Làm nhóm B trước C: đọc raw outputs và `scalar-errors.csv`, sửa schema/duplicate keys/canonical format, header-as-item/quantity-price mapping, abstention/evidence trên crop/unreadable. Kiểm decoded targets/masks và tiny-train generation trước khi chọn một hypothesis cho run #2. Không bỏ strict gate hoặc tăng epoch/budget vô điều kiện. Case cụ thể, IDs và acceptance chi tiết ở `AI-2/2026-11-26-model-dev-acceptance.md`. Nhóm D/E và tests làm song song theo ownership; pilot và OCR mới đã có trong gói hỗ trợ, không để việc dừng theo dataset.
 
 ## 1. Phần đã có để nhận và dùng ngay
 
@@ -47,8 +54,8 @@ Không chờ Data/AI1 hoàn tất toàn bộ V1 để làm phần độc lập: 
 ### C — Pilot và lựa chọn checkpoint bằng dev
 
 1. Giữ D22 làm smoke/regression; dữ liệu này nhỏ và có các biến thể cùng base, không coi 16 mẫu dev là 16 chứng từ độc lập.
-2. Nhận pilot Data theo yêu cầu đã giao: archive/manifest immutable; membership train/dev/final theo base/source/template; đủ nhãn/status và duplicate/grouping decisions. Kiểm actual coverage thay vì chỉ kiểm tên file. Mốc pilot 40 base/160 variants là kế hoạch dữ liệu, không phải evidence đã có.
-3. Nhận OCR bundle đúng membership và canonical/engine/profile hashes. Adapter tự xác minh inputs, không phụ thuộc người khác trả lời từng mẫu.
+2. Nhận pilot `v0.2-pilot-20261126` đã được dựng trong gói gỡ dependency: 40 base/160 variants chỉ train/dev, manifest `99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d`. Dùng reviewed supplement/plan đúng hash sau Lead duyệt PR hỗ trợ, không dùng pending plan ban đầu làm membership. Không cần đợi Data sinh lại hoặc mở final.
+3. Nhận native OCR train80/dev80 đã chạy đủ 160/160, verified bridge và reader receipts trong gói cùng ngày. Adapter tự xác minh IDs/input/canonical/engine/profile hashes. Profile token mới 7168/7936/1536/9472 đã vừa 80 full-JSON-eligible examples bằng tokenizer thật; đây chưa là GPU-fit hoặc quality acceptance. 80 examples có obscured labels giữ exclusion, không biến thành null target. Các input OCR rỗng/unreadable cần abstention/error policy rõ và vẫn có accounting.
 4. Đo token toàn bộ population trước GPU allocation. Có accounting cho bất kỳ sample không đủ supervision. Không cắt text/rows để làm report xanh. Thay budget/model phải tạo config/run mới và đánh giá lại train/inference parity.
 5. Chọn một giả thuyết có cơ sở cho run tiếp: cấu hình LoRA/số epoch/cách biểu diễn/độ phủ dữ liệu. Seed, optimizer, scheduler, dtype, package/model/tokenizer/OCR/schema/evaluator/source hashes phải có trong manifest.
 6. Giới hạn số vòng thử. Chọn checkpoint bằng dev scalar/table/critical-total metrics và failure rate; so B0/M0/M1 trên cùng input và evaluator. Không chọn chỉ bằng loss thấp nhất. Sau ba vòng không tiến bộ phải báo nguyên nhân và phương án, không tiếp tục tiêu GPU vô hạn.

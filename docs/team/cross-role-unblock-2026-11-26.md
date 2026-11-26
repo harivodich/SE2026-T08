@@ -1,5 +1,11 @@
 # Handoff và dependency hiện hành — 26/11/2026
 
+**Đã có cập nhật sau tài liệu này:** pilot40 base/160 variants, native OCR và
+consumer receipts đã được làm trong PR hỗ trợ. Xem
+[kết quả mới](role-unblock-acceptance-2026-11-26.md) và các task cuối theo role.
+Bảng dưới giữ bối cảnh lúc phát hành PR92, không dùng để yêu cầu Data/AI1 tạo
+lại packet đã được bàn giao.
+
 PR88/89/90/91 đã merge. Base đối chiếu là develop `594336013dbc122326169a7c7e6df09e1d9d22c6`. Các bảng blocker ngày 24/11 là lịch sử; không dùng trạng thái “chưa train/chưa có OCR D22” hoặc token profile cũ để giao lại việc.
 
 Lượt D22 đã có native OCR train48/dev16; train 24 eligible samples một epoch/6 optimizer steps, checkpoint/reload; so B0/M0/M1 trên đủ 16 dev variants. Model vẫn chưa được nghiệm thu: raw serving contract nhận 0/16 ở cả M0/M1. Xem [báo cáo đo](AI-2/2026-11-26-model-dev-acceptance.md) và [task AI2](ai2-v1-completion-2026-11-26.md).
