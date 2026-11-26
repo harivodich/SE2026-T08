@@ -3,7 +3,7 @@
 #   docker build -f infra/ai-train.Dockerfile -t vietdoc-ai-train:dev .                                  # CPU
 #   docker build -f infra/ai-train.Dockerfile --build-arg TORCH_INDEX=cu126 -t vietdoc-ai-train:cu126 .  # NVIDIA
 # cu126 matches driver 560.x (CUDA 12.6); newer drivers may use a newer index.
-# Training code (M1.3/M3) is not implemented yet; the default command prints the
+# G0 training is explicit opt-in only; the default command prints the
 # environment report. Weights, checkpoints and datasets are volumes, never image layers.
 
 FROM python:3.12.15-slim-bookworm
@@ -21,6 +21,7 @@ COPY pyproject.toml ./
 RUN pip install --index-url "https://download.pytorch.org/whl/${TORCH_INDEX}" "torch==2.14.1" \
  && mkdir -p src/vietdoc && touch src/vietdoc/__init__.py \
  && pip install ".[train]" \
+ && python -c "import importlib.metadata as m, yaml; assert m.version('PyYAML') == '6.0.3'" \
  && pip uninstall -y vietdoc && rm -rf src
 COPY src ./src
 COPY specs/contracts ./specs/contracts

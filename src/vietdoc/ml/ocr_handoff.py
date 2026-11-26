@@ -400,6 +400,7 @@ def export_handoff(
     output_dir: Path | str,
     *,
     sample_ids: Sequence[str] | None = None,
+    max_samples: int = MAX_SAMPLES,
 ) -> dict[str, Any]:
     """Validate an AI-1 offline handoff and write a new AI-2 consumer bundle."""
     root = Path(handoff_root)
@@ -440,7 +441,9 @@ def export_handoff(
 
     samples = report.get("samples")
     counts = report.get("counts")
-    if not isinstance(samples, list) or not 0 < len(samples) <= MAX_SAMPLES:
+    if type(max_samples) is not int or not 0 < max_samples <= 1000:
+        raise HandoffBridgeError("REPORT_INVALID", "report")
+    if not isinstance(samples, list) or not 0 < len(samples) <= max_samples:
         raise HandoffBridgeError("REPORT_INVALID", "report")
     if not isinstance(counts, dict) or set(counts) != {"requested", "native_attempted", "ok", "failed", "not_run"}:
         raise HandoffBridgeError("REPORT_COUNTS_MISMATCH", "report")
@@ -805,6 +808,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--engine-manifest", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--sample-ids", nargs="+")
+    parser.add_argument("--max-samples", type=int, default=MAX_SAMPLES)
     args = parser.parse_args(argv)
     try:
         index = export_handoff(
@@ -812,6 +816,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.engine_manifest,
             args.output_dir,
             sample_ids=args.sample_ids,
+            max_samples=args.max_samples,
         )
         print(
             json.dumps(

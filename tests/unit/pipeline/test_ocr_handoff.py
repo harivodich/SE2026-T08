@@ -282,6 +282,23 @@ class HandoffTest(unittest.TestCase):
         self.assertFalse(output.exists())
         self.engine.recognize.assert_not_called()
 
+    def test_large_manifest_can_be_selected_with_explicit_bounded_limit(self):
+        names = [f"sample-{index:02d}" for index in range(21)]
+        manifest = self.manifest([self.sample(name, self.data) for name in names])
+        report = review_manifest(self.root, manifest, self.root / "large-selected", self.engine,
+                                 sample_ids=[names[-1]], max_manifest_samples=21)
+        self.assertEqual(report["counts"], {"requested": 1, "native_attempted": 1, "ok": 1,
+                                             "failed": 0, "not_run": 0})
+        self.assertEqual([sample["sample_id"] for sample in report["samples"]], [names[-1]])
+
+    def test_large_manifest_remains_rejected_without_explicit_limit(self):
+        names = [f"sample-{index:02d}" for index in range(21)]
+        manifest = self.manifest([self.sample(name, self.data) for name in names])
+        with self.assertRaises(ValueError):
+            review_manifest(self.root, manifest, self.root / "large-default", self.engine,
+                            sample_ids=[names[-1]])
+        self.engine.recognize.assert_not_called()
+
     def test_bad_snapshot_json_identity_path_rejected_before_cli_load(self):
         manifest = self.root / "invalid.json"
         samples = json.dumps([self.sample()]).encode()

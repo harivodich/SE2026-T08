@@ -73,7 +73,7 @@ services:
       context: ..
       dockerfile: infra/ai-train.Dockerfile
     image: vietdoc-ai-train:dev
-    environment:
+    environment: &train-env
       HF_HUB_OFFLINE: "1"
       TRANSFORMERS_OFFLINE: "1"
       HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
@@ -101,7 +101,8 @@ services:
     security_opt:
       - no-new-privileges:true
     cpus: ${AI_TRAIN_CPUS:-4}
-    mem_limit: ${AI_TRAIN_MEMORY:-8g}
+    # 12g default fits 16GB+ hosts while covering Qwen3-1.7B host load buffers and RTX 3060 12GB G0 runs.
+    mem_limit: ${AI_TRAIN_MEMORY:-12g}
     logging:
       driver: json-file
       options:
@@ -119,9 +120,13 @@ services:
       args:
         TORCH_INDEX: ${AI_TRAIN_TORCH_INDEX:-cu126}
     image: vietdoc-ai-train:${AI_TRAIN_TORCH_INDEX:-cu126}
+    environment:
+      <<: *train-env
+      # Reduce CUDA allocator fragmentation on 12GB VRAM cards (e.g., RTX 3060 12GB).
+      PYTORCH_CUDA_ALLOC_CONF: ${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True,max_split_size_mb:128}
     volumes: *train-volumes
     gpus: all
-    shm_size: 2g
+    shm_size: ${AI_TRAIN_SHM_SIZE:-2g}
 
 secrets:
   ai_service_token:

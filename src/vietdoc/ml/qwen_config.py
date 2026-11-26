@@ -1,4 +1,5 @@
 """Validated offline inference settings. No model frameworks or implicit execution."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 import hashlib
 import json
@@ -6,11 +7,14 @@ import os
 from pathlib import Path
 import re
 import stat
+from typing import Any
 
 from vietdoc.ml import model_provision
 
 EXPECTED_SCHEMA_PATH = 'specs/contracts/business.schema.json'
 FORBIDDEN_EXECUTION_FLAGS = ('allow_download', 'allow_training', 'allow_paid_compute')
+LEGACY_SERIALIZATION = 'vietdoc_ocr_context_v1'
+COMPACT_SERIALIZATION = 'vietdoc_ocr_context_v2'
 
 
 class MLFailure(ValueError):
@@ -55,6 +59,7 @@ class QwenConfig:
     dtype: str
     execution_enabled: bool
     config_sha256: str
+    serialization_version: str = LEGACY_SERIALIZATION
 
     @classmethod
     def from_mapping(cls, data, repository_root: Path):
@@ -87,6 +92,9 @@ class QwenConfig:
             if (any(type(n) is not int or n <= 0 or n > 40960 for n in budgets)
                     or budgets[1] > budgets[0] or budgets[0] + budgets[2] > budgets[3]):
                 raise ValueError()
+            serialization = inp['ocr_context'].get('serialization_version', LEGACY_SERIALIZATION)
+            if serialization not in (LEGACY_SERIALIZATION, COMPACT_SERIALIZATION):
+                raise ValueError()
             device, dtype = profile['device'], profile['dtype']
             if (not isinstance(device,str) or not re.fullmatch(r'cpu|cuda:(?:0|[1-9][0-9]{0,5})',device)
                     or dtype not in ('float32','float16','bfloat16')
@@ -103,15 +111,41 @@ class QwenConfig:
                 raise MLFailure('SCHEMA_HASH_MISMATCH','config')
             fingerprint = hashlib.sha256(json.dumps(data,sort_keys=True,allow_nan=False,
                 ensure_ascii=True,separators=(',',':')).encode()).hexdigest()
-            return cls(model['id'],model['revision'],schema,digest,*budgets,device,dtype,enabled,fingerprint)
+            return cls(model['id'],model['revision'],schema,digest,*budgets,device,dtype,enabled,fingerprint,
+                       serialization)
         except MLFailure:
             raise
         except (KeyError,TypeError,ValueError,OSError):
             raise MLFailure('CONFIG_INVALID','config') from None
 
 
-def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
-    """Optional PyYAML reader; callers can use from_mapping without this dependency."""
+def derive_inference_config_for_training(data: Mapping[str, Any], repository_root: Path) -> QwenConfig:
+    """Derive a non-executable inference QwenConfig from a training mapping.
+
+    Allows explicit ``execution.allow_training`` booleans in the training mapping
+    while keeping ``QwenConfig.from_mapping`` and ``load_config`` strict for
+    inference.  The derived ``QwenConfig`` always has ``execution_enabled=False``
+    so it can feed prompt/tokenizer/collator parity without enabling QwenLoader.
+    """
+    if not isinstance(data, Mapping):
+        raise MLFailure('CONFIG_INVALID', 'config')
+    execution = data.get('execution')
+    if not isinstance(execution, Mapping):
+        raise MLFailure('CONFIG_INVALID', 'config')
+    enabled = execution.get('enabled')
+    allow_training = execution.get('allow_training', False)
+    if type(enabled) is not bool or type(allow_training) is not bool:
+        raise MLFailure('CONFIG_INVALID', 'config')
+    sanitized_execution = dict(execution)
+    sanitized_execution['enabled'] = False
+    sanitized_execution['allow_training'] = False
+    sanitized = dict(data)
+    sanitized['execution'] = sanitized_execution
+    return QwenConfig.from_mapping(sanitized, repository_root)
+
+
+def read_config_mapping(path: Path, repository_root: Path | None = None) -> tuple[dict[str, Any], Path]:
+    """Optional PyYAML reader with unique-key enforcement and repository root resolution."""
     try:
         import yaml
     except ImportError:
@@ -135,6 +169,8 @@ def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
             return result
         UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,mapping)
         data = yaml.load(raw.decode('utf-8'),Loader=UniqueLoader)
+        if not isinstance(data, dict):
+            raise ValueError()
         if repository_root is None:
             repository_root = next((p for p in Path(__file__).resolve().parents if (p/'specs/contracts').is_dir()), None)
         if repository_root is None:
@@ -145,8 +181,14 @@ def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
                     repository_root = candidate.parent.parent
         if repository_root is None:
             raise ValueError()
-        return QwenConfig.from_mapping(data,repository_root)
+        return data, Path(repository_root)
     except MLFailure:
         raise
     except Exception:
         raise MLFailure('CONFIG_INVALID','config') from None
+
+
+def load_config(path: Path, repository_root: Path | None = None) -> QwenConfig:
+    """Optional PyYAML reader for inference; strictly rejects allow_training=true."""
+    data, resolved_root = read_config_mapping(path, repository_root)
+    return QwenConfig.from_mapping(data, resolved_root)
