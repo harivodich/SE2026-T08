@@ -149,6 +149,8 @@ public class JobService {
     Job current = store.job(id, false);
     Document d = store.owned(current.documentId, user, true);
     Job j = store.job(id, true);
+    // A lost cancellation response can be retried without reviving or changing the job.
+    if (j.state.equals("CANCELLED")) return documents.jobView(j);
     if (!Set.of("QUEUED", "RUNNING", "RETRYING").contains(j.state))
       throw new ApiException(409, "JOB_TERMINAL", "Job đã kết thúc.");
     if (!j.state.equals(expectedState))
@@ -303,12 +305,14 @@ public class JobService {
       store.em().refresh(j);
       if (!Set.of("QUEUED", "RUNNING", "RETRYING").contains(j.state)) continue;
       if (j.deadline.isBefore(now) || j.attempts >= maxAttempts) {
+        boolean deadlineExceeded = j.deadline.isBefore(now);
         terminal(
             d,
             j,
             "FAILED",
-            "DEADLINE_EXCEEDED",
-            "Job không hoàn tất trong giới hạn; hãy chạy lại.");
+            deadlineExceeded ? "DEADLINE_EXCEEDED" : "ATTEMPTS_EXHAUSTED",
+            deadlineExceeded ? "Job không hoàn tất trong giới hạn; hãy chạy lại."
+                : "Job đã dùng hết số lần thử.");
       } else if (j.state.equals("RUNNING") && j.leaseUntil != null && j.leaseUntil.isBefore(now)) {
         j.state = "RETRYING";
         j.stage = "WAITING";
