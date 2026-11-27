@@ -1,4 +1,5 @@
 const API_ROOT = "/api/v1";
+const pendingMutations = new Map();
 
 export class ApiError extends Error {
   constructor(status, code, message, details = {}) {
@@ -34,16 +35,22 @@ export class ApiClient {
     return contentType.includes("application/json") ? response.json() : response.blob();
   }
 
-  login(username, password) {
-    return this.request("/auth/session", {
+  async login(username, password) {
+    const result = await this.request("/auth/session", {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
+    pendingMutations.clear();
+    return result;
   }
 
   me() { return this.request("/auth/me"); }
   csrf() { return this.request("/auth/csrf"); }
-  logout() { return this.request("/auth/logout", { method: "POST" }); }
+  async logout() {
+    const result = await this.request("/auth/logout", { method: "POST" });
+    pendingMutations.clear();
+    return result;
+  }
   listDocuments() { return this.request("/documents?limit=50"); }
   document(id, options = {}) { return this.request(`/documents/${encodeURIComponent(id)}`, options); }
   revisions(id, options = {}) { return this.request(`/documents/${encodeURIComponent(id)}/revisions`, options); }
@@ -69,24 +76,41 @@ export class ApiClient {
   }
 
   save(documentId, body) {
-    return this.request(`/documents/${encodeURIComponent(documentId)}/review`, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
+    return this.reviewMutation(documentId, "review", "PATCH", body);
   }
 
   approve(documentId, body) {
-    return this.request(`/documents/${encodeURIComponent(documentId)}/approve`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    return this.reviewMutation(documentId, "approve", "POST", body);
   }
 
   adoptRun(documentId, body) {
-    return this.request(`/documents/${encodeURIComponent(documentId)}/adopt-run`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    return this.reviewMutation(documentId, "adopt-run", "POST", body);
+  }
+
+  hasPendingSave(documentId, body) {
+    const path = `/documents/${encodeURIComponent(documentId)}/review`;
+    return pendingMutations.get(path)?.body === JSON.stringify(body);
+  }
+
+  async reviewMutation(documentId, operation, method, body) {
+    const path = `/documents/${encodeURIComponent(documentId)}/${operation}`;
+    const serialized = JSON.stringify(body);
+    const previous = pendingMutations.get(path);
+    const key = previous?.body === serialized ? previous.key : crypto.randomUUID();
+    pendingMutations.set(path, { body: serialized, key });
+    let result;
+    try {
+      result = await this.request(path, {
+        method, headers: { "Idempotency-Key": key }, body: serialized,
+      });
+    } catch (error) {
+      // A definite rejection cannot be reconciled by replaying a lost response.
+      if (error instanceof ApiError && error.status < 500 &&
+          pendingMutations.get(path)?.key === key) pendingMutations.delete(path);
+      throw error;
+    }
+    if (pendingMutations.get(path)?.key === key) pendingMutations.delete(path);
+    return result;
   }
 
   createExport(documentId, revisionId) {

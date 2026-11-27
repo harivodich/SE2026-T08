@@ -1,9 +1,12 @@
 package vn.vietdoc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +56,7 @@ class PostgresJobIT {
           var versions = statement.executeQuery(
               "select version from flyway_schema_history where success=true order by installed_rank desc limit 1")) {
         assertTrue(versions.next());
-        assertEquals("2", versions.getString(1));
+        assertEquals("4", versions.getString(1));
       }
     }
     String username = "pg-owner-" + Store.id();
@@ -104,6 +107,112 @@ class PostgresJobIT {
     } finally {
       go.countDown();
       pool.shutdownNow();
+    }
+  }
+
+  @Test
+  void staleRecoverySelectionCannotTerminateANewFinalClaim() throws Exception {
+    String username = "pg-recovery-race-" + Store.id();
+    auth.seed(username, "integration-password");
+    var owner = (AuthService.Identity) auth.login(username, "integration-password").get("user");
+    var file = new MockMultipartFile("file", "receipt.png", "image/png",
+        Files.readAllBytes(Path.of("..", "samples", "receipt-demo.png")));
+    var document = documents.upload(owner.id(), file, "receipt", Store.id());
+    var job = jobs.create(document.id(), owner.id(), Store.id());
+    var first = jobs.claim(job.id());
+    assertNotNull(first);
+    var tx = new TransactionTemplate(transactions);
+    tx.execute(status -> {
+      var row = store.job(job.id(), true);
+      row.deadline = Instant.now().plusSeconds(600);
+      row.leaseUntil = Instant.now().minusSeconds(30);
+      return null;
+    });
+    jobs.recover();
+    var second = jobs.claim(job.id());
+    assertNotNull(second);
+    tx.execute(status -> {
+      store.job(job.id(), true).leaseUntil = Instant.now().minusSeconds(30);
+      return null;
+    });
+
+    // Intercept only the point before locking; all queries/locks/refreshes use PostgreSQL.
+    var selected = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    Store slowStore = mock(Store.class, delegatesTo(store));
+    doAnswer(call -> {
+      selected.countDown();
+      assertTrue(resume.await(15, TimeUnit.SECONDS), "replacement claim must finish first");
+      return store.locked(document.id());
+    }).when(slowStore).locked(document.id());
+    var slowRecovery = new JobService(slowStore, null, null, null, null,
+        "demo", "fixture", 180, 60, 3, "", "", "", "");
+    var pool = Executors.newSingleThreadExecutor();
+    try {
+      Future<?> slow = pool.submit(() -> new TransactionTemplate(transactions).execute(status -> {
+        slowRecovery.recover();
+        return null;
+      }));
+      assertTrue(selected.await(15, TimeUnit.SECONDS), "expired selection must precede replacement");
+      jobs.recover();
+      var replacement = jobs.claim(job.id());
+      assertNotNull(replacement);
+      resume.countDown();
+      slow.get(15, TimeUnit.SECONDS);
+      assertEquals("RUNNING", jobs.get(job.id(), owner.id()).state());
+      tx.execute(status -> {
+        var row = store.job(job.id(), false);
+        assertEquals(3, row.attempts);
+        assertEquals(replacement.token(), row.leaseToken);
+        assertEquals(job.id(), store.locked(document.id()).activeJobId);
+        return null;
+      });
+      assertFalse(jobs.complete(second, ai.extract(second)));
+      assertTrue(jobs.complete(replacement, ai.extract(replacement)));
+    } finally {
+      resume.countDown();
+      pool.shutdownNow();
+    }
+  }
+
+  @Test
+  void databaseRejectsCrossDocumentReferencesAndInvalidVersions() throws Exception {
+    String username = "pg-constraints-" + Store.id();
+    auth.seed(username, "integration-password");
+    var owner = (AuthService.Identity) auth.login(username, "integration-password").get("user");
+    byte[] image = Files.readAllBytes(Path.of("..", "samples", "receipt-demo.png"));
+    var file = new MockMultipartFile("file", "receipt.png", "image/png", image);
+    var first = documents.upload(owner.id(), file, "receipt", Store.id());
+    var second = documents.upload(owner.id(), file, "receipt", Store.id());
+    var firstJob = jobs.create(first.id(), owner.id(), Store.id());
+    var secondJob = jobs.create(second.id(), owner.id(), Store.id());
+    var firstClaim = jobs.claim(firstJob.id());
+    var secondClaim = jobs.claim(secondJob.id());
+    assertTrue(jobs.complete(firstClaim, ai.extract(firstClaim)));
+    assertTrue(jobs.complete(secondClaim, ai.extract(secondClaim)));
+    String firstHead = documents.get(first.id(), owner.id()).headRevisionId();
+    String secondHead = documents.get(second.id(), owner.id()).headRevisionId();
+    var active = jobs.create(second.id(), owner.id(), Store.id());
+
+    assertSqlState("23503", "update documents set head_revision_id=? where id=?",
+        secondHead, first.id());
+    assertSqlState("23503", "update documents set active_job_id=? where id=?",
+        active.id(), first.id());
+    assertSqlState("23503", "update revisions set parent_id=? where id=?",
+        secondHead, firstHead);
+    assertSqlState("23503", "update revisions set run_id=? where id=?",
+        secondClaim.runId(), firstHead);
+    assertSqlState("23514", "update documents set version=0 where id=?", first.id());
+    assertSqlState("23514", "update jobs set attempts=-1 where id=?", firstJob.id());
+    assertEquals(firstHead, documents.get(first.id(), owner.id()).headRevisionId());
+  }
+
+  private void assertSqlState(String expected, String sql, String... values) throws Exception {
+    try (var connection = dataSource.getConnection();
+        var statement = connection.prepareStatement(sql)) {
+      for (int i = 0; i < values.length; i++) statement.setString(i + 1, values[i]);
+      SQLException error = assertThrows(SQLException.class, statement::executeUpdate);
+      assertEquals(expected, error.getSQLState());
     }
   }
 

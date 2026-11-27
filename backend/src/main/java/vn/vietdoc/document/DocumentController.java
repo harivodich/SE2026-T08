@@ -116,8 +116,9 @@ public class DocumentController {
   public DocumentService.DocumentView save(
       @PathVariable String id,
       @AuthenticationPrincipal Identity user,
+      @RequestHeader(value = "Idempotency-Key", required = false) String key,
       @Valid @RequestBody Requests.Save input) {
-    return review.save(id, user.id(), input);
+    return review.save(id, user.id(), input, key);
   }
 
   @PostMapping("/documents/{id}/adopt-run")
@@ -125,8 +126,9 @@ public class DocumentController {
   public DocumentService.DocumentView adopt(
       @PathVariable String id,
       @AuthenticationPrincipal Identity user,
+      @RequestHeader(value = "Idempotency-Key", required = false) String key,
       @Valid @RequestBody Requests.Adopt input) {
-    return review.adopt(id, user.id(), input);
+    return review.adopt(id, user.id(), input, key);
   }
 
   @PostMapping("/documents/{id}/approve")
@@ -134,8 +136,9 @@ public class DocumentController {
   public DocumentService.DocumentView approve(
       @PathVariable String id,
       @AuthenticationPrincipal Identity user,
+      @RequestHeader(value = "Idempotency-Key", required = false) String key,
       @Valid @RequestBody Requests.Approve input) {
-    return review.approve(id, user.id(), input);
+    return review.approve(id, user.id(), input, key);
   }
 
   @PostMapping("/documents/{id}/exports")
