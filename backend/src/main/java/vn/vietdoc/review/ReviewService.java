@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import java.time.Instant;
 import java.util.*;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.vietdoc.common.*;
@@ -29,7 +30,15 @@ public class ReviewService {
 
   @Transactional
   public DocumentService.DocumentView save(String id, String user, Requests.Save input) {
+    return save(id, user, input, null);
+  }
+
+  @Transactional
+  public DocumentService.DocumentView save(String id, String user, Requests.Save input, String key) {
     Document d = store.owned(id, user, true);
+    String requestKey = DocumentService.key(key);
+    DocumentService.DocumentView replay = replay(d, user, "SAVE", requestKey, input);
+    if (replay != null) return replay;
     store.compare(d, input.baseRevisionId(), input.expectedDocumentVersion());
     Revision old = store.revision(d.headRevisionId, d);
     validator.business(d.documentType, input.payload());
@@ -63,12 +72,20 @@ public class ReviewService {
         user,
         "SAVE",
         Map.of("base_revision_id", old.id, "revision_id", revision.id, "reason", input.reason()));
-    return documents.view(d);
+    return receipt(d, user, "SAVE", requestKey, input);
   }
 
   @Transactional
   public DocumentService.DocumentView adopt(String id, String user, Requests.Adopt input) {
+    return adopt(id, user, input, null);
+  }
+
+  @Transactional
+  public DocumentService.DocumentView adopt(String id, String user, Requests.Adopt input, String key) {
     Document d = store.owned(id, user, true);
+    String requestKey = DocumentService.key(key);
+    DocumentService.DocumentView replay = replay(d, user, "ADOPT", requestKey, input);
+    if (replay != null) return replay;
     store.compare(d, input.baseRevisionId(), input.expectedDocumentVersion());
     ExtractionRun run = store.run(input.runId(), d);
     JsonNode result = json.read(run.resultJson);
@@ -97,12 +114,20 @@ public class ReviewService {
         user,
         "ADOPT_RUN",
         Map.of("run_id", run.id, "revision_id", d.headRevisionId, "reason", input.reason()));
-    return documents.view(d);
+    return receipt(d, user, "ADOPT", requestKey, input);
   }
 
   @Transactional
   public DocumentService.DocumentView approve(String id, String user, Requests.Approve input) {
+    return approve(id, user, input, null);
+  }
+
+  @Transactional
+  public DocumentService.DocumentView approve(String id, String user, Requests.Approve input, String key) {
     Document d = store.owned(id, user, true);
+    String requestKey = DocumentService.key(key);
+    DocumentService.DocumentView replay = replay(d, user, "APPROVE", requestKey, input);
+    if (replay != null) return replay;
     store.compare(d, input.revisionId(), input.expectedDocumentVersion());
     Revision r = store.revision(input.revisionId(), d);
     if (r.approvedAt != null)
@@ -145,7 +170,40 @@ public class ReviewService {
             input.reason(),
             "acknowledged_issue_ids",
             input.acknowledgedIssueIds()));
-    return documents.view(d);
+    return receipt(d, user, "APPROVE", requestKey, input);
+  }
+
+  private DocumentService.DocumentView replay(
+      Document d, String user, String operation, String key, Object input) {
+    if (key == null) return null;
+    if (store.em().find(UserAccount.class, user, LockModeType.PESSIMISTIC_WRITE) == null)
+      throw ApiException.missing();
+    List<ReviewMutationReceipt> existing = store.em()
+        .createQuery("select r from ReviewMutationReceipt r where r.ownerId=:u and r.operation=:o and r.requestKey=:k", ReviewMutationReceipt.class)
+        .setParameter("u", user).setParameter("o", operation).setParameter("k", key)
+        .getResultList();
+    if (existing.isEmpty()) return null;
+    ReviewMutationReceipt r = existing.get(0);
+    if (!r.documentId.equals(d.id) || !r.requestHash.equals(Json.sha256(json.write(input))))
+      throw new ApiException(409, "IDEMPOTENCY_CONFLICT", "Idempotency-Key đã dùng cho yêu cầu khác.");
+    return json.mapper.convertValue(json.read(r.responseJson), DocumentService.DocumentView.class);
+  }
+
+  private DocumentService.DocumentView receipt(
+      Document d, String user, String operation, String key, Object input) {
+    DocumentService.DocumentView view = documents.view(d);
+    if (key == null) return view;
+    ReviewMutationReceipt r = new ReviewMutationReceipt();
+    r.id = Store.id();
+    r.ownerId = user;
+    r.documentId = d.id;
+    r.operation = operation;
+    r.requestKey = key;
+    r.requestHash = Json.sha256(json.write(input));
+    r.responseJson = json.write(view);
+    r.createdAt = Instant.now();
+    store.em().persist(r);
+    return view;
   }
 
   /** Called in the completion transaction. A rerun never replaces an existing head. */

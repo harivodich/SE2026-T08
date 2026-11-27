@@ -120,6 +120,31 @@ class WorkflowIntegrationTest {
   }
 
   @Test
+  void reviewAndApprovalRetryReplayOriginalResponseWithoutDuplicateRevision() throws Exception {
+    var initial = extracted("receipt");
+    var saveInput = edit(initial, "46000");
+    String saveKey = Store.id();
+    var saved = review.save(initial.id(), owner.id(), saveInput, saveKey);
+    var replayed = review.save(initial.id(), owner.id(), saveInput, saveKey);
+    assertEquals(saved.headRevisionId(), replayed.headRevisionId());
+    assertEquals(saved.version(), replayed.version());
+    assertEquals(2, documents.revisions(initial.id(), owner.id()).items().size());
+
+    var differentInput = edit(initial, "47000");
+    assertEquals("IDEMPOTENCY_CONFLICT", assertThrows(ApiException.class,
+        () -> review.save(initial.id(), owner.id(), differentInput, saveKey)).code);
+    var approval = new Requests.Approve(saved.headRevisionId(), saved.version(), true,
+        warnings(saved), "Đã đối chiếu toàn bộ chứng từ");
+    String approveKey = Store.id();
+    var approved = review.approve(initial.id(), owner.id(), approval, approveKey);
+    var approvalReplay = review.approve(initial.id(), owner.id(), approval, approveKey);
+    assertEquals(approved.version(), approvalReplay.version());
+    assertEquals(approved.headRevisionId(), approvalReplay.headRevisionId());
+    assertEquals(approved.version(), documents.get(initial.id(), owner.id()).version());
+    assertEquals(saved.version(), review.save(initial.id(), owner.id(), saveInput, saveKey).version());
+  }
+
+  @Test
   void receiptSaveApproveExportAndRerunPreserveSnapshots() throws Exception {
     var d = extracted("receipt");
     String prediction = json.write(documents.runs(d.id(), owner.id()).items().get(0).result());

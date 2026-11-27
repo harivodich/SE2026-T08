@@ -54,7 +54,7 @@ class PostgresJobIT {
           var versions = statement.executeQuery(
               "select version from flyway_schema_history where success=true order by installed_rank desc limit 1")) {
         assertTrue(versions.next());
-        assertEquals("3", versions.getString(1));
+        assertEquals("4", versions.getString(1));
       }
     }
     String username = "pg-owner-" + Store.id();
