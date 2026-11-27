@@ -23,7 +23,7 @@ PR vào `develop`/`main`, push lên hai branch và manual dispatch đều đư�
 | ai | ai-fixture-tests | Ubuntu/Python 3.12, fresh `.[serve,test,ai1]` + `numpy==2.2.6`, pip check, pipeline/ML/contracts/architecture/API và CI regressions; không cần model/weights |
 | test | web-java-package-assets | Node tests, Java tests, JAR package và kiểm assets trong JAR |
 | docker-smoke | docker-smoke | Build Docker image từ repo root, chạy demo container, kiểm Thymeleaf/CSRF/static assets và 401 chưa đăng nhập |
-| postgres | postgres-job-lifecycle | PostgreSQL 16.6 container riêng; Flyway v1/v2, concurrent claim, expired lease recovery và stale completion qua `PostgresJobIT` |
+| postgres | postgres-job-lifecycle | PostgreSQL 16.6 container riêng; Flyway v1–v3, document-scoped FK/check constraints, concurrent claim, expired lease recovery và stale completion qua `PostgresJobIT` |
 | backend | backend-release-evidence | Kiểm JUnit đủ mandatory classes, không failure/error/skip; source SHA, JAR và packaged asset/schema/migration hashes phải khớp build receipt |
 | parity | java-python-contract-parity | Cùng16 shared positive/negative cases qua Java consumer, Python validator và oracle; Java corpus hash phải khớp |
 | application-artifact | tested-application-artifact-smoke | Download đúng JAR của job test trong cùng run, verify receipt rồi boot/CSRF/static/401; không rebuild |

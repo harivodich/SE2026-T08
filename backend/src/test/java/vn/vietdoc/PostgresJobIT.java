@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ class PostgresJobIT {
           var versions = statement.executeQuery(
               "select version from flyway_schema_history where success=true order by installed_rank desc limit 1")) {
         assertTrue(versions.next());
-        assertEquals("2", versions.getString(1));
+        assertEquals("3", versions.getString(1));
       }
     }
     String username = "pg-owner-" + Store.id();
@@ -104,6 +105,47 @@ class PostgresJobIT {
     } finally {
       go.countDown();
       pool.shutdownNow();
+    }
+  }
+
+  @Test
+  void databaseRejectsCrossDocumentReferencesAndInvalidVersions() throws Exception {
+    String username = "pg-constraints-" + Store.id();
+    auth.seed(username, "integration-password");
+    var owner = (AuthService.Identity) auth.login(username, "integration-password").get("user");
+    byte[] image = Files.readAllBytes(Path.of("..", "samples", "receipt-demo.png"));
+    var file = new MockMultipartFile("file", "receipt.png", "image/png", image);
+    var first = documents.upload(owner.id(), file, "receipt", Store.id());
+    var second = documents.upload(owner.id(), file, "receipt", Store.id());
+    var firstJob = jobs.create(first.id(), owner.id(), Store.id());
+    var secondJob = jobs.create(second.id(), owner.id(), Store.id());
+    var firstClaim = jobs.claim(firstJob.id());
+    var secondClaim = jobs.claim(secondJob.id());
+    assertTrue(jobs.complete(firstClaim, ai.extract(firstClaim)));
+    assertTrue(jobs.complete(secondClaim, ai.extract(secondClaim)));
+    String firstHead = documents.get(first.id(), owner.id()).headRevisionId();
+    String secondHead = documents.get(second.id(), owner.id()).headRevisionId();
+    var active = jobs.create(second.id(), owner.id(), Store.id());
+
+    assertSqlState("23503", "update documents set head_revision_id=? where id=?",
+        secondHead, first.id());
+    assertSqlState("23503", "update documents set active_job_id=? where id=?",
+        active.id(), first.id());
+    assertSqlState("23503", "update revisions set parent_id=? where id=?",
+        secondHead, firstHead);
+    assertSqlState("23503", "update revisions set run_id=? where id=?",
+        secondClaim.runId(), firstHead);
+    assertSqlState("23514", "update documents set version=0 where id=?", first.id());
+    assertSqlState("23514", "update jobs set attempts=-1 where id=?", firstJob.id());
+    assertEquals(firstHead, documents.get(first.id(), owner.id()).headRevisionId());
+  }
+
+  private void assertSqlState(String expected, String sql, String... values) throws Exception {
+    try (var connection = dataSource.getConnection();
+        var statement = connection.prepareStatement(sql)) {
+      for (int i = 0; i < values.length; i++) statement.setString(i + 1, values[i]);
+      SQLException error = assertThrows(SQLException.class, statement::executeUpdate);
+      assertEquals(expected, error.getSQLState());
     }
   }
 
