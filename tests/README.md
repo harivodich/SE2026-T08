@@ -104,7 +104,9 @@ Windows 11 build26200, i7-12700H (14 cores/20 logical CPUs), RAM16GiB,
 Python3.13.7, Paddle CPU4. Mười pins trong extra `ai1-ocr` khớp `pyproject.toml`;
 Tesseract5.5.3; model set `ppocrv5-det-tess-vie-50446e5d01ac-b6b49293d95d`
 được verify đúng file set/hash trong `paddle_adapter.MODELS`, không download.
-Font Arial SHA-256 `b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a`.
+Font Arial SHA-256 tại lần đo 09/11 là `b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a`;
+font trên host R5 ngày 27/11 có SHA-256 `edfbd22a3d088fc2f5d7c79b8c9c732df6dc878a60f0a80be0f92a3c7a634404`.
+Kiểm hash font thực tế trong report mỗi lần chạy, không kế thừa pin lịch sử.
 Profile default: long edge2000, PDF200DPI, cap20MP, decode15s; geometry suite
 có thêm transforms do test dựng. `pip check` của fixture/native/Data đều PASS.
 Lệnh native ở trên thực chạy **3 passed,32 subtests,0 skipped**. Logs/JUnit,

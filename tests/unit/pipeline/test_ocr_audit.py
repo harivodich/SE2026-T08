@@ -18,6 +18,8 @@ from vietdoc.pipeline.ocr import OcrError
 from vietdoc.pipeline.ocr.handoff import review_manifest
 from vietdoc.pipeline.ocr.triage import build_ledger
 from vietdoc.pipeline.ocr import triage as triage_module
+from vietdoc.pipeline.ocr import profile_compare
+from vietdoc.pipeline.preprocess import PreprocessLimits
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
 
@@ -317,6 +319,9 @@ class TriageLedgerTest(unittest.TestCase):
         engine.recognize.return_value = page
         cls.native = cls.base / "native"
         review_manifest(cls.source, cls.manifest, cls.native, engine)
+        cls.candidate = cls.base / "candidate"
+        review_manifest(cls.source, cls.manifest, cls.candidate, engine,
+                        limits=PreprocessLimits(processed_long_edge=2600))
         release = cls.base / "release"
         release.mkdir()
         model = release / "fictional.bin"
@@ -454,6 +459,41 @@ class TriageLedgerTest(unittest.TestCase):
         with patch.object(triage_module, "draw_overlay", side_effect=render_then_mutate):
             with self.assertRaisesRegex(ValueError, "SOURCE_CHANGED_DURING_TRIAGE"):
                 self.run_ledger(handoff_root=native)
+        self.assertFalse(self.output.exists())
+
+    def run_compare(self, **overrides):
+        ids = [f"case-{i}" for i in range(8)]
+        options = dict(data_root=self.source, manifest=self.manifest,
+            manifest_sha256=sha(self.manifest), baseline_root=self.native,
+            baseline_report_sha256=sha(self.native / "report.json"), candidate_root=self.candidate,
+            candidate_report_sha256=sha(self.candidate / "report.json"),
+            membership_sha256=profile_compare._membership(ids), output_dir=self.output)
+        options.update(overrides)
+        with patch.object(profile_compare, "load_bundle", return_value=(read_json(self.manifest),
+                self.gold, [], {"status": "fixture-only"})):
+            return profile_compare.compare(**options)
+
+    def test_profile_compare_replays_exact_pair_and_preserves_accounting(self):
+        result = self.run_compare()
+        self.assertEqual(len(result["cases"]), 8)
+        self.assertEqual(result["accounting"]["baseline"]["requested"], 8)
+        self.assertEqual(result["accounting"]["candidate"]["ok"], 8)
+        self.assertEqual(result["profiles"]["baseline"]["processed_long_edge"], 2000)
+        self.assertEqual(result["profiles"]["candidate"]["processed_long_edge"], 2600)
+        self.assertEqual(result["metrics"]["baseline"]["all"]["cer"]["denominator"],
+                         result["metrics"]["candidate"]["all"]["cer"]["denominator"])
+        self.assertEqual(read_json(self.output / "compare.json"), result)
+
+    def test_profile_compare_rejects_bad_membership_or_wrong_overlay_without_output(self):
+        with self.assertRaisesRegex(ValueError, "MEMBERSHIP_MISMATCH"):
+            self.run_compare(membership_sha256="0" * 64)
+        self.assertFalse(self.output.exists())
+        candidate = self.case / "candidate"
+        shutil.copytree(self.candidate, candidate)
+        with Image.new("RGB", (100, 100), "black") as image:
+            image.save(candidate / "case-0/overlay.png")
+        with self.assertRaisesRegex(ValueError, "OVERLAY_CONTENT_MISMATCH"):
+            self.run_compare(candidate_root=candidate)
         self.assertFalse(self.output.exists())
 
 

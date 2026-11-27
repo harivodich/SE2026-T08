@@ -336,17 +336,21 @@ def main():
                         help="Maximum samples in the immutable manifest (default 20; D22 80; bounded to 200).")
     parser.add_argument("--fixture-fallback", action="store_true")
     parser.add_argument("--artifact-version", type=int, choices=(1,2), default=1)
+    parser.add_argument("--processed-long-edge", type=int, default=2000,
+                        help="Explicit OCR profile override; default remains 2000 pixels.")
     args = parser.parse_args()
     engine, stage, report_written = None, "input", False
     try:
         plan = _prepare_manifest(args.root, args.manifest, sample_ids=args.sample_ids,
                                  fixture_fallback=args.fixture_fallback,
                                  max_manifest_samples=args.max_manifest_samples)
+        stage = "profile"
+        limits = PreprocessLimits(processed_long_edge=args.processed_long_edge)
         stage = "engine_load"
         engine = VietnameseOcrEngine(args.model_root, artifact_version=args.artifact_version)
         engine.load()
         stage = "input"
-        report = _review_plan(plan, args.output_dir, engine)
+        report = _review_plan(plan, args.output_dir, engine, limits=limits)
         report_written = True
         payload = {"counts": report["counts"], "run_status": report["run_status"], "report_written": True}
         status = 0 if report["run_status"] == "completed" and report["counts"]["ok"] == report["counts"]["requested"] else 2
@@ -355,7 +359,8 @@ def main():
     except (OcrError, PreprocessError) as exc:
         payload, status = {"code": exc.code, "stage": stage, "report_written": False}, 2
     except ValueError:
-        payload, status = {"code": "MANIFEST_INVALID" if stage == "input" else "ENGINE_SETUP_FAILED",
+        payload, status = {"code": {"input": "MANIFEST_INVALID", "profile": "PROFILE_INVALID"}.get(
+                               stage, "ENGINE_SETUP_FAILED"),
                            "stage": stage, "report_written": False}, 2
     except Exception:
         payload, status = {"code": "UNEXPECTED_FAILURE", "stage": stage, "report_written": False}, 2
