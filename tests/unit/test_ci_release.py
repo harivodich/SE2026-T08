@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 import xml.etree.ElementTree as ET
 import zipfile
@@ -38,6 +39,72 @@ class NativeCommandTest(unittest.TestCase):
             settings['arbitrary-python-command'] = 'bad'
             path.write_text(json.dumps(settings))
             with self.assertRaises(ValueError):native_e2e.compute_command(18090, path)
+
+    def test_explicit_release_requires_manifest_pin_before_runtime_directory(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            with self.assertRaisesRegex(ValueError, 'pinned release manifest'):
+                native_e2e.run(Path('missing.jar'), root / 'run',
+                    'jdbc:postgresql://127.0.0.1:5432/isolated', 'java', 'a' * 40,
+                    models=root / 'models')
+            self.assertFalse((root / 'run').exists())
+            release = root / 'models' / 'candidate'
+            release.mkdir(parents=True)
+            (release / 'manifest.json').write_text('fictional manifest')
+            with self.assertRaisesRegex(ValueError, 'manifest missing or changed'):
+                native_e2e.run(Path('missing.jar'), root / 'run',
+                    'jdbc:postgresql://127.0.0.1:5432/isolated', 'java', 'a' * 40,
+                    models=root / 'models', manifest_id='candidate',
+                    release_manifest_sha256='0' * 64)
+            self.assertFalse((root / 'run').exists())
+
+    def test_candidate_preflight_rejects_changed_pins_and_selection(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            config = root / 'config.yaml'
+            config.write_text('fictional config')
+            snapshot = root / 'snapshot'
+            snapshot.mkdir()
+            (snapshot / 'manifest.json').write_text('fictional snapshot')
+            selection = root / 'extractor.json'
+            settings = {'config': str(config), 'config-sha256': native_e2e.sha(config),
+                        'snapshot': str(snapshot),
+                        'snapshot-manifest-sha256': native_e2e.sha(snapshot / 'manifest.json')}
+            selected = dict(config_sha256=settings['config-sha256'],
+                            snapshot_manifest_sha256=settings['snapshot-manifest-sha256'],
+                            run_manifest_sha256=None)
+            selection.write_text(json.dumps(selected))
+            release = SimpleNamespace(files=[SimpleNamespace(path='extractor.json')],
+                                      file=lambda name: selection)
+            native_e2e.preflight_candidate(release, settings)
+            config.write_text('changed config')
+            with self.assertRaisesRegex(ValueError, 'config pin mismatch'):
+                native_e2e.preflight_candidate(release, settings)
+            config.write_text('fictional config')
+            selected['config_sha256'] = 'b' * 64
+            selection.write_text(json.dumps(selected))
+            with self.assertRaisesRegex(ValueError, 'selection does not match pins'):
+                native_e2e.preflight_candidate(release, settings)
+
+    def test_readiness_retries_only_transient_status(self):
+        class Process:
+            def poll(self):return None
+        class Client:
+            calls = 0
+            def json(self, method, path):
+                self.calls += 1
+                if self.calls == 1:raise native_e2e.HttpStatusMismatch(method, path, 200, 503)
+                return {'status': 'READY'}
+        client = Client()
+        self.assertEqual('READY', native_e2e.wait_ready(client, '/health/ready', [Process()],
+                                                       timeout=2, poll_seconds=0)['status'])
+        self.assertEqual(2, client.calls)
+        class Unauthorized(Client):
+            def json(self, method, path):
+                raise native_e2e.HttpStatusMismatch(method, path, 200, 401)
+        with self.assertRaises(native_e2e.HttpStatusMismatch):
+            native_e2e.wait_ready(Unauthorized(), '/health/ready', [Process()],
+                                 timeout=2, poll_seconds=0)
 
 
 class ArtifactEvidenceTest(unittest.TestCase):
