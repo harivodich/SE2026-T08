@@ -130,6 +130,11 @@ function reviewSaveBody() {
   };
 }
 
+function saveBlockedByRemote() {
+  // Only an exact retry may cross the polling guard; the server still enforces CAS.
+  return remoteChanged() && !api().hasPendingSave(state.document.id, reviewSaveBody());
+}
+
 async function autosaveReview() {
   if (!state.document?.head || !hasUnsavedReview() || state.busy || autosaveFlight ||
       remoteChanged() || autosaveBlocked) return;
@@ -518,7 +523,7 @@ async function rerun() {
 
 async function saveReview() {
   const document = state.document;
-  if (!document?.head || state.busy || autosaveFlight || remoteChanged() || autosaveBlocked ||
+  if (!document?.head || state.busy || autosaveFlight || saveBlockedByRemote() || autosaveBlocked ||
       !hasUnsavedReview()) return;
   const session = sessionGeneration, navigation = navigationGeneration;
   const id = document.id;
@@ -528,7 +533,9 @@ async function saveReview() {
   try {
     const updated = await api().save(document.id, body);
     if (!currentView(session, navigation, id)) return;
+    const newerRemote = state.remoteDocument?.version > updated.version ? state.remoteDocument : null;
     setEditorDocument(updated);
+    state.remoteDocument = newerRemote;
     state.message = { text: "Đã lưu thành revision mới. Prediction và các revision trước vẫn được giữ nguyên.", kind: "success" };
     const revisions = await api().revisions(document.id);
     if (!currentView(session, navigation, id)) return;
@@ -660,7 +667,7 @@ function syncDraftControls() {
   if (status) status.textContent = autosaveBlocked ? "Chưa lưu: có xung đột" :
     autosaveFlight ? "Đang lưu bản nháp…" : pending ? "Có thay đổi chưa lưu" : "Đã lưu bản nháp";
   const saveButton = root.querySelector('[data-action="save"]');
-  if (saveButton) saveButton.disabled = !pending || remote || state.busy || !!autosaveFlight || autosaveBlocked;
+  if (saveButton) saveButton.disabled = !pending || saveBlockedByRemote() || state.busy || !!autosaveFlight || autosaveBlocked;
   const approveButton = root.querySelector('[data-action="approve"]');
   if (approveButton && (pending || remote || state.busy || autosaveFlight)) approveButton.disabled = true;
   const rerunButton = root.querySelector('[data-action="rerun"]');
@@ -910,7 +917,7 @@ function renderIssues(issues) {
 function renderReviewActions(document, warnings, blockers, allWarningsChecked) {
   const pending = hasUnsavedReview();
   const canApprove = state.reviewed && !pending && !remoteChanged() && !blockers.length && allWarningsChecked && !state.busy && !autosaveFlight;
-  const disabledSave = !pending || remoteChanged() || state.busy || !!autosaveFlight || autosaveBlocked || !document.head;
+  const disabledSave = !pending || saveBlockedByRemote() || state.busy || !!autosaveFlight || autosaveBlocked || !document.head;
   return `<div class="field reason-field"><label for="review-reason">Ghi chú đối chiếu / lý do</label><input id="review-reason" data-reason value="${escapeHtml(state.reviewReason)}" maxlength="1000" ${state.busy ? "disabled" : ""} /></div>
     <label class="approval-check"><input type="checkbox" data-reviewed ${state.reviewed ? "checked" : ""} ${state.busy ? "disabled" : ""} /><span>Tôi đã đối chiếu dữ liệu với ảnh nguồn và xác nhận mức độ đầy đủ của chứng từ.</span></label>
     ${pending ? '<div class="notice">Có thay đổi hoặc xác nhận field chưa lưu. Hãy lưu thành revision mới trước khi duyệt hoặc chạy xử lý lại.</div>' : ""}

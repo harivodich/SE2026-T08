@@ -1,6 +1,8 @@
 package vn.vietdoc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -104,6 +106,71 @@ class PostgresJobIT {
       assertEquals("QUEUED", jobs.get(secondJob.id(), owner.id()).state());
     } finally {
       go.countDown();
+      pool.shutdownNow();
+    }
+  }
+
+  @Test
+  void staleRecoverySelectionCannotTerminateANewFinalClaim() throws Exception {
+    String username = "pg-recovery-race-" + Store.id();
+    auth.seed(username, "integration-password");
+    var owner = (AuthService.Identity) auth.login(username, "integration-password").get("user");
+    var file = new MockMultipartFile("file", "receipt.png", "image/png",
+        Files.readAllBytes(Path.of("..", "samples", "receipt-demo.png")));
+    var document = documents.upload(owner.id(), file, "receipt", Store.id());
+    var job = jobs.create(document.id(), owner.id(), Store.id());
+    var first = jobs.claim(job.id());
+    assertNotNull(first);
+    var tx = new TransactionTemplate(transactions);
+    tx.execute(status -> {
+      var row = store.job(job.id(), true);
+      row.deadline = Instant.now().plusSeconds(600);
+      row.leaseUntil = Instant.now().minusSeconds(30);
+      return null;
+    });
+    jobs.recover();
+    var second = jobs.claim(job.id());
+    assertNotNull(second);
+    tx.execute(status -> {
+      store.job(job.id(), true).leaseUntil = Instant.now().minusSeconds(30);
+      return null;
+    });
+
+    // Intercept only the point before locking; all queries/locks/refreshes use PostgreSQL.
+    var selected = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    Store slowStore = mock(Store.class, delegatesTo(store));
+    doAnswer(call -> {
+      selected.countDown();
+      assertTrue(resume.await(15, TimeUnit.SECONDS), "replacement claim must finish first");
+      return store.locked(document.id());
+    }).when(slowStore).locked(document.id());
+    var slowRecovery = new JobService(slowStore, null, null, null, null,
+        "demo", "fixture", 180, 60, 3, "", "", "", "");
+    var pool = Executors.newSingleThreadExecutor();
+    try {
+      Future<?> slow = pool.submit(() -> new TransactionTemplate(transactions).execute(status -> {
+        slowRecovery.recover();
+        return null;
+      }));
+      assertTrue(selected.await(15, TimeUnit.SECONDS), "expired selection must precede replacement");
+      jobs.recover();
+      var replacement = jobs.claim(job.id());
+      assertNotNull(replacement);
+      resume.countDown();
+      slow.get(15, TimeUnit.SECONDS);
+      assertEquals("RUNNING", jobs.get(job.id(), owner.id()).state());
+      tx.execute(status -> {
+        var row = store.job(job.id(), false);
+        assertEquals(3, row.attempts);
+        assertEquals(replacement.token(), row.leaseToken);
+        assertEquals(job.id(), store.locked(document.id()).activeJobId);
+        return null;
+      });
+      assertFalse(jobs.complete(second, ai.extract(second)));
+      assertTrue(jobs.complete(replacement, ai.extract(replacement)));
+    } finally {
+      resume.countDown();
       pool.shutdownNow();
     }
   }

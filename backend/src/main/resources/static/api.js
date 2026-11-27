@@ -87,15 +87,28 @@ export class ApiClient {
     return this.reviewMutation(documentId, "adopt-run", "POST", body);
   }
 
+  hasPendingSave(documentId, body) {
+    const path = `/documents/${encodeURIComponent(documentId)}/review`;
+    return pendingMutations.get(path)?.body === JSON.stringify(body);
+  }
+
   async reviewMutation(documentId, operation, method, body) {
     const path = `/documents/${encodeURIComponent(documentId)}/${operation}`;
     const serialized = JSON.stringify(body);
     const previous = pendingMutations.get(path);
     const key = previous?.body === serialized ? previous.key : crypto.randomUUID();
     pendingMutations.set(path, { body: serialized, key });
-    const result = await this.request(path, {
-      method, headers: { "Idempotency-Key": key }, body: serialized,
-    });
+    let result;
+    try {
+      result = await this.request(path, {
+        method, headers: { "Idempotency-Key": key }, body: serialized,
+      });
+    } catch (error) {
+      // A definite rejection cannot be reconciled by replaying a lost response.
+      if (error instanceof ApiError && error.status < 500 &&
+          pendingMutations.get(path)?.key === key) pendingMutations.delete(path);
+      throw error;
+    }
     if (pendingMutations.get(path)?.key === key) pendingMutations.delete(path);
     return result;
   }

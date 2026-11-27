@@ -304,8 +304,13 @@ public class JobService {
       Job j = store.job(found.id, true);
       store.em().refresh(j);
       if (!Set.of("QUEUED", "RUNNING", "RETRYING").contains(j.state)) continue;
-      if (j.deadline.isBefore(now) || j.attempts >= maxAttempts) {
-        boolean deadlineExceeded = j.deadline.isBefore(now);
+      // The selection may predate another runner's recovery and fresh claim.
+      Instant lockedNow = Instant.now();
+      boolean deadlineExceeded = j.deadline.isBefore(lockedNow);
+      boolean leaseExpired = j.state.equals("RUNNING") && j.leaseUntil != null
+          && j.leaseUntil.isBefore(lockedNow);
+      if (!deadlineExceeded && !leaseExpired) continue;
+      if (deadlineExceeded || j.attempts >= maxAttempts) {
         terminal(
             d,
             j,
@@ -313,14 +318,14 @@ public class JobService {
             deadlineExceeded ? "DEADLINE_EXCEEDED" : "ATTEMPTS_EXHAUSTED",
             deadlineExceeded ? "Job không hoàn tất trong giới hạn; hãy chạy lại."
                 : "Job đã dùng hết số lần thử.");
-      } else if (j.state.equals("RUNNING") && j.leaseUntil != null && j.leaseUntil.isBefore(now)) {
+      } else if (leaseExpired) {
         j.state = "RETRYING";
         j.stage = "WAITING";
         j.leaseToken = null;
         j.attemptId = null;
         j.leaseUntil = null;
-        j.nextAttemptAt = now;
-        j.updatedAt = now;
+        j.nextAttemptAt = lockedNow;
+        j.updatedAt = lockedNow;
       }
     }
   }
