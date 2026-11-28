@@ -9,6 +9,7 @@ import http.cookiejar
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import shutil
 import signal
@@ -24,6 +25,13 @@ import uuid
 from scripts.ci.application import require, sha
 
 ROOT = Path(__file__).resolve().parents[2]
+SHA256 = re.compile(r'[0-9a-f]{64}\Z')
+
+
+class HttpStatusMismatch(ValueError):
+    def __init__(self, method, path, expected, actual):
+        self.actual = actual
+        super().__init__(f'{method} {path}: expected{expected}, got{actual}')
 
 
 def provision(models):
@@ -50,15 +58,68 @@ def compute_command(port, candidate_settings=None):
     if candidate_settings is None:
         return [sys.executable, '-m', 'uvicorn', 'vietdoc.entrypoints.api.app:create_runtime_app',
                 '--factory', '--host', '127.0.0.1', '--port', str(port), '--no-access-log'], 'b0'
-    settings = json.loads(candidate_settings.read_text(encoding='utf8'))
+    settings = candidate_options(candidate_settings)
+    arguments = [value for name, value in sorted(settings.items()) for value in ('--' + name, value)]
+    return [sys.executable, '-m', 'scripts.serve_compute_candidate', '--extractor', 'qwen-local', *arguments], 'qwen-local'
+
+
+def candidate_options(candidate_settings):
+    require(candidate_settings.is_file() and candidate_settings.stat().st_size <= 16 * 1024,
+            'Candidate settings missing or too large')
+    def unique(pairs):
+        value = {}
+        for key, item in pairs:
+            require(key not in value, 'Duplicate candidate setting')
+            value[key] = item
+        return value
+    settings = json.loads(candidate_settings.read_text(encoding='utf8'), object_pairs_hook=unique)
     required = {'config', 'config-sha256', 'snapshot', 'snapshot-manifest-sha256'}
     allowed = required | {'run-dir', 'run-manifest-sha256', 'ocr-artifact-version'}
     require(isinstance(settings, dict) and required <= settings.keys() <= allowed,
             'Candidate needs explicit config/snapshot pins, without arbitrary command options')
     require(('run-dir' in settings) == ('run-manifest-sha256' in settings), 'Candidate adapter pins incomplete')
     require(all(isinstance(value, str) and value for value in settings.values()), 'Candidate settings must be strings')
-    arguments = [value for name, value in sorted(settings.items()) for value in ('--' + name, value)]
-    return [sys.executable, '-m', 'scripts.serve_compute_candidate', '--extractor', 'qwen-local', *arguments], 'qwen-local'
+    for name in ('config-sha256', 'snapshot-manifest-sha256', 'run-manifest-sha256'):
+        if name in settings: require(SHA256.fullmatch(settings[name]) is not None, 'Invalid candidate SHA256 pin')
+    if 'ocr-artifact-version' in settings:
+        require(settings['ocr-artifact-version'] in ('1', '2'), 'Invalid OCR artifact version')
+    return settings
+
+
+def preflight_candidate(release, settings):
+    paths = [('config', Path(settings['config'])),
+             ('snapshot-manifest', Path(settings['snapshot']) / 'manifest.json')]
+    if 'run-dir' in settings:
+        paths.append(('run-manifest', Path(settings['run-dir']) / 'run_manifest.json'))
+    for name, path in paths:
+        require(path.is_absolute() and path.is_file() and not path.is_symlink(),
+                f'Candidate {name} missing or unsafe')
+        require(sha(path) == settings[name + '-sha256'], f'Candidate {name} pin mismatch')
+    expected = dict(config_sha256=settings['config-sha256'],
+                    snapshot_manifest_sha256=settings['snapshot-manifest-sha256'],
+                    run_manifest_sha256=settings.get('run-manifest-sha256'))
+    require('extractor.json' in {file.path for file in release.files},
+            'Candidate release missing extractor selection')
+    try:
+        actual = json.loads(release.file('extractor.json').read_text(encoding='utf8'))
+    except (UnicodeError, ValueError) as error:
+        raise ValueError('Candidate extractor selection is invalid') from error
+    require(actual == expected, 'Candidate extractor selection does not match pins')
+
+
+def wait_ready(client, path, processes, timeout=120, poll_seconds=1):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        require(all(process.poll() is None for process in processes),
+                'Test service exited before readiness')
+        try:
+            return client.json('GET', path)
+        except HttpStatusMismatch as error:
+            if error.actual != 503: raise
+        except (URLError, TimeoutError):
+            pass
+        time.sleep(poll_seconds)
+    raise TimeoutError('Test service readiness timeout')
 
 
 class Client:
@@ -81,17 +142,27 @@ class Client:
         with response:
             content = response.read(4 * 1024 * 1024 + 1)
             require(len(content) <= 4 * 1024 * 1024, 'Oversize test response')
-            require(response.status == expected, f'{method} {path}: expected{expected}, got{response.status}')
+            if response.status != expected:
+                raise HttpStatusMismatch(method, path, expected, response.status)
         return content
 
     def json(self, method, path, expected=200, **kwargs):
         return json.loads(self.request(method, path, expected, **kwargs))
 
 
-def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id='ci-native-b0-v1', candidate_settings=None, pg_bin=None):
+def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id='ci-native-b0-v1',
+        candidate_settings=None, pg_bin=None, release_manifest_sha256=None):
     require(database_url.startswith('jdbc:postgresql://127.0.0.1:') or
             database_url.startswith('jdbc:postgresql://localhost:'), 'Use isolated loopback PostgreSQL only')
     require(candidate_settings is None or models is not None, 'Candidate model release must be provisioned explicitly')
+    require((models is None) == (release_manifest_sha256 is None),
+            'Explicit models need a pinned release manifest SHA256')
+    if models is not None:
+        require(SHA256.fullmatch(release_manifest_sha256) is not None, 'Invalid release manifest SHA256 pin')
+        manifest = models / manifest_id / 'manifest.json'
+        require(manifest.is_file() and not manifest.is_symlink() and sha(manifest) == release_manifest_sha256,
+                'Release manifest missing or changed')
+    settings = candidate_options(candidate_settings) if candidate_settings is not None else None
     run_root.mkdir(parents=True, exist_ok=False)
     manifest_id = provision(run_root / 'models') if models is None else manifest_id
     models = models or run_root / 'models'
@@ -99,6 +170,7 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
     from vietdoc.ml.release_manifest import load_release
     release = load_release(models, manifest_id)
     require(release is not None, 'Native release missing')
+    if settings is not None: preflight_candidate(release, settings)
     token, password = secrets.token_urlsafe(32), secrets.token_urlsafe(24)
     attempts, storage = run_root / 'attempts', run_root / 'java-storage'
     attempts.mkdir()
@@ -112,15 +184,6 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
                                    start_new_session=os.name != 'nt')
         processes.append(process)
         return process
-    def wait(client, path):
-        deadline = time.monotonic() + 120
-        while time.monotonic() < deadline:
-            require(all(p.poll() is None for p in processes), 'Test service exited before readiness')
-            try:
-                return client.json('GET', path)
-            except (URLError, TimeoutError, ValueError):
-                time.sleep(1)
-        raise TimeoutError('Test service readiness timeout')
     try:
         env = dict(os.environ, PYTHONPATH=str(ROOT / 'src'), HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1',
                    PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK='true', VIETDOC_SERVICE_TOKEN=token,
@@ -129,7 +192,7 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
                    VIETDOC_HOST='127.0.0.1', VIETDOC_PORT=str(ai_port))
         command, extractor = compute_command(ai_port, candidate_settings)
         start(command, env, 'compute')
-        ready = wait(Client(f'http://127.0.0.1:{ai_port}'), '/health/ready')
+        ready = wait_ready(Client(f'http://127.0.0.1:{ai_port}'), '/health/ready', processes)
         require(ready['status'] == 'READY' and manifest_id in ready['releases'], 'Native provider not ready')
         env = dict(os.environ, SERVER_PORT=str(web_port), DATABASE_URL=database_url,
                    DATABASE_USER=os.environ['VIETDOC_PG_TEST_USER'], DATABASE_PASSWORD=os.environ['VIETDOC_PG_TEST_PASSWORD'],
@@ -138,14 +201,18 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
                    PIPELINE_MANIFEST=manifest_id, SEED_USERNAME='ci-native-owner', SEED_PASSWORD=password)
         java_command = [java, '-Duser.timezone=UTC', '-Dserver.address=127.0.0.1', '-jar', str(jar.resolve())]
         java_process = start(java_command, env, 'java')
-        wait(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health')
+        wait_ready(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health', processes)
         client = Client(f'http://127.0.0.1:{web_port}/api/v1')
         client.csrf = client.json('GET', '/auth/csrf')['token']
         client.json('POST', '/auth/session', payload=dict(username='ci-native-owner', password=password))
         client.csrf = client.json('GET', '/auth/csrf')['token']
         result = dict(version=1, source_sha=source_sha, jar_sha256=sha(jar), actual_native_provider=True,
                       database='PostgreSQL', model_release=manifest_id, candidate_id=manifest_id,
-                      extractor=extractor, cases=[],
+                      release_manifest_sha256=sha(release.root / 'manifest.json'), extractor=extractor,
+                      candidate_pins=None if settings is None else {
+                          name: settings.get(name) for name in
+                          ('config-sha256', 'snapshot-manifest-sha256', 'run-manifest-sha256',
+                           'ocr-artifact-version')}, cases=[],
                       scope='Actual native application integration; quality/final acceptance remains separate')
         for kind, extension, total in [('receipt', 'png', '45000'), ('invoice', 'pdf', '110000')]:
             sample = ROOT / 'samples' / f'{kind}-demo.{extension}'
@@ -231,7 +298,7 @@ def run(jar, run_root, database_url, java, source_sha, models=None, manifest_id=
             restored_env = dict(env, DATABASE_URL=database_url.rsplit('/', 1)[0] + '/' + restored_database,
                                 STORAGE_ROOT=str(restored_storage), WORKER_ENABLED='false')
             start(java_command, restored_env, 'java-restored')
-            wait(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health')
+            wait_ready(Client(f'http://127.0.0.1:{web_port}'), '/actuator/health', processes)
             replay = Client(client.base)
             replay.csrf = replay.json('GET', '/auth/csrf')['token']
             replay.json('POST', '/auth/session', payload=dict(username='ci-native-owner', password=password))
@@ -271,12 +338,14 @@ def main():
     parser.add_argument('--sha', required=True)
     parser.add_argument('--models', type=Path)
     parser.add_argument('--manifest-id', default='ci-native-b0-v1')
+    parser.add_argument('--release-manifest-sha256', help='Required SHA256 pin when --models is supplied')
     parser.add_argument('--candidate-settings', type=Path, help='Explicit pinned qwen-local config; no silent B0 fallback')
     parser.add_argument('--pg-bin', type=Path, help='PostgreSQL client directory; enables actual isolated backup/restore')
     parser.add_argument('--java', default='java')
     args = parser.parse_args()
     result = run(args.jar, args.run_root.resolve(), args.database_url, args.java, args.sha,
-                 args.models, args.manifest_id, args.candidate_settings, args.pg_bin)
+                 args.models, args.manifest_id, args.candidate_settings, args.pg_bin,
+                 args.release_manifest_sha256)
     print(json.dumps(result))
 
 

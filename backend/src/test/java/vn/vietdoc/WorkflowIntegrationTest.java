@@ -120,6 +120,31 @@ class WorkflowIntegrationTest {
   }
 
   @Test
+  void reviewAndApprovalRetryReplayOriginalResponseWithoutDuplicateRevision() throws Exception {
+    var initial = extracted("receipt");
+    var saveInput = edit(initial, "46000");
+    String saveKey = Store.id();
+    var saved = review.save(initial.id(), owner.id(), saveInput, saveKey);
+    var replayed = review.save(initial.id(), owner.id(), saveInput, saveKey);
+    assertEquals(saved.headRevisionId(), replayed.headRevisionId());
+    assertEquals(saved.version(), replayed.version());
+    assertEquals(2, documents.revisions(initial.id(), owner.id()).items().size());
+
+    var differentInput = edit(initial, "47000");
+    assertEquals("IDEMPOTENCY_CONFLICT", assertThrows(ApiException.class,
+        () -> review.save(initial.id(), owner.id(), differentInput, saveKey)).code);
+    var approval = new Requests.Approve(saved.headRevisionId(), saved.version(), true,
+        warnings(saved), "Đã đối chiếu toàn bộ chứng từ");
+    String approveKey = Store.id();
+    var approved = review.approve(initial.id(), owner.id(), approval, approveKey);
+    var approvalReplay = review.approve(initial.id(), owner.id(), approval, approveKey);
+    assertEquals(approved.version(), approvalReplay.version());
+    assertEquals(approved.headRevisionId(), approvalReplay.headRevisionId());
+    assertEquals(approved.version(), documents.get(initial.id(), owner.id()).version());
+    assertEquals(saved.version(), review.save(initial.id(), owner.id(), saveInput, saveKey).version());
+  }
+
+  @Test
   void receiptSaveApproveExportAndRerunPreserveSnapshots() throws Exception {
     var d = extracted("receipt");
     String prediction = json.write(documents.runs(d.id(), owner.id()).items().get(0).result());
@@ -408,9 +433,14 @@ class WorkflowIntegrationTest {
         "ACTIVE_JOB_EXISTS",
         assertThrows(ApiException.class, () -> jobs.create(d.id(), owner.id(), Store.id())).code);
     var c = jobs.claim(j.id());
-    jobs.cancel(j.id(), owner.id(), "RUNNING");
+    var cancelled = jobs.cancel(j.id(), owner.id(), "RUNNING");
+    assertEquals("CANCELLED", cancelled.state());
+    assertEquals("CANCELLED", jobs.cancel(j.id(), owner.id(), "RUNNING").state());
     assertFalse(jobs.complete(c, ai.extract(c)));
     assertNull(documents.get(d.id(), owner.id()).head());
+    var completed = extracted("invoice").job();
+    assertEquals("JOB_TERMINAL",
+        assertThrows(ApiException.class, () -> jobs.cancel(completed.id(), owner.id(), "RUNNING")).code);
   }
 
   @Test
@@ -433,6 +463,25 @@ class WorkflowIntegrationTest {
     assertNotEquals(old.runId(), current.runId());
     assertFalse(jobs.complete(old, ai.extract(old)));
     assertTrue(jobs.complete(current, ai.extract(current)));
+  }
+
+  @Test
+  void exhaustedLeaseRecoveryReportsAttemptLimitAndRejectsLateCompletion() throws Exception {
+    var d = documents.upload(owner.id(), sample("receipt", "png"), "receipt", Store.id());
+    var j = jobs.create(d.id(), owner.id(), Store.id());
+    var claim = jobs.claim(j.id());
+    new TransactionTemplate(tm).execute(s -> {
+      var job = store.job(j.id(), true);
+      job.attempts = 3;
+      job.leaseUntil = Instant.now().minusSeconds(1);
+      return null;
+    });
+    jobs.recover();
+    var failed = jobs.get(j.id(), owner.id());
+    assertEquals("FAILED", failed.state());
+    assertEquals("ATTEMPTS_EXHAUSTED", failed.errorCode());
+    assertFalse(jobs.complete(claim, ai.extract(claim)));
+    assertTrue(documents.runs(d.id(), owner.id()).items().isEmpty());
   }
 
   @Test

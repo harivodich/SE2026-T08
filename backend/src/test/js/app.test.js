@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import * as domain from "../../main/resources/static/domain.js";
+import { ApiClient as ReviewApiClient } from "../../main/resources/static/api.js";
 
 const source = readFileSync(new URL("../../main/resources/static/app.js", import.meta.url), "utf8")
   .replace(/import \{[\s\S]*?\} from "\.\/(?:api|domain)\.js";/g, "")
@@ -55,7 +56,8 @@ async function harness(routes = {}) {
     runs(id) { return routes.runs?.(id) ?? Promise.resolve({ items: [] }); }
     page(id, options) { return routes.page?.(id, options) ?? Promise.resolve({ url: id }); }
     listDocuments() { return routes.listDocuments(); }
-    save(id, body) { return routes.save(id, body); }
+    save(id, body) { return routes.reviewClient ? routes.reviewClient.save(id, body) : routes.save(id, body); }
+    hasPendingSave(id, body) { return routes.reviewClient?.hasPendingSave(id, body) ?? false; }
     request(path) { return routes.request?.(path) ?? Promise.resolve({ state: "QUEUED" }); }
     createJob(id) { return routes.createJob?.(id) ?? Promise.resolve({ id: "job", state: "QUEUED" }); }
     approve(id, body) { return routes.approve?.(id, body) ?? Promise.resolve(doc(id, 2)); }
@@ -132,6 +134,75 @@ test("polling preserves editor base and prevents silent save over a newer head",
   await app.saveReview();
   assert.equal(saves, 0);
   assert.match(app.root.innerHTML, /data-remote-notice >Chứng từ đã thay đổi/);
+});
+
+for (const autosave of [false, true]) {
+  for (const remoteVersion of [2, 3]) {
+    test(`lost ${autosave ? "automatic" : "manual"} save can replay after poll v${remoteVersion}`, async () => {
+      const id = `retry-${autosave}-${remoteVersion}`;
+      const original = doc(id, 1), committed = doc(id, 2, "200");
+      let remote = original, writes = 0;
+      const calls = [];
+      const client = new ReviewApiClient();
+      client.request = async (_path, options) => {
+        calls.push(options);
+        if (calls.length === 1) {
+          writes++;
+          remote = committed;
+          throw new Error("response lost after commit");
+        }
+        assert.equal(options.headers["Idempotency-Key"], calls[0].headers["Idempotency-Key"]);
+        assert.equal(options.body, calls[0].body);
+        return committed; // Receipt replay returns the original result, not a new write.
+      };
+      const app = await harness({
+        reviewClient: client, document: async () => original,
+        listDocuments: async () => ({ items: [remote] }),
+      });
+      await app.openDocument(id);
+      app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+      if (autosave) await app.advance(700);
+      else await app.saveReview();
+      if (remoteVersion === 3) remote = doc(id, 3, "300");
+      await app.refreshDocuments();
+      assert.equal(app.state.editorBase.version, 1);
+      assert.equal(app.controls['[data-action="save"]'].disabled, false);
+      await app.saveReview();
+      assert.equal(calls.length, 2);
+      assert.equal(writes, 1);
+      assert.equal(app.state.editorBase.version, 2);
+      assert.equal(app.state.payload.total_amount, "200");
+      assert.equal(app.state.remoteDocument?.version ?? null, remoteVersion === 3 ? 3 : null);
+      // An unrelated newer head remains guarded, including after a successful replay.
+      if (remoteVersion === 3) {
+        app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "400" });
+        await app.saveReview();
+        assert.equal(calls.length, 2);
+        assert.equal(app.controls['[data-action="save"]'].disabled, true);
+      }
+    });
+  }
+}
+
+test("changed draft cannot reuse a lost save to cross the remote-head guard", async () => {
+  const original = doc("changed-retry", 1), remote = doc("changed-retry", 2, "200");
+  let calls = 0;
+  const client = new ReviewApiClient();
+  client.request = async () => { calls++; throw new Error("response lost"); };
+  const app = await harness({
+    reviewClient: client, document: async () => original,
+    listDocuments: async () => ({ items: [remote] }),
+  });
+  await app.openDocument(original.id);
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "200" });
+  await app.saveReview();
+  await app.refreshDocuments();
+  app.updateBoundValue({ dataset: { scalar: "total_amount" }, value: "250" });
+  await app.saveReview();
+  await app.advance(1000);
+  assert.equal(calls, 1);
+  assert.equal(app.controls['[data-action="save"]'].disabled, true);
+  assert.equal(app.state.payload.total_amount, "250");
 });
 
 test("late detail and image responses cannot replace the selected document", async () => {

@@ -249,4 +249,30 @@ public final class Entities {
     @Column(name = "created_at")
     public Instant createdAt;
   }
+
+  @Entity(name = "ReviewMutationReceipt")
+  @Table(name = "review_mutation_receipts")
+  public static class ReviewMutationReceipt {
+    @Id public String id;
+
+    @Column(name = "owner_id")
+    public String ownerId;
+
+    @Column(name = "document_id")
+    public String documentId;
+
+    public String operation;
+
+    @Column(name = "request_key")
+    public String requestKey;
+
+    @Column(name = "request_hash")
+    public String requestHash;
+
+    @Column(name = "response_json", columnDefinition = "text")
+    public String responseJson;
+
+    @Column(name = "created_at")
+    public Instant createdAt;
+  }
 }

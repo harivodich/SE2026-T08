@@ -22,9 +22,9 @@ Error envelope đề xuất: code,message,request_id,details (field/issue paths 
 | GET /api/v1/documents/{id}/runs/{run}/page | same document/owner | 200 canonical image, checksum; run-specific |
 | GET /api/v1/documents/{id}/revisions | owner | 200 history/approval markers |
 | GET /api/v1/documents/{id}/revisions/{revision} | same document/owner | 200 payload/metadata/run/approval/version |
-| PATCH /api/v1/documents/{id}/review | full payload,base_revision_id,expected_version,reason | 201 appended draft + head/version/issues; CAS, stale409 |
-| POST /api/v1/documents/{id}/adopt | run_id,base_revision_id,expected_version,reason | 201 new draft; candidate same document, CAS |
-| POST /api/v1/documents/{id}/approve | revision_id,expected_version,review_confirmed,acknowledged_issue_ids,reason | 201 approval; current head/revalidate/blockers/completeness |
+| PATCH /api/v1/documents/{id}/review | full payload,base_revision_id,expected_version,reason; optional Idempotency-Key | 201 appended draft + head/version/issues; CAS, stale409 |
+| POST /api/v1/documents/{id}/adopt-run | run_id,base_revision_id,expected_version,reason; optional Idempotency-Key | 201 new draft; candidate same document, CAS |
+| POST /api/v1/documents/{id}/approve | revision_id,expected_version,review_confirmed,acknowledged_issue_ids,reason; optional Idempotency-Key | 201 approval; current head/revalidate/blockers/completeness |
 | POST /api/v1/documents/{id}/exports | explicit revision_id,format=json | 201 new artifact or200 existing; approved, deterministic exporter version |
 | GET /api/v1/documents/{id}/exports/{export}/download | same owner | 200 exact persisted bytes/checksum |
 | GET /api/v1/admin/model-releases | admin | approved/verified manifests available locally |
@@ -39,6 +39,8 @@ Pages /login, /documents (list/upload), /documents/{id} (viewer/editor/status), 
 Scalar editor nhận string/null; item add/delete giữ stable row_id_map; default row không fill missing thành0. JavaScript giữ dirty buffer/base version,409 giữ edits và cho compare/reload/reconcile có chủ ý. Polling stop khi terminal/unload, backoff khi hidden/error; OCR/model text escaped.
 
 All source overlay trên canonical page đúng revision.run_id. Save/adopt approved head tạo new draft, không làm mất old export. Approve controls không là validator authority.
+
+Với review/adopt-run/approve, cùng owner, operation và `Idempotency-Key` + body trả lại response gốc khi retry sau mất phản hồi; dùng lại key với body hoặc document khác trả `IDEMPOTENCY_CONFLICT` (409). Không có header thì giữ quy tắc CAS hiện tại. Browser giữ key của mutation chưa nhận phản hồi thành công để retry.
 
 ## Verification cần tạo
 
