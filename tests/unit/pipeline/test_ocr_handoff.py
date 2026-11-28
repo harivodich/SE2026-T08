@@ -18,6 +18,7 @@ from vietdoc.contracts.ocr import OcrPage, PreparedPage
 from vietdoc.pipeline.evidence import EvidenceRequest, match_evidence
 from vietdoc.pipeline.ocr import OcrError
 from vietdoc.pipeline.ocr import handoff
+from vietdoc.pipeline.ocr import benchmark as benchmark_module
 from vietdoc.pipeline.ocr.handoff import review_manifest
 from vietdoc.pipeline.ocr.paddle_adapter import VietnameseOcrEngine, _to_page
 from vietdoc.pipeline.geometry import canonical_quad
@@ -55,13 +56,51 @@ class HandoffTest(unittest.TestCase):
         return {"sample_id": name, "document_type": "receipt", "assets": {
             "png": {"path": name + ".png", "sha256": digest or sha256(self.data).hexdigest()}}}
 
-    def run_cli(self, manifest, output):
+    def run_cli(self, manifest, output, *extra):
         stream = StringIO()
         argv = ["ocr-handoff", "--root", str(self.root), "--manifest", str(manifest),
-                "--output-dir", str(output), "--model-root", "unused-local-models"]
+                "--output-dir", str(output), "--model-root", "unused-local-models", *extra]
         with patch("sys.argv", argv), patch("vietdoc.pipeline.ocr.paddle_adapter.VietnameseOcrEngine", return_value=self.engine), redirect_stdout(stream):
             status = handoff.main()
         return status, json.loads(stream.getvalue())
+
+    def test_explicit_long_edge_keeps_canonical_bytes_and_records_profile(self):
+        with Image.new("RGB", (503, 307), "white") as image, BytesIO() as stream:
+            image.save(stream, format="PNG")
+            source = stream.getvalue()
+        manifest = self.manifest([self.sample(data=source, digest=sha256(source).hexdigest())])
+        self.engine.recognize.side_effect = lambda loaded, **_: OcrPage(
+            0, *loaded.canonical.size, "fictional.test", ())
+        outputs = [self.root / "profile-2000", self.root / "profile-401"]
+        self.assertEqual(self.run_cli(manifest, outputs[0])[0], 0)
+        self.assertEqual(self.run_cli(manifest, outputs[1], "--processed-long-edge", "401")[0], 0)
+        reports = [json.loads((path / "report.json").read_text(encoding="utf-8")) for path in outputs]
+        self.assertEqual([r["profile"]["processed_long_edge"] for r in reports], [2000, 401])
+        self.assertEqual([r["samples"][0]["prepared"]["processed"]["width"] for r in reports], [503, 401])
+        self.assertEqual([r["samples"][0]["prepared"]["processed"]["height"] for r in reports], [307, 245])
+        self.assertEqual((outputs[0] / "tiny/canonical.png").read_bytes(),
+                         (outputs[1] / "tiny/canonical.png").read_bytes())
+        self.assertEqual(reports[0]["samples"][0]["canonical"], reports[1]["samples"][0]["canonical"])
+        failed = self.root / "profile-invalid"
+        self.assertEqual(self.run_cli(manifest, failed, "--processed-long-edge", "0"),
+                         (2, {"code": "PROFILE_INVALID", "stage": "profile", "report_written": False}))
+        self.assertFalse(failed.exists())
+
+    def test_benchmark_requires_each_type_and_row_bin_pair_before_native_load(self):
+        ids = [f"case-{index}" for index in range(10)]
+        bins = [("receipt", count) for count in (0, 0, 1, 3, 12)] + [
+            ("invoice", count) for count in (0, 1, 3, 12, 30)]
+        samples = [dict(sample_id=sid, document_type=kind, row_count=count, split="dev")
+                   for sid, (kind, count) in zip(ids, bins, strict=True)]
+        plan = (dict(samples=samples), "0" * 64,
+                [(sample, self.root / "not-read.png") for sample in samples])
+        with patch.object(benchmark_module, "_prepare_manifest", return_value=plan):
+            with self.assertRaisesRegex(ValueError, "BENCHMARK_COVERAGE_MISMATCH"):
+                benchmark_module.benchmark(root=self.root, manifest=self.root / "not-read.json",
+                    manifest_sha256="0" * 64, model_root=self.root / "not-loaded",
+                    sample_ids=ids, membership_sha256=benchmark_module.membership_hash(ids),
+                    output_dir=self.root / "not-created")
+        self.assertFalse((self.root / "not-created").exists())
 
     def test_optional_provenance_hashes_preserve_valid_and_null_values(self):
         for index, value in enumerate((None, "0123456789abcdef" * 4)):

@@ -1240,3 +1240,119 @@ Full AI gate sau fix:1276 tests/529 subtests PASS, 1 permitted Windows symlink
 skip,1277 collected, policy_failures=[], exit0 (`r1-overlay-ai.log/.xml`).
 Native inference NOT_RUN. Các số local trên được đo trước tích hợp PR98;
 hosted CI phải kiểm trên head bàn giao mới, không kế thừa kết quả CI head cũ.
+
+## R2 — Coverage preprocess/geometry (26/11–27/11/2026)
+
+Ma trận dưới đây đối chiếu hành vi đã có với regression thật, trước khi thêm code.
+Lệnh focused: `python -m pytest tests/unit/pipeline/test_preprocess.py
+tests/unit/pipeline/test_geometry.py tests/unit/pipeline/test_evidence.py
+tests/unit/pipeline/test_ocr_input.py tests/unit/pipeline/test_ocr_consumer.py
+tests/unit/pipeline/test_ocr_handoff.py -q -p no:cacheprovider` chạy trên fixture env:
+**179 tests, 238 subtests PASS**. Test dùng loader/PDFium thật và synthetic
+geometry oracle; không gọi model native.
+
+| Yêu cầu | Regression đang chạy | Kết quả/giới hạn |
+|---|---|---|
+| PNG/JPEG/PDF một trang; corrupt, wrong magic, multipage, encrypted, cap bytes/pixels | `test_preprocess.py` input/PDF/cap tests | PASS; reject typed trước native, trừ lỗi phát sinh sau decode |
+| RGB uint8, alpha nền trắng, gray, EXIF 1–8 | `test_preprocess.py` RGB/alpha/EXIF tests | PASS; Pillow `convert('RGB')`, không áp ICC color management riêng; fidelity ICC chưa đo |
+| PDF MediaBox/rotation/DPI/small text | `test_preprocess.py` rotated PDF, pre-render cap, 72 DPI override | PASS; 200 DPI mặc định, quá 20 MP reject thay vì tự giảm DPI |
+| Rounded resize và canonical hash/frame | `test_geometry.py` loader/resize/edge, `test_preprocess.py` resize; handoff profile regression | PASS; processed dimensions thực, canonical bytes giống nhau giữa profile |
+| Projective/crop/reflection/winding/bounds/unavailable | `test_geometry.py`, `test_evidence.py` inverse/invalid/abstain tests | PASS; không tự clamp hoặc tạo bbox khi mapping unavailable |
+| Decode timeout, native/output lỗi và lượt sau | `test_preprocess.py` real subprocess kill/reap; `test_ocr_handoff.py` typed failures/next sample | PASS logic/decoder thật; full native recovery và process-tree memory thuộc R5 |
+
+PDF rotated small-text test đọc character boxes từ PDF source, tính tọa độ độc lập
+cho bốn rotation, qua loader thật rồi so canonical OCR quad và ink bbox; sai số
+pixel kiểm `delta=1.5`, back-projection `1e-7`. EXIF/rounded resize dùng vị trí
+đánh dấu độc lập. Đây là geometry/renderer oracle, không phải detector recall.
+Các ảnh overlay native đã kiểm pixel trong R1; native matching tổng quát chỉ
+được chấm khi Lead/Data nhận annotation/policy matching. Không thêm deskew/crop
+tự động khi chưa có paired evidence.
+
+## R3 — Đăng ký thí nghiệm profile trước native run (27/11/2026)
+
+Thí nghiệm chỉ thay `processed_long_edge` **2000 → 2600** qua opt-in
+`python -m vietdoc.pipeline.ocr.handoff --processed-long-edge 2600`;
+PDF DPI200, byte/pixel caps, artifact v2, cùng PP-OCRv5/Tesseract pins, CPU4,
+source, Data manifest và evaluator Proposed giữ nguyên. CLI default vẫn2000.
+Thử tuần tự capacity1, output roots mới. Không dùng train hoặc final holdout.
+
+- Manifest `99a66a13f555892b61abb93272b582a042d26947bd0af45210ee50ad2319619d`;
+  native baseline report `ef23e8f63b8e18a86736d5fa2a9d98b6b1d79dac8b638969c55a5aaa4f8244ec`.
+- Canary12 đã cố định ở R1: SHA256 của danh sách IDs sort, mỗi ID+newline =
+  `2e2036186552cd7724a447e00e4781ce44c288166495c90a27768782916cec92`.
+- Dev80 cùng manifest: SHA256 của danh sách IDs sort, mỗi ID+newline =
+  `f3ac192d2db2e961c81516de71450d9f93d511290180da627acaed8b147f77c5`.
+- Bước1: chạy canary cả baseline/candidate cùng host; nếu canonical hash/frame
+  đổi, status/failure tăng hoặc một critical quantity/total có OCR regression,
+  dừng và giữ baseline. Bước2 chỉ khi qua bước1: chạy đủ cùng dev80 hai profile.
+- Chỉ đề nghị candidate opt-in nếu không có critical regression, CER/WER micro
+  theo cả hai type không xấu hơn, ít nhất một critical glyph cải thiện và tài
+  nguyên vẫn trong limits; nếu không thì giữ baseline. Không sửa điều kiện sau
+  khi xem output. Báo mọi failure/not-run, empty-reference/exclusion và raw
+  latency, không dùng duration Linux cũ so với Windows mới để kết luận tốc độ.
+
+CLI native, release/config inventory và số đo R3/R5 chỉ được ghi PASS sau khi
+chạy thực. Trên máy hiện tại chưa chạy vì bộ nhớ ảo khả dụng khi kiểm chỉ khoảng
+1,1 GB; engine import được nhưng batch inference chưa an toàn.
+
+### R3 measured decision — giữ baseline
+
+Sau khi bộ nhớ ảo khả dụng tăng, đã chạy 12 canary và đầy đủ cùng 80 dev IDs
+trên Windows/Python3.13, cùng model gốc/CPU4/artifact v2. Bốn handoff reports
+đều `run_status=completed`; canary12 và dev80 của mỗi profile đều 100% ok,
+không failed/not_run. `profile_compare` verify đủ 80 IDs, Data gold, raw input,
+canonical, processed, overlay và typed OCR; report ignored
+`artifacts/evaluation/ai1-v1-20261126/r3-dev80-comparison/compare.json`
+SHA256 `dbddfc07a1bd18dcecb584ba2512d6d260afe29f2a5ee1cf46b2682afef7598f`.
+
+Theo policy D3.1 Proposed, CER micro toàn dev80 1239/34314 → 945/34314;
+receipt 629/15962 → 480/15962, invoice 610/18352 → 465/18352.
+WER 1231/7808 → 895/7808. Slices row30 cải thiện, nhưng row3 CER
+84/3956 → 93/3956 và unreadable có 0 reference characters nên CER rate
+**null**, dù character edits tăng116→119. 48 cases cải thiện CER,
+12 xấu đi,20 không đổi; đều được giữ trong report. Median observed handoff
+duration trên cùng host 1,429s→2,119s, p95 nearest-rank (80 samples,
+rank76) 2,307s→3,917s; không là production SLA.
+
+Ba critical quantity `05`→`0,5` đã cải thiện; invoice `1`→`4` chưa đổi.
+Candidate lại làm invoice `f07-b0000-clean` line amount `350.000`→`450.000`,
+và xuất thêm ký tự sai trên một số unreadable/no-text controls. Đây là
+critical regression theo điều kiện giữ/bỏ đã đăng ký. **Bác bỏ 2600; giữ
+baseline2000, default/cache cũ nguyên.** Không đánh đổi line amount sai lấy
+headline CER tốt hơn. Các đường OCR block/overlay của từng case ở hai roots
+`r3-dev80-2000` và `r3-dev80-2600`; không suy business mapping hoặc detection
+recall từ chúng. So sánh mới là development diagnostic, không final holdout.
+
+## R5 — Benchmark prereg và native runtime boundary
+
+Chọn cố định 10 dev IDs cho benchmark baseline2000: với mỗi type receipt/invoice,
+chọn ID lexicographic đầu tiên ở năm tổ hợp (row0,clean), (row1,mild),
+(row3,clean), (row12,crop), (row30,clean). SHA256 sorted IDs+newline
+`4f3ee726013330dffbca077cbea2aa7b01f3afbf1734590c33b47cf3fc238969`.
+Một cold-start engine load và request đầu tiên tách riêng, sau đó 3 lượt
+tuần tự/ID (30 warm observations) trên cùng engine/slot. Đo wall decode,
+native OCR và JSON serialize, process-tree RSS sampled bao child decoder,
+baseline/end RSS, raw timings; báo sampling interval và không gọi sampled
+peak là tuyệt đối. Không chạy lại nhiều mức cap chỉ để tăng số test.
+
+AI1 runtime thực tải hai thư mục pinned: PP-OCRv5 detector gồm 3 file
+`inference.json`, `inference.pdiparams`, `inference.yml`, và Tesseract
+`vie.traineddata`; `_verify_model` reject extra/missing/symlink/hash trước load.
+Config runtime `limit_side_len=960`, CPU4, Paddle model, Tesseract line PSM và
+LSTM OEM được pin bởi source `paddle_adapter.py`/OCR_VERSION; package versions
+trong `RUNTIME_VERSIONS`. `pipeline.json` của AI2 B0 release là file thứ năm
+trong engine inventory cũ nhưng không có trong model ZIP nhận được; AI1 không
+tự tạo file giả hay claim full B0 release từ bốn file này. Fresh-root B0/v2
+chỉ nghiệm thu khi nhận đúng config/provenance và kiểm hash toàn gói.
+
+### Cập nhật R4–R6 sau khi nhận cấu hình gốc (27/11/2026)
+
+Đoạn đăng ký R3 ở trên ghi thời điểm bộ nhớ khả dụng ~1,1 GB và chưa chạy native;
+đó là trạng thái **trước** bốn handoff runs và kết quả R3 measured decision.
+Đoạn R5 ở trên cũng ghi tình trạng **trước** khi nhận ZIP cấu hình gốc. ZIP mới
+`VietDoc-AI1-pipeline-config-goc-20261127.zip` đã verify theo SHA256
+`03a549e4b171574b6d1c9420fa90454546b52891f6ee4686a67f7936f78fee91`.
+Full release B0/v1 (original bytes) và opt-in B0/v2 đã assemble/verify; default/cache
+cũ giữ nguyên. Native CLI/HTTP receipt và invoice, consumer packet, cold/warm
+benchmark, failure/recovery và full gate được ghi tập trung trong
+[bàn giao AI-1 V1 R2–R6](team/ai1-v1-handoff-r2-r6-2026-11-27.md).
